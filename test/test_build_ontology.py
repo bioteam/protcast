@@ -1,5 +1,5 @@
 import sys
-
+import os
 import argparse
 import logging
 
@@ -13,20 +13,17 @@ from protcast.preprocessing.ontology import Ontology
 
 
 if __name__ == "__main__":
-    """build_ontology.py
+    """test_build_ontology.py
     Builds an Ontology object and saves it to disk given an input *obo file.
     Example:
 
-    python3 preprocessing-scripts/write_protcast_dataset_to_file.py \
-    test.obo \
-    test.bin
+    python3 preprocessing/test_build_ontology.py data/go.obo data/go.obo.bin
     """
     parser = argparse.ArgumentParser(
-        description="Build an ontology from an \
-        `.obo` file"
+        description="Build an ontology from an *.obo file and save"
     )
-    parser.add_argument("input_obo_file")
-    parser.add_argument("output_serialized_ontology")
+    parser.add_argument("-i", "--input", default="data/go.obo")
+    parser.add_argument("-o", "--output", default="data/go.obo.bin")
     parser.add_argument("-v", default=False, action="store_true", help="Verbose")
     args = parser.parse_args()
 
@@ -35,5 +32,7 @@ if __name__ == "__main__":
     else:
         logging.basicConfig(level=logging.INFO)
 
-    ontology = Ontology(args.input_obo_file)
-    ontology.save(args.output_serialized_ontology)
+    ontology = Ontology(args.input)
+    ontology.save(args.output)
+
+    os.remove(args.output)

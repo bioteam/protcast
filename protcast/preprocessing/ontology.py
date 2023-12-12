@@ -125,7 +125,7 @@ class GOTerm:
         self.ancestors: list[str] = None
 
     def add_parent(self, parent: GOTerm) -> None:
-        """add_parent
+        """add_parentf
         Add parent id to term
 
         Parameters
@@ -948,7 +948,7 @@ class Ontology:
         Parameters
         ----------
         output_file: str
-            Name of input file
+            Name of output file
 
         Returns
         -------
