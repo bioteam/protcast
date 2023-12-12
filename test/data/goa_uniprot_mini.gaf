@@ -1,0 +1,1000 @@
+!gaf-version: 2.2
+!
+!This file contains all GO annotations and gene product information for proteins in the UniProt KnowledgeBase (UniProtKB),
+!ComplexPortal protein complexes, and RNAcentral identifiers.
+!
+!date-generated: 2021-11-09 08:14 
+!generated-by: UniProt
+!go-version: http://purl.obolibrary.org/obo/go/releases/2021-11-06/extensions/go-plus.owl
+!
+UniProtKB	A0A1Z4V764	NIES806_33130	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	Uncharacterized protein	NIES806_33130	protein	taxon:1973481	20211010	UniProt		
+UniProtKB	A0A1Z4V764	NIES806_33130	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Uncharacterized protein	NIES806_33130	protein	taxon:1973481	20211010	UniProt		
+UniProtKB	A0A1Z4V764	NIES806_33130	enables	GO:0008234	GO_REF:0000043	IEA	UniProtKB-KW:KW-0788	F	Uncharacterized protein	NIES806_33130	protein	taxon:1973481	20211010	UniProt		
+UniProtKB	A0A1Z4V764	NIES806_33130	enables	GO:0008233	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	F	Uncharacterized protein	NIES806_33130	protein	taxon:1973481	20211010	UniProt		
+UniProtKB	A0A225DLN6	FRUB_03971	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Molybdenum ABC transporter, periplasmic molybdenum-binding protein ModA	FRUB_03971	protein	taxon:1908690	20211010	UniProt		
+UniProtKB	A0A225DLN6	FRUB_03971	enables	GO:0030973	GO_REF:0000002	IEA	InterPro:IPR044084	F	Molybdenum ABC transporter, periplasmic molybdenum-binding protein ModA	FRUB_03971	protein	taxon:1908690	20211009	InterPro		
+UniProtKB	A0A225DLN6	FRUB_03971	involved_in	GO:0015689	GO_REF:0000002	IEA	InterPro:IPR005950|InterPro:IPR044084	P	Molybdenum ABC transporter, periplasmic molybdenum-binding protein ModA	FRUB_03971	protein	taxon:1908690	20211009	InterPro		
+UniProtKB	A0A098C095	ING2E5B_1090	located_in	GO:0009289	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0113	C	P_gingi_FimA domain-containing protein	ING2E5B_1090	protein	taxon:1562970	20211009	UniProt		
+UniProtKB	A0A098C095	ING2E5B_1090	located_in	GO:0009289	GO_REF:0000043	IEA	UniProtKB-KW:KW-0281	C	P_gingi_FimA domain-containing protein	ING2E5B_1090	protein	taxon:1562970	20211010	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	involved_in	GO:0006071	GO_REF:0000104	IEA	UniRule:UR000100385	P	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	enables	GO:0004792	GO_REF:0000104	IEA	UniRule:UR000100385	F	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	located_in	GO:0005737	GO_REF:0000104	IEA	UniRule:UR000100385	C	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	enables	GO:0004792	GO_REF:0000116	IEA	RHEA:16881	F	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	RHEA		
+UniProtKB	A0A0A2ZXP0	glpE	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	enables	GO:0004792	GO_REF:0000003	IEA	EC:2.8.1.1	F	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211010	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211010	UniProt		
+UniProtKB	A0A0A2ZXP0	glpE	enables	GO:0004792	GO_REF:0000002	IEA	InterPro:IPR023695	F	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	InterPro		
+UniProtKB	A0A0A2ZXP0	glpE	located_in	GO:0005737	GO_REF:0000002	IEA	InterPro:IPR023695	C	Thiosulfate sulfurtransferase GlpE	glpE|IO48_11295	protein	taxon:1396510	20211009	InterPro		
+UniProtKB	A0A0B1RSA1	QR64_01025	located_in	GO:0016021	GO_REF:0000104	IEA	UniRule:UR001079773	C	GDT1 family protein	QR64_01025	protein	taxon:713612	20211009	UniProt		
+UniProtKB	A0A0B1RSA1	QR64_01025	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	GDT1 family protein	QR64_01025	protein	taxon:713612	20211009	UniProt		
+UniProtKB	A0A0B1RSA1	QR64_01025	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	GDT1 family protein	QR64_01025	protein	taxon:713612	20211010	UniProt		
+UniProtKB	A0A0B1RSA1	QR64_01025	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	GDT1 family protein	QR64_01025	protein	taxon:713612	20211010	UniProt		
+UniProtKB	A0A285XKW3	SAMN05421890_4429	enables	GO:0000166	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	SAMN05421890_4429	protein	taxon:106592	20211009	UniProt		
+UniProtKB	A0A285XKW3	SAMN05421890_4429	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	SAMN05421890_4429	protein	taxon:106592	20211009	UniProt		
+UniProtKB	A0A285XKW3	SAMN05421890_4429	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	ABC transporter domain-containing protein	SAMN05421890_4429	protein	taxon:106592	20211010	UniProt		
+UniProtKB	A0A285XKW3	SAMN05421890_4429	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	ABC transporter domain-containing protein	SAMN05421890_4429	protein	taxon:106592	20211010	UniProt		
+UniProtKB	A0A285XKW3	SAMN05421890_4429	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439|InterPro:IPR017871	F	ABC transporter domain-containing protein	SAMN05421890_4429	protein	taxon:106592	20211009	InterPro		
+UniProtKB	A0A292YZ07	TOK_2753	involved_in	GO:0055085	GO_REF:0000108	IEA	GO:0022857	P	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211011	GOC		
+UniProtKB	A0A292YZ07	TOK_2753	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211009	UniProt		
+UniProtKB	A0A292YZ07	TOK_2753	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211010	UniProt		
+UniProtKB	A0A292YZ07	TOK_2753	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211010	UniProt		
+UniProtKB	A0A292YZ07	TOK_2753	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211010	UniProt		
+UniProtKB	A0A292YZ07	TOK_2753	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR000522	C	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211009	InterPro		
+UniProtKB	A0A292YZ07	TOK_2753	enables	GO:0022857	GO_REF:0000002	IEA	InterPro:IPR000522	F	ABC-type Fe3+-siderophore transport system, permease component	TOK_2753	protein	taxon:1987376	20211009	InterPro		
+UniProtKB	A0A0E1EUT2	STAB902_07580	enables	GO:0016772	GO_REF:0000117	IEA	ARBA:ARBA00025934	F	PfkB domain-containing protein	STAB902_07580	protein	taxon:1437007	20211009	UniProt		
+UniProtKB	A0A0E1EUT2	STAB902_07580	involved_in	GO:0016310	GO_REF:0000117	IEA	ARBA:ARBA00024407	P	PfkB domain-containing protein	STAB902_07580	protein	taxon:1437007	20211009	UniProt		
+UniProtKB	A0A0E1EUT2	STAB902_07580	involved_in	GO:0016310	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	P	PfkB domain-containing protein	STAB902_07580	protein	taxon:1437007	20211010	UniProt		
+UniProtKB	A0A0E1EUT2	STAB902_07580	enables	GO:0016301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	F	PfkB domain-containing protein	STAB902_07580	protein	taxon:1437007	20211010	UniProt		
+UniProtKB	A0A0F6PGH4	GP	located_in	GO:0005576	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0243	C	Filo_glycop domain-containing protein	GP	protein	taxon:186538	20211009	UniProt		
+UniProtKB	A0A0F6PGH4	GP	located_in	GO:0005576	GO_REF:0000043	IEA	UniProtKB-KW:KW-0964	C	Filo_glycop domain-containing protein	GP	protein	taxon:186538	20211010	UniProt		
+UniProtKB	A0A2D7MDT0	CMC18_09310	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Beta-N-acetylglucosaminidase	CMC18_09310	protein	taxon:1871037	20211010	UniProt		
+UniProtKB	A0A2D7MDT0	CMC18_09310	enables	GO:0004553	GO_REF:0000002	IEA	InterPro:IPR001764|InterPro:IPR019800|InterPro:IPR036881|InterPro:IPR036962	F	Beta-N-acetylglucosaminidase	CMC18_09310	protein	taxon:1871037	20211009	InterPro		
+UniProtKB	A0A2D7MDT0	CMC18_09310	involved_in	GO:0005975	GO_REF:0000002	IEA	InterPro:IPR001764|InterPro:IPR019800|InterPro:IPR036881|InterPro:IPR036962	P	Beta-N-acetylglucosaminidase	CMC18_09310	protein	taxon:1871037	20211009	InterPro		
+UniProtKB	A0A2E0DLN8	pth	enables	GO:0004045	GO_REF:0000104	IEA	UniRule:UR000037500	F	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	UniProt		
+UniProtKB	A0A2E0DLN8	pth	involved_in	GO:0006412	GO_REF:0000104	IEA	UniRule:UR000037500	P	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	UniProt		
+UniProtKB	A0A2E0DLN8	pth	located_in	GO:0005737	GO_REF:0000104	IEA	UniRule:UR000037500	C	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	UniProt		
+UniProtKB	A0A2E0DLN8	pth	enables	GO:0004045	GO_REF:0000116	IEA	RHEA:54448	F	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	RHEA		
+UniProtKB	A0A2E0DLN8	pth	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	UniProt		
+UniProtKB	A0A2E0DLN8	pth	enables	GO:0004045	GO_REF:0000003	IEA	EC:3.1.1.29	F	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	UniProt		
+UniProtKB	A0A2E0DLN8	pth	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211010	UniProt		
+UniProtKB	A0A2E0DLN8	pth	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211010	UniProt		
+UniProtKB	A0A2E0DLN8	pth	enables	GO:0004045	GO_REF:0000002	IEA	InterPro:IPR001328|InterPro:IPR018171|InterPro:IPR036416	F	Peptidyl-tRNA hydrolase	pth|CMC48_08865	protein	taxon:1871037	20211009	InterPro		
+UniProtKB	A0A2E2L7Q0	CMH38_08110	enables	GO:0000166	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	CMH38_08110	protein	taxon:51671	20211009	UniProt		
+UniProtKB	A0A2E2L7Q0	CMH38_08110	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	CMH38_08110	protein	taxon:51671	20211009	UniProt		
+UniProtKB	A0A2E2L7Q0	CMH38_08110	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	ABC transporter domain-containing protein	CMH38_08110	protein	taxon:51671	20211010	UniProt		
+UniProtKB	A0A2E2L7Q0	CMH38_08110	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	ABC transporter domain-containing protein	CMH38_08110	protein	taxon:51671	20211010	UniProt		
+UniProtKB	A0A2E2L7Q0	CMH38_08110	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439|InterPro:IPR017871	F	ABC transporter domain-containing protein	CMH38_08110	protein	taxon:51671	20211009	InterPro		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0009279	GO_REF:0000117	IEA	ARBA:ARBA00024657	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	UniProt		
+UniProtKB	A0A0Q0SS48	AQS70_19865	involved_in	GO:0044718	GO_REF:0000108	IEA	GO:0015344	P	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211011	GOC		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	UniProt		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0009279	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0040	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	UniProt		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211010	UniProt		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0009279	GO_REF:0000043	IEA	UniProtKB-KW:KW-0998	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211010	UniProt		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0019867	GO_REF:0000002	IEA	InterPro:IPR011662	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	InterPro		
+UniProtKB	A0A0Q0SS48	AQS70_19865	enables	GO:0038023	GO_REF:0000002	IEA	InterPro:IPR010105	F	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	InterPro		
+UniProtKB	A0A0Q0SS48	AQS70_19865	involved_in	GO:0015891	GO_REF:0000002	IEA	InterPro:IPR010105	P	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	InterPro		
+UniProtKB	A0A0Q0SS48	AQS70_19865	located_in	GO:0009279	GO_REF:0000002	IEA	InterPro:IPR010105	C	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	InterPro		
+UniProtKB	A0A0Q0SS48	AQS70_19865	enables	GO:0015344	GO_REF:0000002	IEA	InterPro:IPR010105	F	STN domain-containing protein	AQS70_19865	protein	taxon:1563157	20211009	InterPro		
+UniProtKB	A0A2G6II52	CSA72_07045	involved_in	GO:0006629	GO_REF:0000002	IEA	InterPro:IPR017946|InterPro:IPR030395	P	GP-PDE domain-containing protein	CSA72_07045	protein	taxon:1948890	20211009	InterPro		
+UniProtKB	A0A2G6II52	CSA72_07045	enables	GO:0008081	GO_REF:0000002	IEA	InterPro:IPR017946|InterPro:IPR030395	F	GP-PDE domain-containing protein	CSA72_07045	protein	taxon:1948890	20211009	InterPro		
+UniProtKB	A0A2I2YZZ6	CCHCR1	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Alpha-helical coiled-coil rod protein	CCHCR1	protein	taxon:9595	20211009	UniProt		
+UniProtKB	A0A2I2YZZ6	CCHCR1	located_in	GO:0005634	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0191	C	Alpha-helical coiled-coil rod protein	CCHCR1	protein	taxon:9595	20211009	UniProt		
+UniProtKB	A0A2I2YZZ6	CCHCR1	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Alpha-helical coiled-coil rod protein	CCHCR1	protein	taxon:9595	20211010	UniProt		
+UniProtKB	A0A2I2YZZ6	CCHCR1	located_in	GO:0005634	GO_REF:0000043	IEA	UniProtKB-KW:KW-0539	C	Alpha-helical coiled-coil rod protein	CCHCR1	protein	taxon:9595	20211010	UniProt		
+UniProtKB	A0A2I2YZZ6	CCHCR1	involved_in	GO:0030154	GO_REF:0000002	IEA	InterPro:IPR009800	P	Alpha-helical coiled-coil rod protein	CCHCR1	protein	taxon:9595	20211009	InterPro		
+UniProtKB	A0A2J7TVE7	A1395_25445	enables	GO:0003700	GO_REF:0000002	IEA	InterPro:IPR000847	F	HTH lysR-type domain-containing protein	A1395_25445	protein	taxon:380021	20211009	InterPro		
+UniProtKB	A0A2J7TVE7	A1395_25445	involved_in	GO:0006355	GO_REF:0000002	IEA	InterPro:IPR000847	P	HTH lysR-type domain-containing protein	A1395_25445	protein	taxon:380021	20211009	InterPro		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	involved_in	GO:0007186	GO_REF:0000117	IEA	ARBA:ARBA00025802	P	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211009	UniProt		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	involved_in	GO:0050790	GO_REF:0000108	IEA	GO:0005085	P	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211011	GOC		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211009	UniProt		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211009	UniProt		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211010	UniProt		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211010	UniProt		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	enables	GO:0005085	GO_REF:0000002	IEA	InterPro:IPR000219|InterPro:IPR015212	F	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211009	InterPro		
+UniProtKB	A0A2J8SEI1	CR201_G0044078	located_in	GO:0005737	GO_REF:0000002	IEA	InterPro:IPR015212	C	ARHGEF1 isoform 7	CR201_G0044078	protein	taxon:9601	20211009	InterPro		
+UniProtKB	A0A2N0CPW8	CWR41_08770	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211009	UniProt		
+UniProtKB	A0A2N0CPW8	CWR41_08770	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0037	C	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211009	UniProt		
+UniProtKB	A0A2N0CPW8	CWR41_08770	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211010	UniProt		
+UniProtKB	A0A2N0CPW8	CWR41_08770	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211010	UniProt		
+UniProtKB	A0A2N0CPW8	CWR41_08770	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211010	UniProt		
+UniProtKB	A0A2N0CPW8	CWR41_08770	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR001851	P	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211009	InterPro		
+UniProtKB	A0A2N0CPW8	CWR41_08770	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR001851	C	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211009	InterPro		
+UniProtKB	A0A2N0CPW8	CWR41_08770	enables	GO:0022857	GO_REF:0000002	IEA	InterPro:IPR001851	F	Branched-chain amino acid ABC transporter permease	CWR41_08770	protein	taxon:158823	20211009	InterPro		
+UniProtKB	A0A2N3WTK8	ATK30_8182	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Uncharacterized protein	ATK30_8182	protein	taxon:369932	20211010	UniProt		
+UniProtKB	A0A2N3WTK8	ATK30_8182	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Uncharacterized protein	ATK30_8182	protein	taxon:369932	20211010	UniProt		
+UniProtKB	A0A151XER6	ALC60_02428	enables	GO:0004045	GO_REF:0000116	IEA	RHEA:54448	F	Aminoacyl-tRNA hydrolase	ALC60_02428	protein	taxon:64791	20211009	RHEA		
+UniProtKB	A0A151XER6	ALC60_02428	enables	GO:0004045	GO_REF:0000003	IEA	EC:3.1.1.29	F	Aminoacyl-tRNA hydrolase	ALC60_02428	protein	taxon:64791	20211009	UniProt		
+UniProtKB	A0A151XER6	ALC60_02428	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Aminoacyl-tRNA hydrolase	ALC60_02428	protein	taxon:64791	20211010	UniProt		
+UniProtKB	A0A151XER6	ALC60_02428	enables	GO:0004045	GO_REF:0000002	IEA	InterPro:IPR002833	F	Aminoacyl-tRNA hydrolase	ALC60_02428	protein	taxon:64791	20211009	InterPro		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0004089	GO_REF:0000117	IEA	ARBA:ARBA00025693	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	UniProt		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0004089	GO_REF:0000104	IEA	UniRule:UR000000806	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	UniProt		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0008270	GO_REF:0000104	IEA	UniRule:UR000000806	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	UniProt		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0004089	GO_REF:0000116	IEA	RHEA:10748	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	RHEA		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0004089	GO_REF:0000003	IEA	EC:4.2.1.1	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	UniProt		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0016829	GO_REF:0000043	IEA	UniProtKB-KW:KW-0456	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211010	UniProt		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0004089	GO_REF:0000002	IEA	InterPro:IPR001765|InterPro:IPR015892|InterPro:IPR036874|InterPro:IPR045066	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	InterPro		
+UniProtKB	A0A2N8RXI2	CXK92_19465	enables	GO:0008270	GO_REF:0000002	IEA	InterPro:IPR001765|InterPro:IPR015892|InterPro:IPR036874|InterPro:IPR045066	F	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	InterPro		
+UniProtKB	A0A2N8RXI2	CXK92_19465	involved_in	GO:0015976	GO_REF:0000002	IEA	InterPro:IPR015892	P	Carbonic anhydrase	CXK92_19465	protein	taxon:316	20211009	InterPro		
+UniProtKB	A0A6I4QCX9	GQ598_03455	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Lactamase_B domain-containing protein	GQ598_03455	protein	taxon:2687317	20211010	UniProt		
+UniProtKB	A0A6J1YHY9	LOC113596175	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Fc receptor-like protein 2 isoform X9	LOC113596175	protein	taxon:32536	20211010	UniProt		
+UniProtKB	A0A6J1YHY9	LOC113596175	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Fc receptor-like protein 2 isoform X9	LOC113596175	protein	taxon:32536	20211010	UniProt		
+UniProtKB	A0A6J2LJR5	HS2ST1	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211009	UniProt		
+UniProtKB	A0A6J2LJR5	HS2ST1	located_in	GO:0000139	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0134	C	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211009	UniProt		
+UniProtKB	A0A6J2LJR5	HS2ST1	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211010	UniProt		
+UniProtKB	A0A6J2LJR5	HS2ST1	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211010	UniProt		
+UniProtKB	A0A6J2LJR5	HS2ST1	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211010	UniProt		
+UniProtKB	A0A6J2LJR5	HS2ST1	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR005331|InterPro:IPR007734	C	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211009	InterPro		
+UniProtKB	A0A6J2LJR5	HS2ST1	enables	GO:0008146	GO_REF:0000002	IEA	InterPro:IPR005331|InterPro:IPR007734	F	heparan sulfate 2-O-sulfotransferase 1 isoform X2	HS2ST1	protein	taxon:89673	20211009	InterPro		
+UniProtKB	A0A6J4IRH7	AVDCRST_MAG27-2475	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Putative cytochrome c oxidase, subunit I	AVDCRST_MAG27-2475	protein	taxon:1135998	20211010	UniProt		
+UniProtKB	A0A6J4IRH7	AVDCRST_MAG27-2475	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Putative cytochrome c oxidase, subunit I	AVDCRST_MAG27-2475	protein	taxon:1135998	20211010	UniProt		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	involved_in	GO:0016311	GO_REF:0000108	IEA	GO:0036424	P	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211011	GOC		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	involved_in	GO:0016311	GO_REF:0000108	IEA	GO:0036424	P	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211011	GOC		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	enables	GO:0036424	GO_REF:0000116	IEA	RHEA:21208	F	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211009	RHEA		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	enables	GO:0036424	GO_REF:0000003	IEA	EC:3.1.3.3	F	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211009	UniProt		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	involved_in	GO:0006564	GO_REF:0000043	IEA	UniProtKB-KW:KW-0718	P	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	involved_in	GO:0008652	GO_REF:0000043	IEA	UniProtKB-KW:KW-0028	P	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WGV6	CIP107532_01928	involved_in	GO:0006564	GO_REF:0000002	IEA	InterPro:IPR004469	P	O-phosphoserine phosphohydrolase	CIP107532_01928	protein	taxon:1717	20211009	InterPro		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Permease	FRC0103_01814	protein	taxon:1717	20211009	UniProt		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	involved_in	GO:0046677	GO_REF:0000043	IEA	UniProtKB-KW:KW-0046	P	Permease	FRC0103_01814	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Permease	FRC0103_01814	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Permease	FRC0103_01814	protein	taxon:1717	20211010	UniProt		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR000412	P	Permease	FRC0103_01814	protein	taxon:1717	20211009	InterPro		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	part_of	GO:0043190	GO_REF:0000002	IEA	InterPro:IPR000412	C	Permease	FRC0103_01814	protein	taxon:1717	20211009	InterPro		
+UniProtKB	A0A6J4WRM0	FRC0103_01814	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR000412	C	Permease	FRC0103_01814	protein	taxon:1717	20211009	InterPro		
+UniProtKB	A0A6L9FMX8	CAG65_19195	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Methyltransf_2 domain-containing protein	CAG65_19195	protein	taxon:1938690	20211010	UniProt		
+UniProtKB	A0A6L9FMX8	CAG65_19195	involved_in	GO:0032259	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	P	Methyltransf_2 domain-containing protein	CAG65_19195	protein	taxon:1938690	20211010	UniProt		
+UniProtKB	A0A6L9FMX8	CAG65_19195	enables	GO:0008168	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	F	Methyltransf_2 domain-containing protein	CAG65_19195	protein	taxon:1938690	20211010	UniProt		
+UniProtKB	A0A6L9FMX8	CAG65_19195	enables	GO:0008171	GO_REF:0000002	IEA	InterPro:IPR001077	F	Methyltransf_2 domain-containing protein	CAG65_19195	protein	taxon:1938690	20211009	InterPro		
+UniProtKB	A0A6L9FMX8	CAG65_19195	enables	GO:0008168	GO_REF:0000002	IEA	InterPro:IPR016461	F	Methyltransf_2 domain-containing protein	CAG65_19195	protein	taxon:1938690	20211009	InterPro		
+UniProtKB	A0A6M0FE84	F6K01_06840	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Glycosyltransferase family 2 protein	F6K01_06840	protein	taxon:2607772	20211010	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0006355	GO_REF:0000108	IEA	GO:0003700	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211011	GOC		
+UniProtKB	A0A6M8VGP0	nusA	enables	GO:0003723	GO_REF:0000104	IEA	UniRule:UR000165451	F	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0006353	GO_REF:0000104	IEA	UniRule:UR000165451	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	located_in	GO:0005737	GO_REF:0000104	IEA	UniRule:UR000165451	C	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0031564	GO_REF:0000104	IEA	UniRule:UR000165451	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0006353	GO_REF:0000043	IEA	UniProtKB-KW:KW-0806	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211010	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	enables	GO:0003723	GO_REF:0000043	IEA	UniProtKB-KW:KW-0694	F	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211010	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211010	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0031564	GO_REF:0000043	IEA	UniProtKB-KW:KW-0889	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211010	UniProt		
+UniProtKB	A0A6M8VGP0	nusA	enables	GO:0003723	GO_REF:0000002	IEA	InterPro:IPR009019|InterPro:IPR010213|InterPro:IPR025249	F	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6M8VGP0	nusA	enables	GO:0003700	GO_REF:0000002	IEA	InterPro:IPR013735|InterPro:IPR036555	F	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6M8VGP0	nusA	enables	GO:0003676	GO_REF:0000002	IEA	InterPro:IPR004087	F	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6M8VGP0	nusA	enables	GO:0000166	GO_REF:0000002	IEA	InterPro:IPR010995	F	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0006353	GO_REF:0000002	IEA	InterPro:IPR030842	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0031554	GO_REF:0000002	IEA	InterPro:IPR013735|InterPro:IPR036555	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6M8VGP0	nusA	involved_in	GO:0031564	GO_REF:0000002	IEA	InterPro:IPR030842	P	Transcription termination/antitermination protein NusA	nusA|HND40_15240	protein	taxon:2026749	20211009	InterPro		
+UniProtKB	A0A6N3WHC5	EP10_16510	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211009	UniProt		
+UniProtKB	A0A6N3WHC5	EP10_16510	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0039	C	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211009	UniProt		
+UniProtKB	A0A6N3WHC5	EP10_16510	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211010	UniProt		
+UniProtKB	A0A6N3WHC5	EP10_16510	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211010	UniProt		
+UniProtKB	A0A6N3WHC5	EP10_16510	involved_in	GO:0072488	GO_REF:0000002	IEA	InterPro:IPR001905|InterPro:IPR018047	P	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211009	InterPro		
+UniProtKB	A0A6N3WHC5	EP10_16510	enables	GO:0008519	GO_REF:0000002	IEA	InterPro:IPR001905|InterPro:IPR018047|InterPro:IPR024041	F	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211009	InterPro		
+UniProtKB	A0A6N3WHC5	EP10_16510	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR001905|InterPro:IPR018047|InterPro:IPR024041	C	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211009	InterPro		
+UniProtKB	A0A6N3WHC5	EP10_16510	located_in	GO:0005887	GO_REF:0000002	IEA	InterPro:IPR002229	C	Ammonium transporter	EP10_16510	protein	taxon:1430331	20211009	InterPro		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0050262	GO_REF:0000003	IEA	EC:2.7.1.22	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0000309	GO_REF:0000003	IEA	EC:2.7.7.1	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211010	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0016779	GO_REF:0000043	IEA	UniProtKB-KW:KW-0548	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211010	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211010	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	involved_in	GO:0016310	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	P	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211010	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0016301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211010	UniProt		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0050262	GO_REF:0000002	IEA	InterPro:IPR016429	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	InterPro		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR004821	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	InterPro		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0003677	GO_REF:0000002	IEA	InterPro:IPR010982	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	InterPro		
+UniProtKB	A0A6N6K7R2	DXF85_01385	enables	GO:0000309	GO_REF:0000002	IEA	InterPro:IPR006417|InterPro:IPR016429	F	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	InterPro		
+UniProtKB	A0A6N6K7R2	DXF85_01385	involved_in	GO:0009058	GO_REF:0000002	IEA	InterPro:IPR004821	P	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	InterPro		
+UniProtKB	A0A6N6K7R2	DXF85_01385	involved_in	GO:0009435	GO_REF:0000002	IEA	InterPro:IPR006417|InterPro:IPR016429	P	HTH cro/C1-type domain-containing protein	DXF85_01385	protein	taxon:1563222	20211009	InterPro		
+UniProtKB	A0A410SHM3	rsxC	located_in	GO:0005886	GO_REF:0000104	IEA	UniRule:UR000090104	C	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211009	UniProt		
+UniProtKB	A0A410SHM3	rsxC	involved_in	GO:0022900	GO_REF:0000104	IEA	UniRule:UR000090104	P	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211009	UniProt		
+UniProtKB	A0A410SHM3	rsxC	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0037	C	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211009	UniProt		
+UniProtKB	A0A410SHM3	rsxC	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211010	UniProt		
+UniProtKB	A0A410SHM3	rsxC	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-0997	C	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211010	UniProt		
+UniProtKB	A0A410SHM3	rsxC	enables	GO:0051539	GO_REF:0000043	IEA	UniProtKB-KW:KW-0004	F	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211010	UniProt		
+UniProtKB	A0A410SHM3	rsxC	enables	GO:0051536	GO_REF:0000043	IEA	UniProtKB-KW:KW-0411	F	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211010	UniProt		
+UniProtKB	A0A410SHM3	rsxC	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211010	UniProt		
+UniProtKB	A0A410SHM3	rsxC	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211010	UniProt		
+UniProtKB	A0A410SHM3	rsxC	enables	GO:0051539	GO_REF:0000002	IEA	InterPro:IPR010208	F	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211009	InterPro		
+UniProtKB	A0A410SHM3	rsxC	enables	GO:0009055	GO_REF:0000002	IEA	InterPro:IPR010208	F	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211009	InterPro		
+UniProtKB	A0A410SHM3	rsxC	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR010208	C	Ion-translocating oxidoreductase complex subunit C	rsxC|rnfC|ERO09_04590	protein	taxon:729	20211009	InterPro		
+UniProtKB	A0A416NWB2	DWX98_09775	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Helicase C-terminal domain-containing protein	DWX98_09775	protein	taxon:2292964	20211010	UniProt		
+UniProtKB	A0A416NWB2	DWX98_09775	involved_in	GO:0032259	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	P	Helicase C-terminal domain-containing protein	DWX98_09775	protein	taxon:2292964	20211010	UniProt		
+UniProtKB	A0A416NWB2	DWX98_09775	enables	GO:0008168	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	F	Helicase C-terminal domain-containing protein	DWX98_09775	protein	taxon:2292964	20211010	UniProt		
+UniProtKB	A0A416NWB2	DWX98_09775	enables	GO:0003677	GO_REF:0000002	IEA	InterPro:IPR006935	F	Helicase C-terminal domain-containing protein	DWX98_09775	protein	taxon:2292964	20211009	InterPro		
+UniProtKB	A0A416NWB2	DWX98_09775	enables	GO:0016787	GO_REF:0000002	IEA	InterPro:IPR006935	F	Helicase C-terminal domain-containing protein	DWX98_09775	protein	taxon:2292964	20211009	InterPro		
+UniProtKB	A0A416NWB2	DWX98_09775	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR006935	F	Helicase C-terminal domain-containing protein	DWX98_09775	protein	taxon:2292964	20211009	InterPro		
+UniProtKB	A0A6P9B1X7	TCF12	enables	GO:0046983	GO_REF:0000002	IEA	InterPro:IPR011598|InterPro:IPR036638	F	BHLH domain-containing protein	TCF12	protein	taxon:94885	20211009	InterPro		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0016616	GO_REF:0000117	IEA	ARBA:ARBA00027087	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	UniProt		
+UniProtKB	A0A429TBG7	E2C00_18775	involved_in	GO:0006065	GO_REF:0000041	IEA	UniPathway:UPA00038	P	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	UniProt		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0003979	GO_REF:0000116	IEA	RHEA:23596	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	RHEA		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0003979	GO_REF:0000003	IEA	EC:1.1.1.22	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	UniProt		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211010	UniProt		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0051287	GO_REF:0000002	IEA	InterPro:IPR001732|InterPro:IPR014026|InterPro:IPR014027	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	InterPro		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0003979	GO_REF:0000002	IEA	InterPro:IPR028357	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	InterPro		
+UniProtKB	A0A429TBG7	E2C00_18775	enables	GO:0016616	GO_REF:0000002	IEA	InterPro:IPR001732|InterPro:IPR014026|InterPro:IPR014027|InterPro:IPR017476	F	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	InterPro		
+UniProtKB	A0A429TBG7	E2C00_18775	involved_in	GO:0000271	GO_REF:0000002	IEA	InterPro:IPR028357	P	UDP-glucose 6-dehydrogenase	E2C00_18775|E2C02_29060|EF905_33935	protein	taxon:2487420	20211009	InterPro		
+UniProtKB	A0A431L146	EKK48_22725	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211010	UniProt		
+UniProtKB	A0A431L146	EKK48_22725	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211010	UniProt		
+UniProtKB	A0A431L146	EKK48_22725	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211010	UniProt		
+UniProtKB	A0A431L146	EKK48_22725	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211010	UniProt		
+UniProtKB	A0A431L146	EKK48_22725	enables	GO:0000166	GO_REF:0000002	IEA	InterPro:IPR023299	F	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211009	InterPro		
+UniProtKB	A0A431L146	EKK48_22725	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR001757	C	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211009	InterPro		
+UniProtKB	A0A431L146	EKK48_22725	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR001757	F	Cation_ATPase_N domain-containing protein	EKK48_22725	protein	taxon:2052166	20211009	InterPro		
+UniProtKB	A0A484B8H1	AWZ03_008625	enables	GO:0000166	GO_REF:0000104	IEA	UniRule:UR000400038	F	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211009	UniProt		
+UniProtKB	A0A484B8H1	AWZ03_008625	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000400038	F	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211009	UniProt		
+UniProtKB	A0A484B8H1	AWZ03_008625	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211010	UniProt		
+UniProtKB	A0A484B8H1	AWZ03_008625	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211010	UniProt		
+UniProtKB	A0A484B8H1	AWZ03_008625	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211010	UniProt		
+UniProtKB	A0A484B8H1	AWZ03_008625	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211010	UniProt		
+UniProtKB	A0A484B8H1	AWZ03_008625	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR011527	P	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211009	InterPro		
+UniProtKB	A0A484B8H1	AWZ03_008625	enables	GO:0140359	GO_REF:0000002	IEA	InterPro:IPR011527|InterPro:IPR044726	F	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211009	InterPro		
+UniProtKB	A0A484B8H1	AWZ03_008625	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR011527|InterPro:IPR036640	C	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211009	InterPro		
+UniProtKB	A0A484B8H1	AWZ03_008625	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439|InterPro:IPR011527|InterPro:IPR017871|InterPro:IPR036640	F	Uncharacterized protein	AWZ03_008625	protein	taxon:7232	20211009	InterPro		
+UniProtKB	A0A7C8GT84	F9U64_12970	enables	GO:0003700	GO_REF:0000002	IEA	InterPro:IPR002481	F	Transcriptional repressor	F9U64_12970	protein	taxon:1672701	20211009	InterPro		
+UniProtKB	A0A7C8GT84	F9U64_12970	involved_in	GO:0006355	GO_REF:0000002	IEA	InterPro:IPR002481	P	Transcriptional repressor	F9U64_12970	protein	taxon:1672701	20211009	InterPro		
+UniProtKB	A0A7H0LCT9	ND4	enables	GO:0008137	GO_REF:0000104	IEA	UniRule:UR000000376	F	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211009	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	enables	GO:0008137	GO_REF:0000116	IEA	RHEA:29091	F	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211009	RHEA		
+UniProtKB	A0A7H0LCT9	ND4	located_in	GO:0031966	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0171	C	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211009	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	enables	GO:0008137	GO_REF:0000003	IEA	EC:7.1.1.2	F	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211009	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	located_in	GO:0070469	GO_REF:0000043	IEA	UniProtKB-KW:KW-0679	C	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211010	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	located_in	GO:0005739	GO_REF:0000043	IEA	UniProtKB-KW:KW-0496	C	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211010	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211010	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211010	UniProt		
+UniProtKB	A0A7H0LCT9	ND4	involved_in	GO:0042773	GO_REF:0000002	IEA	InterPro:IPR003918	P	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211009	InterPro		
+UniProtKB	A0A7H0LCT9	ND4	enables	GO:0008137	GO_REF:0000002	IEA	InterPro:IPR003918	F	NADH-ubiquinone oxidoreductase chain 4	ND4	protein	taxon:226145	20211009	InterPro		
+UniProtKB	A0A7H8R3U5	TRUGW13939_06687	enables	GO:0047834	GO_REF:0000002	IEA	InterPro:IPR023210	F	Aldo_ket_red domain-containing protein	TRUGW13939_06687	protein	taxon:121627	20211009	InterPro		
+UniProtKB	A0A7H9DPB3	prmC	involved_in	GO:0043414	GO_REF:0000117	IEA	ARBA:ARBA00026446	P	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	involved_in	GO:0044267	GO_REF:0000117	IEA	ARBA:ARBA00025474	P	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0008757	GO_REF:0000117	IEA	ARBA:ARBA00024445	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0008170	GO_REF:0000117	IEA	ARBA:ARBA00027062	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0036009	GO_REF:0000104	IEA	UniRule:UR000120762	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	involved_in	GO:0018364	GO_REF:0000104	IEA	UniRule:UR000120762	P	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0102559	GO_REF:0000116	IEA	RHEA:42896	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	RHEA		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0102559	GO_REF:0000003	IEA	EC:2.1.1.297	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211010	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	involved_in	GO:0032259	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	P	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211010	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0008168	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211010	UniProt		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0003676	GO_REF:0000002	IEA	InterPro:IPR002052	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	InterPro		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0008276	GO_REF:0000002	IEA	InterPro:IPR004556	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	InterPro		
+UniProtKB	A0A7H9DPB3	prmC	involved_in	GO:0006479	GO_REF:0000002	IEA	InterPro:IPR004556	P	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	InterPro		
+UniProtKB	A0A7H9DPB3	prmC	involved_in	GO:0032259	GO_REF:0000002	IEA	InterPro:IPR002052	P	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	InterPro		
+UniProtKB	A0A7H9DPB3	prmC	enables	GO:0008168	GO_REF:0000002	IEA	InterPro:IPR002052|InterPro:IPR007848|InterPro:IPR019874	F	Release factor glutamine methyltransferase	prmC|FGL66_07370	protein	taxon:2583989	20211009	InterPro		
+UniProtKB	A0A4Q7QML2	EV649_4107	enables	GO:0071949	GO_REF:0000002	IEA	InterPro:IPR012258	F	ACOX domain-containing protein	EV649_4107	protein	taxon:2512220	20211009	InterPro		
+UniProtKB	A0A4Q7QML2	EV649_4107	enables	GO:0003997	GO_REF:0000002	IEA	InterPro:IPR002655|InterPro:IPR012258	F	ACOX domain-containing protein	EV649_4107	protein	taxon:2512220	20211009	InterPro		
+UniProtKB	A0A4Q7QML2	EV649_4107	located_in	GO:0005777	GO_REF:0000002	IEA	InterPro:IPR002655|InterPro:IPR012258	C	ACOX domain-containing protein	EV649_4107	protein	taxon:2512220	20211009	InterPro		
+UniProtKB	A0A4Q7QML2	EV649_4107	enables	GO:0016627	GO_REF:0000002	IEA	InterPro:IPR036250	F	ACOX domain-containing protein	EV649_4107	protein	taxon:2512220	20211009	InterPro		
+UniProtKB	A0A4Q7QML2	EV649_4107	involved_in	GO:0006631	GO_REF:0000002	IEA	InterPro:IPR012258	P	ACOX domain-containing protein	EV649_4107	protein	taxon:2512220	20211009	InterPro		
+UniProtKB	A0A4Q7QML2	EV649_4107	involved_in	GO:0006635	GO_REF:0000002	IEA	InterPro:IPR002655	P	ACOX domain-containing protein	EV649_4107	protein	taxon:2512220	20211009	InterPro		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0035335	GO_REF:0000108	IEA	GO:0004725	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211011	GOC		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0035335	GO_REF:0000108	IEA	GO:0004725	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211011	GOC		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0035335	GO_REF:0000108	IEA	GO:0004725	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211011	GOC		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0035335	GO_REF:0000108	IEA	GO:0004725	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211011	GOC		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0051301	GO_REF:0000104	IEA	UniRule:UR001527763	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	enables	GO:0004725	GO_REF:0000104	IEA	UniRule:UR001527763	F	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	enables	GO:0004725	GO_REF:0000116	IEA	RHEA:10684	F	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	RHEA		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	enables	GO:0004725	GO_REF:0000003	IEA	EC:3.1.3.48	F	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0007049	GO_REF:0000043	IEA	UniProtKB-KW:KW-0131	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211010	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211010	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	enables	GO:0004721	GO_REF:0000043	IEA	UniProtKB-KW:KW-0904	F	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211010	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0051301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0132	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211010	UniProt		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:1902751	GO_REF:0000002	IEA	InterPro:IPR000751	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	InterPro		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	enables	GO:0004725	GO_REF:0000002	IEA	InterPro:IPR000751	F	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	InterPro		
+UniProtKB	A0A7J7RWK0	mRhiFer1_002511	involved_in	GO:0006470	GO_REF:0000002	IEA	InterPro:IPR000751	P	M-phase inducer phosphatase	mRhiFer1_002511	protein	taxon:59479	20211009	InterPro		
+UniProtKB	A0A7K1QJA8	map	involved_in	GO:0006464	GO_REF:0000117	IEA	ARBA:ARBA00026435	P	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0046914	GO_REF:0000117	IEA	ARBA:ARBA00024818	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0004177	GO_REF:0000117	IEA	ARBA:ARBA00025299	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0008235	GO_REF:0000117	IEA	ARBA:ARBA00026536	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0070006	GO_REF:0000104	IEA	UniRule:UR000161491	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	involved_in	GO:0070084	GO_REF:0000104	IEA	UniRule:UR000161491	P	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0046872	GO_REF:0000104	IEA	UniRule:UR000161491	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	UniProt		
+UniProtKB	A0A7K1QJA8	map	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211010	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211010	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211010	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0004177	GO_REF:0000043	IEA	UniProtKB-KW:KW-0031	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211010	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0008233	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211010	UniProt		
+UniProtKB	A0A7K1QJA8	map	enables	GO:0070006	GO_REF:0000002	IEA	InterPro:IPR002467	F	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	InterPro		
+UniProtKB	A0A7K1QJA8	map	involved_in	GO:0006508	GO_REF:0000002	IEA	InterPro:IPR002467	P	Methionine aminopeptidase	map|GOZ83_11895	protein	taxon:373	20211009	InterPro		
+UniProtKB	A0A4R9IF54	EHQ24_06270	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Uncharacterized protein	EHQ24_06270	protein	taxon:2484964	20211010	UniProt		
+UniProtKB	A0A4R9IF54	EHQ24_06270	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Uncharacterized protein	EHQ24_06270	protein	taxon:2484964	20211010	UniProt		
+UniProtKB	A0A4S8XBT5	D6D21_08380	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	GroES-like protein	D6D21_08380	protein	taxon:5580	20211010	UniProt		
+UniProtKB	A0A4S8XBT5	D6D21_08380	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	GroES-like protein	D6D21_08380	protein	taxon:5580	20211010	UniProt		
+UniProtKB	A0A4S8XBT5	D6D21_08380	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR002328	F	GroES-like protein	D6D21_08380	protein	taxon:5580	20211009	InterPro		
+UniProtKB	A0A4S8XBT5	D6D21_08380	enables	GO:0008270	GO_REF:0000002	IEA	InterPro:IPR002328	F	GroES-like protein	D6D21_08380	protein	taxon:5580	20211009	InterPro		
+UniProtKB	A0A7L1PN08	Ccdc125	involved_in	GO:2000145	GO_REF:0000002	IEA	InterPro:IPR034608	P	CC125 protein	Ccdc125|ORIORI_R05467	protein	taxon:181099	20211009	InterPro		
+UniProtKB	A0A508WA21	nadR	involved_in	GO:0016310	GO_REF:0000108	IEA	GO:0050262	P	AAA_28 domain-containing protein	nadR|AMBR_MGDJBKAP_00848	protein	taxon:33968	20211011	GOC		
+UniProtKB	A0A508WA21	nadR	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	AAA_28 domain-containing protein	nadR|AMBR_MGDJBKAP_00848	protein	taxon:33968	20211010	UniProt		
+UniProtKB	A0A508WA21	nadR	enables	GO:0050262	GO_REF:0000002	IEA	InterPro:IPR016429	F	AAA_28 domain-containing protein	nadR|AMBR_MGDJBKAP_00848	protein	taxon:33968	20211009	InterPro		
+UniProtKB	A0A508WA21	nadR	enables	GO:0000309	GO_REF:0000002	IEA	InterPro:IPR006417|InterPro:IPR016429	F	AAA_28 domain-containing protein	nadR|AMBR_MGDJBKAP_00848	protein	taxon:33968	20211009	InterPro		
+UniProtKB	A0A508WA21	nadR	involved_in	GO:0009435	GO_REF:0000002	IEA	InterPro:IPR006417|InterPro:IPR016429	P	AAA_28 domain-containing protein	nadR|AMBR_MGDJBKAP_00848	protein	taxon:33968	20211009	InterPro		
+UniProtKB	C9S932	VDBG_00187	involved_in	GO:0042274	GO_REF:0000002	IEA	InterPro:IPR007307	P	LTV1	VDBG_00187	protein	taxon:526221	20211009	InterPro		
+UniProtKB	D2BSR5	Dd586_2838	involved_in	GO:0006886	GO_REF:0000002	IEA	InterPro:IPR005699	P	Lipoprotein, PulS/OutS family	Dd586_2838	protein	taxon:590409	20211009	InterPro		
+UniProtKB	D5X5X3	Tint_0626	enables	GO:0071949	GO_REF:0000002	IEA	InterPro:IPR016166	F	FAD-binding PCMH-type domain-containing protein	Tint_0626	protein	taxon:75379	20211009	InterPro		
+UniProtKB	D5X5X3	Tint_0626	enables	GO:0050660	GO_REF:0000002	IEA	InterPro:IPR004113|InterPro:IPR006094|InterPro:IPR016164|InterPro:IPR036318	F	FAD-binding PCMH-type domain-containing protein	Tint_0626	protein	taxon:75379	20211009	InterPro		
+UniProtKB	D5X5X3	Tint_0626	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR004113|InterPro:IPR016164	F	FAD-binding PCMH-type domain-containing protein	Tint_0626	protein	taxon:75379	20211009	InterPro		
+UniProtKB	D5X5X3	Tint_0626	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR006094	F	FAD-binding PCMH-type domain-containing protein	Tint_0626	protein	taxon:75379	20211009	InterPro		
+UniProtKB	G0SXL2	RTG_01509	located_in	GO:0005739	GO_REF:0000104	IEA	UniRule:UR000376341	C	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	UniProt		
+UniProtKB	G0SXL2	RTG_01509	involved_in	GO:0002949	GO_REF:0000104	IEA	UniRule:UR000376341	P	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0016747	GO_REF:0000104	IEA	UniRule:UR000376341	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0061711	GO_REF:0000116	IEA	RHEA:37059	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	RHEA		
+UniProtKB	G0SXL2	RTG_01509	located_in	GO:0005739	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0173	C	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0061711	GO_REF:0000003	IEA	EC:2.3.1.234	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	UniProt		
+UniProtKB	G0SXL2	RTG_01509	located_in	GO:0005739	GO_REF:0000043	IEA	UniProtKB-KW:KW-0496	C	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	involved_in	GO:0008033	GO_REF:0000043	IEA	UniProtKB-KW:KW-0819	P	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0016746	GO_REF:0000043	IEA	UniProtKB-KW:KW-0012	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	enables	GO:0008233	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	F	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211010	UniProt		
+UniProtKB	G0SXL2	RTG_01509	involved_in	GO:0002949	GO_REF:0000002	IEA	InterPro:IPR022450	P	tRNA N6-adenosine threonylcarbamoyltransferase, mitochondrial	RTG_01509	protein	taxon:1001064	20211009	InterPro		
+UniProtKB	G0UW56	TCIL3000_10_3850	involved_in	GO:0006413	GO_REF:0000108	IEA	GO:0003743	P	Putative EIF3-interacting protein	TCIL3000_10_3850	protein	taxon:1068625	20211011	GOC		
+UniProtKB	G0UW56	TCIL3000_10_3850	enables	GO:0003743	GO_REF:0000002	IEA	InterPro:IPR019382	F	Putative EIF3-interacting protein	TCIL3000_10_3850	protein	taxon:1068625	20211009	InterPro		
+UniProtKB	G0UW56	TCIL3000_10_3850	part_of	GO:0005852	GO_REF:0000002	IEA	InterPro:IPR019382	C	Putative EIF3-interacting protein	TCIL3000_10_3850	protein	taxon:1068625	20211009	InterPro		
+UniProtKB	G0UW56	TCIL3000_10_3850	located_in	GO:0005737	GO_REF:0000002	IEA	InterPro:IPR019382	C	Putative EIF3-interacting protein	TCIL3000_10_3850	protein	taxon:1068625	20211009	InterPro		
+UniProtKB	G5J003	CWATWH0003_0841	involved_in	GO:0006464	GO_REF:0000117	IEA	ARBA:ARBA00026435	P	Two-component response regulator	CWATWH0003_0841	protein	taxon:423471	20211009	UniProt		
+UniProtKB	G5J003	CWATWH0003_0841	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Two-component response regulator	CWATWH0003_0841	protein	taxon:423471	20211010	UniProt		
+UniProtKB	G5J003	CWATWH0003_0841	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	Two-component response regulator	CWATWH0003_0841	protein	taxon:423471	20211010	UniProt		
+UniProtKB	G5J003	CWATWH0003_0841	involved_in	GO:0000160	GO_REF:0000002	IEA	InterPro:IPR001789	P	Two-component response regulator	CWATWH0003_0841	protein	taxon:423471	20211009	InterPro		
+UniProtKB	G5J003	CWATWH0003_0841	involved_in	GO:0018298	GO_REF:0000002	IEA	InterPro:IPR016132	P	Two-component response regulator	CWATWH0003_0841	protein	taxon:423471	20211009	InterPro		
+UniProtKB	A0A1B6VK65	A0123_01636	located_in	GO:0009279	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0040	C	TonB-dependent receptor	A0123_01636	protein	taxon:38307	20211009	UniProt		
+UniProtKB	A0A1B6VK65	A0123_01636	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	TonB-dependent receptor	A0123_01636	protein	taxon:38307	20211010	UniProt		
+UniProtKB	A0A1B6VK65	A0123_01636	located_in	GO:0009279	GO_REF:0000043	IEA	UniProtKB-KW:KW-0998	C	TonB-dependent receptor	A0123_01636	protein	taxon:38307	20211010	UniProt		
+UniProtKB	A0A1B9JQE8	A9G10_10560	involved_in	GO:1902358	GO_REF:0000108	IEA	GO:0008271	P	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211011	GOC		
+UniProtKB	A0A1B9JQE8	A9G10_10560	involved_in	GO:1902358	GO_REF:0000108	IEA	GO:0015116	P	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211011	GOC		
+UniProtKB	A0A1B9JQE8	A9G10_10560	involved_in	GO:1902358	GO_REF:0000108	IEA	GO:0008271	P	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211011	GOC		
+UniProtKB	A0A1B9JQE8	A9G10_10560	enables	GO:0008271	GO_REF:0000104	IEA	UniRule:UR000143764	F	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	UniProt		
+UniProtKB	A0A1B9JQE8	A9G10_10560	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	UniProt		
+UniProtKB	A0A1B9JQE8	A9G10_10560	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211010	UniProt		
+UniProtKB	A0A1B9JQE8	A9G10_10560	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211010	UniProt		
+UniProtKB	A0A1B9JQE8	A9G10_10560	enables	GO:0015116	GO_REF:0000002	IEA	InterPro:IPR011547	F	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	InterPro		
+UniProtKB	A0A1B9JQE8	A9G10_10560	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR001902	P	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	InterPro		
+UniProtKB	A0A1B9JQE8	A9G10_10560	enables	GO:0008271	GO_REF:0000002	IEA	InterPro:IPR001902	F	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	InterPro		
+UniProtKB	A0A1B9JQE8	A9G10_10560	involved_in	GO:0008272	GO_REF:0000002	IEA	InterPro:IPR001902|InterPro:IPR011547	P	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	InterPro		
+UniProtKB	A0A1B9JQE8	A9G10_10560	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR011547	C	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	InterPro		
+UniProtKB	A0A1B9JQE8	A9G10_10560	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR001902	C	STAS domain-containing protein	A9G10_10560	protein	taxon:1196095	20211009	InterPro		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	involved_in	GO:0044238	GO_REF:0000117	IEA	ARBA:ARBA00025356	P	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20211009	UniProt		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	involved_in	GO:0044260	GO_REF:0000117	IEA	ARBA:ARBA00025473	P	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20211009	UniProt		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	involved_in	GO:0016567	GO_REF:0000108	IEA	GO:0061630	P	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20211011	GOC		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20211010	UniProt		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20211010	UniProt		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	enables	GO:0061630	PMID:21873635	IBA	FB:FBgn0037442|FB:FBgn0039875|MGI:MGI:1346341|MGI:MGI:1914139|MGI:MGI:2677438|PANTHER:PTN001864905|PomBase:SPBC17D11.02c|UniProtKB:Q86TM6	F	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	part_of	GO:0017119	PMID:21873635	IBA	PANTHER:PTN001102456|TAIR:locus:2015726|TAIR:locus:2044782|TAIR:locus:2046911|TAIR:locus:2046931|TAIR:locus:2085136|UniProtKB:O22925|UniProtKB:Q8L7E3	C	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	is_active_in	GO:0005768	PMID:21873635	IBA	PANTHER:PTN001102456|TAIR:locus:2085136	C	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	involved_in	GO:0006511	PMID:21873635	IBA	PANTHER:PTN001864905|PomBase:SPBC17D11.02c|SGD:S000001517|SGD:S000002550|SGD:S000005373|TAIR:locus:2014993|TAIR:locus:2093422|UniProtKB:Q86TM6|UniProtKB:Q8WWF5	P	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20200808	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	involved_in	GO:0006623	PMID:21873635	IBA	PANTHER:PTN001102456|TAIR:locus:2046911|TAIR:locus:2046931|TAIR:locus:2085136	P	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	involved_in	GO:0006896	PMID:21873635	IBA	PANTHER:PTN001102456|TAIR:locus:2085136	P	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	is_active_in	GO:0016020	PMID:21873635	IBA	PANTHER:PTN001102456|TAIR:locus:2085136|UniProtKB:Q9LRB7	C	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	A0A1D6P109	ZEAMMB73_Zm00001d046147	is_active_in	GO:0005802	PMID:21873635	IBA	PANTHER:PTN001102456|TAIR:locus:2085136	C	RING-type domain-containing protein	ZEAMMB73_Zm00001d046147	protein	taxon:4577	20180328	GO_Central		
+UniProtKB	J7RQH7	dsbB	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0009055	P	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211011	GOC		
+UniProtKB	J7RQH7	dsbB	enables	GO:0015035	GO_REF:0000104	IEA	UniRule:UR000083131	F	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	UniProt		
+UniProtKB	J7RQH7	dsbB	enables	GO:0009055	GO_REF:0000104	IEA	UniRule:UR000083131	F	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0005886	GO_REF:0000104	IEA	UniRule:UR000083131	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0039	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0037	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211010	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-0997	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211010	UniProt		
+UniProtKB	J7RQH7	dsbB	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211010	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211010	UniProt		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211010	UniProt		
+UniProtKB	J7RQH7	dsbB	enables	GO:0015035	GO_REF:0000002	IEA	InterPro:IPR003752	F	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	InterPro		
+UniProtKB	J7RQH7	dsbB	involved_in	GO:0006457	GO_REF:0000002	IEA	InterPro:IPR003752	P	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	InterPro		
+UniProtKB	J7RQH7	dsbB	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR003752	C	Disulfide bond formation protein B	dsbB|BN16_17331	protein	taxon:475609	20211009	InterPro		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0001172	GO_REF:0000108	IEA	GO:0003968	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211011	GOC		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039523	GO_REF:0000104	IEA	UniRule:UR000523929	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039545	GO_REF:0000104	IEA	UniRule:UR000523929	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0075526	GO_REF:0000104	IEA	UniRule:UR000523929	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	enables	GO:0003968	GO_REF:0000104	IEA	UniRule:UR000523929	F	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	enables	GO:0003723	GO_REF:0000104	IEA	UniRule:UR000523929	F	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0006351	GO_REF:0000104	IEA	UniRule:UR000523929	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0006370	GO_REF:0000104	IEA	UniRule:UR000523929	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	located_in	GO:0033650	GO_REF:0000104	IEA	UniRule:UR000523929	C	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	located_in	GO:0042025	GO_REF:0000104	IEA	UniRule:UR000523929	C	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0019083	GO_REF:0000104	IEA	UniRule:UR000523929	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	located_in	GO:0033650	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0407	C	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	located_in	GO:0042025	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0414	C	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0006370	GO_REF:0000043	IEA	UniProtKB-KW:KW-0506	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0006397	GO_REF:0000043	IEA	UniProtKB-KW:KW-0507	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0075526	GO_REF:0000043	IEA	UniProtKB-KW:KW-1157	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039503	GO_REF:0000043	IEA	UniProtKB-KW:KW-1090	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039523	GO_REF:0000043	IEA	UniProtKB-KW:KW-1104	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039545	GO_REF:0000043	IEA	UniProtKB-KW:KW-1097	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039657	GO_REF:0000043	IEA	UniProtKB-KW:KW-1190	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	located_in	GO:0033650	GO_REF:0000043	IEA	UniProtKB-KW:KW-1045	C	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0030683	GO_REF:0000043	IEA	UniProtKB-KW:KW-0899	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	located_in	GO:0042025	GO_REF:0000043	IEA	UniProtKB-KW:KW-1048	C	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0019083	GO_REF:0000043	IEA	UniProtKB-KW:KW-1195	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211010	UniProt		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0039694	GO_REF:0000002	IEA	InterPro:IPR001591	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	InterPro		
+UniProtKB	J9V3A0	PB2	enables	GO:0003723	GO_REF:0000002	IEA	InterPro:IPR001591|InterPro:IPR037258	F	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	InterPro		
+UniProtKB	J9V3A0	PB2	involved_in	GO:0006351	GO_REF:0000002	IEA	InterPro:IPR037258	P	Polymerase basic protein 2	PB2	protein	taxon:1176077	20211009	InterPro		
+UniProtKB	A0A1E4KND0	ABS92_09975	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211009	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	enables	GO:0008237	GO_REF:0000043	IEA	UniProtKB-KW:KW-0482	F	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	enables	GO:0008233	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	F	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211010	UniProt		
+UniProtKB	A0A1E4KND0	ABS92_09975	enables	GO:0004222	GO_REF:0000002	IEA	InterPro:IPR004387|InterPro:IPR008915	F	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211009	InterPro		
+UniProtKB	A0A1E4KND0	ABS92_09975	involved_in	GO:0006508	GO_REF:0000002	IEA	InterPro:IPR004387|InterPro:IPR008915	P	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211009	InterPro		
+UniProtKB	A0A1E4KND0	ABS92_09975	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR004387	C	Zinc metalloprotease	ABS92_09975	protein	taxon:1660149	20211009	InterPro		
+UniProtKB	A0A1E7HZC1	BA867_01260	involved_in	GO:0016226	GO_REF:0000117	IEA	ARBA:ARBA00024775	P	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	UniProt		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0031071	GO_REF:0000116	IEA	RHEA:43892	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	RHEA		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0031071	GO_REF:0000003	IEA	EC:2.8.1.7	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	UniProt		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0051537	GO_REF:0000043	IEA	UniProtKB-KW:KW-0001	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211010	UniProt		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0051536	GO_REF:0000043	IEA	UniProtKB-KW:KW-0411	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211010	UniProt		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211010	UniProt		
+UniProtKB	A0A1E7HZC1	BA867_01260	involved_in	GO:0044571	GO_REF:0000002	IEA	InterPro:IPR010240	P	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	InterPro		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR015421|InterPro:IPR015422	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	InterPro		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0031071	GO_REF:0000002	IEA	InterPro:IPR010240	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	InterPro		
+UniProtKB	A0A1E7HZC1	BA867_01260	enables	GO:0030170	GO_REF:0000002	IEA	InterPro:IPR010240	F	Cysteine desulfurase	BA867_01260	protein	taxon:1869300	20211009	InterPro		
+UniProtKB	A0A1G0ZRS4	A2X45_06090	involved_in	GO:0000160	GO_REF:0000002	IEA	InterPro:IPR001789|InterPro:IPR008207|InterPro:IPR036641	P	Uncharacterized protein	A2X45_06090	protein	taxon:1798574	20211009	InterPro		
+UniProtKB	M6UQG0	secY	involved_in	GO:0043952	GO_REF:0000104	IEA	UniRule:UR000054593	P	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	UniProt		
+UniProtKB	M6UQG0	secY	involved_in	GO:0065002	GO_REF:0000104	IEA	UniRule:UR000054593	P	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	UniProt		
+UniProtKB	M6UQG0	secY	located_in	GO:0005886	GO_REF:0000104	IEA	UniRule:UR000054593	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	UniProt		
+UniProtKB	M6UQG0	secY	involved_in	GO:0006605	GO_REF:0000104	IEA	UniRule:UR000054593	P	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	UniProt		
+UniProtKB	M6UQG0	secY	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	UniProt		
+UniProtKB	M6UQG0	secY	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0039	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	UniProt		
+UniProtKB	M6UQG0	secY	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211010	UniProt		
+UniProtKB	M6UQG0	secY	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211010	UniProt		
+UniProtKB	M6UQG0	secY	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211010	UniProt		
+UniProtKB	M6UQG0	secY	involved_in	GO:0015031	GO_REF:0000043	IEA	UniProtKB-KW:KW-0653	P	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211010	UniProt		
+UniProtKB	M6UQG0	secY	involved_in	GO:0015031	GO_REF:0000043	IEA	UniProtKB-KW:KW-0811	P	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211010	UniProt		
+UniProtKB	M6UQG0	secY	involved_in	GO:0015031	GO_REF:0000002	IEA	InterPro:IPR002208	P	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	InterPro		
+UniProtKB	M6UQG0	secY	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR002208	C	Protein translocase subunit SecY	secY|LEP1GSC186_1226	protein	taxon:1085540	20211009	InterPro		
+UniProtKB	N0GT22	COI	involved_in	GO:0006119	GO_REF:0000041	IEA	UniPathway:UPA00705	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	UniProt		
+UniProtKB	N0GT22	COI	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211011	GOC		
+UniProtKB	N0GT22	COI	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211011	GOC		
+UniProtKB	N0GT22	COI	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211011	GOC		
+UniProtKB	N0GT22	COI	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211011	GOC		
+UniProtKB	N0GT22	COI	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211011	GOC		
+UniProtKB	N0GT22	COI	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211011	GOC		
+UniProtKB	N0GT22	COI	enables	GO:0004129	GO_REF:0000116	IEA	RHEA:11436	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	RHEA		
+UniProtKB	N0GT22	COI	located_in	GO:0005743	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0168	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	UniProt		
+UniProtKB	N0GT22	COI	enables	GO:0004129	GO_REF:0000003	IEA	EC:7.1.1.9	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	UniProt		
+UniProtKB	N0GT22	COI	located_in	GO:0005743	GO_REF:0000043	IEA	UniProtKB-KW:KW-0999	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211010	UniProt		
+UniProtKB	N0GT22	COI	located_in	GO:0070469	GO_REF:0000043	IEA	UniProtKB-KW:KW-0679	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211010	UniProt		
+UniProtKB	N0GT22	COI	located_in	GO:0005739	GO_REF:0000043	IEA	UniProtKB-KW:KW-0496	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211010	UniProt		
+UniProtKB	N0GT22	COI	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211010	UniProt		
+UniProtKB	N0GT22	COI	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211010	UniProt		
+UniProtKB	N0GT22	COI	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211010	UniProt		
+UniProtKB	N0GT22	COI	enables	GO:0004129	GO_REF:0000002	IEA	InterPro:IPR000883|InterPro:IPR023616	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	InterPro		
+UniProtKB	N0GT22	COI	involved_in	GO:0009060	GO_REF:0000002	IEA	InterPro:IPR000883	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	InterPro		
+UniProtKB	N0GT22	COI	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR000883	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	InterPro		
+UniProtKB	N0GT22	COI	enables	GO:0020037	GO_REF:0000002	IEA	InterPro:IPR000883	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:1273447	20211009	InterPro		
+UniProtKB	P54081	thyA2	involved_in	GO:0006235	GO_REF:0000041	IEA	UniPathway:UPA00575	P	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	UniProt		
+UniProtKB	P54081	thyA2	involved_in	GO:0006231	GO_REF:0000104	IEA	UniRule:UR000074698	P	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	UniProt		
+UniProtKB	P54081	thyA2	enables	GO:0004799	GO_REF:0000104	IEA	UniRule:UR000074698	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	UniProt		
+UniProtKB	P54081	thyA2	located_in	GO:0005737	GO_REF:0000104	IEA	UniRule:UR000074698	C	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	UniProt		
+UniProtKB	P54081	thyA2	enables	GO:0004799	GO_REF:0000116	IEA	RHEA:12104	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	RHEA		
+UniProtKB	P54081	thyA2	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	UniProt		
+UniProtKB	P54081	thyA2	enables	GO:0004799	GO_REF:0000003	IEA	EC:2.1.1.45	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	UniProt		
+UniProtKB	P54081	thyA2	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211010	UniProt		
+UniProtKB	P54081	thyA2	involved_in	GO:0009165	GO_REF:0000043	IEA	UniProtKB-KW:KW-0545	P	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211010	UniProt		
+UniProtKB	P54081	thyA2	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211010	UniProt		
+UniProtKB	P54081	thyA2	involved_in	GO:0032259	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	P	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211010	UniProt		
+UniProtKB	P54081	thyA2	enables	GO:0008168	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211010	UniProt		
+UniProtKB	P54081	thyA2	enables	GO:0004799	GO_REF:0000002	IEA	InterPro:IPR000398|InterPro:IPR020940	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	InterPro		
+UniProtKB	P54081	thyA2	involved_in	GO:0006231	GO_REF:0000002	IEA	InterPro:IPR000398|InterPro:IPR020940	P	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	InterPro		
+UniProtKB	P54081	thyA2	enables	GO:0016741	GO_REF:0000002	IEA	InterPro:IPR045097	F	Thymidylate synthase 2	thyA2|thyB|thyBA	protein	taxon:1390	20211009	InterPro		
+UniProtKB	A0A1G6LVW4	SAMN05192589_102258	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Threonine/homoserine/homoserine lactone efflux protein	SAMN05192589_102258	protein	taxon:187868	20211010	UniProt		
+UniProtKB	A0A1G6LVW4	SAMN05192589_102258	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Threonine/homoserine/homoserine lactone efflux protein	SAMN05192589_102258	protein	taxon:187868	20211010	UniProt		
+UniProtKB	A0A1G6LVW4	SAMN05192589_102258	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Threonine/homoserine/homoserine lactone efflux protein	SAMN05192589_102258	protein	taxon:187868	20211010	UniProt		
+UniProtKB	A0A1G6LVW4	SAMN05192589_102258	involved_in	GO:0006865	GO_REF:0000002	IEA	InterPro:IPR001123	P	Threonine/homoserine/homoserine lactone efflux protein	SAMN05192589_102258	protein	taxon:187868	20211009	InterPro		
+UniProtKB	A0A1G6LVW4	SAMN05192589_102258	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR001123	C	Threonine/homoserine/homoserine lactone efflux protein	SAMN05192589_102258	protein	taxon:187868	20211009	InterPro		
+UniProtKB	Q15ST2	Patl_2540	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	PBPb domain-containing protein	Patl_2540	protein	taxon:342610	20211010	UniProt		
+UniProtKB	Q15ST2	Patl_2540	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	PBPb domain-containing protein	Patl_2540	protein	taxon:342610	20211010	UniProt		
+UniProtKB	A0A1G7LQ57	SAMN05216377_105151	enables	GO:0015035	GO_REF:0000002	IEA	InterPro:IPR005746	F	Thioredoxin	SAMN05216377_105151	protein	taxon:366584	20211009	InterPro		
+UniProtKB	A0A1G7LQ57	SAMN05216377_105151	involved_in	GO:0006662	GO_REF:0000002	IEA	InterPro:IPR005746	P	Thioredoxin	SAMN05216377_105151	protein	taxon:366584	20211009	InterPro		
+UniProtKB	Q7VS68	BP0575	enables	GO:0003700	GO_REF:0000002	IEA	InterPro:IPR000835	F	HTH marR-type domain-containing protein	BP0575	protein	taxon:257313	20211009	InterPro		
+UniProtKB	Q7VS68	BP0575	involved_in	GO:0006355	GO_REF:0000002	IEA	InterPro:IPR000835	P	HTH marR-type domain-containing protein	BP0575	protein	taxon:257313	20211009	InterPro		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006096	GO_REF:0000041	IEA	UniPathway:UPA00109	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211009	UniProt		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0007165	GO_REF:0000108	IEA	GO:0005125	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211011	GOC		
+UniProtKB	Q7ZU30	gpia	enables	GO:0004347	GO_REF:0000116	IEA	RHEA:11816	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211009	RHEA		
+UniProtKB	Q7ZU30	gpia	enables	GO:0004347	GO_REF:0000003	IEA	EC:5.3.1.9	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211009	UniProt		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006094	GO_REF:0000043	IEA	UniProtKB-KW:KW-0312	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211010	UniProt		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006096	GO_REF:0000043	IEA	UniProtKB-KW:KW-0324	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211010	UniProt		
+UniProtKB	Q7ZU30	gpia	enables	GO:0016853	GO_REF:0000043	IEA	UniProtKB-KW:KW-0413	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211010	UniProt		
+UniProtKB	Q7ZU30	gpia	enables	GO:0005125	GO_REF:0000043	IEA	UniProtKB-KW:KW-0202	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211010	UniProt		
+UniProtKB	Q7ZU30	gpia	located_in	GO:0005615	GO_REF:0000043	IEA	UniProtKB-KW:KW-0202	C	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211010	UniProt		
+UniProtKB	Q7ZU30	gpia	enables	GO:0004347	GO_REF:0000002	IEA	InterPro:IPR001672|InterPro:IPR018189|InterPro:IPR023096	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211009	InterPro		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006094	GO_REF:0000002	IEA	InterPro:IPR001672|InterPro:IPR018189	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211009	InterPro		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006096	GO_REF:0000002	IEA	InterPro:IPR001672|InterPro:IPR018189|InterPro:IPR023096	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20211009	InterPro		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0051156	PMID:21873635	IBA	PANTHER:PTN000157839|RGD:2727|UniProtKB:P06744	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20180413	GO_Central		
+UniProtKB	Q7ZU30	gpia	enables	GO:0048029	PMID:21873635	IBA	PANTHER:PTN000157839|RGD:2727	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20180413	GO_Central		
+UniProtKB	Q7ZU30	gpia	enables	GO:0004347	PMID:21873635	IBA	FB:FBgn0003074|MGI:MGI:95797|PANTHER:PTN000157839|RGD:2727|SGD:S000000400|UniProtKB:P06744|UniProtKB:P0A6T1|UniProtKB:P42862|UniProtKB:P42863|UniProtKB:P9WN69|UniProtKB:Q59000	F	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20200807	GO_Central		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006094	PMID:21873635	IBA	PANTHER:PTN000157839|SGD:S000000400|UniProtKB:P42862|UniProtKB:P42863	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20200807	GO_Central		
+UniProtKB	Q7ZU30	gpia	involved_in	GO:0006096	PMID:21873635	IBA	MGI:MGI:95797|PANTHER:PTN000157839|SGD:S000000400|UniProtKB:P0A6T1|UniProtKB:P42862|UniProtKB:P42863|UniProtKB:P9WN69	P	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20180413	GO_Central		
+UniProtKB	Q7ZU30	gpia	is_active_in	GO:0005829	PMID:21873635	IBA	FB:FBgn0003074|PANTHER:PTN000157839|RGD:2727|UniProtKB:P06744|UniProtKB:P0A6T1|UniProtKB:P42862|UniProtKB:P42863	C	Glucose-6-phosphate isomerase	gpia	protein	taxon:7955	20180413	GO_Central		
+UniProtKB	A0A1H9I0G9	SAMN05428995_10633	enables	GO:0051536	GO_REF:0000002	IEA	InterPro:IPR001041|InterPro:IPR036010	F	2Fe-2S ferredoxin-type domain-containing protein	SAMN05428995_10633	protein	taxon:1881056	20211009	InterPro		
+UniProtKB	A0A1H9I0G9	SAMN05428995_10633	enables	GO:0046872	GO_REF:0000002	IEA	InterPro:IPR002888	F	2Fe-2S ferredoxin-type domain-containing protein	SAMN05428995_10633	protein	taxon:1881056	20211009	InterPro		
+UniProtKB	A0A1H9I0G9	SAMN05428995_10633	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR002888	F	2Fe-2S ferredoxin-type domain-containing protein	SAMN05428995_10633	protein	taxon:1881056	20211009	InterPro		
+UniProtKB	S0G6B4	Dpo_1c07050	involved_in	GO:0018106	GO_REF:0000108	IEA	GO:0004673	P	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211011	GOC		
+UniProtKB	S0G6B4	Dpo_1c07050	enables	GO:0004673	GO_REF:0000003	IEA	EC:2.7.13.3	F	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211009	UniProt		
+UniProtKB	S0G6B4	Dpo_1c07050	involved_in	GO:0016310	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	P	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211010	UniProt		
+UniProtKB	S0G6B4	Dpo_1c07050	enables	GO:0016301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	F	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211010	UniProt		
+UniProtKB	S0G6B4	Dpo_1c07050	enables	GO:0016772	GO_REF:0000002	IEA	InterPro:IPR004358	F	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211009	InterPro		
+UniProtKB	S0G6B4	Dpo_1c07050	involved_in	GO:0000160	GO_REF:0000002	IEA	InterPro:IPR001789	P	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211009	InterPro		
+UniProtKB	S0G6B4	Dpo_1c07050	involved_in	GO:0016310	GO_REF:0000002	IEA	InterPro:IPR004358	P	Histidine kinase	Dpo_1c07050	protein	taxon:1286635	20211009	InterPro		
+UniProtKB	S2JLE3	HMPREF1544_02056	part_of	GO:0031931	GO_REF:0000002	IEA	InterPro:IPR018857	C	Uncharacterized protein	HMPREF1544_02056	protein	taxon:1220926	20211009	InterPro		
+UniProtKB	S2JLE3	HMPREF1544_02056	involved_in	GO:0031929	GO_REF:0000002	IEA	InterPro:IPR018857	P	Uncharacterized protein	HMPREF1544_02056	protein	taxon:1220926	20211009	InterPro		
+UniProtKB	S4NRC0	LOT_1051	involved_in	GO:0005975	GO_REF:0000117	IEA	ARBA:ARBA00027104	P	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211009	UniProt		
+UniProtKB	S4NRC0	LOT_1051	enables	GO:0004553	GO_REF:0000117	IEA	ARBA:ARBA00026737	F	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211009	UniProt		
+UniProtKB	S4NRC0	LOT_1051	involved_in	GO:0008152	GO_REF:0000043	IEA	UniProtKB-KW:KW-0326	P	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211010	UniProt		
+UniProtKB	S4NRC0	LOT_1051	enables	GO:0016798	GO_REF:0000043	IEA	UniProtKB-KW:KW-0326	F	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211010	UniProt		
+UniProtKB	S4NRC0	LOT_1051	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211010	UniProt		
+UniProtKB	S4NRC0	LOT_1051	enables	GO:0004553	GO_REF:0000002	IEA	InterPro:IPR006710	F	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211009	InterPro		
+UniProtKB	S4NRC0	LOT_1051	involved_in	GO:0005975	GO_REF:0000002	IEA	InterPro:IPR006710	P	Beta-xylosidase	LOT_1051	protein	taxon:1423780	20211009	InterPro		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0008879	GO_REF:0000117	IEA	ARBA:ARBA00027223	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	UniProt		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0008879	GO_REF:0000116	IEA	RHEA:15225	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	RHEA		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0008879	GO_REF:0000003	IEA	EC:2.7.7.24	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	UniProt		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211010	UniProt		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0016779	GO_REF:0000043	IEA	UniProtKB-KW:KW-0548	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211010	UniProt		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211010	UniProt		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	involved_in	GO:0045226	GO_REF:0000002	IEA	InterPro:IPR005907	P	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	InterPro		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0016779	GO_REF:0000002	IEA	InterPro:IPR005835	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	InterPro		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	enables	GO:0008879	GO_REF:0000002	IEA	InterPro:IPR005907	F	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	InterPro		
+UniProtKB	A0A1I4VGR7	SAMN04487858_110115	involved_in	GO:0009058	GO_REF:0000002	IEA	InterPro:IPR005835	P	Glucose-1-phosphate thymidylyltransferase	SAMN04487858_110115	protein	taxon:1761898	20211009	InterPro		
+UniProtKB	U3RGF7	env	involved_in	GO:0002223	GO_REF:0000117	IEA	ARBA:ARBA00026317	P	Glycoprotein 120	env	protein	taxon:11676	20211009	UniProt		
+UniProtKB	U3RGF7	env	located_in	GO:0019031	GO_REF:0000043	IEA	UniProtKB-KW:KW-0261	C	Glycoprotein 120	env	protein	taxon:11676	20211010	UniProt		
+UniProtKB	U3RGF7	env	located_in	GO:0019031	GO_REF:0000002	IEA	InterPro:IPR000777|InterPro:IPR036377	C	Glycoprotein 120	env	protein	taxon:11676	20211009	InterPro		
+UniProtKB	A0A1I7LA97	SAMN05421543_1311	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Chaperonin GroEL	SAMN05421543_1311	protein	taxon:392015	20211010	UniProt		
+UniProtKB	A0A1I7LA97	SAMN05421543_1311	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	Chaperonin GroEL	SAMN05421543_1311	protein	taxon:392015	20211010	UniProt		
+UniProtKB	A0A1I7LA97	SAMN05421543_1311	enables	GO:0016887	GO_REF:0000002	IEA	InterPro:IPR002423	F	Chaperonin GroEL	SAMN05421543_1311	protein	taxon:392015	20211009	InterPro		
+UniProtKB	A0A1I7LA97	SAMN05421543_1311	involved_in	GO:0006457	GO_REF:0000002	IEA	InterPro:IPR018370	P	Chaperonin GroEL	SAMN05421543_1311	protein	taxon:392015	20211009	InterPro		
+UniProtKB	A0A1I7LA97	SAMN05421543_1311	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR002423|InterPro:IPR018370	F	Chaperonin GroEL	SAMN05421543_1311	protein	taxon:392015	20211009	InterPro		
+UniProtKB	W9LFI9	FOBC_00916	located_in	GO:0110165	GO_REF:0000117	IEA	ARBA:ARBA00025337	C	MICOS complex subunit MIC60	FOBC_00916|FOZG_01773	protein	taxon:660027	20211009	UniProt		
+UniProtKB	W9LFI9	FOBC_00916	located_in	GO:0005743	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0168	C	MICOS complex subunit MIC60	FOBC_00916|FOZG_01773	protein	taxon:660027	20211009	UniProt		
+UniProtKB	W9LFI9	FOBC_00916	located_in	GO:0005743	GO_REF:0000043	IEA	UniProtKB-KW:KW-0999	C	MICOS complex subunit MIC60	FOBC_00916|FOZG_01773	protein	taxon:660027	20211010	UniProt		
+UniProtKB	W9LFI9	FOBC_00916	located_in	GO:0005739	GO_REF:0000043	IEA	UniProtKB-KW:KW-0496	C	MICOS complex subunit MIC60	FOBC_00916|FOZG_01773	protein	taxon:660027	20211010	UniProt		
+UniProtKB	W9LFI9	FOBC_00916	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	MICOS complex subunit MIC60	FOBC_00916|FOZG_01773	protein	taxon:660027	20211010	UniProt		
+UniProtKB	W9LFI9	FOBC_00916	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	MICOS complex subunit MIC60	FOBC_00916|FOZG_01773	protein	taxon:660027	20211010	UniProt		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211010	UniProt		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211010	UniProt		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211010	UniProt		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	enables	GO:0008236	GO_REF:0000043	IEA	UniProtKB-KW:KW-0720	F	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211010	UniProt		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	enables	GO:0008233	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	F	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211010	UniProt		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	enables	GO:0004252	GO_REF:0000002	IEA	InterPro:IPR036852	F	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211009	InterPro		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	involved_in	GO:0006508	GO_REF:0000002	IEA	InterPro:IPR030400|InterPro:IPR036852	P	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211009	InterPro		
+UniProtKB	A0A1Q5FAV2	AMK19_04100	enables	GO:0008236	GO_REF:0000002	IEA	InterPro:IPR015366	F	Peptidase S53 domain-containing protein	AMK19_04100	protein	taxon:1703930	20211009	InterPro		
+UniProtKB	A0A1I8EDN2	A0A1I8EDN2	located_in	GO:0005759	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0170	C	GrpE protein homolog		protein	taxon:6293	20211009	UniProt		
+UniProtKB	A0A1I8EDN2	A0A1I8EDN2	located_in	GO:0005739	GO_REF:0000043	IEA	UniProtKB-KW:KW-0496	C	GrpE protein homolog		protein	taxon:6293	20211010	UniProt		
+UniProtKB	A0A1I8EDN2	A0A1I8EDN2	enables	GO:0051087	GO_REF:0000002	IEA	InterPro:IPR000740	F	GrpE protein homolog		protein	taxon:6293	20211009	InterPro		
+UniProtKB	A0A1I8EDN2	A0A1I8EDN2	enables	GO:0042803	GO_REF:0000002	IEA	InterPro:IPR000740	F	GrpE protein homolog		protein	taxon:6293	20211009	InterPro		
+UniProtKB	A0A1I8EDN2	A0A1I8EDN2	enables	GO:0000774	GO_REF:0000002	IEA	InterPro:IPR000740	F	GrpE protein homolog		protein	taxon:6293	20211009	InterPro		
+UniProtKB	A0A1I8EDN2	A0A1I8EDN2	involved_in	GO:0006457	GO_REF:0000002	IEA	InterPro:IPR000740|InterPro:IPR009012	P	GrpE protein homolog		protein	taxon:6293	20211009	InterPro		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:1902531	GO_REF:0000117	IEA	ARBA:ARBA00026396	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:0006464	GO_REF:0000117	IEA	ARBA:ARBA00026435	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	located_in	GO:0005737	GO_REF:0000117	IEA	ARBA:ARBA00024689	C	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:0018106	GO_REF:0000108	IEA	GO:0004673	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211011	GOC		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0004673	GO_REF:0000003	IEA	EC:2.7.13.3	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:0016310	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0016301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211010	UniProt		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0000155	GO_REF:0000002	IEA	InterPro:IPR003661|InterPro:IPR036097	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	InterPro		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	enables	GO:0016772	GO_REF:0000002	IEA	InterPro:IPR004358	F	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	InterPro		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:0007165	GO_REF:0000002	IEA	InterPro:IPR003660|InterPro:IPR003661|InterPro:IPR036097	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	InterPro		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR003660	C	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	InterPro		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:0000160	GO_REF:0000002	IEA	InterPro:IPR001789|InterPro:IPR008207|InterPro:IPR036641	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	InterPro		
+UniProtKB	A0A1Q7NXD1	AUI49_04605	involved_in	GO:0016310	GO_REF:0000002	IEA	InterPro:IPR004358	P	Histidine kinase	AUI49_04605	protein	taxon:1805353	20211009	InterPro		
+UniProtKB	A0A069DTB2	A0A069DTB2	involved_in	GO:0050790	GO_REF:0000108	IEA	GO:0005085	P	Putative pattern-formation protein/guanine nucleotide exchange factor		protein	taxon:65343	20211011	GOC		
+UniProtKB	A0A069DTB2	A0A069DTB2	enables	GO:0005085	GO_REF:0000002	IEA	InterPro:IPR000904|InterPro:IPR035999	F	Putative pattern-formation protein/guanine nucleotide exchange factor		protein	taxon:65343	20211009	InterPro		
+UniProtKB	A0A069DTB2	A0A069DTB2	involved_in	GO:0032012	GO_REF:0000002	IEA	InterPro:IPR000904|InterPro:IPR035999	P	Putative pattern-formation protein/guanine nucleotide exchange factor		protein	taxon:65343	20211009	InterPro		
+UniProtKB	A0A1S3TWK0	LOC106759456	involved_in	GO:0006098	GO_REF:0000041	IEA	UniPathway:UPA00115	P	Transaldolase	LOC106759456	protein	taxon:3916	20211009	UniProt		
+UniProtKB	A0A1S3TWK0	LOC106759456	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Transaldolase	LOC106759456	protein	taxon:3916	20211009	UniProt		
+UniProtKB	A0A1S3TWK0	LOC106759456	enables	GO:0004801	GO_REF:0000003	IEA	EC:2.2.1.2	F	Transaldolase	LOC106759456	protein	taxon:3916	20211009	UniProt		
+UniProtKB	A0A1S3TWK0	LOC106759456	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR013785	F	Transaldolase	LOC106759456	protein	taxon:3916	20211009	InterPro		
+UniProtKB	A0A1S3TWK0	LOC106759456	enables	GO:0004801	GO_REF:0000002	IEA	InterPro:IPR004732	F	Transaldolase	LOC106759456	protein	taxon:3916	20211009	InterPro		
+UniProtKB	A0A1S3TWK0	LOC106759456	involved_in	GO:0005975	GO_REF:0000002	IEA	InterPro:IPR001585|InterPro:IPR018225	P	Transaldolase	LOC106759456	protein	taxon:3916	20211009	InterPro		
+UniProtKB	A0A1S3TWK0	LOC106759456	involved_in	GO:0006098	GO_REF:0000002	IEA	InterPro:IPR004732	P	Transaldolase	LOC106759456	protein	taxon:3916	20211009	InterPro		
+UniProtKB	A0A1S3TWK0	LOC106759456	located_in	GO:0005737	GO_REF:0000002	IEA	InterPro:IPR004732	C	Transaldolase	LOC106759456	protein	taxon:3916	20211009	InterPro		
+UniProtKB	A0A1S3TWK0	LOC106759456	involved_in	GO:0009749	GO_REF:0000107	IEA	UniProtKB:Q9LYR4|araport11:AT5G13420.1	P	Transaldolase	LOC106759456	protein	taxon:3916	20211009	EnsemblPlants		
+UniProtKB	A0A1S3TWK0	LOC106759456	involved_in	GO:0009809	GO_REF:0000107	IEA	UniProtKB:Q9LYR4|araport11:AT5G13420.1	P	Transaldolase	LOC106759456	protein	taxon:3916	20211009	EnsemblPlants		
+UniProtKB	A0A1S3TWK0	LOC106759456	located_in	GO:0009507	GO_REF:0000107	IEA	UniProtKB:Q9LYR4|araport11:AT5G13420.1	C	Transaldolase	LOC106759456	protein	taxon:3916	20211009	EnsemblPlants		
+UniProtKB	A0A2N6GNR1	zapD	involved_in	GO:0090529	GO_REF:0000104	IEA	UniRule:UR000028592	P	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211009	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	involved_in	GO:0043093	GO_REF:0000104	IEA	UniRule:UR000028592	P	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211009	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	located_in	GO:0005737	GO_REF:0000104	IEA	UniRule:UR000028592	C	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211009	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211009	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	involved_in	GO:0007049	GO_REF:0000043	IEA	UniProtKB-KW:KW-0131	P	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211010	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	involved_in	GO:0051301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0132	P	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211010	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211010	UniProt		
+UniProtKB	A0A2N6GNR1	zapD	involved_in	GO:0000917	GO_REF:0000043	IEA	UniProtKB-KW:KW-0717	P	Cell division protein ZapD	zapD|C0631_01375	protein	taxon:1940285	20211010	UniProt		
+UniProtKB	A0A560E3W6	FBZ96_102520	enables	GO:0000166	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	FBZ96_102520	protein	taxon:1803665	20211009	UniProt		
+UniProtKB	A0A560E3W6	FBZ96_102520	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	FBZ96_102520	protein	taxon:1803665	20211009	UniProt		
+UniProtKB	A0A560E3W6	FBZ96_102520	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	ABC transporter domain-containing protein	FBZ96_102520	protein	taxon:1803665	20211010	UniProt		
+UniProtKB	A0A560E3W6	FBZ96_102520	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	ABC transporter domain-containing protein	FBZ96_102520	protein	taxon:1803665	20211010	UniProt		
+UniProtKB	A0A560E3W6	FBZ96_102520	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439	F	ABC transporter domain-containing protein	FBZ96_102520	protein	taxon:1803665	20211009	InterPro		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0016763	GO_REF:0000117	IEA	ARBA:ARBA00025972	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	UniProt		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0009032	GO_REF:0000104	IEA	UniRule:UR000001326	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	UniProt		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0009032	GO_REF:0000116	IEA	RHEA:16037	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	RHEA		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0009032	GO_REF:0000003	IEA	EC:2.4.2.4	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	UniProt		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0016757	GO_REF:0000043	IEA	UniProtKB-KW:KW-0328	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211010	UniProt		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211010	UniProt		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0004645	GO_REF:0000002	IEA	InterPro:IPR000053	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	InterPro		
+UniProtKB	A0A2U1YU81	TSO5_04795	involved_in	GO:0006206	GO_REF:0000002	IEA	InterPro:IPR000053|InterPro:IPR017872	P	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	InterPro		
+UniProtKB	A0A2U1YU81	TSO5_04795	involved_in	GO:0006213	GO_REF:0000002	IEA	InterPro:IPR013102|InterPro:IPR036566	P	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	InterPro		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0016763	GO_REF:0000002	IEA	InterPro:IPR013102|InterPro:IPR013466|InterPro:IPR036566	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	InterPro		
+UniProtKB	A0A2U1YU81	TSO5_04795	enables	GO:0016757	GO_REF:0000002	IEA	InterPro:IPR000312	F	Putative thymidine phosphorylase	TSO5_04795	protein	taxon:716760	20211009	InterPro		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:0006119	GO_REF:0000041	IEA	UniPathway:UPA00705	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211011	GOC		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211011	GOC		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211011	GOC		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211011	GOC		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211011	GOC		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211011	GOC		
+UniProtKB	A0A2U4Z3V2	COI	enables	GO:0004129	GO_REF:0000116	IEA	RHEA:11436	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	RHEA		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0005743	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0168	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	enables	GO:0004129	GO_REF:0000003	IEA	EC:7.1.1.9	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0005743	GO_REF:0000043	IEA	UniProtKB-KW:KW-0999	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211010	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0070469	GO_REF:0000043	IEA	UniProtKB-KW:KW-0679	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211010	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0005739	GO_REF:0000043	IEA	UniProtKB-KW:KW-0496	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211010	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211010	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211010	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211010	UniProt		
+UniProtKB	A0A2U4Z3V2	COI	enables	GO:0004129	GO_REF:0000002	IEA	InterPro:IPR000883|InterPro:IPR023616	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	InterPro		
+UniProtKB	A0A2U4Z3V2	COI	involved_in	GO:0009060	GO_REF:0000002	IEA	InterPro:IPR000883	P	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	InterPro		
+UniProtKB	A0A2U4Z3V2	COI	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR000883	C	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	InterPro		
+UniProtKB	A0A2U4Z3V2	COI	enables	GO:0020037	GO_REF:0000002	IEA	InterPro:IPR000883	F	Cytochrome c oxidase subunit 1	COI	protein	taxon:2325380	20211009	InterPro		
+UniProtKB	A0A5A9P0I4	E1301_Tti017103	located_in	GO:0031514	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0117	C	Dynein regulatory complex protein 9	E1301_Tti017103	protein	taxon:1572043	20211009	UniProt		
+UniProtKB	A0A5A9P0I4	E1301_Tti017103	located_in	GO:0031514	GO_REF:0000043	IEA	UniProtKB-KW:KW-0282	C	Dynein regulatory complex protein 9	E1301_Tti017103	protein	taxon:1572043	20211010	UniProt		
+UniProtKB	A0A5A9P0I4	E1301_Tti017103	located_in	GO:0005929	GO_REF:0000043	IEA	UniProtKB-KW:KW-0969	C	Dynein regulatory complex protein 9	E1301_Tti017103	protein	taxon:1572043	20211010	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	enables	GO:0097159	GO_REF:0000117	IEA	ARBA:ARBA00026868	F	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211009	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	involved_in	GO:0006139	GO_REF:0000117	IEA	ARBA:ARBA00024489	P	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211009	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	enables	GO:1901363	GO_REF:0000117	IEA	ARBA:ARBA00026759	F	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211009	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	involved_in	GO:0006950	GO_REF:0000117	IEA	ARBA:ARBA00024359	P	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211009	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	involved_in	GO:0051716	GO_REF:0000117	IEA	ARBA:ARBA00027391	P	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211009	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	enables	GO:0016829	GO_REF:0000043	IEA	UniProtKB-KW:KW-0456	F	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211010	UniProt		
+UniProtKB	A0A2V4FFB0	DM483_00560	involved_in	GO:0018298	GO_REF:0000043	IEA	UniProtKB-KW:KW-0157	P	Photolyase/cryptochrome alpha/beta domain-containing protein	DM483_00560	protein	taxon:435519	20211010	UniProt		
+UniProtKB	A0A2W1UYH2	DEJ22_07535	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR020843	F	PKS_ER domain-containing protein	DEJ22_07535	protein	taxon:2175646	20211009	InterPro		
+UniProtKB	A0A5H2YLP0	SG09_08600	enables	GO:0003677	GO_REF:0000043	IEA	UniProtKB-KW:KW-0238	F	YlxR domain-containing protein	SG09_08600	protein	taxon:2599805	20211010	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0016462	GO_REF:0000104	IEA	UniRule:UR000094083	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	located_in	GO:0005737	GO_REF:0000104	IEA	UniRule:UR000094083	C	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0047429	GO_REF:0000003	IEA	EC:3.6.1.9	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0036218	GO_REF:0000003	IEA	EC:3.6.1.9	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0004551	GO_REF:0000003	IEA	EC:3.6.1.9	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0035529	GO_REF:0000003	IEA	EC:3.6.1.9	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211010	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	involved_in	GO:0009117	GO_REF:0000043	IEA	UniProtKB-KW:KW-0546	P	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211010	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	located_in	GO:0005737	GO_REF:0000043	IEA	UniProtKB-KW:KW-0963	C	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211010	UniProt		
+UniProtKB	A0A5L4MTH0	A0Y55_03640	enables	GO:0047429	GO_REF:0000002	IEA	InterPro:IPR003697	F	Nucleoside triphosphate pyrophosphatase	A0Y55_03640|YZ34_05990	protein	taxon:201	20211009	InterPro		
+UniProtKB	A0A5M9ZM56	EMO89_08930	enables	GO:0000166	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	EMO89_08930	protein	taxon:1630162	20211009	UniProt		
+UniProtKB	A0A5M9ZM56	EMO89_08930	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter domain-containing protein	EMO89_08930	protein	taxon:1630162	20211009	UniProt		
+UniProtKB	A0A5M9ZM56	EMO89_08930	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	ABC transporter domain-containing protein	EMO89_08930	protein	taxon:1630162	20211010	UniProt		
+UniProtKB	A0A5M9ZM56	EMO89_08930	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	ABC transporter domain-containing protein	EMO89_08930	protein	taxon:1630162	20211010	UniProt		
+UniProtKB	A0A5M9ZM56	EMO89_08930	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439|InterPro:IPR017871	F	ABC transporter domain-containing protein	EMO89_08930	protein	taxon:1630162	20211009	InterPro		
+UniProtKB	A0A5N9EL29	rpsT	involved_in	GO:0006412	GO_REF:0000104	IEA	UniRule:UR000030811	P	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211009	UniProt		
+UniProtKB	A0A5N9EL29	rpsT	enables	GO:0019843	GO_REF:0000104	IEA	UniRule:UR000030811	F	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211009	UniProt		
+UniProtKB	A0A5N9EL29	rpsT	located_in	GO:0005840	GO_REF:0000043	IEA	UniProtKB-KW:KW-0689	C	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211010	UniProt		
+UniProtKB	A0A5N9EL29	rpsT	enables	GO:0003723	GO_REF:0000043	IEA	UniProtKB-KW:KW-0694	F	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211010	UniProt		
+UniProtKB	A0A5N9EL29	rpsT	enables	GO:0019843	GO_REF:0000043	IEA	UniProtKB-KW:KW-0699	F	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211010	UniProt		
+UniProtKB	A0A5N9EL29	rpsT	enables	GO:0003735	GO_REF:0000002	IEA	InterPro:IPR002583|InterPro:IPR036510	F	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211009	InterPro		
+UniProtKB	A0A5N9EL29	rpsT	enables	GO:0003723	GO_REF:0000002	IEA	InterPro:IPR002583|InterPro:IPR036510	F	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211009	InterPro		
+UniProtKB	A0A5N9EL29	rpsT	located_in	GO:0005840	GO_REF:0000002	IEA	InterPro:IPR002583|InterPro:IPR036510	C	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211009	InterPro		
+UniProtKB	A0A5N9EL29	rpsT	involved_in	GO:0006412	GO_REF:0000002	IEA	InterPro:IPR002583|InterPro:IPR036510	P	30S ribosomal protein S20	rpsT|FI711_08235	protein	taxon:2030829	20211009	InterPro		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	enables	GO:0016301	GO_REF:0000117	IEA	ARBA:ARBA00024352	F	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211009	UniProt		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	involved_in	GO:0046835	GO_REF:0000108	IEA	GO:0008741	P	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211011	GOC		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	enables	GO:0008741	GO_REF:0000003	IEA	EC:2.7.1.16	F	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211009	UniProt		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211010	UniProt		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	involved_in	GO:0016310	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	P	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211010	UniProt		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	enables	GO:0016301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0418	F	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211010	UniProt		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	involved_in	GO:0005975	GO_REF:0000002	IEA	InterPro:IPR018485	P	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211009	InterPro		
+UniProtKB	A0A5W4NHQ7	BZS58_24745	enables	GO:0016773	GO_REF:0000002	IEA	InterPro:IPR018485	F	FGGY_C domain-containing protein	BZS58_24745	protein	taxon:149539	20211009	InterPro		
+UniProtKB	A0A5X3P0G8	mtgA	involved_in	GO:0009252	GO_REF:0000041	IEA	UniPathway:UPA00219	P	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	enables	GO:0008955	GO_REF:0000104	IEA	UniRule:UR000065725	F	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0005886	GO_REF:0000104	IEA	UniRule:UR000065725	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	involved_in	GO:0009252	GO_REF:0000104	IEA	UniRule:UR000065725	P	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	enables	GO:0008955	GO_REF:0000116	IEA	RHEA:23708	F	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	RHEA		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0037	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	enables	GO:0008955	GO_REF:0000003	IEA	EC:2.4.1.129	F	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-0997	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	involved_in	GO:0071555	GO_REF:0000043	IEA	UniProtKB-KW:KW-0961	P	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	enables	GO:0016757	GO_REF:0000043	IEA	UniProtKB-KW:KW-0328	F	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	involved_in	GO:0008360	GO_REF:0000043	IEA	UniProtKB-KW:KW-0133	P	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	involved_in	GO:0009252	GO_REF:0000043	IEA	UniProtKB-KW:KW-0573	P	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211010	UniProt		
+UniProtKB	A0A5X3P0G8	mtgA	enables	GO:0016763	GO_REF:0000002	IEA	InterPro:IPR011812	F	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	InterPro		
+UniProtKB	A0A5X3P0G8	mtgA	involved_in	GO:0009252	GO_REF:0000002	IEA	InterPro:IPR011812	P	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	InterPro		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0009274	GO_REF:0000002	IEA	InterPro:IPR011812	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	InterPro		
+UniProtKB	A0A5X3P0G8	mtgA	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR011812	C	Biosynthetic peptidoglycan transglycosylase	mtgA|D2118_07495	protein	taxon:1243597	20211009	InterPro		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0004148	GO_REF:0000116	IEA	RHEA:15045	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	RHEA		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0004148	GO_REF:0000003	IEA	EC:1.8.1.4	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	UniProt		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211010	UniProt		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211010	UniProt		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0050660	GO_REF:0000002	IEA	InterPro:IPR006258|InterPro:IPR016156	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	InterPro		
+UniProtKB	A0A636CWI7	CC562_06595	involved_in	GO:0045454	GO_REF:0000002	IEA	InterPro:IPR004099	P	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	InterPro		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0004148	GO_REF:0000002	IEA	InterPro:IPR006258	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	InterPro		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0016668	GO_REF:0000002	IEA	InterPro:IPR012999	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	InterPro		
+UniProtKB	A0A636CWI7	CC562_06595	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR001100|InterPro:IPR016156|InterPro:IPR023753	F	Dihydrolipoyl dehydrogenase	CC562_06595	protein	taxon:483687	20211009	InterPro		
+UniProtKB	A0A378VD49	lbpA	involved_in	GO:0071702	GO_REF:0000117	IEA	ARBA:ARBA00025772	P	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	UniProt		
+UniProtKB	A0A378VD49	lbpA	involved_in	GO:0006811	GO_REF:0000117	IEA	ARBA:ARBA00025461	P	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	UniProt		
+UniProtKB	A0A378VD49	lbpA	involved_in	GO:0034755	GO_REF:0000108	IEA	GO:0015091	P	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211011	GOC		
+UniProtKB	A0A378VD49	lbpA	located_in	GO:0009279	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0040	C	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	UniProt		
+UniProtKB	A0A378VD49	lbpA	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211010	UniProt		
+UniProtKB	A0A378VD49	lbpA	located_in	GO:0009279	GO_REF:0000043	IEA	UniProtKB-KW:KW-0998	C	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211010	UniProt		
+UniProtKB	A0A378VD49	lbpA	enables	GO:0015091	GO_REF:0000002	IEA	InterPro:IPR010948	F	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	InterPro		
+UniProtKB	A0A378VD49	lbpA	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR010949	P	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	InterPro		
+UniProtKB	A0A378VD49	lbpA	located_in	GO:0019867	GO_REF:0000002	IEA	InterPro:IPR010948|InterPro:IPR010949	C	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	InterPro		
+UniProtKB	A0A378VD49	lbpA	involved_in	GO:0006826	GO_REF:0000002	IEA	InterPro:IPR010948	P	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	InterPro		
+UniProtKB	A0A378VD49	lbpA	enables	GO:0022857	GO_REF:0000002	IEA	InterPro:IPR010949	F	Lactoferrin binding protein A	lbpA|NCTC10618_00302	protein	taxon:486	20211009	InterPro		
+UniProtKB	A0A679GWR5	BwiPL1_12100	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR011766	F	2-oxoglutarate ferredoxin oxidoreductase subunit beta	BwiPL1_12100	protein	taxon:1890302	20211009	InterPro		
+UniProtKB	A0A679GWR5	BwiPL1_12100	enables	GO:0030976	GO_REF:0000002	IEA	InterPro:IPR011766	F	2-oxoglutarate ferredoxin oxidoreductase subunit beta	BwiPL1_12100	protein	taxon:1890302	20211009	InterPro		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0016887	GO_REF:0000117	IEA	ARBA:ARBA00025550	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0008094	GO_REF:0000117	IEA	ARBA:ARBA00027449	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0003677	GO_REF:0000104	IEA	UniRule:UR000165711	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0003678	GO_REF:0000104	IEA	UniRule:UR000165711	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	involved_in	GO:0006268	GO_REF:0000104	IEA	UniRule:UR000165711	P	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0008270	GO_REF:0000104	IEA	UniRule:UR000165711	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	part_of	GO:1990077	GO_REF:0000104	IEA	UniRule:UR000165711	C	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000165711	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	UniProt		
+UniProtKB	A0A3A6N1A9	priA	involved_in	GO:0006260	GO_REF:0000043	IEA	UniProtKB-KW:KW-0235	P	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	involved_in	GO:0006269	GO_REF:0000043	IEA	UniProtKB-KW:KW-0639	P	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0003677	GO_REF:0000043	IEA	UniProtKB-KW:KW-0238	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0004386	GO_REF:0000043	IEA	UniProtKB-KW:KW-0347	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	part_of	GO:1990077	GO_REF:0000043	IEA	UniProtKB-KW:KW-0639	C	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211010	UniProt		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0003677	GO_REF:0000002	IEA	InterPro:IPR005259|InterPro:IPR041222	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	InterPro		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0003676	GO_REF:0000002	IEA	InterPro:IPR011545	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	InterPro		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0003678	GO_REF:0000002	IEA	InterPro:IPR005259	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	InterPro		
+UniProtKB	A0A3A6N1A9	priA	involved_in	GO:0006260	GO_REF:0000002	IEA	InterPro:IPR005259	P	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	InterPro		
+UniProtKB	A0A3A6N1A9	priA	involved_in	GO:0032508	GO_REF:0000002	IEA	InterPro:IPR005259	P	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	InterPro		
+UniProtKB	A0A3A6N1A9	priA	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR011545	F	Primosomal protein N'	priA|C4563_04850	protein	taxon:895	20211009	InterPro		
+UniProtKB	A0A3A8KCK3	D7X32_07185	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Glycosyltransferase	D7X32_07185	protein	taxon:2316728	20211010	UniProt		
+UniProtKB	A0A3A8KCK3	D7X32_07185	enables	GO:0016757	GO_REF:0000002	IEA	InterPro:IPR001296	F	Glycosyltransferase	D7X32_07185	protein	taxon:2316728	20211009	InterPro		
+UniProtKB	A0A6B1YJI6	GUL26_37810	involved_in	GO:0043170	GO_REF:0000117	IEA	ARBA:ARBA00024680	P	Uncharacterized protein	GUL26_37810	protein	taxon:287	20211009	UniProt		
+UniProtKB	A0A6B1YJI6	GUL26_37810	involved_in	GO:0044238	GO_REF:0000117	IEA	ARBA:ARBA00025356	P	Uncharacterized protein	GUL26_37810	protein	taxon:287	20211009	UniProt		
+UniProtKB	A0A6B1YJI6	GUL26_37810	involved_in	GO:0006807	GO_REF:0000117	IEA	ARBA:ARBA00025516	P	Uncharacterized protein	GUL26_37810	protein	taxon:287	20211009	UniProt		
+UniProtKB	A0A6B1YJI6	GUL26_37810	enables	GO:0003824	GO_REF:0000117	IEA	ARBA:ARBA00024961	F	Uncharacterized protein	GUL26_37810	protein	taxon:287	20211009	UniProt		
+UniProtKB	A0A6B1YJI6	GUL26_37810	located_in	GO:0005737	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0086	C	Uncharacterized protein	GUL26_37810	protein	taxon:287	20211009	UniProt		
+UniProtKB	A0A6G1TXU9	F7D73_03965	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Omp85 domain-containing protein	F7D73_03965	protein	taxon:165179	20211010	UniProt		
+UniProtKB	A0A6G1TXU9	F7D73_03965	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Omp85 domain-containing protein	F7D73_03965	protein	taxon:165179	20211010	UniProt		
+UniProtKB	A0A6G1TXU9	F7D73_03965	located_in	GO:0019867	GO_REF:0000002	IEA	InterPro:IPR000184	C	Omp85 domain-containing protein	F7D73_03965	protein	taxon:165179	20211009	InterPro		
+UniProtKB	A0A3Q7IVS7	A0A3Q7IVS7	enables	GO:0016491	PMID:21873635	IBA	FB:FBgn0259697|PANTHER:PTN001083246|TAIR:locus:2082122|TAIR:locus:2823671|UniProtKB:P71875	F	Uncharacterized protein		protein	taxon:4081	20210325	GO_Central		
+UniProtKB	A0A3Q7IVS7	A0A3Q7IVS7	is_active_in	GO:0005737	PMID:21873635	IBA	PANTHER:PTN001083246|TAIR:locus:2823671|WB:WBGene00007536	C	Uncharacterized protein		protein	taxon:4081	20210325	GO_Central		
+UniProtKB	A0A3Q7IVS7	A0A3Q7IVS7	enables	GO:0032441	PMID:21873635	IBA	PANTHER:PTN001083324|TAIR:locus:2082122	F	Uncharacterized protein		protein	taxon:4081	20210325	GO_Central		
+UniProtKB	A0A2H6N4Y7	A0A2H6N4Y7	involved_in	GO:0007165	GO_REF:0000002	IEA	InterPro:IPR000198|InterPro:IPR008936	P	Rho-GAP domain-containing protein		protein	taxon:129465	20211009	InterPro		
+UniProtKB	A0A453BVM3	A0A453BVM3	enables	GO:0004672	GO_REF:0000002	IEA	InterPro:IPR000719|InterPro:IPR001245|InterPro:IPR008271	F	Protein kinase domain-containing protein		protein	taxon:200361	20211009	InterPro		
+UniProtKB	A0A453BVM3	A0A453BVM3	involved_in	GO:0006468	GO_REF:0000002	IEA	InterPro:IPR000719|InterPro:IPR001245|InterPro:IPR008271	P	Protein kinase domain-containing protein		protein	taxon:200361	20211009	InterPro		
+UniProtKB	A0A453BVM3	A0A453BVM3	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR000719	F	Protein kinase domain-containing protein		protein	taxon:200361	20211009	InterPro		
+UniProtKB	A0A452Z0R4	A0A452Z0R4	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR005135	F	Endo/exonuclease/phosphatase domain-containing protein		protein	taxon:200361	20211009	InterPro		
+UniProtKB	A0A7G3B389	A0A7G3B389	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Uncharacterized protein		protein	taxon:7200	20211010	UniProt		
+UniProtKB	A0A7G3B389	A0A7G3B389	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Uncharacterized protein		protein	taxon:7200	20211010	UniProt		
+UniProtKB	A0A7G3B389	A0A7G3B389	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR005828	P	Uncharacterized protein		protein	taxon:7200	20211009	InterPro		
+UniProtKB	A0A7G3B389	A0A7G3B389	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR005828	C	Uncharacterized protein		protein	taxon:7200	20211009	InterPro		
+UniProtKB	A0A7G3B389	A0A7G3B389	enables	GO:0022857	GO_REF:0000002	IEA	InterPro:IPR005828	F	Uncharacterized protein		protein	taxon:7200	20211009	InterPro		
+UniProtKB	A0A2L2Y9U2	A0A2L2Y9U2	located_in	GO:0000775	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0047	C	Uncharacterized protein		protein	taxon:114398	20211009	UniProt		
+UniProtKB	A0A2L2Y9U2	A0A2L2Y9U2	located_in	GO:0005694	GO_REF:0000043	IEA	UniProtKB-KW:KW-0158	C	Uncharacterized protein		protein	taxon:114398	20211010	UniProt		
+UniProtKB	A0A2L2Y9U2	A0A2L2Y9U2	involved_in	GO:0007049	GO_REF:0000043	IEA	UniProtKB-KW:KW-0131	P	Uncharacterized protein		protein	taxon:114398	20211010	UniProt		
+UniProtKB	A0A2L2Y9U2	A0A2L2Y9U2	involved_in	GO:0051301	GO_REF:0000043	IEA	UniProtKB-KW:KW-0132	P	Uncharacterized protein		protein	taxon:114398	20211010	UniProt		
+UniProtKB	A0A2L2Y9U2	A0A2L2Y9U2	located_in	GO:0000775	GO_REF:0000043	IEA	UniProtKB-KW:KW-0137	C	Uncharacterized protein		protein	taxon:114398	20211010	UniProt		
+UniProtKB	A0A2L2Y9U2	A0A2L2Y9U2	located_in	GO:0005634	GO_REF:0000043	IEA	UniProtKB-KW:KW-0539	C	Uncharacterized protein		protein	taxon:114398	20211010	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	involved_in	GO:0006813	GO_REF:0000117	IEA	ARBA:ARBA00025469	P	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211010	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	involved_in	GO:0006811	GO_REF:0000043	IEA	UniProtKB-KW:KW-0406	P	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211010	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	involved_in	GO:0006813	GO_REF:0000043	IEA	UniProtKB-KW:KW-0633	P	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211010	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211010	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211010	UniProt		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	involved_in	GO:0071805	GO_REF:0000002	IEA	InterPro:IPR004772	P	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR003445	P	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	enables	GO:0008324	GO_REF:0000002	IEA	InterPro:IPR003445	F	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	involved_in	GO:0006812	GO_REF:0000002	IEA	InterPro:IPR003445	P	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR004772	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	enables	GO:0015379	GO_REF:0000002	IEA	InterPro:IPR004772	F	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+UniProtKB	A0A7W6AHS9	GGR33_002485	involved_in	GO:0006259	GO_REF:0000108	IEA	GO:0004536	P	TatD DNase family protein	GGR33_002485	protein	taxon:1176177	20211011	GOC		
+UniProtKB	A0A7W6AHS9	GGR33_002485	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	TatD DNase family protein	GGR33_002485	protein	taxon:1176177	20211010	UniProt		
+UniProtKB	A0A7W6AHS9	GGR33_002485	enables	GO:0004536	GO_REF:0000002	IEA	InterPro:IPR015991	F	TatD DNase family protein	GGR33_002485	protein	taxon:1176177	20211009	InterPro		
+UniProtKB	A0A7W6AHS9	GGR33_002485	enables	GO:0016788	GO_REF:0000002	IEA	InterPro:IPR001130	F	TatD DNase family protein	GGR33_002485	protein	taxon:1176177	20211009	InterPro		
+UniProtKB	A0A7X5TXK6	FHU31_001576	involved_in	GO:0090305	GO_REF:0000108	IEA	GO:0004518	P	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211011	GOC		
+UniProtKB	A0A7X5TXK6	FHU31_001576	enables	GO:0008853	GO_REF:0000003	IEA	EC:3.1.11.2	F	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211009	UniProt		
+UniProtKB	A0A7X5TXK6	FHU31_001576	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211010	UniProt		
+UniProtKB	A0A7X5TXK6	FHU31_001576	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR005135	F	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211009	InterPro		
+UniProtKB	A0A7X5TXK6	FHU31_001576	enables	GO:0004518	GO_REF:0000002	IEA	InterPro:IPR004808	F	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211009	InterPro		
+UniProtKB	A0A7X5TXK6	FHU31_001576	involved_in	GO:0006281	GO_REF:0000002	IEA	InterPro:IPR004808|InterPro:IPR037493	P	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211009	InterPro		
+UniProtKB	A0A7X5TXK6	FHU31_001576	enables	GO:0008853	GO_REF:0000002	IEA	InterPro:IPR037493	F	Exodeoxyribonuclease III	FHU31_001576	protein	taxon:258505	20211009	InterPro		
+UniProtKB	A0A0B7D516	yycJ	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Lactamase_B domain-containing protein	yycJ|PS718_02449|SRM1_01363	protein	taxon:294	20211010	UniProt		
+UniProtKB	A0A7X6PBF6	GX869_08430	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Glycosyltransferase family 4 protein	GX869_08430	protein	taxon:2030808	20211010	UniProt		
+UniProtKB	A0A7X6PBF6	GX869_08430	enables	GO:0016757	GO_REF:0000002	IEA	InterPro:IPR001296	F	Glycosyltransferase family 4 protein	GX869_08430	protein	taxon:2030808	20211009	InterPro		
+UniProtKB	A0A7Y5A882	rplO	involved_in	GO:0006412	GO_REF:0000104	IEA	UniRule:UR000047417	P	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211009	UniProt		
+UniProtKB	A0A7Y5A882	rplO	enables	GO:0019843	GO_REF:0000104	IEA	UniRule:UR000047417	F	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211009	UniProt		
+UniProtKB	A0A7Y5A882	rplO	located_in	GO:0005840	GO_REF:0000043	IEA	UniProtKB-KW:KW-0689	C	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211010	UniProt		
+UniProtKB	A0A7Y5A882	rplO	enables	GO:0003723	GO_REF:0000043	IEA	UniProtKB-KW:KW-0694	F	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211010	UniProt		
+UniProtKB	A0A7Y5A882	rplO	enables	GO:0019843	GO_REF:0000043	IEA	UniProtKB-KW:KW-0699	F	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211010	UniProt		
+UniProtKB	A0A7Y5A882	rplO	enables	GO:0003735	GO_REF:0000002	IEA	InterPro:IPR001196|InterPro:IPR005749|InterPro:IPR030878	F	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211009	InterPro		
+UniProtKB	A0A7Y5A882	rplO	part_of	GO:0015934	GO_REF:0000002	IEA	InterPro:IPR005749|InterPro:IPR030878	C	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211009	InterPro		
+UniProtKB	A0A7Y5A882	rplO	located_in	GO:0005840	GO_REF:0000002	IEA	InterPro:IPR001196	C	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211009	InterPro		
+UniProtKB	A0A7Y5A882	rplO	involved_in	GO:0006412	GO_REF:0000002	IEA	InterPro:IPR001196|InterPro:IPR005749|InterPro:IPR030878	P	50S ribosomal protein L15	rplO|HP547_02145	protein	taxon:2738452	20211009	InterPro		
+UniProtKB	A0A0H5D095	NIT7321_01314	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	Peptidase_A24 domain-containing protein	NIT7321_01314	protein	taxon:481446	20211010	UniProt		
+UniProtKB	A0A0H5D095	NIT7321_01314	enables	GO:0008233	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	F	Peptidase_A24 domain-containing protein	NIT7321_01314	protein	taxon:481446	20211010	UniProt		
+UniProtKB	A0A0H5D095	NIT7321_01314	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Peptidase_A24 domain-containing protein	NIT7321_01314	protein	taxon:481446	20211010	UniProt		
+UniProtKB	A0A0H5D095	NIT7321_01314	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Peptidase_A24 domain-containing protein	NIT7321_01314	protein	taxon:481446	20211010	UniProt		
+UniProtKB	A0A0H5D095	NIT7321_01314	enables	GO:0004190	GO_REF:0000002	IEA	InterPro:IPR000045	F	Peptidase_A24 domain-containing protein	NIT7321_01314	protein	taxon:481446	20211009	InterPro		
+UniProtKB	A0A0H5D095	NIT7321_01314	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR000045	C	Peptidase_A24 domain-containing protein	NIT7321_01314	protein	taxon:481446	20211009	InterPro		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	involved_in	GO:0090116	GO_REF:0000108	IEA	GO:0003886	P	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211011	GOC		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	involved_in	GO:0090116	GO_REF:0000108	IEA	GO:0003886	P	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211011	GOC		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	enables	GO:0003886	GO_REF:0000116	IEA	RHEA:13681	F	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211009	RHEA		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	enables	GO:0003886	GO_REF:0000003	IEA	EC:2.1.1.37	F	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211009	UniProt		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211010	UniProt		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	involved_in	GO:0009307	GO_REF:0000043	IEA	UniProtKB-KW:KW-0680	P	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211010	UniProt		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	involved_in	GO:0032259	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	P	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211010	UniProt		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	enables	GO:0008168	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	F	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211010	UniProt		
+UniProtKB	A0A0Q7SNQ3	ASD25_23430	enables	GO:0008168	GO_REF:0000002	IEA	InterPro:IPR001525	F	DNA (cytosine-5-)-methyltransferase	ASD25_23430	protein	taxon:1736462	20211009	InterPro		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0010181	GO_REF:0000104	IEA	UniRule:UR000184750	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0000049	GO_REF:0000104	IEA	UniRule:UR000184750	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	involved_in	GO:0002943	GO_REF:0000104	IEA	UniRule:UR000184750	P	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0017150	GO_REF:0000104	IEA	UniRule:UR000184750	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0017150	GO_REF:0000116	IEA	RHEA:23624	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	RHEA		
+UniProtKB	A0A0R0LQ52	dusC	involved_in	GO:0008033	GO_REF:0000043	IEA	UniProtKB-KW:KW-0819	P	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211010	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0003723	GO_REF:0000043	IEA	UniProtKB-KW:KW-0694	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211010	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0000049	GO_REF:0000043	IEA	UniProtKB-KW:KW-0820	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211010	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211010	UniProt		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0050660	GO_REF:0000002	IEA	InterPro:IPR001269|InterPro:IPR004652|InterPro:IPR018517	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	InterPro		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR013785	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	InterPro		
+UniProtKB	A0A0R0LQ52	dusC	involved_in	GO:0002943	GO_REF:0000002	IEA	InterPro:IPR032887	P	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	InterPro		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR004652|InterPro:IPR024036	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	InterPro		
+UniProtKB	A0A0R0LQ52	dusC	enables	GO:0017150	GO_REF:0000002	IEA	InterPro:IPR001269|InterPro:IPR018517|InterPro:IPR032887	F	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	InterPro		
+UniProtKB	A0A0R0LQ52	dusC	involved_in	GO:0008033	GO_REF:0000002	IEA	InterPro:IPR001269|InterPro:IPR004652|InterPro:IPR018517	P	tRNA-dihydrouridine synthase B	dusC|dusB|FERRO_02330	protein	taxon:1356299	20211009	InterPro		
+UniProtKB	A0A3D4FID4	DIU45_10930	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	EamA family transporter	DIU45_10930	protein	taxon:1506	20211010	UniProt		
+UniProtKB	A0A3D4FID4	DIU45_10930	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	EamA family transporter	DIU45_10930	protein	taxon:1506	20211010	UniProt		
+UniProtKB	A0A3D4FID4	DIU45_10930	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR000620	C	EamA family transporter	DIU45_10930	protein	taxon:1506	20211009	InterPro		
+UniProtKB	A0A3D4FID4	DIU45_10930	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR000620	C	EamA family transporter	DIU45_10930	protein	taxon:1506	20211009	InterPro		
+UniProtKB	A0A3G7UEA8	C4K03_5643	enables	GO:0008908	GO_REF:0000003	IEA	EC:3.3.2.1	F	Isochorismatase domain-containing protein	C4K03_5643	protein	taxon:47883	20211009	UniProt		
+UniProtKB	A0A3G7UEA8	C4K03_5643	enables	GO:0016787	GO_REF:0000043	IEA	UniProtKB-KW:KW-0378	F	Isochorismatase domain-containing protein	C4K03_5643	protein	taxon:47883	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	involved_in	GO:0003008	GO_REF:0000117	IEA	ARBA:ARBA00024416	P	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	enables	GO:0038023	GO_REF:0000117	IEA	ARBA:ARBA00026458	F	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	involved_in	GO:0050911	GO_REF:0000108	IEA	GO:0004984	P	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211011	GOC		
+UniProtKB	A0A1U7QT36	LOC101835852	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0039	C	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	involved_in	GO:0007165	GO_REF:0000043	IEA	UniProtKB-KW:KW-0807	P	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	involved_in	GO:0007186	GO_REF:0000043	IEA	UniProtKB-KW:KW-0297	P	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	enables	GO:0004930	GO_REF:0000043	IEA	UniProtKB-KW:KW-0297	F	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211010	UniProt		
+UniProtKB	A0A1U7QT36	LOC101835852	enables	GO:0004984	GO_REF:0000002	IEA	InterPro:IPR000725	F	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	InterPro		
+UniProtKB	A0A1U7QT36	LOC101835852	enables	GO:0004930	GO_REF:0000002	IEA	InterPro:IPR000276	F	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	InterPro		
+UniProtKB	A0A1U7QT36	LOC101835852	involved_in	GO:0007186	GO_REF:0000002	IEA	InterPro:IPR000276|InterPro:IPR000725	P	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	InterPro		
+UniProtKB	A0A1U7QT36	LOC101835852	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR000276|InterPro:IPR000725|InterPro:IPR017452	C	G_PROTEIN_RECEP_F1_2 domain-containing protein	LOC101835852	protein	taxon:10036	20211009	InterPro		
+UniProtKB	A0A1V6PR72	PENANT_c049G09333	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Uncharacterized protein	PENANT_c049G09333	protein	taxon:416450	20211010	UniProt		
+UniProtKB	A0A1V6PR72	PENANT_c049G09333	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Uncharacterized protein	PENANT_c049G09333	protein	taxon:416450	20211010	UniProt		
+UniProtKB	A0A3Q7Q4L3	EEFSEC	involved_in	GO:0006414	GO_REF:0000043	IEA	UniProtKB-KW:KW-0251	P	Tr-type G domain-containing protein	EEFSEC	protein	taxon:34884	20211010	UniProt		
+UniProtKB	A0A3Q7Q4L3	EEFSEC	enables	GO:0003746	GO_REF:0000043	IEA	UniProtKB-KW:KW-0251	F	Tr-type G domain-containing protein	EEFSEC	protein	taxon:34884	20211010	UniProt		
+UniProtKB	A0A3Q7Q4L3	EEFSEC	enables	GO:0003924	GO_REF:0000002	IEA	InterPro:IPR000795	F	Tr-type G domain-containing protein	EEFSEC	protein	taxon:34884	20211009	InterPro		
+UniProtKB	A0A3Q7Q4L3	EEFSEC	enables	GO:0005525	GO_REF:0000002	IEA	InterPro:IPR000795	F	Tr-type G domain-containing protein	EEFSEC	protein	taxon:34884	20211009	InterPro		
+UniProtKB	A0A3Q8WBL1	EI420_03640	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Cytochrome c-type biogenesis protein	EI420_03640	protein	taxon:44935	20211010	UniProt		
+UniProtKB	A0A3Q8WBL1	EI420_03640	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Cytochrome c-type biogenesis protein	EI420_03640	protein	taxon:44935	20211010	UniProt		
+UniProtKB	A0A3Q8WBL1	EI420_03640	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Cytochrome c-type biogenesis protein	EI420_03640	protein	taxon:44935	20211010	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	involved_in	GO:0044205	GO_REF:0000041	IEA	UniPathway:UPA00070	P	DHOdehase	EA686_22525	protein	taxon:470	20211009	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0039	C	DHOdehase	EA686_22525	protein	taxon:470	20211009	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	enables	GO:0004152	GO_REF:0000003	IEA	EC:1.3.5.2	F	DHOdehase	EA686_22525	protein	taxon:470	20211009	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	involved_in	GO:0006221	GO_REF:0000043	IEA	UniProtKB-KW:KW-0665	P	DHOdehase	EA686_22525	protein	taxon:470	20211010	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	DHOdehase	EA686_22525	protein	taxon:470	20211010	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	DHOdehase	EA686_22525	protein	taxon:470	20211010	UniProt		
+UniProtKB	A0A3R9ZLV9	EA686_22525	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR013785	F	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A3R9ZLV9	EA686_22525	enables	GO:0004152	GO_REF:0000002	IEA	InterPro:IPR001295|InterPro:IPR005719|InterPro:IPR012135	F	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A3R9ZLV9	EA686_22525	involved_in	GO:0006207	GO_REF:0000002	IEA	InterPro:IPR001295|InterPro:IPR005719	P	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A3R9ZLV9	EA686_22525	involved_in	GO:0006222	GO_REF:0000002	IEA	InterPro:IPR012135	P	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A3R9ZLV9	EA686_22525	enables	GO:0016627	GO_REF:0000002	IEA	InterPro:IPR005720	F	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A3R9ZLV9	EA686_22525	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR005719	C	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A3R9ZLV9	EA686_22525	located_in	GO:0005737	GO_REF:0000002	IEA	InterPro:IPR005720	C	DHOdehase	EA686_22525	protein	taxon:470	20211009	InterPro		
+UniProtKB	A0A421AZN6	CLV68_4772	enables	GO:0016491	GO_REF:0000002	IEA	InterPro:IPR006076	F	DAO domain-containing protein	CLV68_4772	protein	taxon:585224	20211009	InterPro		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0006082	GO_REF:0000117	IEA	ARBA:ARBA00024987	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0016836	GO_REF:0000117	IEA	ARBA:ARBA00026328	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0009097	GO_REF:0000041	IEA	UniPathway:UPA00047	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0009099	GO_REF:0000041	IEA	UniPathway:UPA00049	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0004160	GO_REF:0000104	IEA	UniRule:UR000001403	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0009097	GO_REF:0000104	IEA	UniRule:UR000001403	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0009099	GO_REF:0000104	IEA	UniRule:UR000001403	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0004160	GO_REF:0000116	IEA	RHEA:20936	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	RHEA		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0004160	GO_REF:0000003	IEA	EC:4.2.1.9	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0051539	GO_REF:0000043	IEA	UniProtKB-KW:KW-0004	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211010	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0051536	GO_REF:0000043	IEA	UniProtKB-KW:KW-0411	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211010	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211010	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0016829	GO_REF:0000043	IEA	UniProtKB-KW:KW-0456	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211010	UniProt		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0008652	GO_REF:0000043	IEA	UniProtKB-KW:KW-0028	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211010	UniProt		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0009082	GO_REF:0000043	IEA	UniProtKB-KW:KW-0100	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211010	UniProt		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0003824	GO_REF:0000002	IEA	InterPro:IPR000581|InterPro:IPR020558	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	InterPro		
+UniProtKB	A0A226WWG4	ilvD	enables	GO:0004160	GO_REF:0000002	IEA	InterPro:IPR004404	F	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	InterPro		
+UniProtKB	A0A226WWG4	ilvD	involved_in	GO:0009082	GO_REF:0000002	IEA	InterPro:IPR004404	P	Dihydroxy-acid dehydratase	ilvD|BSU04_28765	protein	taxon:196367	20211009	InterPro		
+UniProtKB	A0A251RUD3	HannXRQ_Chr03g0062301	located_in	GO:0005634	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0191	C	ENT domain-containing protein	HannXRQ_Chr03g0062301|HannXRQ_Chr17g0569021	protein	taxon:4232	20211009	UniProt		
+UniProtKB	A0A251RUD3	HannXRQ_Chr03g0062301	located_in	GO:0005634	GO_REF:0000043	IEA	UniProtKB-KW:KW-0539	C	ENT domain-containing protein	HannXRQ_Chr03g0062301|HannXRQ_Chr17g0569021	protein	taxon:4232	20211010	UniProt		
+UniProtKB	A0A446CXF8	nosZ	involved_in	GO:0019333	GO_REF:0000041	IEA	UniPathway:UPA00652	P	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	involved_in	GO:1902600	GO_REF:0000108	IEA	GO:0004129	P	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211011	GOC		
+UniProtKB	A0A446CXF8	nosZ	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0004129	P	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211011	GOC		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0050304	GO_REF:0000104	IEA	UniRule:UR000098395	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	located_in	GO:0042597	GO_REF:0000104	IEA	UniRule:UR000098395	C	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0005509	GO_REF:0000104	IEA	UniRule:UR000098395	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0005507	GO_REF:0000104	IEA	UniRule:UR000098395	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0050304	GO_REF:0000116	IEA	RHEA:43108	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	RHEA		
+UniProtKB	A0A446CXF8	nosZ	located_in	GO:0042597	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0200	C	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0050304	GO_REF:0000003	IEA	EC:1.7.2.4	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	UniProt		
+UniProtKB	A0A446CXF8	nosZ	located_in	GO:0042597	GO_REF:0000043	IEA	UniProtKB-KW:KW-0574	C	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211010	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211010	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211010	UniProt		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0050304	GO_REF:0000002	IEA	InterPro:IPR023644	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	InterPro		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0004129	GO_REF:0000002	IEA	InterPro:IPR002429	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	InterPro		
+UniProtKB	A0A446CXF8	nosZ	located_in	GO:0016020	GO_REF:0000002	IEA	InterPro:IPR002429	C	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	InterPro		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0005509	GO_REF:0000002	IEA	InterPro:IPR023644	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	InterPro		
+UniProtKB	A0A446CXF8	nosZ	enables	GO:0005507	GO_REF:0000002	IEA	InterPro:IPR002429|InterPro:IPR023644	F	Nitrous-oxide reductase	nosZ|AVE30378_05230	protein	taxon:2069367	20211009	InterPro		
+UniProtKB	A0A447QPV4	iucA	involved_in	GO:1901566	GO_REF:0000117	IEA	ARBA:ARBA00024392	P	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211009	UniProt		
+UniProtKB	A0A447QPV4	iucA	involved_in	GO:0044249	GO_REF:0000117	IEA	ARBA:ARBA00025364	P	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211009	UniProt		
+UniProtKB	A0A447QPV4	iucA	enables	GO:0016881	GO_REF:0000117	IEA	ARBA:ARBA00025553	F	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211009	UniProt		
+UniProtKB	A0A447QPV4	iucA	enables	GO:0016874	GO_REF:0000043	IEA	UniProtKB-KW:KW-0436	F	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211010	UniProt		
+UniProtKB	A0A447QPV4	iucA	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211010	UniProt		
+UniProtKB	A0A447QPV4	iucA	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211010	UniProt		
+UniProtKB	A0A447QPV4	iucA	involved_in	GO:0019290	GO_REF:0000002	IEA	InterPro:IPR007310|InterPro:IPR037455	P	Aerobactin synthase IucA	iucA|NCTC9419_03622	protein	taxon:61652	20211009	InterPro		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0015667	GO_REF:0000116	IEA	RHEA:16857	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	RHEA		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0015667	GO_REF:0000003	IEA	EC:2.1.1.113	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	UniProt		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0016740	GO_REF:0000043	IEA	UniProtKB-KW:KW-0808	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211010	UniProt		
+UniProtKB	A0A496EZ86	DDP57_01770	involved_in	GO:0032259	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	P	Methyltransferase	DDP57_01770	protein	taxon:210	20211010	UniProt		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0008168	GO_REF:0000043	IEA	UniProtKB-KW:KW-0489	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211010	UniProt		
+UniProtKB	A0A496EZ86	DDP57_01770	involved_in	GO:0090124	GO_REF:0000002	IEA	InterPro:IPR017985	P	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	InterPro		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0003677	GO_REF:0000002	IEA	InterPro:IPR001091|InterPro:IPR002941|InterPro:IPR017985	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	InterPro		
+UniProtKB	A0A496EZ86	DDP57_01770	involved_in	GO:0006306	GO_REF:0000002	IEA	InterPro:IPR001091|InterPro:IPR002941	P	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	InterPro		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0008170	GO_REF:0000002	IEA	InterPro:IPR001091|InterPro:IPR002941	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	InterPro		
+UniProtKB	A0A496EZ86	DDP57_01770	enables	GO:0015667	GO_REF:0000002	IEA	InterPro:IPR017985	F	Methyltransferase	DDP57_01770	protein	taxon:210	20211009	InterPro		
+UniProtKB	A0A4P6WVR8	mltB1	enables	GO:0016829	GO_REF:0000043	IEA	UniProtKB-KW:KW-0456	F	SLT_2 domain-containing protein	mltB1|HPF_07690	protein	taxon:47421	20211010	UniProt		
+UniProtKB	A0A6G5VJF8	tef1-alpha	involved_in	GO:0006414	GO_REF:0000043	IEA	UniProtKB-KW:KW-0251	P	Translation elongation factor 1-alpha	tef1-alpha	protein	taxon:42673	20211010	UniProt		
+UniProtKB	A0A6G5VJF8	tef1-alpha	enables	GO:0003746	GO_REF:0000043	IEA	UniProtKB-KW:KW-0251	F	Translation elongation factor 1-alpha	tef1-alpha	protein	taxon:42673	20211010	UniProt		
+UniProtKB	C6C4N1	msrQ	involved_in	GO:0022900	GO_REF:0000108	IEA	GO:0009055	P	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211011	GOC		
+UniProtKB	C6C4N1	msrQ	enables	GO:0010181	GO_REF:0000104	IEA	UniRule:UR000068687	F	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	enables	GO:0009055	GO_REF:0000104	IEA	UniRule:UR000068687	F	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0005887	GO_REF:0000104	IEA	UniRule:UR000068687	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	enables	GO:0020037	GO_REF:0000104	IEA	UniRule:UR000068687	F	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	involved_in	GO:0030091	GO_REF:0000104	IEA	UniRule:UR000068687	P	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0005886	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0037	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211009	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-1003	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211010	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0005886	GO_REF:0000043	IEA	UniProtKB-KW:KW-0997	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211010	UniProt		
+UniProtKB	C6C4N1	msrQ	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211010	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211010	UniProt		
+UniProtKB	C6C4N1	msrQ	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	Protein-methionine-sulfoxide reductase heme-binding subunit MsrQ	msrQ|Dd703_3681	protein	taxon:579405	20211010	UniProt		
+UniProtKB	D6V2Z5	msrA	involved_in	GO:0006464	GO_REF:0000104	IEA	UniRule:UR000076335	P	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211009	UniProt		
+UniProtKB	D6V2Z5	msrA	enables	GO:0008113	GO_REF:0000104	IEA	UniRule:UR000076335	F	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211009	UniProt		
+UniProtKB	D6V2Z5	msrA	enables	GO:0033744	GO_REF:0000116	IEA	RHEA:19993	F	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211009	RHEA		
+UniProtKB	D6V2Z5	msrA	enables	GO:0008113	GO_REF:0000116	IEA	RHEA:14217	F	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211009	RHEA		
+UniProtKB	D6V2Z5	msrA	enables	GO:0008113	GO_REF:0000003	IEA	EC:1.8.4.11	F	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211009	UniProt		
+UniProtKB	D6V2Z5	msrA	enables	GO:0016491	GO_REF:0000043	IEA	UniProtKB-KW:KW-0560	F	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211010	UniProt		
+UniProtKB	D6V2Z5	msrA	enables	GO:0008113	GO_REF:0000002	IEA	InterPro:IPR002569|InterPro:IPR036509	F	Peptide methionine sulfoxide reductase MsrA	msrA|AfiDRAFT_0311	protein	taxon:666684	20211009	InterPro		
+UniProtKB	D7K6G9	HMPREF9010_03798	located_in	GO:0016020	GO_REF:0000044	IEA	UniProtKB-SubCell:SL-0162	C	MFS domain-containing protein	HMPREF9010_03798	protein	taxon:457390	20211009	UniProt		
+UniProtKB	D7K6G9	HMPREF9010_03798	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	MFS domain-containing protein	HMPREF9010_03798	protein	taxon:457390	20211010	UniProt		
+UniProtKB	D7K6G9	HMPREF9010_03798	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	MFS domain-containing protein	HMPREF9010_03798	protein	taxon:457390	20211010	UniProt		
+UniProtKB	D7K6G9	HMPREF9010_03798	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR004638|InterPro:IPR011701	P	MFS domain-containing protein	HMPREF9010_03798	protein	taxon:457390	20211009	InterPro		
+UniProtKB	D7K6G9	HMPREF9010_03798	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR004638	C	MFS domain-containing protein	HMPREF9010_03798	protein	taxon:457390	20211009	InterPro		
+UniProtKB	D7K6G9	HMPREF9010_03798	enables	GO:0022857	GO_REF:0000002	IEA	InterPro:IPR004638|InterPro:IPR011701|InterPro:IPR020846	F	MFS domain-containing protein	HMPREF9010_03798	protein	taxon:457390	20211009	InterPro		
+UniProtKB	E1L5X1	rpmF	involved_in	GO:0006412	GO_REF:0000104	IEA	UniRule:UR000036455	P	50S ribosomal protein L32	rpmF|HMPREF9321_0431	protein	taxon:866776	20211009	UniProt		
+UniProtKB	E1L5X1	rpmF	located_in	GO:0005840	GO_REF:0000043	IEA	UniProtKB-KW:KW-0689	C	50S ribosomal protein L32	rpmF|HMPREF9321_0431	protein	taxon:866776	20211010	UniProt		
+UniProtKB	E1L5X1	rpmF	enables	GO:0003735	GO_REF:0000002	IEA	InterPro:IPR002677	F	50S ribosomal protein L32	rpmF|HMPREF9321_0431	protein	taxon:866776	20211009	InterPro		
+UniProtKB	E1L5X1	rpmF	part_of	GO:0015934	GO_REF:0000002	IEA	InterPro:IPR002677	C	50S ribosomal protein L32	rpmF|HMPREF9321_0431	protein	taxon:866776	20211009	InterPro		
+UniProtKB	E1L5X1	rpmF	involved_in	GO:0006412	GO_REF:0000002	IEA	InterPro:IPR002677|InterPro:IPR011332	P	50S ribosomal protein L32	rpmF|HMPREF9321_0431	protein	taxon:866776	20211009	InterPro		
+UniProtKB	A0A6L8FF48	phoB	enables	GO:0003677	GO_REF:0000104	IEA	UniRule:UR000414392	F	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211009	UniProt		
+UniProtKB	A0A6L8FF48	phoB	involved_in	GO:0006817	GO_REF:0000043	IEA	UniProtKB-KW:KW-0592	P	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211010	UniProt		
+UniProtKB	A0A6L8FF48	phoB	enables	GO:0003677	GO_REF:0000043	IEA	UniProtKB-KW:KW-0238	F	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211010	UniProt		
+UniProtKB	A0A6L8FF48	phoB	enables	GO:0003677	GO_REF:0000002	IEA	InterPro:IPR001867|InterPro:IPR011879	F	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211009	InterPro		
+UniProtKB	A0A6L8FF48	phoB	enables	GO:0000156	GO_REF:0000002	IEA	InterPro:IPR011879	F	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211009	InterPro		
+UniProtKB	A0A6L8FF48	phoB	involved_in	GO:0006355	GO_REF:0000002	IEA	InterPro:IPR001867	P	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211009	InterPro		
+UniProtKB	A0A6L8FF48	phoB	involved_in	GO:0006817	GO_REF:0000002	IEA	InterPro:IPR011879	P	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211009	InterPro		
+UniProtKB	A0A6L8FF48	phoB	involved_in	GO:0000160	GO_REF:0000002	IEA	InterPro:IPR001789|InterPro:IPR001867|InterPro:IPR011879	P	Phosphate regulon transcriptional regulatory protein PhoB	phoB|F4109_07405|F4X06_05580	protein	taxon:1913989	20211009	InterPro		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0000166	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	UniProt		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0005524	GO_REF:0000104	IEA	UniRule:UR000400038	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	UniProt		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0000166	GO_REF:0000043	IEA	UniProtKB-KW:KW-0547	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211010	UniProt		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211010	UniProt		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	located_in	GO:0016020	GO_REF:0000043	IEA	UniProtKB-KW:KW-0472	C	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211010	UniProt		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0005524	GO_REF:0000043	IEA	UniProtKB-KW:KW-0067	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211010	UniProt		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	involved_in	GO:0055085	GO_REF:0000002	IEA	InterPro:IPR011527	P	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	InterPro		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0140359	GO_REF:0000002	IEA	InterPro:IPR011527	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	InterPro		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR011527|InterPro:IPR036640	C	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	InterPro		
+UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439|InterPro:IPR011527|InterPro:IPR017871|InterPro:IPR036640	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	InterPro		
+UniProtKB	A0A6N9GJR9	F4034_00615	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Inositol monophosphatase family protein	F4034_00615	protein	taxon:2026724	20211010	UniProt		

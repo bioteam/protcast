@@ -1,0 +1,10 @@
+@startuml
+object GO
+object Uniprot
+object UniprotGOA
+object Dataset
+
+Dataset <|-- GO
+Dataset <|-- Uniprot
+Dataset <|-- UniprotGOA
+@enduml

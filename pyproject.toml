@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ProtCast"
+dynamic = ["version"]
+description = "Protein function prediction based on sequence and GO annotations"
+authors = [{ name = "BioTeam", email = "contact@bioteam.net" }]
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "typeguard",
+    "scikit-learn",
+    "tqdm",
+    "tensorflow",
+    "biopython",
+    "ifeatpro",
+]
+
+[tool.setuptools]
+packages = ["protcast"]
