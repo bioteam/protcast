@@ -136,12 +136,12 @@ class SimpleDataset:
         # 
         self._propagate_annotations()
 
-        logging.info(f"GO: {self.ontology_path}")
-        logging.info(f"GOA: {self.gaf_path}")
-        logging.info(f"UniProt: {self.swissprot_path}")
-        logging.info(f"TrEMBL: {self.trembl_path}")
-        logging.info(f"Saved SimpleDataset: {self.output_dir}")
-        logging.info(f"Created at: {self.created_at}")
+        logging.info(f"GO: '{self.ontology_path}'")
+        logging.info(f"GOA: '{self.gaf_path}'")
+        logging.info(f"UniProt: '{self.swissprot_path}'")
+        logging.info(f"TrEMBL: '{self.trembl_path}'")
+        logging.info(f"Saved SimpleDataset: '{self.output_dir}'")
+        logging.info(f"Created at: '{self.created_at}'")
         
 
     @typechecked
@@ -344,9 +344,8 @@ class SimpleDataset:
                 # The GAF DB_Object_ID does not match an accession from uniprot_sprot
                 else:
                     logging.debug(
-                        "No accession found for UniProtKB protein :"
-                        f"{rec['DB_Object_ID']} and evidence: "
-                        f"{rec['Evidence']}"
+                        "No primary accession found for 'UniProtKB' protein "
+                        f"{rec['DB_Object_ID']} and evidence {rec['Evidence']}"
                     )
                     trembl_annotations.append(
                         (
@@ -357,8 +356,7 @@ class SimpleDataset:
                     )
             else:
                 logging.debug(
-                    f"Found protein {rec['DB_Object_ID']} that belongs to "
-                    f"{rec['DB']}"
+                    f"Found protein {rec['DB_Object_ID']} labeled '{rec['DB']}'"
                 )
                 num_annotations_not_labeled_uniprotkb += 1
 
@@ -434,7 +432,7 @@ class SimpleDataset:
 
             protein = self.proteins.get(primary_accession)
             if protein is None:
-                protein = Protein(primary_accession, Seq(sequence))
+                protein = Protein(primary_accession, str(Seq))
                 self.proteins[protein.id] = protein
                 num_found_in_trembl += 1
 
