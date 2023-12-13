@@ -778,7 +778,7 @@ class Ontology:
 
         goterm_lines = []
 
-        for line in tqdm(lines, desc="Processing GO terms from {}".format(go_file)):
+        for line in tqdm(lines, desc=f"Processing GO terms from '{go_file}'"):
             # Look for end of Term
             if line == "":
                 self.process_go_term(goterm_lines)

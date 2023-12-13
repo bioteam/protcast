@@ -1,6 +1,6 @@
 # Tests
 
-This directory contains some tests around Protein Oracle data processing scripts
+This directory contains some tests around ProtCast data processing scripts
 
 `path_to_root.py`: Tests the generation of the Ontology from and `.obo` file.
 It takes a serialized Ontology file, a GO term namespace, and a GO term ID and
@@ -18,7 +18,7 @@ sorting criteria and that the GOTerms have the correct set of ancestors.
 python3 test/ontology_topology.py data/ontology/serialized/go.bin
 ```
 
-`test/annot_propagation.py`: Tests that a protein if a protein is annotated with a GO term it is
+`annot_propagation.py`: Tests that a protein if a protein is annotated with a GO term it is
 also annotated with all of its ancestors. Usage:
 ```
 python3 test/annot_propagation.py data/dataset/dataset.bin

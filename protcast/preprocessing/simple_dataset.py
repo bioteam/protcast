@@ -10,7 +10,6 @@ import pickle
 from tqdm import tqdm
 from typeguard import typechecked
 
-from Bio import SwissProt
 from Bio.Seq import Seq
 from Bio.SeqIO.FastaIO import FastaIterator
 
@@ -26,7 +25,7 @@ from preprocessing.parse_gaf import parse_gaf
 class SimpleDataset:
     """SimpleDataset
     This class runs the SwissProt, TrEMBL, GAF, and Gene Ontology file
-    parsers and creates a SimpleDataset which is saved to disk. Used by
+    parsers and creates a SimpleDataset can be saved to disk. Used by
     *preprocessing/create_simple_dataset.py*.
 
     Attributes
@@ -42,8 +41,6 @@ class SimpleDataset:
     -------
     init:
         Initialize
-    create:
-        Parse TrEMBL, SwissProt, GAF, OBO files
     save:
         Save SimpleDataset to disk
     from_serialized_file:
@@ -295,14 +292,14 @@ class SimpleDataset:
         trembl_annotations = []
         num_swissprot_annots = 0
         num_new_swissprot_annots = 0
-        num_annotations_not_in_uniprotkb = 0
+        num_annotations_not_labeled_uniprotkb = 0
 
-        logging.info(f"Reading from {str(self.gaf_path)}")
+        logging.info(f"Reading from '{str(self.gaf_path)}'")
         gaf_annotations = parse_gaf(self.gaf_path)
 
         for rec in tqdm(
             gaf_annotations,
-            desc=f"Processing records from {str(self.gaf_path)}",
+            desc=f"Processing GOA records from '{str(self.gaf_path)}'",
         ):
             if rec["DB"] == "UniProtKB":
                 primary_go_term = self.ontology.get_primary_term(rec["GO_ID"])
@@ -311,7 +308,7 @@ class SimpleDataset:
                 if primary_accession:
                     if primary_accession != rec["DB_Object_ID"]:
                         logging.debug(
-                            "Found secondary accession: "
+                            "Found accession in SwissProt: "
                             f"{rec['DB_Object_ID']}. Primary is: "
                             f"{primary_accession}"
                         )
@@ -342,12 +339,12 @@ class SimpleDataset:
                         num_new_swissprot_annots += 1
                         logging.debug(
                             "Created annotation for: "
-                            f"{rec['DB_Object_ID']}. Primary is {primary_accession}"
+                            f"{rec['DB_Object_ID']}. Primary accession is {primary_accession}"
                         )
                 # The GAF DB_Object_ID does not match an accession from uniprot_sprot
                 else:
                     logging.debug(
-                        "No primary accession found for UniProtKB protein :"
+                        "No accession found for UniProtKB protein :"
                         f"{rec['DB_Object_ID']} and evidence: "
                         f"{rec['Evidence']}"
                     )
@@ -363,23 +360,23 @@ class SimpleDataset:
                     f"Found protein {rec['DB_Object_ID']} that belongs to "
                     f"{rec['DB']}"
                 )
-                num_annotations_not_in_uniprotkb += 1
+                num_annotations_not_labeled_uniprotkb += 1
 
         logging.info(
-            f"Total annotations in {self.gaf_path}: {len(gaf_annotations)}"
+            f"Found {len(gaf_annotations)} total annotations in '{self.gaf_path}'"
         )
         logging.info(
-            f"Found {num_annotations_not_in_uniprotkb} annotations not in UniProtKB"
+            f"Found {num_annotations_not_labeled_uniprotkb} annotations not labelled 'UniProtKB'"
         )
         logging.info(
-            f"Found {num_swissprot_annots} UniProtKB annotations in Swissprot"
+            f"Found {num_swissprot_annots} 'UniProtKB' annotations in Swissprot"
         )
         logging.info(
-            f"Made {num_new_swissprot_annots} new annotations for Swissprot proteins "
-            "NOT in UniProtKB/SwissProt"
+            f"Made {num_new_swissprot_annots} new annotations for 'UniProtKB' annotations "
+            "not in SwissProt"
         )
         logging.info(
-            f"Found {len(trembl_annotations)} UniProtKB annotations not in SwissProt"
+            f"Found {len(trembl_annotations)} 'UniProtKB' annotations not in SwissProt"
         )
 
         return trembl_annotations
@@ -416,7 +413,7 @@ class SimpleDataset:
 
         for record in tqdm(
             FastaIterator(trembl_handle),
-            desc=f"Reading TrEMBL records from {trembl_handle.name}",
+            desc=f"Reading TrEMBL records from '{trembl_handle.name}'",
         ):
             # >tr|A0A1D8RA60|A0A1D8RA60_9ARCH 
             accession = record.id.split("|")[1]

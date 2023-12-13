@@ -99,7 +99,7 @@ class MakeDRSeqs:
         if self.informat != 'fasta':
             tmpfasta = tempfile.NamedTemporaryFile()
             if self.verbose:
-                print("Creating fasta version of '{}'".format(self.seqfile))
+                print(f"Creating fasta version of '{self.seqfile}'")
             SeqIO.convert(self.seqfile, self.informat, tmpfasta.name, "fasta")
         tmph = tempfile.NamedTemporaryFile(delete=False)
         tmpout = open(tmph.name, 'w')
@@ -108,14 +108,14 @@ class MakeDRSeqs:
                str(self.threshold), tmpfasta.name, tmpfasta.name]
         try:
             if self.verbose:
-                print("Running 'mash dist': {}".format(cmd))
+                print(f"Running 'mash dist': {cmd}")
             proc = subprocess.run(cmd, stdout=tmpout)
         except (subprocess.CalledProcessError) as exception:
-            print("Error: {}".format(exception))
-            sys.exit("Error running 'mash dist' on {}".format(tmpfasta.name))
+            print(f"Error: {exception}")
+            sys.exit(f"Error running 'mash dist' on {tmpfasta.name}")
         tmpout.close()
         if self.verbose:
-            print("Completed 'mash dist', output is: {}".format(tmph.name))
+            print(f"Completed 'mash dist', output is: {tmph.name}")
         return tmph.name
 
 
@@ -170,8 +170,7 @@ class MakeDRSeqs:
         """
         clust = DBSCAN(eps=0.1, min_samples=2, metric='precomputed')
         if self.verbose:
-            print("Running DBSCAN on matrix with {} sequences".format(
-                len(mat[0])))
+            print(f"Running DBSCAN on matrix with {len(mat[0])} sequences")
         predictions = clust.fit_predict(mat)
         if self.verbose:
             print("Completed DBSCAN")
@@ -186,12 +185,11 @@ class MakeDRSeqs:
                 print("No clusters found")
             sys.exit(1)
         if self.verbose:
-            print("Reading '{}' with SeqIO".format(self.seqfile))
+            print(f"Reading '{self.seqfile}' with SeqIO")
         self.seqs = SeqIO.to_dict(SeqIO.parse(self.seqfile, self.informat))
         if self.verbose:
             for k in clusters.keys():
-                print("Cluster {0} ({1}): {2}".format(
-                    k, len(clusters[k]), clusters[k]))
+                print(f"Cluster {k} ({len(clusters[k])}): {clusters[k]}")
                 for seqid in clusters[k]:
                     print(self.seqs[seqid].description)
         return clusters
@@ -214,8 +212,7 @@ class MakeDRSeqs:
         # Have to use "index" since BioPython cannot write Swissprot format
         seq_dict = SeqIO.index(self.seqfile, self.informat)
         if self.verbose:
-            print("Input file '{0}' has {1} sequences".format(
-                self.seqfile, len(seq_dict.keys())))
+            print("Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences")
         # For example, input is "data/viruses.dat", output is "viruses-dr.dat"
         self.output = os.path.basename(self.seqfile).split('.')[0] + '-dr.dat'
         with open(self.output, 'w') as out:

@@ -81,8 +81,10 @@ def parse_swissprot(
         """parse
         Inner function for parse_swissprot function
         """
+        num_annotations = 0
+
         for req in tqdm(
-            SwissProt.parse(handle), desc=f"Reading records from {handle.name}"
+            SwissProt.parse(handle), desc=f"Reading SwissProt records from '{handle.name}'"
         ):
             primary_accession = req.accessions[0]
             # Map secondary accessions to primary accession, for example:
@@ -95,6 +97,7 @@ def parse_swissprot(
                 # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
                 # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
                 if ref[0] == "GO":
+                    num_annotations += 1
                     annot_term = ref[1]
                     primary_go_term = ontology.get_primary_term(annot_term)
                     if not primary_go_term:
@@ -125,9 +128,17 @@ def parse_swissprot(
             assert (proteins.get(protein.id) is None)
             proteins[protein.id] = protein
 
+        logging.info(
+            f"Found {len(proteins.keys())} total proteins in '{handle.name}'"
+        )
+        logging.info(
+            f"Found {num_annotations} total annotations in '{handle.name}'"
+        )
+
     proteins = {}
     accessions = {}
     go_terms_not_found: set[str] = set()
+
     if swissprot_db.suffix == ".gz":
         with gzip.open(swissprot_db, "rt") as f:
             parse(f)

@@ -998,3 +998,6 @@ UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0140359	GO_REF:0000002	IEA	InterPro:
 UniProtKB	A0A6N7WYN5	FYJ71_02830	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR011527|InterPro:IPR036640	C	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	InterPro		
 UniProtKB	A0A6N7WYN5	FYJ71_02830	enables	GO:0005524	GO_REF:0000002	IEA	InterPro:IPR003439|InterPro:IPR011527|InterPro:IPR017871|InterPro:IPR036640	F	ABC transporter ATP-binding protein	FYJ71_02830	protein	taxon:2652282	20211009	InterPro		
 UniProtKB	A0A6N9GJR9	F4034_00615	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Inositol monophosphatase family protein	F4034_00615	protein	taxon:2026724	20211010	UniProt		
+ComplexPortal	CPX-7365	ctx_crodu-15	part_of	GO:0005576	PMID:8513799	NAS		C	Crotoxin complex, aCA1/2/4-bCA2/3/4-CBd variant	CA:CBd	protein_complex	taxon:8732	20220715	ComplexPortal		
+RNAcentral	URS0000347C46_10381	URS0000347C46_10381	enables	GO:0140869	PMID:33184237	IMP		FSaimiriine gammaherpesvirus 2 (Herpesvirus saimiri) HSUR1 small nuclear RNA		snRNA	taxon:10381	20221215	FlyBase	has_input(RNAcentral:URS0000233054_9606),part_of(GO:0140958)	
+RNAcentral	URS0000347C46_10381	URS0000347C46_10381	involved_in	GO:0140958	PMID:33184237	IDA		Saimiriine gammaherpesvirus 2 (Herpesvirus saimiri) HSUR1 small nuclear RNA		snRNA	taxon:10381	20221215	FlyBase	

@@ -23,7 +23,7 @@ consists of:
   - Parsing the UniprotKB databse and create a representation of the proteins
     in along with its annotations.
   - Given the two representations above, create the submodels that make up
-    Protein Oracle. This will be determined from the category of the GO term, its number
+    ProtCast. This will be determined from the category of the GO term, its number
     of associations and its level in the tree.
   - Generating the feature vectors from the protein sequences. Initially, CTriad?
      will be used.
