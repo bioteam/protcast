@@ -12,7 +12,7 @@ This implementation uses the Keras library.
 
 ├── doc/
 
-├── preprocessing-scripts/
+├── preprocessing/
 
 ├── test/
 
@@ -20,9 +20,7 @@ This implementation uses the Keras library.
 
 ├── utility-scripts/
 
-├── LICENSE
-
-└── README.md
+## protcast/
 
 `protcast/model`
 
