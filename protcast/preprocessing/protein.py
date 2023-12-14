@@ -23,9 +23,9 @@ class Protein:
         Initialize
     is_manually_annotated:
         ...
-    get_electronic_non_obsolete_annotations:
+    get_electronic__annotations:
         ...
-    get_manual_non_obsolete_annotations:
+    get_manual_annotations:
         ...
     get_all_annotations:
         ...
@@ -100,9 +100,9 @@ class Protein:
         """
         return list(self.annotations.values())
 
-    def get_manual_non_obsolete_annotations(self) -> list[Annotation]:
+    def get_manual_annotations(self) -> list[Annotation]:
         """get_manual_non_obsolete_annotations
-        Get all manual, non-obsolete Annotations for a Protein
+        Get all manual Annotations for a Protein
 
         Parameters
         ----------
@@ -112,16 +112,11 @@ class Protein:
         -------
         List of Annotations
         """
-        return list(
-            filter(
-                lambda x: x.is_manual and not x.is_obsolete,
-                self.annotations.values(),
-            )
-        )
+        return [x for x in self.get_all_annotations() if x.is_manual]
 
-    def get_electronic_non_obsolete_annotations(self) -> list[Annotation]:
+    def get_electronic_annotations(self) -> list[Annotation]:
         """get_electronic_non_obsolete_annotations
-        Get all electronic, non-obsolete Annotations for a Protein
+        Get all electronic Annotations for a Protein
 
         Parameters
         ----------
@@ -133,7 +128,7 @@ class Protein:
         """
         return list(
             filter(
-                lambda x: not x.is_manual and not x.is_obsolete,
+                lambda x: not x.is_manual() and not x.is_obsolete,
                 self.annotations.values(),
             )
         )

@@ -107,22 +107,19 @@ def parse_swissprot(
                         )
                         go_terms_not_found.add(annot_term) 
                     else:
-                        is_manual = "IEA" not in ref[3]
                         # Annotation can exist already because the GO term is
                         # the alt of another GO term (i.e. the primary)
                         annot = protein.get_annotation(primary_go_term.id)
                         if annot:
-                            annot.set_is_manual(annot.is_manual or is_manual)
+                            annot.is_manual = annot.is_manual
                         else:
                             annot = Annotation(
                                 primary_go_term.id,
                                 protein.id,
-                                True,
-                                primary_go_term.is_obsolete,
-                                is_manual,
+                                ref[3].split(':')[0],
                             )
-                            protein.add_annotation(annot)
-                            primary_go_term.add_annotation(annot)
+                        protein.add_annotation(annot)
+                        # primary_go_term.add_annotation(annot)
 
             # At this point the protein should not exist in the Ontology
             assert (proteins.get(protein.id) is None)

@@ -27,6 +27,23 @@ if __name__ == "__main__":
 
     assert len(go_terms_not_found) == 0    
     assert len(proteins) == 141
+
     assert proteins['A0A016QRH0'].id == 'A0A016QRH0'
     assert len(proteins['A0A016QRH0'].annotations.keys()) == 3
+    annots = proteins['A0A016QRH0'].get_all_annotations()
+    assert len(annots) == 3
+    assert annots[0].evidence_code == 'IEA'
+    assert annots[0].is_manual == False
+    assert annots[2].go_term_id == 'GO:0015379'
+    manuals = proteins['A0A016QRH0'].get_manual_annotations()
+    assert manuals == []
+
+    annots = proteins['A0A1D6P109'].get_all_annotations()
+    assert len(annots) == 9
+    assert annots[2].evidence_code == 'IEA'
+    assert annots[8].evidence_code == 'IBA'
+    assert annots[8].is_manual == True
+    manuals = proteins['A0A1D6P109'].get_manual_annotations()
+    assert len(manuals) == 8
+
     assert proteins['A0A0A2ZXP0'].sequence == "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVVICYHGNSSRNVAQFLVEQGFDEVYSVRGGFDAWCKAELPLEQGL"

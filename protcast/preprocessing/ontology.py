@@ -55,18 +55,6 @@ class GOTerm:
         ....
     get_children:
         ....
-    add_annotation:
-        ....
-    remove_annotation:
-        ....
-    get_all_annotations:
-        ....
-    get_manual_annotations:
-        ....
-    get_manual_non_obsolete_annotions:
-        ....
-    get_non_obsolete_annotations:
-        ....
     get_primary:
         ....
     is_primary:
@@ -182,103 +170,103 @@ class GOTerm:
         """
         return self.children.values
 
-    def add_annotation(self, annot: Annotation) -> None:
-        """add_annotation
-        Add Annotation to GOTerm
+    # def add_annotation(self, annot: Annotation) -> None:
+    #     """add_annotation
+    #     Add Annotation to GOTerm
 
-        Parameters
-        ----------
-        annot: object
-            Annotation
+    #     Parameters
+    #     ----------
+    #     annot: object
+    #         Annotation
 
-        Returns
-        -------
-        None
-        """
-        assert self.annotations.get(annot.protein_id) is None
-        self.annotations[annot.protein_id] = annot
+    #     Returns
+    #     -------
+    #     None
+    #     """
+    #     assert self.annotations.get(annot.protein_id) is None
+    #     self.annotations[annot.protein_id] = annot
 
-    def remove_annotation(self, protein_id: str) -> None:
-        """remove_annotation
-        Remove Annotation from GOTerm
+    # def remove_annotation(self, protein_id: str) -> None:
+    #     """remove_annotation
+    #     Remove Annotation from GOTerm
 
-        Parameters
-        ----------
-        protein_id: str
-            Protein id
+    #     Parameters
+    #     ----------
+    #     protein_id: str
+    #         Protein id
 
-        Returns
-        -------
-        None
-        """
-        assert self.annotations.get(protein_id) is not None
-        del self.annotations[protein_id]
+    #     Returns
+    #     -------
+    #     None
+    #     """
+    #     assert self.annotations.get(protein_id) is not None
+    #     del self.annotations[protein_id]
 
-    def get_all_annotations(self) -> list[Annotation]:
-        """get_all_annotations
-        Get all Annotations for a GOTerm
+    # def get_all_annotations(self) -> list[Annotation]:
+    #     """get_all_annotations
+    #     Get all Annotations for a GOTerm
 
-        Parameters
-        ----------
-        None
+    #     Parameters
+    #     ----------
+    #     None
 
-        Returns
-        -------
-        List of Annotations
-        """
-        return list(self.annotations.values())
+    #     Returns
+    #     -------
+    #     List of Annotations
+    #     """
+    #     return list(self.annotations.values())
 
-    def get_manual_annotations(self) -> list[Annotation]:
-        """get_manual_annotations
-        Get the manual Annotations
+    # def get_manual_annotations(self) -> list[Annotation]:
+    #     """get_manual_annotations
+    #     Get the manual Annotations
 
-        Parameters
-        ----------
-        None
+    #     Parameters
+    #     ----------
+    #     None
 
-        Returns
-        -------
-        List of Annotations
-        """
-        return list(filter(lambda x: x.is_manual, self.annotations.values()))
+    #     Returns
+    #     -------
+    #     List of Annotations
+    #     """
+    #     return list(filter(lambda x: x.is_manual, self.annotations.values()))
 
-    def get_manual_non_obsolete_annotations(self) -> list[Annotation]:
-        """get_manual_non_obsolete_annotions
-        Get all manual, non-obsolete Annotations
+    # def get_manual_non_obsolete_annotations(self) -> list[Annotation]:
+    #     """get_manual_non_obsolete_annotions
+    #     Get all manual, non-obsolete Annotations
 
-        Parameters
-        ----------
-        None
+    #     Parameters
+    #     ----------
+    #     None
 
-        Returns
-        -------
-        List of Annotations
-        """
-        return list(
-            filter(
-                lambda x: x.is_manual and not x.is_obsolete,
-                self.annotations.values(),
-            )
-        )
+    #     Returns
+    #     -------
+    #     List of Annotations
+    #     """
+    #     return list(
+    #         filter(
+    #             lambda x: x.is_manual and not x.is_obsolete,
+    #             self.annotations.values(),
+    #         )
+    #     )
 
-    def get_non_obsolete_annotations(self) -> list[Annotation]:
-        """get_non_obsolete_annotations
-        Get all non-obsolete Annotations
+    # def get_non_obsolete_annotations(self) -> list[Annotation]:
+    #     """get_non_obsolete_annotations
+    #     Get all non-obsolete Annotations
 
-        Parameters
-        ----------
-        None
+    #     Parameters
+    #     ----------
+    #     None
 
-        Returns
-        -------
-        List of Annotations
-        """
-        return list(
-            filter(
-                lambda x: not x.is_obsolete,
-                self.annotations.values(),
-            )
-        )
+    #     Returns
+    #     -------
+    #     List of Annotations
+    #     """
+    #     return list(
+    #         filter(
+    #             lambda x: not x.is_obsolete,
+    #             self.annotations.values(),
+    #         )
+    #     )
 
     def get_primary(self) -> GOTerm:
         """get_primary

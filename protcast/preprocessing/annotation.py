@@ -1,10 +1,59 @@
+import sys
 from typeguard import typechecked
 
 
 class Annotation:
     """Annotation
     Annotation objects link one protein and one GO term and store
-    details on the GO annotation: is_leaf, is_obsolete, is_manual.
+    the evidence code for the GO annotation. The code determines
+    if is_manual() is True or False.
+
+    Evidence Codes for Annotations (see https://geneontology.org/docs/guide-go-evidence-codes/)
+
+    Experimental evidence:
+
+    Inferred from Experiment (EXP)
+    Inferred from Direct Assay (IDA)
+    Inferred from Physical Interaction (IPI)
+    Inferred from Mutant Phenotype (IMP)
+    Inferred from Genetic Interaction (IGI)
+    Inferred from Expression Pattern (IEP)
+
+    Inferred from High Throughput Experiment (HTP)
+    Inferred from High Throughput Direct Assay (HDA)
+    Inferred from High Throughput Mutant Phenotype (HMP)
+    Inferred from High Throughput Genetic Interaction (HGI)
+    Inferred from High Throughput Expression Pattern (HEP)
+
+    PhylogeneticLLY inferred:
+
+    Inferred from Biological aspect of Ancestor (IBA)
+    Inferred from Biological aspect of Descendant (IBD)
+    Inferred from Key Residues (IKR)
+    Inferred from Rapid Divergence (IRD)
+
+    Computational analysis evidence:
+
+    Inferred from Sequence or structural Similarity (ISS)
+    Inferred from Sequence Orthology (ISO)
+    Inferred from Sequence Alignment (ISA)
+    Inferred from Sequence Model (ISM)
+    Inferred from Genomic Context (IGC)
+    Inferred from Reviewed Computational Analysis (RCA)
+
+    Author statement evidence:
+
+    Traceable Author Statement (TAS)
+    Non-traceable Author Statement (NAS)
+    
+    Curator statement evidence:
+
+    Inferred by Curator (IC)
+    No biological Data available (ND)
+
+    Electronic annotation evidence:
+
+    Inferred from Electronic Annotation (IEA)
 
     Attributes
     ----------
@@ -12,19 +61,15 @@ class Annotation:
         ....
     protein_id : str
         ....
-    is_leaf : Boolean
+    evidence_code : str
         ....
-    is_obsolete : Boolean
+    is_manual : bool
         ....
-    is_manual : Boolean
-        Default is False
-
+        
     Methods
     -------
     init:
         Initialize
-    is_manual:
-        Set Boolean
     """
 
     @typechecked
@@ -32,9 +77,7 @@ class Annotation:
         self,
         go_term_id: str,
         protein_id: str,
-        is_leaf: bool,
-        is_obsolete: bool,
-        is_manual=False,
+        evidence_code: str,
     ) -> None:
         """__init__
         Initialize Annotation
@@ -45,34 +88,28 @@ class Annotation:
             ...
         protein_id: str
             ...
-        is_leaf: Boolean
+        evidence_code: str
             ...
-        is_obsolete: Boolean
-            ...
-        is_manual: Boolean
-            Default is False
 
         Returns
         -------
         None
         """
+        MANUAL_CODES = [
+        "EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", 
+        "HEP", "IBA", "IBD", "IKR", "IRD", "ISS", "ISO", "ISA", "ISM", "IGC", 
+        "RCA", "TAS", "NAS", "IC", "ND"
+        ]
+
         self.go_term_id = go_term_id
         self.protein_id = protein_id
-        self.is_leaf = is_leaf
-        self.is_obsolete = is_obsolete
-        self.is_manual = is_manual
+        self.evidence_code = evidence_code
 
-    def set_is_manual(self, is_manual: bool) -> None:
-        """is_manual
-        Set if the annotation is manual or not
+        # Any evidence code except for 'IEA' is 'manual'
+        if self.evidence_code == 'IEA':
+            self.is_manual = False
+        elif self.evidence_code in MANUAL_CODES:
+            self.is_manual = True
+        else:
+            sys.exit(f"No valid evidence code for protein {self.protein_id} and GO term {self.go_term_id}")
 
-        Parameters
-        ----------
-        is_manual: Boolean
-            Set Boolean
-
-        Returns
-        -------
-        None
-        """
-        self.is_manual = is_manual

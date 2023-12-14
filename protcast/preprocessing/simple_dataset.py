@@ -247,7 +247,9 @@ class SimpleDataset:
         """
         for protein in self.proteins.values():
             logging.debug(f"Propagating {len(protein.get_all_annotations())} annotations for {protein.id}")
+            protein_annots = list()
             for annot in protein.get_all_annotations():
+                protein_annots.append(annot.go_term_id)
                 # The annotation key is the GO term id
                 go_term_ancestors: list[str] = self.ontology.get_primary_term(
                     annot.go_term_id
