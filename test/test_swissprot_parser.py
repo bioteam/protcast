@@ -27,7 +27,11 @@ if __name__ == "__main__":
 
     assert len(go_terms_not_found) == 0    
     assert len(proteins) == 141
+    assert len(accessions.keys()) == 142
 
+    assert accessions['A0A017QRH0'] == 'A0A016QRH0'
+    assert accessions['A0A016QRH0'] == 'A0A016QRH0'
+    
     assert proteins['A0A016QRH0'].id == 'A0A016QRH0'
     assert len(proteins['A0A016QRH0'].annotations.keys()) == 3
     annots = proteins['A0A016QRH0'].get_all_annotations()
@@ -47,3 +51,4 @@ if __name__ == "__main__":
     assert len(manuals) == 8
 
     assert proteins['A0A0A2ZXP0'].sequence == "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVVICYHGNSSRNVAQFLVEQGFDEVYSVRGGFDAWCKAELPLEQGL"
+

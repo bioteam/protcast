@@ -6,7 +6,7 @@ class Annotation:
     """Annotation
     Annotation objects link one protein and one GO term and store
     the evidence code for the GO annotation. The code determines
-    if is_manual() is True or False.
+    if *is_manual* is True or False.
 
     Evidence Codes for Annotations (see https://geneontology.org/docs/guide-go-evidence-codes/)
 
@@ -25,7 +25,7 @@ class Annotation:
     Inferred from High Throughput Genetic Interaction (HGI)
     Inferred from High Throughput Expression Pattern (HEP)
 
-    PhylogeneticLLY inferred:
+    Phylogenetically inferred:
 
     Inferred from Biological aspect of Ancestor (IBA)
     Inferred from Biological aspect of Descendant (IBD)
@@ -95,6 +95,7 @@ class Annotation:
         -------
         None
         """
+        # All evidence codes except for 'IEA' are 'manual'
         MANUAL_CODES = [
         "EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", 
         "HEP", "IBA", "IBD", "IKR", "IRD", "ISS", "ISO", "ISA", "ISM", "IGC", 
@@ -105,7 +106,6 @@ class Annotation:
         self.protein_id = protein_id
         self.evidence_code = evidence_code
 
-        # Any evidence code except for 'IEA' is 'manual'
         if self.evidence_code == 'IEA':
             self.is_manual = False
         elif self.evidence_code in MANUAL_CODES:
