@@ -214,9 +214,9 @@ class SimpleDataset:
         }
 
         for protein in self.proteins.values():
-            protein_annots = protein.get_manual_non_obsolete_annotations()
+            protein_annots = protein.get_manual_annotations()
             if include_electronic:
-                protein_annots.extend(protein.get_electronic_non_obsolete_annotations())
+                protein_annots.extend(protein.get_electronic_annotations())
             for annotation in protein_annots:
                 go_term = self.ontology.get_primary_term(annotation.go_term_id)
                 namespace_file_map[go_term.namespace].write(
@@ -325,15 +325,14 @@ class SimpleDataset:
                     # contain the same 'DB_Object_ID' and 'GO_ID'
                     if annot:
                         # The 'Evidence Code' field is required in GAF 2*
-                        annot.set_is_manual(annot.is_manual or rec["Evidence"] != "IEA")
+                        # annot.set_is_manual(annot.is_manual or rec["Evidence"] != "IEA")
                         num_swissprot_annots += 1
                     else:
                         annot = Annotation(
                             primary_go_term.id,
                             protein.id,
-                            True,
+                            rec["Evidence"],
                             primary_go_term.is_obsolete,
-                            rec["Evidence"] != "IEA",
                         )
                         protein.add_annotation(annot)
                         self.ontology.get_primary_term(
@@ -355,6 +354,7 @@ class SimpleDataset:
                             rec["DB_Object_ID"],
                             primary_go_term.id,
                             rec["Evidence"],
+                            primary_go_term.is_obsolete,
                         )
                     )
             else:

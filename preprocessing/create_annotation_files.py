@@ -32,20 +32,34 @@ def main():
     test
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--ontology", help="Path to ontology file (.obo file)")
     parser.add_argument(
-        "-s0", "--swissprot_t0", help="Path to the SwissProt DB at t0 (.dat file)"
+        "-o", "--ontology", help="Path to ontology file (.obo file)"
     )
     parser.add_argument(
-        "-s1", "--swissprot_t1", help="Path to the SwissProt DB at t1 (.dat file)"
+        "-s0",
+        "--swissprot_t0",
+        help="Path to the SwissProt DB at t0 (.dat file)",
     )
-    parser.add_argument("-t", "--trembl", help="Path to TrEMBL DB (.fasta file)")
     parser.add_argument(
-        "-g", "--goa", help="Path to Gene Ontology Annotation (.gaf file)"
+        "-s1",
+        "--swissprot_t1",
+        help="Path to the SwissProt DB at t1 (.dat file)",
     )
-    parser.add_argument("-f", "--file", help="Path to serialized 'Dataset' file")
+    parser.add_argument(
+        "-t", "--trembl", help="Path to TrEMBL DB (.fasta file)"
+    )
+    parser.add_argument(
+        "-g",
+        "--goa",
+        help="Path to Gene Ontology Annotation (.gaf file)",
+    )
+    parser.add_argument(
+        "-f", "--file", help="Path to serialized 'Dataset' file"
+    )
     parser.add_argument("output", help="Output annotation file")
-    parser.add_argument("-v", default=False, action="store_true", help="Verbose")
+    parser.add_argument(
+        "-v", default=False, action="store_true", help="Verbose"
+    )
     args = parser.parse_args()
 
     all_source_flags = (
@@ -59,7 +73,9 @@ def main():
     if (all_source_flags and serialized_flags) or (
         not serialized_flags and not all_source_flags
     ):
-        print("Provide either '-f' flag or '-o', '-s0', '-s1', '-t' and '-g' flags")
+        print(
+            "Provide either '-f' flag or '-o', '-s0', '-s1', '-t' and '-g' flags"
+        )
         exit(1)
 
     if args.v:
@@ -80,7 +96,9 @@ def main():
             Path(args.goa),
         )
 
-    logging.info(f"Creating annotation files {args.output}_{{bpo, cco, mfo}}.tsv")
+    logging.info(
+        f"Creating annotation files {args.output}_{{bpo, cco, mfo}}.tsv"
+    )
     dataset.create_annotation_files(args.output)
 
 

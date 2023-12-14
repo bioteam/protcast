@@ -24,7 +24,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("-i", "--input", default="data/go.obo")
     parser.add_argument("-o", "--output", default="data/go.obo.bin")
-    parser.add_argument("-v", default=False, action="store_true", help="Verbose")
+    parser.add_argument(
+        "-v", default=False, action="store_true", help="Verbose"
+    )
     args = parser.parse_args()
 
     if args.v:

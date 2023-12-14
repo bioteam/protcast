@@ -17,38 +17,50 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Checks that a Swissprot file is parsed correctly"
     )
-    parser.add_argument("-i", "--input", default="data/uniprot_mini.dat")
+    parser.add_argument(
+        "-i", "--input", default="data/uniprot_mini.dat"
+    )
     parser.add_argument("-o", "--ontology", default="data/go.obo")
     args = parser.parse_args()
 
     ontology = Ontology(args.ontology)
 
-    proteins, go_terms_not_found, accessions = parse_swissprot(ontology, Path(args.input))
+    proteins, go_terms_not_found, accessions = parse_swissprot(
+        ontology, Path(args.input)
+    )
 
-    assert len(go_terms_not_found) == 0    
+    assert len(go_terms_not_found) == 0
     assert len(proteins) == 141
-    assert len(accessions.keys()) == 142
+    assert len(accessions) == 142
 
-    assert accessions['A0A017QRH0'] == 'A0A016QRH0'
-    assert accessions['A0A016QRH0'] == 'A0A016QRH0'
-    
-    assert proteins['A0A016QRH0'].id == 'A0A016QRH0'
-    assert len(proteins['A0A016QRH0'].annotations.keys()) == 3
-    annots = proteins['A0A016QRH0'].get_all_annotations()
+    assert accessions["A0A017QRH0"] == "A0A016QRH0"
+    assert accessions["A0A016QRH0"] == "A0A016QRH0"
+
+    assert proteins["A0A016QRH0"].id == "A0A016QRH0"
+    assert len(proteins["A0A016QRH0"].annotations) == 3
+    annots = proteins["A0A016QRH0"].get_all_annotations()
     assert len(annots) == 3
-    assert annots[0].evidence_code == 'IEA'
+    assert annots[0].evidence_code == "IEA"
     assert annots[0].is_manual == False
-    assert annots[2].go_term_id == 'GO:0015379'
-    manuals = proteins['A0A016QRH0'].get_manual_annotations()
+    assert annots[2].go_term_id == "GO:0015379"
+    manuals = proteins["A0A016QRH0"].get_manual_annotations()
     assert manuals == []
+    assert (
+        len(proteins["A0A016QRH0"].get_electronic_annotations()) == 3
+    )
 
-    annots = proteins['A0A1D6P109'].get_all_annotations()
+    annots = proteins["A0A1D6P109"].get_all_annotations()
     assert len(annots) == 9
-    assert annots[2].evidence_code == 'IEA'
-    assert annots[8].evidence_code == 'IBA'
+    assert annots[2].evidence_code == "IEA"
+    assert annots[8].evidence_code == "IBA"
     assert annots[8].is_manual == True
-    manuals = proteins['A0A1D6P109'].get_manual_annotations()
+    manuals = proteins["A0A1D6P109"].get_manual_annotations()
     assert len(manuals) == 8
+    assert (
+        len(proteins["A0A1D6P109"].get_electronic_annotations()) == 1
+    )
 
-    assert proteins['A0A0A2ZXP0'].sequence == "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVVICYHGNSSRNVAQFLVEQGFDEVYSVRGGFDAWCKAELPLEQGL"
-
+    assert (
+        proteins["A0A0A2ZXP0"].sequence
+        == "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVVICYHGNSSRNVAQFLVEQGFDEVYSVRGGFDAWCKAELPLEQGL"
+    )

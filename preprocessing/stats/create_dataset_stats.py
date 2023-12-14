@@ -35,7 +35,9 @@ def main():
     """
     log.basicConfig(level=log.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("dataset", help="Path to serialized dataset file")
+    parser.add_argument(
+        "dataset", help="Path to serialized dataset file"
+    )
     parser.add_argument("output_dir", help="Output dataset dir")
     parser.add_argument(
         "-w", default=False, action="store_true", help="Overwrite dir"

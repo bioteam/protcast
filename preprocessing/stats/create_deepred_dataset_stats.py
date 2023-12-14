@@ -60,8 +60,12 @@ def main():
             )
             exit(1)
 
-    log.info(f"Deserializing DeepredDataset from file: {args.dataset}")
-    dataset = DeepredDataset.from_serialized_protcast_dataset(args.dataset)
+    log.info(
+        f"Deserializing DeepredDataset from file: {args.dataset}"
+    )
+    dataset = DeepredDataset.from_serialized_protcast_dataset(
+        args.dataset
+    )
     log.info("Generating DeepredDataset statistics")
     stats.generate_protcast_dataset_stats(dataset, output_dir)
 

@@ -106,7 +106,9 @@ class Dataset:
 
         # Add proteins found in UniProt-GOA that are in TrEMBL
         self.add_trembl_proteins(
-            self.swissprot_t1_path, self.trembl_path, trembl_annotations
+            self.swissprot_t1_path,
+            self.trembl_path,
+            trembl_annotations,
         )
 
         self.propagate_annotations()
@@ -182,11 +184,17 @@ class Dataset:
         }
 
         for protein in self.proteins.values():
-            protein_annots = protein.get_manual_non_obsolete_annotations()
+            protein_annots = (
+                protein.get_manual_non_obsolete_annotations()
+            )
             if include_electronic:
-                protein_annots.extend(protein.get_electronic_non_obsolete_annotations())
+                protein_annots.extend(
+                    protein.get_electronic_non_obsolete_annotations()
+                )
             for annotation in protein_annots:
-                go_term = self.ontology.get_primary_term(annotation.go_term_id)
+                go_term = self.ontology.get_primary_term(
+                    annotation.go_term_id
+                )
                 namespace_file_map[go_term.namespace].write(
                     protein.id + "\t" + annotation.go_term_id + "\n"
                 )
@@ -216,13 +224,17 @@ class Dataset:
         for protein in self.proteins.values():
             for annot in protein.get_all_annotations():
                 # The annotation key is the GO term id
-                go_term_ancestors: list[str] = self.ontology.get_primary_term(
+                go_term_ancestors: list[
+                    str
+                ] = self.ontology.get_primary_term(
                     annot.go_term_id
                 ).ancestors
                 for ancestor in go_term_ancestors:
                     ancestor_annot = protein.get_annotation(ancestor)
                     if not ancestor_annot:
-                        ancestor_go_term = self.ontology.get_primary_term(ancestor)
+                        ancestor_go_term = (
+                            self.ontology.get_primary_term(ancestor)
+                        )
                         ancestor_annot = Annotation(
                             ancestor_go_term.id,
                             protein.id,
@@ -231,12 +243,15 @@ class Dataset:
                             is_manual=annot.is_manual,
                         )
                         protein.add_annotation(ancestor_annot)
-                        ancestor_go_term.add_annotation(ancestor_annot)
+                        ancestor_go_term.add_annotation(
+                            ancestor_annot
+                        )
                     else:
                         # If the protein is already annotated with this GO
                         # term, we might update 'is_manual'.
                         ancestor_annot.set_is_manual(
-                            ancestor_annot.is_manual or annot.is_manual
+                            ancestor_annot.is_manual
+                            or annot.is_manual
                         )
 
     @typechecked
@@ -266,21 +281,34 @@ class Dataset:
         with open(goa_path, "r") as handle:
             for rec in tqdm(
                 gafiterator(handle),
-                desc="Reading GAF records from {}".format(str(goa_path)),
+                desc="Reading GAF records from {}".format(
+                    str(goa_path)
+                ),
             ):
                 if rec["DB"] == "UniProtKB":
-                    primary_accession_id = self.accessions.get(rec["DB_Object_ID"])
-                    primary_go_term = self.ontology.get_primary_term(rec["GO_ID"])
+                    primary_accession_id = self.accessions.get(
+                        rec["DB_Object_ID"]
+                    )
+                    primary_go_term = self.ontology.get_primary_term(
+                        rec["GO_ID"]
+                    )
                     if primary_accession_id:
-                        if primary_accession_id != rec["DB_Object_ID"]:
+                        if (
+                            primary_accession_id
+                            != rec["DB_Object_ID"]
+                        ):
                             logging.debug(
                                 "Found secondary protein id: "
                                 f"{rec['DB_Object_ID']}. Primary is: "
                                 f"{primary_accession_id}"
                             )
 
-                        protein: Protein = proteins.get(primary_accession_id)
-                        annot: Annotation = protein.get_annotation(primary_go_term.id)
+                        protein: Protein = proteins.get(
+                            primary_accession_id
+                        )
+                        annot: Annotation = protein.get_annotation(
+                            primary_go_term.id
+                        )
                         # The annotation can already exist because the
                         # it can already be present in the UniProtKB/Swiss-Prot
                         # database or due to the fact that the UniProt-GOA
@@ -289,7 +317,8 @@ class Dataset:
                         if annot:
                             # The 'Evidence Code' field is required in GAF 2*
                             annot.set_is_manual(
-                                annot.is_manual or rec["Evidence"] != "IEA"
+                                annot.is_manual
+                                or rec["Evidence"] != "IEA"
                             )
                             swissprot_annotations += 1
                         else:
@@ -325,7 +354,8 @@ class Dataset:
                     )
 
         logging.info(
-            f"Found {len(trembl_annotations)} TrEMBL annotations in the GOA " "database"
+            f"Found {len(trembl_annotations)} TrEMBL annotations in the GOA "
+            "database"
         )
         logging.info(
             f"There were {swissprot_annotations} annotations in GOA that were "
@@ -340,7 +370,10 @@ class Dataset:
 
     @typechecked
     def add_trembl_proteins(
-        self, swissprot_t1_path, trembl_path, trembl_annotations: list[tuple]
+        self,
+        swissprot_t1_path,
+        trembl_path,
+        trembl_annotations: list[tuple],
     ):
         """add_trembl_proteins
         ...
@@ -358,12 +391,16 @@ class Dataset:
         -------
         None
         """
-        def parse(trembl_handle, tr_path, swissprot_handle, swiss_path):
+
+        def parse(
+            trembl_handle, tr_path, swissprot_handle, swiss_path
+        ):
             # We parse both TrEMBL and SwissProt at t1 because there are
             # entries in Uniprot-GOA that can be missing from Swissprot at t0.
             # These databases are not completely in sync at any point in time.
             for record in tqdm(
-                FastaIterator(trembl_handle), desc="Reading TrEMBL records"
+                FastaIterator(trembl_handle),
+                desc="Reading TrEMBL records",
             ):
                 accession = record.id.split("|")[1]
                 if accession in annotated_protein_ids:
@@ -378,11 +415,19 @@ class Dataset:
                 for acc in req.accessions:
                     if acc in annotated_protein_ids:
                         self.accessions[acc] = primary_accession
-                        annotated_protein_seqs[primary_accession] = req.sequence
+                        annotated_protein_seqs[
+                            primary_accession
+                        ] = req.sequence
 
-            for (protein_id, go_term_id, evidence) in trembl_annotations:
+            for (
+                protein_id,
+                go_term_id,
+                evidence,
+            ) in trembl_annotations:
                 primary_accession = self.accessions.get(protein_id)
-                sequence = annotated_protein_seqs.get(primary_accession)
+                sequence = annotated_protein_seqs.get(
+                    primary_accession
+                )
                 if sequence is None:
                     logging.warning(
                         f"Couldn't find protein {protein_id} in neither "
@@ -395,7 +440,9 @@ class Dataset:
 
                 protein = self.proteins.get(primary_accession)
                 if protein is None:
-                    protein = Protein(primary_accession, Seq(sequence))
+                    protein = Protein(
+                        primary_accession, Seq(sequence)
+                    )
                     self.proteins[protein.id] = protein
 
                 # The annotation can already exist due to the fact that the
@@ -407,7 +454,9 @@ class Dataset:
                 # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:Q3HWX0
                 annot = protein.get_annotation(go_term_id)
                 if not annot:
-                    go_term = self.ontology.get_primary_term(go_term_id)
+                    go_term = self.ontology.get_primary_term(
+                        go_term_id
+                    )
                     annotation = Annotation(
                         go_term_id,
                         primary_accession,
@@ -419,15 +468,26 @@ class Dataset:
                     protein.add_annotation(annotation)
                     go_term.add_annotation(annotation)
                 else:
-                    annot.set_is_manual(annot.is_manual or evidence != "IEA")
+                    annot.set_is_manual(
+                        annot.is_manual or evidence != "IEA"
+                    )
 
-        logging.info("Adding proteins and annotations from UniProtKB/TrEMBL")
-        annotated_protein_ids = set([x[0] for x in trembl_annotations])
+        logging.info(
+            "Adding proteins and annotations from UniProtKB/TrEMBL"
+        )
+        annotated_protein_ids = set(
+            [x[0] for x in trembl_annotations]
+        )
         annotated_protein_seqs = {}
 
         with open(trembl_path, "r") as trembl_handle:
             with open(swissprot_t1_path, "r") as swissprot_handle:
-                parse(trembl_handle, trembl_path, swissprot_handle, swissprot_t1_path)
+                parse(
+                    trembl_handle,
+                    trembl_path,
+                    swissprot_handle,
+                    swissprot_t1_path,
+                )
 
     def remove_protein(self, protein_id: str):
         """remove_protein

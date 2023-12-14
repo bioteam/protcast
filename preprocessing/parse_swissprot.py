@@ -77,52 +77,63 @@ def parse_swissprot(
     accessions: dict with keys of Swissprot accessions and secondary accessions
                 and values of Swissprot accessions
     """
+
     def parse(handle):
         """parse
-        Inner function for parse_swissprot function
+        Inner function for parse_swissprot()
         """
         num_annotations = 0
 
-        for req in tqdm(
-            SwissProt.parse(handle), desc=f"Reading SwissProt records from '{handle.name}'"
+        for rec in tqdm(
+            SwissProt.parse(handle),
+            desc=f"Reading SwissProt records from '{handle.name}'",
         ):
-            primary_accession = req.accessions[0]
+            primary_accession = rec.accessions[0]
             # Map secondary accessions to primary accession, for example:
             # AC   P0A9Q6; P08193; P76937; P78251;
-            for acc in req.accessions:  
+            for acc in rec.accessions:
                 accessions[acc] = primary_accession
-            protein = Protein(primary_accession, str(req.sequence))
-            for ref in req.cross_references:
-                # Tuple of length 3 or 4:
+            protein = Protein(primary_accession, str(rec.sequence))
+            for ref in rec.cross_references:
+                # Tuple of length 3, 4, or 5:
                 # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
                 # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
                 if ref[0] == "GO":
-                    num_annotations += 1
-                    annot_term = ref[1]
-                    primary_go_term = ontology.get_primary_term(annot_term)
+                    go_term = ref[1]
+                    evidence_code = ref[3].split(":")[0]
+                    primary_go_term = ontology.get_primary_term(
+                        go_term
+                    )
                     if not primary_go_term:
                         logging.error(
-                            f"GO Term {annot_term} found in SwissProt but not "
+                            f"GO Term {go_term} found in SwissProt but not "
                             "found in ontology"
                         )
-                        go_terms_not_found.add(annot_term) 
+                        go_terms_not_found.add(go_term)
                     else:
                         # Annotation can exist already because the GO term is
                         # the alt of another GO term (i.e. the primary)
-                        annot = protein.get_annotation(primary_go_term.id)
+                        annot = protein.get_annotation(
+                            primary_go_term.id
+                        )
                         if annot:
-                            annot.is_manual = annot.is_manual
-                        else:
-                            annot = Annotation(
-                                primary_go_term.id,
-                                protein.id,
-                                ref[3].split(':')[0],
+                            logging.debug(
+                                f"Annotation with protein {protein.id} and GO term "
+                                "{primary_go_term.id} already exists"
                             )
-                        protein.add_annotation(annot)
-                        # primary_go_term.add_annotation(annot)
+                        else:
+                            protein.add_annotation(
+                                Annotation(
+                                    primary_go_term.id,
+                                    protein.id,
+                                    evidence_code,
+                                    primary_go_term.is_obsolete,
+                                )
+                            )
+                            num_annotations += 1
 
-            # At this point the protein should not exist in the Ontology
-            assert (proteins.get(protein.id) is None)
+            # The protein should not already exist
+            assert proteins.get(protein.id) is None
             proteins[protein.id] = protein
 
         logging.info(

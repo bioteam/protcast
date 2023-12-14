@@ -30,7 +30,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("ontology", help="Path to ontology file")
     parser.add_argument("uniprot_db", help="Path to uniprot db")
-    parser.add_argument("-o", "--output", help="Output swissprot file")
+    parser.add_argument(
+        "-o", "--output", help="Output swissprot file"
+    )
     parser.add_argument("-v", action="store_true", help="Verbose")
     args = parser.parse_args()
 
@@ -41,7 +43,9 @@ def main():
 
     ontology = load_ontology(args.ontology)
 
-    proteins, go_terms_not_found = parse_swissprot(ontology, args.uniprot_db)
+    proteins, go_terms_not_found = parse_swissprot(
+        ontology, args.uniprot_db
+    )
 
     if args.output:
         with open(args.output, "wb") as f:

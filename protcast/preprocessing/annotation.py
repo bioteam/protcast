@@ -45,7 +45,7 @@ class Annotation:
 
     Traceable Author Statement (TAS)
     Non-traceable Author Statement (NAS)
-    
+
     Curator statement evidence:
 
     Inferred by Curator (IC)
@@ -65,7 +65,9 @@ class Annotation:
         ....
     is_manual : bool
         ....
-        
+    has_obsolete: bool
+        ....
+
     Methods
     -------
     init:
@@ -78,6 +80,7 @@ class Annotation:
         go_term_id: str,
         protein_id: str,
         evidence_code: str,
+        has_obsolete: bool
     ) -> None:
         """__init__
         Initialize Annotation
@@ -90,26 +93,52 @@ class Annotation:
             ...
         evidence_code: str
             ...
-
+        has_obsolete: bool
+            ...
+            
         Returns
         -------
         None
         """
         # All evidence codes except for 'IEA' are 'manual'
         MANUAL_CODES = [
-        "EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "HTP", "HDA", "HMP", "HGI", 
-        "HEP", "IBA", "IBD", "IKR", "IRD", "ISS", "ISO", "ISA", "ISM", "IGC", 
-        "RCA", "TAS", "NAS", "IC", "ND"
+            "EXP",
+            "IDA",
+            "IPI",
+            "IMP",
+            "IGI",
+            "IEP",
+            "HTP",
+            "HDA",
+            "HMP",
+            "HGI",
+            "HEP",
+            "IBA",
+            "IBD",
+            "IKR",
+            "IRD",
+            "ISS",
+            "ISO",
+            "ISA",
+            "ISM",
+            "IGC",
+            "RCA",
+            "TAS",
+            "NAS",
+            "IC",
+            "ND",
         ]
 
         self.go_term_id = go_term_id
         self.protein_id = protein_id
         self.evidence_code = evidence_code
+        self.has_obsolete = has_obsolete
 
-        if self.evidence_code == 'IEA':
+        if self.evidence_code == "IEA":
             self.is_manual = False
         elif self.evidence_code in MANUAL_CODES:
             self.is_manual = True
         else:
-            sys.exit(f"No valid evidence code for protein {self.protein_id} and GO term {self.go_term_id}")
-
+            sys.exit(
+                f"No valid evidence code for protein {self.protein_id} and GO term {self.go_term_id}"
+            )

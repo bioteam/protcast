@@ -23,8 +23,12 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("goa", help="Path to Gene Ontology Annotation (.gaf file)")
-    parser.add_argument("trembl", help="Path to TrEMBL DB (.fasta file)")
+    parser.add_argument(
+        "goa", help="Path to Gene Ontology Annotation (.gaf file)"
+    )
+    parser.add_argument(
+        "trembl", help="Path to TrEMBL DB (.fasta file)"
+    )
     parser.add_argument("output", help="Output file")
     args = parser.parse_args()
 
@@ -43,13 +47,18 @@ def main():
 
     records_saved = 0
     with open(trembl_path) as trembl:
-        for record in tqdm(FastaIterator(trembl), desc="Reading TrEMBL in {}".format(str(trembl_path))):
+        for record in tqdm(
+            FastaIterator(trembl),
+            desc="Reading TrEMBL in {}".format(str(trembl_path)),
+        ):
             # TODO: Account for the fact of secondary accessions. Looks like
             # there are none in FASTA as of now
             accession = record.id.split("|")[1]
             if accession in protein_ids:
                 records_saved += 1
-                logging.info(f"Saving record {records_saved}: {record.id}")
+                logging.info(
+                    f"Saving record {records_saved}: {record.id}"
+                )
                 saved_records.append(record)
 
     logging.info(f"Found {len(saved_records)} matching sequences")

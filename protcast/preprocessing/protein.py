@@ -22,7 +22,7 @@ class Protein:
     __init__:
         Initialize
     is_manually_annotated:
-        ...
+        Boolean
     get_electronic__annotations:
         ...
     get_manual_annotations:
@@ -34,6 +34,7 @@ class Protein:
     add_annotation:
         ..
     """
+
     def __init__(self, id: str, sequence: str) -> None:
         """__init__
         Initialize
@@ -101,7 +102,7 @@ class Protein:
         return list(self.annotations.values())
 
     def get_manual_annotations(self) -> list[Annotation]:
-        """get_manual_non_obsolete_annotations
+        """get_manual_annotations
         Get all manual Annotations for a Protein
 
         Parameters
@@ -115,8 +116,8 @@ class Protein:
         return [x for x in self.get_all_annotations() if x.is_manual]
 
     def get_electronic_annotations(self) -> list[Annotation]:
-        """get_electronic_non_obsolete_annotations
-        Get all electronic Annotations for a Protein
+        """get_electronic_annotations
+        Get all electronic Annotations for a Protein (evidence code is IEA)
 
         Parameters
         ----------
@@ -126,12 +127,11 @@ class Protein:
         -------
         List of Annotations
         """
-        return list(
-            filter(
-                lambda x: not x.is_manual() and not x.is_obsolete,
-                self.annotations.values(),
-            )
-        )
+        return [
+            x
+            for x in self.get_all_annotations()
+            if x.evidence_code == "IEA"
+        ]
 
     def is_manually_annotated(self, go_term_id: str) -> bool | None:
         """is_manually_annotated

@@ -32,10 +32,16 @@ def main():
         "-t", "--trembl", help="Path to the TrEMBL file (*.fa)"
     )
     parser.add_argument(
-        "-g", "--gaf", help="Path to GO Annotation Format file (*.gaf)"
+        "-g",
+        "--gaf",
+        help="Path to GO Annotation Format file (*.gaf)",
     )
     parser.add_argument(
-        "-v", "--verbose", default=False, action="store_true", help="Create DEBUG log"
+        "-v",
+        "--verbose",
+        default=False,
+        action="store_true",
+        help="Create DEBUG log",
     )
     parser.add_argument("-O", "--output_dir", help="Output directory")
     args = parser.parse_args()
@@ -46,7 +52,7 @@ def main():
         Path(args.trembl),
         Path(args.gaf),
         Path(args.output_dir),
-        args.verbose
+        args.verbose,
     )
 
     dataset.save()

@@ -148,7 +148,8 @@ class SubModelDataset:
         None
         """
         np.savetxt(
-            output_dir / f"{self.feature_vector_name}_model_{self.namespace}_"
+            output_dir
+            / f"{self.feature_vector_name}_model_{self.namespace}_"
             f"{self.ontology_level}_{self.bucket}_{self.level_index}_"
             "x_train.mat",
             self.X_train,
@@ -156,7 +157,8 @@ class SubModelDataset:
         )
 
         np.savetxt(
-            output_dir / f"{self.feature_vector_name}_model_{self.namespace}_"
+            output_dir
+            / f"{self.feature_vector_name}_model_{self.namespace}_"
             f"{self.ontology_level}_{self.bucket}_{self.level_index}_"
             "y_train.mat",
             self.y_train,
@@ -164,7 +166,8 @@ class SubModelDataset:
         )
 
         np.savetxt(
-            output_dir / f"{self.feature_vector_name}_model_{self.namespace}_"
+            output_dir
+            / f"{self.feature_vector_name}_model_{self.namespace}_"
             f"{self.ontology_level}_{self.bucket}_{self.level_index}_"
             "x_val.mat",
             self.X_val,
@@ -172,7 +175,8 @@ class SubModelDataset:
         )
 
         np.savetxt(
-            output_dir / f"{self.feature_vector_name}_model_{self.namespace}_"
+            output_dir
+            / f"{self.feature_vector_name}_model_{self.namespace}_"
             f"{self.ontology_level}_{self.bucket}_{self.level_index}_"
             "y_val.mat",
             self.y_val,
@@ -180,7 +184,8 @@ class SubModelDataset:
         )
 
         np.savetxt(
-            output_dir / f"{self.feature_vector_name}_model_{self.namespace}_"
+            output_dir
+            / f"{self.feature_vector_name}_model_{self.namespace}_"
             f"{self.ontology_level}_{self.bucket}_{self.level_index}_"
             "x_test.mat",
             self.X_test,
@@ -188,7 +193,8 @@ class SubModelDataset:
         )
 
         np.savetxt(
-            output_dir / f"{self.feature_vector_name}_model_{self.namespace}_"
+            output_dir
+            / f"{self.feature_vector_name}_model_{self.namespace}_"
             f"{self.ontology_level}_{self.bucket}_{self.level_index}_"
             "y_test.mat",
             self.y_test,
@@ -220,12 +226,16 @@ class SubModelDataset:
             f"model_{self.namespace}_{self.ontology_level}_{self.bucket}_"
             f"{self.level_index}_x_train"
         )
-        hdf5_file.create_dataset(x_train_dataset_name, data=self.X_train)
+        hdf5_file.create_dataset(
+            x_train_dataset_name, data=self.X_train
+        )
         y_train_dataset_name = (
             f"model_{self.namespace}_{self.ontology_level}_{self.bucket}_"
             f"{self.level_index}_y_train"
         )
-        hdf5_file.create_dataset(y_train_dataset_name, data=self.y_train)
+        hdf5_file.create_dataset(
+            y_train_dataset_name, data=self.y_train
+        )
         x_val_dataset_name = (
             f"model_{self.namespace}_{self.ontology_level}_{self.bucket}_"
             f"{self.level_index}_x_val"
@@ -240,12 +250,16 @@ class SubModelDataset:
             f"model_{self.namespace}_{self.ontology_level}_{self.bucket}_"
             f"{self.level_index}_x_test"
         )
-        hdf5_file.create_dataset(x_test_dataset_name, data=self.X_test)
+        hdf5_file.create_dataset(
+            x_test_dataset_name, data=self.X_test
+        )
         y_test_dataset_name = (
             f"model_{self.namespace}_{self.ontology_level}_{self.bucket}_"
             f"{self.level_index}_y_test"
         )
-        hdf5_file.create_dataset(y_test_dataset_name, data=self.y_test)
+        hdf5_file.create_dataset(
+            y_test_dataset_name, data=self.y_test
+        )
 
 
 class DeepredDataset:
@@ -362,7 +376,8 @@ class DeepredDataset:
         buckets: list[int] = DEFAULT_BUCKETS,
         go_terms_per_submodel: int = DEFAULT_GO_TERMS_PER_SUBMODEL,
         feature_vector_name: str = DEFAULT_FEATURE_VECTOR_NAME,
-        target_imbalance_ratio: float | None = DEFAULT_TARGET_IMBALANCE_RATIO,
+        target_imbalance_ratio: float
+        | None = DEFAULT_TARGET_IMBALANCE_RATIO,
     ) -> None:
         """__init__
         Initialize and build feature vectors, and the GO term trees and
@@ -542,7 +557,10 @@ class DeepredDataset:
         """
         prev_bucket = 0
         for bucket in self.buckets:
-            if len(go_term.get_manual_non_obsolete_annotations()) < bucket:
+            if (
+                len(go_term.get_manual_non_obsolete_annotations())
+                < bucket
+            ):
                 return prev_bucket
             prev_bucket = bucket
         return prev_bucket
@@ -593,17 +611,22 @@ class DeepredDataset:
             submodels_tree[level] = {}
             for bucket, go_terms in go_terms_level.items():
                 go_terms.sort(
-                    key=lambda x: len(x.get_manual_non_obsolete_annotations())
+                    key=lambda x: len(
+                        x.get_manual_non_obsolete_annotations()
+                    )
                 )
                 submodels_tree[level][bucket] = []
                 number_of_go_terms = len(go_terms)
                 number_of_models = max(
-                    1, number_of_go_terms // self.go_terms_per_submodel
+                    1,
+                    number_of_go_terms // self.go_terms_per_submodel,
                 )
                 adjusted_number_of_terms_per_model = (
                     number_of_go_terms // number_of_models
                 )
-                remainder_terms = number_of_go_terms % number_of_models
+                remainder_terms = (
+                    number_of_go_terms % number_of_models
+                )
 
                 offset = 0
                 for i in range(0, number_of_models):
@@ -621,7 +644,11 @@ class DeepredDataset:
                     ]
                     submodels_tree[level][bucket].append(
                         self._build_submodel_dataset(
-                            submodel_go_terms, namespace, level, bucket, i
+                            submodel_go_terms,
+                            namespace,
+                            level,
+                            bucket,
+                            i,
                         )
                     )
                     offset += number_of_terms_in_model
@@ -680,7 +707,9 @@ class DeepredDataset:
         # 0's and 1's that indicates if a given protein has a given GO annotation
         y_dict = {}
         for i, go_term in enumerate(go_terms):
-            annotations = go_term.get_manual_non_obsolete_annotations()
+            annotations = (
+                go_term.get_manual_non_obsolete_annotations()
+            )
             for annot in annotations:
                 pid = annot.protein_id
                 y = y_dict.get(pid)
@@ -693,7 +722,10 @@ class DeepredDataset:
 
         samples_pid = np.zeros(len(y_dict), dtype="str")
         X = np.zeros(
-            (len(y_dict), FEATURE_VECTOR_LENGTHS[self.feature_vector_name])
+            (
+                len(y_dict),
+                FEATURE_VECTOR_LENGTHS[self.feature_vector_name],
+            )
         )
         y = np.zeros((len(y_dict), len(go_terms)))
         for row, (pid, label) in enumerate(y_dict.items()):
@@ -728,19 +760,27 @@ class DeepredDataset:
             np.random.set_state(rng_state)
             np.random.shuffle(y_resampled)
 
-            train_samples = round(len(y_dict) * self.training_partition)
-            validation_samples = round(len(y_dict) * self.validation_partition)
+            train_samples = round(
+                len(y_dict) * self.training_partition
+            )
+            validation_samples = round(
+                len(y_dict) * self.validation_partition
+            )
 
             X_train = X_resampled[:train_samples, :]
             X_val = X_resampled[
                 train_samples : train_samples + validation_samples, :
             ]
-            X_test = X_resampled[train_samples + validation_samples :, :]
+            X_test = X_resampled[
+                train_samples + validation_samples :, :
+            ]
             y_train = y_resampled[:train_samples, :]
             y_val = y_resampled[
                 train_samples : train_samples + validation_samples, :
             ]
-            y_test = y_resampled[train_samples + validation_samples :, :]
+            y_test = y_resampled[
+                train_samples + validation_samples :, :
+            ]
 
             train_non_zero = np.all(np.count_nonzero(y_train, axis=0))
             val_non_zero = np.all(np.count_nonzero(y_val, axis=0))
@@ -757,7 +797,9 @@ class DeepredDataset:
                         "all training, validation and test datasets."
                         " Saving labels 'y.csv' in current directory"
                     )
-                    np.savetxt("y.csv", y_resampled, fmt="%d", delimiter=",")
+                    np.savetxt(
+                        "y.csv", y_resampled, fmt="%d", delimiter=","
+                    )
                     exit(1)
 
         submodel_dataset = SubModelDataset(
@@ -812,7 +854,9 @@ class DeepredDataset:
     @typechecked
     def _write_submodel_dataset_tree_to_files(
         self,
-        submodels_dataset: dict[int, dict[int, list[SubModelDataset]]],
+        submodels_dataset: dict[
+            int, dict[int, list[SubModelDataset]]
+        ],
         output_dir: Path,
     ):
         """_write_submodel_dataset_tree_to_files
@@ -852,10 +896,18 @@ class DeepredDataset:
         None
         """
         os.makedirs(output_dir, exist_ok=True)
-        hf = h5py.File(output_dir / "protcast_dataset.hdf5", "w", driver="core")
-        self.write_submodel_dataset_tree_to_hdf5(hf, self.bp_submodels_tree)
-        self.write_submodel_dataset_tree_to_hdf5(hf, self.cc_submodels_tree)
-        self.write_submodel_dataset_tree_to_hdf5(hf, self.mf_submodels_tree)
+        hf = h5py.File(
+            output_dir / "protcast_dataset.hdf5", "w", driver="core"
+        )
+        self.write_submodel_dataset_tree_to_hdf5(
+            hf, self.bp_submodels_tree
+        )
+        self.write_submodel_dataset_tree_to_hdf5(
+            hf, self.cc_submodels_tree
+        )
+        self.write_submodel_dataset_tree_to_hdf5(
+            hf, self.mf_submodels_tree
+        )
 
     def write_submodel_dataset_tree_to_hdf5(
         self, hdf5_file, submodels_dataset
@@ -953,7 +1005,9 @@ class DeepredDataset:
         None
         """
         os.makedirs(output_dir, exist_ok=True)
-        with open(output_dir / Path("protcast_dataset.bin"), "wb") as f:
+        with open(
+            output_dir / Path("protcast_dataset.bin"), "wb"
+        ) as f:
             pickle.dump(self, f)
 
     def summary(self):
@@ -973,15 +1027,18 @@ class DeepredDataset:
         None
         """
         pp = pprint.PrettyPrinter(indent=4)
-        p_bp_go_terms_tree, p_bp_go_terms_tree_lengths = summarize_tree(
-            self.bp_go_terms_tree
-        )
-        p_cc_go_terms_tree, p_cc_go_terms_tree_lengths = summarize_tree(
-            self.cc_go_terms_tree
-        )
-        p_mf_go_terms_tree, p_mf_go_terms_tree_lengths = summarize_tree(
-            self.mf_go_terms_tree
-        )
+        (
+            p_bp_go_terms_tree,
+            p_bp_go_terms_tree_lengths,
+        ) = summarize_tree(self.bp_go_terms_tree)
+        (
+            p_cc_go_terms_tree,
+            p_cc_go_terms_tree_lengths,
+        ) = summarize_tree(self.cc_go_terms_tree)
+        (
+            p_mf_go_terms_tree,
+            p_mf_go_terms_tree_lengths,
+        ) = summarize_tree(self.mf_go_terms_tree)
 
         print("---------- Deepred Dataset -----------")
         print("------- BP GO Terms Tree Lengths -------")

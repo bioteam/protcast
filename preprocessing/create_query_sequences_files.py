@@ -31,7 +31,9 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", help="Path to serialized dataset")
-    parser.add_argument("seq_ids", help="Path to file with a list of seq_ids")
+    parser.add_argument(
+        "seq_ids", help="Path to file with a list of seq_ids"
+    )
     parser.add_argument("output", help="Output file")
     parser.add_argument("-v", action="store_true", help="Verbose")
     args = parser.parse_args()
@@ -45,10 +47,14 @@ def main():
     dataset = Dataset.from_serialized_file(args.dataset)
     logging.info("Done deserializing 'Dataset'...")
 
-    logging.info("Converting input sequences IDs to their primary accessions...")
+    logging.info(
+        "Converting input sequences IDs to their primary accessions..."
+    )
     with open(args.seq_ids, "r") as input_file:
         with open(args.output, "w") as output_seq_file:
-            with open(args.output + ".fasta", "w") as output_fasta_file:
+            with open(
+                args.output + ".fasta", "w"
+            ) as output_fasta_file:
                 for in_seq in input_file.readlines():
                     in_seq = in_seq.strip()
                     out_seq = dataset.accessions[in_seq]
@@ -58,7 +64,9 @@ def main():
                         )
                     output_seq_file.write(out_seq + "\n")
                     output_fasta_file.write(f">{out_seq}\n")
-                    output_fasta_file.write(f"{dataset.proteins[out_seq].sequence}\n")
+                    output_fasta_file.write(
+                        f"{dataset.proteins[out_seq].sequence}\n"
+                    )
 
 
 if __name__ == "__main__":

@@ -30,12 +30,15 @@ def get_protein_feature(
     tmpfasta = tempfile.NamedTemporaryFile()
     # Write fasta file
     with open(tmpfasta.name, "w") as f:
-        for (pid, seq) in zip(pids, seqs):
+        for pid, seq in zip(pids, seqs):
             f.write(">" + pid + "\n" + seq + "\n")
 
     get_feature(tmpfasta.name, feature, tmpdir.name)
     with open(os.path.join(tmpdir.name, feature + ".csv")) as f:
-        features = [[float(x) for x in line.split(",")[1:]] for line in f.readlines()]
+        features = [
+            [float(x) for x in line.split(",")[1:]]
+            for line in f.readlines()
+        ]
     return features
 
 

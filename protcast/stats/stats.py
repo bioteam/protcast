@@ -55,7 +55,9 @@ def generate_dataset_stats(
             f"Swissprot t1 File: {dataset.swissprot_t1_path} (md5: "
             f"{dataset.swissprot_t1_md5})\n"
         )
-        f.write(f"GOA File: {dataset.goa_path} (md5: {dataset.goa_md5})\n")
+        f.write(
+            f"GOA File: {dataset.goa_path} (md5: {dataset.goa_md5})\n"
+        )
 
     with open(output_dir / Path("bp_go_terms.txt"), "w") as f:
         f.write(dataset.ontology.bp_dag.to_text())
@@ -69,12 +71,25 @@ def generate_dataset_stats(
     def write_obsolete_go_terms(file_name: Path, dag: GODAG):
         with open(output_dir / file_name, "w") as f:
             f.write("Term\n")
-            f.write("\n".join([f"{node.id}" for node in dag.get_obsolete_nodes()]))
+            f.write(
+                "\n".join(
+                    [
+                        f"{node.id}"
+                        for node in dag.get_obsolete_nodes()
+                    ]
+                )
+            )
             f.write("\n")
 
-    write_obsolete_go_terms(Path("obsolete_bp_go_terms.txt"), dataset.ontology.bp_dag)
-    write_obsolete_go_terms(Path("obsolete_cc_go_terms.txt"), dataset.ontology.cc_dag)
-    write_obsolete_go_terms(Path("obsolete_mf_go_terms.txt"), dataset.ontology.mf_dag)
+    write_obsolete_go_terms(
+        Path("obsolete_bp_go_terms.txt"), dataset.ontology.bp_dag
+    )
+    write_obsolete_go_terms(
+        Path("obsolete_cc_go_terms.txt"), dataset.ontology.cc_dag
+    )
+    write_obsolete_go_terms(
+        Path("obsolete_mf_go_terms.txt"), dataset.ontology.mf_dag
+    )
 
     with open(output_dir / Path("go_terms_not_found.txt"), "w") as f:
         f.write(
@@ -86,7 +101,9 @@ def generate_dataset_stats(
 
 
 @typechecked
-def generate_protcast_dataset_stats(protcast_dataset: DeepredDataset, output_dir: Path):
+def generate_protcast_dataset_stats(
+    protcast_dataset: DeepredDataset, output_dir: Path
+):
     """generate_protcast_dataset_stats
     Create protcast_general.txt file.
 
@@ -133,10 +150,17 @@ def generate_protcast_dataset_stats(protcast_dataset: DeepredDataset, output_dir
     )
 
     with open(output_dir / Path("protcast_general.txt"), "w") as f:
-        f.write(f"DeepredDataset Creation Time: {protcast_dataset.created_at}\n")
+        f.write(
+            f"DeepredDataset Creation Time: {protcast_dataset.created_at}\n"
+        )
 
-        total_number_of_submodels = protcast_dataset.submodel_global_index
-        f.write("Total number of models: " f"{total_number_of_submodels}\n")
+        total_number_of_submodels = (
+            protcast_dataset.submodel_global_index
+        )
+        f.write(
+            "Total number of models: "
+            f"{total_number_of_submodels}\n"
+        )
 
         imbalanced_models = (
             len(bp_imbalanced_models)
@@ -148,7 +172,9 @@ def generate_protcast_dataset_stats(protcast_dataset: DeepredDataset, output_dir
             f"({imbalanced_models/total_number_of_submodels*100}%)\n"
         )
 
-        def list_imbalanaced_submodels(namespace: str, imbalanced_models: list):
+        def list_imbalanaced_submodels(
+            namespace: str, imbalanced_models: list
+        ):
             f.write(f"Imbalanced Models ({namespace}):\n")
             f.write("\n".join(imbalanced_models))
 
@@ -160,7 +186,9 @@ def generate_protcast_dataset_stats(protcast_dataset: DeepredDataset, output_dir
 @typechecked
 def _generate_namespace_submodel_dataset_stats(
     namespace_name: str,
-    namespace_submodels_dataset: dict[int, dict[int, list[SubModelDataset]]],
+    namespace_submodels_dataset: dict[
+        int, dict[int, list[SubModelDataset]]
+    ],
     output_dir: Path,
 ) -> tuple[list[tuple[str, int]], set[str]]:
     """_generate_namespace_submodel_dataset_stats
@@ -179,19 +207,31 @@ def _generate_namespace_submodel_dataset_stats(
     number_of_samples_submodels_ds: list of strings
     imbalanced_models: set of strings
     """
-    with open(output_dir / Path(f"protcast_{namespace_name}_submodels.txt"), "w") as f:
+    with open(
+        output_dir / Path(f"protcast_{namespace_name}_submodels.txt"),
+        "w",
+    ) as f:
         number_of_samples_submodels_ds = []
         imbalanced_models = set()
         f.write(
-            f"Mean Imbalanced Ratio Threshold: " f"{MEAN_IMBALANCE_RATIO_THRESHOLD}\n"
+            f"Mean Imbalanced Ratio Threshold: "
+            f"{MEAN_IMBALANCE_RATIO_THRESHOLD}\n"
         )
-        for level, buckets in sorted(namespace_submodels_dataset.items()):
+        for level, buckets in sorted(
+            namespace_submodels_dataset.items()
+        ):
             for bucket, datasets in sorted(buckets.items()):
                 for dataset in datasets:
                     samples = dataset.X_train.shape[0]
                     level_index = dataset.level_index
                     mean_ir = utils.calculate_mean_imbalance_ratio(
-                        np.vstack((dataset.y_train, dataset.y_val, dataset.y_test))
+                        np.vstack(
+                            (
+                                dataset.y_train,
+                                dataset.y_val,
+                                dataset.y_test,
+                            )
+                        )
                     )
 
                     if mean_ir == float("inf"):
@@ -217,7 +257,9 @@ def _generate_namespace_submodel_dataset_stats(
                         (f"{level}-{bucket}-{level_index}", samples)
                     )
                     if mean_ir > MEAN_IMBALANCE_RATIO_THRESHOLD:
-                        imbalanced_models.add(f"{level} - {bucket} - {level_index}")
+                        imbalanced_models.add(
+                            f"{level} - {bucket} - {level_index}"
+                        )
         return number_of_samples_submodels_ds, imbalanced_models
 
 
@@ -254,8 +296,14 @@ def _generate_namespace_submodel_classes_histogram(
     pickle.dump(
         fig,
         open(
-            output_dir / Path(f"number_of_samples_per_submodel_{namespace}.fig.pickle"),
+            output_dir
+            / Path(
+                f"number_of_samples_per_submodel_{namespace}.fig.pickle"
+            ),
             "wb",
         ),
     )
-    plt.savefig(output_dir / Path(f"number_of_samples_per_submodel_{namespace}.png"))
+    plt.savefig(
+        output_dir
+        / Path(f"number_of_samples_per_submodel_{namespace}.png")
+    )

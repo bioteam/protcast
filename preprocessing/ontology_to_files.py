@@ -21,7 +21,9 @@ if __name__ == "__main__":
     data/ontology/t0/go_20211026.obo \
     data/ontology/t0/ontology_20211026
     """
-    parser = argparse.ArgumentParser(description="Write an ontology to CAFA2 files")
+    parser = argparse.ArgumentParser(
+        description="Write an ontology to CAFA2 files"
+    )
     parser.add_argument("input_obo_file")
     parser.add_argument("output_files")
     parser.add_argument("-v", action="store_true", help="Verbose")

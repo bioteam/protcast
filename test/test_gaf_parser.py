@@ -18,11 +18,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Checks that a GAF file is parsed correctly"
     )
-    parser.add_argument("-i", "--input", default="data/goa_uniprot_mini.gaf")
+    parser.add_argument(
+        "-i", "--input", default="data/goa_uniprot_mini.gaf"
+    )
     args = parser.parse_args()
 
     annotations = parse_gaf(args.input)
-    
+
     assert len(annotations) == 994
-    assert annotations[0]["DB_Object_ID"] == 'A0A1Z4V764'
-    assert annotations[990]["DB_Object_ID"] == 'A0A6N9GJR9'
+    assert annotations[0]["DB_Object_ID"] == "A0A1Z4V764"
+    assert annotations[990]["DB_Object_ID"] == "A0A6N9GJR9"

@@ -44,7 +44,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Print a path from a GO term to the root"
     )
-    parser.add_argument("input", metavar="<path/to/input_serialized_ontology_file>")
+    parser.add_argument(
+        "input", metavar="<path/to/input_serialized_ontology_file>"
+    )
     parser.add_argument("id")
 
     args = parser.parse_args()

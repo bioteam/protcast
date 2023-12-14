@@ -30,9 +30,15 @@ def main():
     """
     parser = argparse.ArgumentParser()
     input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument("-d", help="Input 'Dataset' serialized file")
-    input_group.add_argument("-m", help="Input 'DeepredDataset' serialized file")
-    parser.add_argument("-v", default=False, action="store_true", help="Verbose")
+    input_group.add_argument(
+        "-d", help="Input 'Dataset' serialized file"
+    )
+    input_group.add_argument(
+        "-m", help="Input 'DeepredDataset' serialized file"
+    )
+    parser.add_argument(
+        "-v", default=False, action="store_true", help="Verbose"
+    )
     args = parser.parse_args()
 
     if args.v:
@@ -43,18 +49,26 @@ def main():
     if args.d:
         model_dataset = OracleDataset.from_serialized_dataset(args.d)
     else:
-        model_dataset = OracleDataset.from_serialized_oracle_dataset(args.m)
+        model_dataset = OracleDataset.from_serialized_oracle_dataset(
+            args.m
+        )
 
     # model_dataset.summary()
-    with open("ctriad/model_biological_process_2_30_0_x_hat.mat", "r") as f:
+    with open(
+        "ctriad/model_biological_process_2_30_0_x_hat.mat", "r"
+    ) as f:
         x_hat = [
-            [float(x) for x in line.strip("\n").split(" ")] for line in f.readlines()
+            [float(x) for x in line.strip("\n").split(" ")]
+            for line in f.readlines()
         ]
         x_hat = np.array(x_hat)
 
-    with open("ctriad/model_biological_process_2_30_0_y_hat.mat", "r") as f:
+    with open(
+        "ctriad/model_biological_process_2_30_0_y_hat.mat", "r"
+    ) as f:
         y_hat = [
-            [int(x) for x in line.strip("\n").split(" ")] for line in f.readlines()
+            [int(x) for x in line.strip("\n").split(" ")]
+            for line in f.readlines()
         ]
         y_hat = np.array(y_hat)
 

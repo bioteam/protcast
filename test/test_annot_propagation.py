@@ -18,14 +18,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Checks that a protein is annotated with all ancestor GO Terms"
     )
-    parser.add_argument("input", metavar="<path/to/input_serialized_dataset_file>")
+    parser.add_argument(
+        "input", metavar="<path/to/input_serialized_dataset_file>"
+    )
     args = parser.parse_args()
 
     dataset = Dataset.from_serialized_file(args.input)
 
     # Original Annot: Q8HZM6 -> GO:0002548
     protein = dataset.proteins.get("Q8HZM6")
-    go_term_ancestors = dataset.ontology.get_primary_term("GO:0002548").ancestors
+    go_term_ancestors = dataset.ontology.get_primary_term(
+        "GO:0002548"
+    ).ancestors
 
     protein_annots = set(protein.annotations.keys())
 
