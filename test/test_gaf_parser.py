@@ -25,6 +25,6 @@ if __name__ == "__main__":
 
     annotations = parse_gaf(args.input)
 
-    assert len(annotations) == 994
+    assert len(annotations) == 995
     assert annotations[0]["DB_Object_ID"] == "A0A1Z4V764"
     assert annotations[990]["DB_Object_ID"] == "A0A6N9GJR9"

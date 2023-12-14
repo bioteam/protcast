@@ -30,13 +30,29 @@ class SimpleDataset:
 
     Attributes
     ----------
-    proteins: ...
+    proteins: dict
         ....
-    accessions:
+    accessions: dict
         ...
-    go_terms_not_found: 
+    go_terms_not_found: list
         ...
-
+    ontology_path: Path
+        ...
+    swissprot_path: Path
+        ...
+    trembl_path: Path
+        ...
+    gaf_path: Path
+        ...
+    output_dir: Path
+        ...
+    verbose: bool
+        ...
+    ontology_md5: str
+        ...
+    swissprot_md5: str
+        ...
+    
     Methods
     -------
     init:
@@ -190,7 +206,7 @@ class SimpleDataset:
         ----------
         output_path: str
             ...
-        include_electronic: Boolean
+        include_electronic: bool
             Default is False
 
         Returns
@@ -234,7 +250,7 @@ class SimpleDataset:
     def _propagate_annotations(self):
         """propagate_annotations
         Adds detailed information on the ancestors of the GO term in
-        each Annotation including whether the ancestor 'is_obsolete'
+        each Annotation including whether the ancestor 'has_obsolete'
         and 'is_manual'.
 
         Parameters
@@ -261,18 +277,14 @@ class SimpleDataset:
                         ancestor_annot = Annotation(
                             ancestor_go_term.id,
                             protein.id,
-                            False,
+                            annot.evidence_code,
                             ancestor_go_term.is_obsolete,
-                            is_manual=annot.is_manual,
                         )
                         protein.add_annotation(ancestor_annot)
-                        ancestor_go_term.add_annotation(ancestor_annot)
                     else:
                         # If the protein is already annotated with this GO
-                        # term, we might update 'is_manual'.
-                        ancestor_annot.set_is_manual(
-                            ancestor_annot.is_manual or annot.is_manual
-                        )
+                        # term, we might update 'is_manual'
+                        ancestor_annot.is_manual = annot.is_manual
 
     @typechecked
     def _annotate_proteins_from_gaf(self) -> list[tuple]:
@@ -285,8 +297,7 @@ class SimpleDataset:
 
         Parameters
         ----------
-        proteins: dict
-            ...
+        None
 
         Returns
         -------
@@ -335,9 +346,6 @@ class SimpleDataset:
                             primary_go_term.is_obsolete,
                         )
                         protein.add_annotation(annot)
-                        self.ontology.get_primary_term(
-                            primary_go_term.id
-                        ).add_annotation(annot)
                         num_new_swissprot_annots += 1
                         logging.debug(
                             "Created annotation for: "
@@ -422,7 +430,7 @@ class SimpleDataset:
                 self.accessions[accession] = accession
                 annotated_trembl_seqs[accession] = str(record.seq)
 
-        for protein_id, go_term_id, evidence in trembl_annotations:
+        for protein_id, go_term_id, evidence, has_obsolete in trembl_annotations:
             primary_accession = self.accessions.get(protein_id)
             sequence = annotated_trembl_seqs.get(primary_accession)
             if sequence is None:
@@ -433,11 +441,13 @@ class SimpleDataset:
                 self.missing_proteins.add(protein_id)
                 continue
 
+            # Make a new Protein if it does not exist
             protein = self.proteins.get(primary_accession)
             if protein is None:
                 protein = Protein(primary_accession, str(Seq))
                 self.proteins[protein.id] = protein
                 num_found_in_trembl += 1
+                logging.debug(f"Created new Protein {protein_id}")
 
             # The annotation can already exist due to the fact that the
             # UniProt-GOA *gaf file can have almost identical entries that
@@ -452,15 +462,11 @@ class SimpleDataset:
                 annotation = Annotation(
                     go_term_id,
                     primary_accession,
-                    True,
+                    evidence,
                     go_term.is_obsolete,
-                    evidence != "IEA",
                 )
 
                 protein.add_annotation(annotation)
-                go_term.add_annotation(annotation)
-            else:
-                annot.set_is_manual(annot.is_manual or evidence != "IEA")
             
         logging.info(f"Found {num_found_in_trembl} proteins in TrEMBL")
 

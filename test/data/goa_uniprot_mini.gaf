@@ -1001,3 +1001,4 @@ UniProtKB	A0A6N9GJR9	F4034_00615	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB
 ComplexPortal	CPX-7365	ctx_crodu-15	part_of	GO:0005576	PMID:8513799	NAS		C	Crotoxin complex, aCA1/2/4-bCA2/3/4-CBd variant	CA:CBd	protein_complex	taxon:8732	20220715	ComplexPortal		
 RNAcentral	URS0000347C46_10381	URS0000347C46_10381	enables	GO:0140869	PMID:33184237	IMP		FSaimiriine gammaherpesvirus 2 (Herpesvirus saimiri) HSUR1 small nuclear RNA		snRNA	taxon:10381	20221215	FlyBase	has_input(RNAcentral:URS0000233054_9606),part_of(GO:0140958)	
 RNAcentral	URS0000347C46_10381	URS0000347C46_10381	involved_in	GO:0140958	PMID:33184237	IDA		Saimiriine gammaherpesvirus 2 (Herpesvirus saimiri) HSUR1 small nuclear RNA		snRNA	taxon:10381	20221215	FlyBase	
+UniProtKB	M5BGM1	F4034_00615	enables	GO:0046872	GO_REF:0000043	IEA	UniProtKB-KW:KW-0479	F	Inositol monophosphatase family protein	F4034_00615	protein	taxon:2026724	20211010	UniProt		
