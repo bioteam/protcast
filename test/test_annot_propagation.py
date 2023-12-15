@@ -8,7 +8,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.dataset import Dataset
+from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 if __name__ == "__main__":
