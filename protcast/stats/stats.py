@@ -8,8 +8,8 @@ from typeguard import typechecked
 
 from protcast import BP, CC, MF
 from protcast.preprocessing import utils
-from protcast.preprocessing.dataset import Dataset
-from protcast.preprocessing.protcast_dataset import (
+from protcast.preprocessing.simple_dataset import SimpleDataset
+from protcast.preprocessing.deepred_dataset import (
     DeepredDataset,
     SubModelDataset,
 )
@@ -22,7 +22,7 @@ MEAN_IMBALANCE_RATIO_THRESHOLD = 3
 
 @typechecked
 def generate_dataset_stats(
-    dataset: Dataset,
+    dataset: SimpleDataset,
     output_dir: Path,
 ):
     """generate_dataset_stats

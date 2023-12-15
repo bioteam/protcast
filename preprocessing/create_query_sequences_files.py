@@ -9,7 +9,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.dataset import Dataset
+from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 def main():
@@ -24,7 +24,7 @@ def main():
     This script was used to generate the query sequences to evaluate the BLAST predictor.
     Example:
 
-    python preprocessing-scripts/create_query_sequences_files.py \
+    python preprocessing/create_query_sequences_files.py \
     data/dataset/u-2021-04-g-2021-10-26/dataset.bin \
     input_sequences.txt \
     output_sequences
@@ -43,9 +43,9 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    logging.info("Deserializing 'Dataset'...")
-    dataset = Dataset.from_serialized_file(args.dataset)
-    logging.info("Done deserializing 'Dataset'...")
+    logging.info("Deserializing 'SimpleDataset'...")
+    dataset = SimpleDataset.from_serialized_file(args.dataset)
+    logging.info("Done deserializing 'SimpleDataset'...")
 
     logging.info(
         "Converting input sequences IDs to their primary accessions..."

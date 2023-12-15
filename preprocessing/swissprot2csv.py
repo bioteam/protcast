@@ -41,9 +41,9 @@ def main():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    ontology = load_ontology(args.ontology)
+    ontology = Ontology.load_ontology(args.ontology)
 
-    proteins, go_terms_not_found = parse_swissprot(
+    proteins, go_terms_not_found, accessions = parse_swissprot(
         ontology, args.uniprot_db
     )
 
