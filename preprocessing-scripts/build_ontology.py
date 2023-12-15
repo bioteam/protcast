@@ -13,17 +13,17 @@ from protcast.preprocessing.ontology import Ontology
 
 
 if __name__ == "__main__":
-    """test_build_ontology.py
+    """build_ontology.py
     Builds an Ontology object and saves it to disk given an input *obo file.
     Example:
 
-    python3 test_build_ontology.py
+    python3 preprocessing-scripts/build_ontology.py data/go.obo data/go.obo.bin
     """
     parser = argparse.ArgumentParser(
         description="Build an ontology from an *.obo file and save"
     )
-    parser.add_argument("-i", "--input", default="data/go.obo")
-    parser.add_argument("-o", "--output", default="data/go.obo.bin")
+    parser.add_argument("-i", "--input")
+    parser.add_argument("-o", "--output")
     parser.add_argument(
         "-v", default=False, action="store_true", help="Verbose"
     )
@@ -36,7 +36,3 @@ if __name__ == "__main__":
 
     ontology = Ontology(args.input)
     ontology.save(args.output)
-
-    assert os.path.isfile(Path(args.output))
-
-    os.remove(args.output)

@@ -17,9 +17,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Checks that a Swissprot file is parsed correctly"
     )
-    parser.add_argument(
-        "-i", "--input", default="data/uniprot_mini.dat"
-    )
+    parser.add_argument("-i", "--input", default="data/uniprot_mini.dat")
     parser.add_argument("-o", "--ontology", default="data/go.obo")
     args = parser.parse_args()
 
@@ -45,9 +43,7 @@ if __name__ == "__main__":
     assert annots[2].go_term_id == "GO:0015379"
     manuals = proteins["A0A016QRH0"].get_manual_annotations()
     assert manuals == []
-    assert (
-        len(proteins["A0A016QRH0"].get_electronic_annotations()) == 3
-    )
+    assert len(proteins["A0A016QRH0"].get_electronic_annotations()) == 3
 
     annots = proteins["A0A1D6P109"].get_all_annotations()
     assert len(annots) == 9
@@ -56,9 +52,7 @@ if __name__ == "__main__":
     assert annots[8].is_manual == True
     manuals = proteins["A0A1D6P109"].get_manual_annotations()
     assert len(manuals) == 8
-    assert (
-        len(proteins["A0A1D6P109"].get_electronic_annotations()) == 1
-    )
+    assert len(proteins["A0A1D6P109"].get_electronic_annotations()) == 1
 
     assert (
         proteins["A0A0A2ZXP0"].sequence

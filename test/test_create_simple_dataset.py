@@ -11,33 +11,42 @@ from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 def main():
-    """"test_create_simple_dataset.py
+    """ "test_create_simple_dataset.py
     Creates a dataset that can be used by Keras FeatureSpace, which expects
     protein features and GO terms to be passed in as a dataframe.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-o", "--ontology", help="Path to Gene Ontology file (*.obo)",
-        default='data/go.obo'
+        "-o",
+        "--ontology",
+        help="Path to Gene Ontology file (*.obo)",
+        default="data/go.obo",
     )
     parser.add_argument(
-        "-s", "--swissprot", help="Path to the SwissProt file (*.dat)",
-        default='data/uniprot_mini.dat'
+        "-s",
+        "--swissprot",
+        help="Path to the SwissProt file (*.dat)",
+        default="data/uniprot_mini.dat",
     )
     parser.add_argument(
-        "-t", "--trembl", help="Path to the TrEMBL file (*.fa)",
-        default='data/uniprot_trembl_mini.fasta'
+        "-t",
+        "--trembl",
+        help="Path to the TrEMBL file (*.fa)",
+        default="data/uniprot_trembl_mini.fasta",
     )
     parser.add_argument(
-        "-g", "--gaf", help="Path to GOA format file (*.gaf)",
-        default='data/goa_uniprot_mini.gaf'
+        "-g",
+        "--gaf",
+        help="Path to GOA format file (*.gaf)",
+        default="data/goa_uniprot_mini.gaf",
     )
     parser.add_argument(
-        "--output_dir", help="Output directory",
-        default='data/'
+        "--output_dir", help="Output directory", default="data/"
     )
     parser.add_argument(
-        "-v", "--verbose", default=True,
+        "-v",
+        "--verbose",
+        default=True,
         help="Create DEBUG log",
     )
     args = parser.parse_args()
@@ -53,11 +62,12 @@ def main():
 
     dataset.save()
 
-    assert os.path.isfile(Path(args.output_dir, 'SimpleDataset.bin'))
-    assert os.path.isfile(Path(args.output_dir, 'SimpleDataset.log'))
+    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
+    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
 
-    os.unlink(Path(args.output_dir, 'SimpleDataset.bin'))
-    os.unlink(Path(args.output_dir, 'SimpleDataset.log'))
+    os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
+    os.unlink(Path(args.output_dir, "SimpleDataset.log"))
+
 
 if __name__ == "__main__":
     main()

@@ -18,9 +18,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Checks that a GAF file is parsed correctly"
     )
-    parser.add_argument(
-        "-i", "--input", default="data/goa_uniprot_mini.gaf"
-    )
+    parser.add_argument("-i", "--input", default="data/goa_uniprot_mini.gaf")
     args = parser.parse_args()
 
     annotations = parse_gaf(args.input)

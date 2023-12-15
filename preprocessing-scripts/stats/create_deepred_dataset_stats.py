@@ -9,7 +9,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[2]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.protcast_dataset import DeepredDataset
+from protcast.preprocessing.deepred_dataset import DeepredDataset
 from protcast.stats import stats
 
 

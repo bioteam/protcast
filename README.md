@@ -12,7 +12,7 @@ This implementation uses the Keras library.
 
 ├── doc/
 
-├── preprocessing/
+├── preprocessing-scripts/
 
 ├── test/
 
@@ -28,7 +28,7 @@ This implementation uses the Keras library.
 
 `protcast/preprocessing`
 
-Contains the code that parses the databases/raw data, builds the python
+Contains the code that parses the raw data, builds the python
 structures to represent the inputs for the model and converts them into a
 format that can be used to feed the model for training. More specifically:
 
@@ -108,6 +108,8 @@ pip install .
 
 ### Sources
 
+Files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`.
+
 ### UniProtKB/Swiss-Prot Database
 
 
@@ -121,9 +123,9 @@ and it was used to obtain the sequences found in UniProt-GOA database.
 
 
 ### Gene Ontology (GO)
-The Gene Ontology databases `(.obo)` were downloaded from:
+The Gene Ontology databases `(.obo)` are downloaded from:
 
-
+https://release.geneontology.org
 
 #### UniProt-GOA
 
@@ -144,7 +146,6 @@ publishes two types of GOA-UniProt databases:
 - Unfiltered: Contains annotations from a larger number of species and
   includes automation generated annotations.
 
-
 ### Processing
 The steps to build the dataset to the model are:
 
@@ -160,27 +161,26 @@ The steps to build the dataset to the model are:
 
 ## Building the Ontology
 
-Generating the ontology: `preprocessing-scripts/build_ontology.py` takes a GO
+Generating the ontology: `protcast/preprocessing/ontology.py` takes a GO
 ontology (that can be downloaded from: http://current.geneontology.org/ontology/go.obo)
-and creates an instance of the `Ontology` class defined in
-`ontology/ontology.py`. In addition, the script can also serialize
+and creates an instance of the `Ontology` class.
+In addition, the script can also serialize
 and save the ontology into a file which can then be deserialized using
-`load_ont()`.
+`load_ontology()`.
 
-`data/ontology` directory contains both the original `.obo` file and the
-serialized ontology used to train the protein predictor.
+`test/data/` directory contains an `.obo`.
 
 For example:
 
 ```
-python preprocessing-scripts/ontology.py \
+python preprocessing-scripts/build_ontology.py \
   data/ontology/go_20210901.obo \
   data/ontology/serialized/go.bin
 ```
 
 ## Parsing SwissProt
 
-`preprocessing-scripts/parse_swissprot.py` takes a serialized GO ontology file
+`preprocessing-scripts/parse_swissprot.py` takes a GO ontology file
 and a Swissprot database file and converts it into an instance of a `Dataset`
 class. The database was downloaded from:
 https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz.
@@ -190,10 +190,9 @@ For example:
 
 ```
 python preprocessing-scripts/parse_swissprot.py \
-  data/ontology/serialized/go.bin \
+  data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```
-
 
 ## Ontology
 

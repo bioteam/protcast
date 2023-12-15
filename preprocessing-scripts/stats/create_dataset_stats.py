@@ -9,7 +9,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[2]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.dataset import Dataset
+from protcast.preprocessing.simple_dataset import SimpleDataset
 from protcast.stats import stats
 
 
@@ -28,7 +28,7 @@ def main():
 
 
     Example:
-    python preprocessing-scripts/stats/create_dataset_stats.py \
+    python preprocessing/stats/create_dataset_stats.py \
         data/dataset/u-2021-04-g-2021-10-26/dataset.bin \
         data/dataset/u-2021-04-g-2021-10-26/stats/ \
         -w
@@ -60,8 +60,8 @@ def main():
             )
             exit(1)
 
-    log.info(f"Deserializing dataset from file: {args.dataset}")
-    dataset = Dataset.from_serialized_file(args.dataset)
+    log.info(f"Deserializing SimpleDataset from file: {args.dataset}")
+    dataset = SimpleDataset.from_serialized_file(args.dataset)
     log.info(f"Generating dataset statistics in: {output_dir}")
     stats.generate_dataset_stats(dataset, Path(output_dir))
 

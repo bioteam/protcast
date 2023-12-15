@@ -78,23 +78,16 @@ if __name__ == "__main__":
         ]
     )
     # fatty acid ligase activity
-    assert (
-        set(ontology.get_primary_term("GO:0015645").ancestors)
-        == ancestors
-    )
+    assert set(ontology.get_primary_term("GO:0015645").ancestors) == ancestors
 
     # GO:0140657
     ancestors = set(["GO:0003674"])
     assert (
-        set(ontology.get_primary_term("GO:0140657").ancestors)
-        == ancestors
+        set(ontology.get_primary_term("GO:0140657").ancestors) == ancestors
     )  # fatty acid ligase activity
 
     # GO:0016878
-    ancestors = set(
-        ["GO:0003674", "GO:0003824", "GO:0016874", "GO:0016877"]
-    )
+    ancestors = set(["GO:0003674", "GO:0003824", "GO:0016874", "GO:0016877"])
     assert (
-        set(ontology.get_primary_term("GO:0016878").ancestors)
-        == ancestors
+        set(ontology.get_primary_term("GO:0016878").ancestors) == ancestors
     )  # fatty acid ligase activity
