@@ -173,6 +173,7 @@ class SimpleDataset:
         None
         """
         os.makedirs(self.output_dir, exist_ok=True)
+        logging.debug(f"Saving SimpleDataset.bin to '{self.output_dir}'")
         with open(self.output_dir / Path("SimpleDataset.bin"), "wb") as f:
             pickle.dump(self, f)
 
