@@ -28,12 +28,13 @@ class GOTerm:
     name: str
         ....
     primary: Boolean
-        A primary term is the most specific and detailed description of gene or gene product functions.
-        Usually found in the lowest level of the tree.
+        A primary term is the most specific and detailed description of gene or 
+        gene product functions. Usually found in the lowest level of the tree.
     is_obsolete: Boolean
         ....
     level: int
-        Level in ontology tree, starting at level 0 (Molecular Function, Biological Process, Cellular Component)
+        Level in ontology tree, starting at level 0 (Molecular Function, 
+        Biological Process, Cellular Component)
     parents:
         ...
     children:

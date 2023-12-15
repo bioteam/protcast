@@ -111,26 +111,14 @@ def parse_swissprot(
                         )
                         go_terms_not_found.add(go_term)
                     else:
-                        # Annotation can exist already because the GO term is
-                        # the alt of another GO term (i.e. the primary)
-                        annot = protein.get_annotation(
-                            primary_go_term.id
-                        )
-                        if annot:
-                            logging.debug(
-                                f"Annotation with protein {protein.id} and GO term "
-                                "{primary_go_term.id} already exists"
-                            )
-                        else:
-                            protein.add_annotation(
-                                Annotation(
-                                    primary_go_term.id,
+                        annot = Annotation(
+                                    go_term,
                                     protein.id,
                                     evidence_code,
                                     primary_go_term.is_obsolete,
                                 )
-                            )
-                            num_annotations += 1
+                        protein.add_annotation(annot)
+                        num_annotations += 1
 
             # The protein should not already exist
             assert proteins.get(protein.id) is None

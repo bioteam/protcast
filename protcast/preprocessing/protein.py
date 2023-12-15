@@ -67,7 +67,10 @@ class Protein:
         -------
         None
         """
-        assert self.annotations.get(annot.go_term_id) is None
+        # Check that the pair of GO term and evidence code does not exist
+        protein_annot = self.annotations.get(annot.go_term_id)
+        if protein_annot:
+            assert protein_annot.evidence_code != annot.evidence_code
         self.annotations[annot.go_term_id] = annot
 
     @typechecked

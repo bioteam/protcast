@@ -66,7 +66,7 @@ class Annotation:
     is_manual : bool
         ....
     has_obsolete: bool
-        ....
+        Has an obsolete GO term
 
     Methods
     -------

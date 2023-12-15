@@ -52,7 +52,7 @@ class SimpleDataset:
         ...
     swissprot_md5: str
         ...
-    
+
     Methods
     -------
     init:
@@ -70,7 +70,7 @@ class SimpleDataset:
     _add_trembl_proteins:
         ...
     _parse:
-        Parset TrEMBL, Swissprot
+        Inner function, parse TrEMBL
     remove_protein:
         ...
     md5:
@@ -85,7 +85,7 @@ class SimpleDataset:
         trembl_path: Path,
         gaf_path: Path,
         output_dir: Path,
-        verbose: bool
+        verbose: bool,
     ):
         """__init__
         ...
@@ -104,7 +104,7 @@ class SimpleDataset:
             Location for saved SimpleDataset and log file
         verbose: bool
             Write DEBUG level log if True
-        
+
         Returns
         -------
         None
@@ -119,14 +119,14 @@ class SimpleDataset:
         # Due to size we skip md5 of the trembl and GOA *gaf files
         self.gaf_path = gaf_path
         self.trembl_path = trembl_path
-        
+
         logger = logging.getLogger()
         if self.verbose:
             logger.setLevel(logging.DEBUG)
         else:
             logger.setLevel(logging.INFO)
         self._write_log(logger)
-            
+
         # Keep track of proteins seen in the *gaf file but
         # not found in Uniprot or TrEMBL
         self.missing_proteins = set()
@@ -149,7 +149,7 @@ class SimpleDataset:
         # Add proteins found in UniProt-GOA *gaf file that are in TrEMBL
         self._add_trembl_proteins(trembl_annotations)
 
-        # 
+        #
         self._propagate_annotations()
 
         logging.info(f"GO: '{self.ontology_path}'")
@@ -158,7 +158,6 @@ class SimpleDataset:
         logging.info(f"TrEMBL: '{self.trembl_path}'")
         logging.info(f"Saved SimpleDataset: '{self.output_dir}'")
         logging.info(f"Created at: '{self.created_at}'")
-        
 
     @typechecked
     def save(self):
@@ -262,7 +261,9 @@ class SimpleDataset:
         None
         """
         for protein in self.proteins.values():
-            logging.debug(f"Propagating {len(protein.get_all_annotations())} annotations for {protein.id}")
+            logging.debug(
+                f"Propagating {len(protein.get_all_annotations())} annotations for {protein.id}"
+            )
             protein_annots = list()
             for annot in protein.get_all_annotations():
                 protein_annots.append(annot.go_term_id)
@@ -315,61 +316,54 @@ class SimpleDataset:
             gaf_annotations,
             desc=f"Processing GOA records from '{str(self.gaf_path)}'",
         ):
-            if rec["DB"] == "UniProtKB":
-                primary_go_term = self.ontology.get_primary_term(rec["GO_ID"])
-                primary_accession = self.accessions.get(rec["DB_Object_ID"])
-                # The GAF DB_Object_ID matches an accession from uniprot_sprot
-                if primary_accession:
-                    if primary_accession != rec["DB_Object_ID"]:
-                        logging.debug(
-                            "Found accession in SwissProt: "
-                            f"{rec['DB_Object_ID']}. Primary is: "
-                            f"{primary_accession}"
-                        )
-
-                    protein: Protein = self.proteins.get(primary_accession)
-                    annot = protein.get_annotation(primary_go_term.id)
-                    # The annotation can already exist because the
-                    # it can already be present in the UniProtKB/Swiss-Prot
-                    # file or due to the fact that the UniProt-GOA
-                    # *gaf file can have almost identical entries that
-                    # contain the same 'DB_Object_ID' and 'GO_ID'
-                    if annot:
-                        # The 'Evidence Code' field is required in GAF 2*
-                        # annot.set_is_manual(annot.is_manual or rec["Evidence"] != "IEA")
-                        num_swissprot_annots += 1
-                    else:
-                        annot = Annotation(
-                            primary_go_term.id,
-                            protein.id,
-                            rec["Evidence"],
-                            primary_go_term.is_obsolete,
-                        )
-                        protein.add_annotation(annot)
-                        num_new_swissprot_annots += 1
-                        logging.debug(
-                            "Created annotation for: "
-                            f"{rec['DB_Object_ID']}. Primary accession is {primary_accession}"
-                        )
-                # The GAF DB_Object_ID does not match an accession from uniprot_sprot
+            go_term = self.ontology.get_primary_term(rec["GO_ID"])
+            # See if the protein is in SwissProt
+            if self.accessions.get(rec["DB_Object_ID"]):
+                primary_accession = self.accessions[rec["DB_Object_ID"]]
+                # Already have Protein and Annotation
+                if self._find_annotation(rec, primary_accession):
+                    num_swissprot_annots += 1
+                # Do not have the Annotation so add it to the Protein
                 else:
+                    annot = Annotation(
+                        rec["GO_ID"],
+                        primary_accession,
+                        rec["Evidence"],
+                        go_term.is_obsolete,
+                    )
+                    self.proteins[primary_accession].add_annotation(annot)
                     logging.debug(
-                        "No primary accession found for 'UniProtKB' protein "
-                        f"{rec['DB_Object_ID']} and evidence {rec['Evidence']}"
+                        f"Created new annotation for {primary_accession}: {rec['GO_ID']}, {rec['Evidence']}"
                     )
-                    trembl_annotations.append(
-                        (
-                            rec["DB_Object_ID"],
-                            primary_go_term.id,
-                            rec["Evidence"],
-                            primary_go_term.is_obsolete,
-                        )
-                    )
+                    num_new_swissprot_annots += 1
+            # The GAF DB_Object_ID does not match any accession from SwissProt
             else:
                 logging.debug(
-                    f"Found protein {rec['DB_Object_ID']} labeled '{rec['DB']}'"
+                    "No accession found in SwissProt for 'UniProtKB' protein "
+                    f"{rec['DB_Object_ID']} "
+                )
+                trembl_annotations.append(
+                    (
+                        rec["DB_Object_ID"],
+                        rec["GO_ID"],
+                        rec["Evidence"],
+                        go_term.is_obsolete,
+                    )
+                )
+            # Not "UniProtKB" but can try to get a protein sequence from TrEMBL
+            if rec["DB"] != "UniProtKB":
+                logging.debug(
+                    f"Found protein {rec['DB_Object_ID']} labeled '{rec['DB']} not 'UniProtKB'"
                 )
                 num_annotations_not_labeled_uniprotkb += 1
+                trembl_annotations.append(
+                    (
+                        rec["DB_Object_ID"],
+                        rec["GO_ID"],
+                        rec["Evidence"],
+                        go_term.is_obsolete,
+                    )
+                )
 
         logging.info(
             f"Found {len(gaf_annotations)} total annotations in '{self.gaf_path}'"
@@ -381,8 +375,7 @@ class SimpleDataset:
             f"Found {num_swissprot_annots} 'UniProtKB' annotations in Swissprot"
         )
         logging.info(
-            f"Made {num_new_swissprot_annots} new annotations for 'UniProtKB' annotations "
-            "not in SwissProt"
+            f"Made {num_new_swissprot_annots} new annotations for existing SwissProt Proteins"
         )
         logging.info(
             f"Found {len(trembl_annotations)} 'UniProtKB' annotations not in SwissProt"
@@ -390,12 +383,23 @@ class SimpleDataset:
 
         return trembl_annotations
 
+    def _find_annotation(self, rec, primary_accession):
+        protein = self.proteins.get(primary_accession)
+        for annot in protein.get_all_annotations():
+            if (
+                annot.evidence_code == rec["Evidence"]
+                and annot.go_term_id == rec["GO_ID"]
+            ):
+                logging.debug(
+                    f"Found Annotation for {primary_accession} ({rec['GO_ID']}, {rec['Evidence']})"
+                )
+                return True
+        return False
+
     @typechecked
-    def _add_trembl_proteins(
-        self, trembl_annotations: list[tuple]
-    ) -> None:
+    def _add_trembl_proteins(self, trembl_annotations: list[tuple]) -> None:
         """_add_trembl_proteins
-        Find proteins in TrEMBL that were in the *gaf file but not 
+        Find proteins in TrEMBL that were in the *gaf file but not
         in the UniProt *dat file.
 
         Parameters
@@ -410,9 +414,9 @@ class SimpleDataset:
         logging.info("Adding proteins and annotations from TrEMBL")
 
         with open(self.trembl_path, "r") as trembl_handle:
-            self._parse(trembl_handle, trembl_annotations)
+            self._parse_trembl(trembl_handle, trembl_annotations)
 
-    def _parse(self, trembl_handle, trembl_annotations):
+    def _parse_trembl(self, trembl_handle, trembl_annotations):
         # We parse both TrEMBL and SwissProt because there are
         # entries in Uniprot-GOA *gaf file that can be missing from Swissprot.
         # These databases are not completely in sync at any point in time.
@@ -424,19 +428,23 @@ class SimpleDataset:
             FastaIterator(trembl_handle),
             desc=f"Reading TrEMBL records from '{trembl_handle.name}'",
         ):
-            # >tr|A0A1D8RA60|A0A1D8RA60_9ARCH 
+            # >tr|A0A1D8RA60|A0A1D8RA60_9ARCH
             accession = record.id.split("|")[1]
             if accession in annotated_trembl_ids:
                 self.accessions[accession] = accession
                 annotated_trembl_seqs[accession] = str(record.seq)
 
-        for protein_id, go_term_id, evidence, has_obsolete in trembl_annotations:
+        for (
+            protein_id,
+            go_term_id,
+            evidence,
+            has_obsolete,
+        ) in trembl_annotations:
             primary_accession = self.accessions.get(protein_id)
             sequence = annotated_trembl_seqs.get(primary_accession)
             if sequence is None:
                 logging.debug(
-                    f"Couldn't find protein {protein_id} in either "
-                    "SwissProt or TrEMBL. Skipping."
+                    f"Could not find protein {protein_id} in TrEMBL. Skipping."
                 )
                 self.missing_proteins.add(protein_id)
                 continue
@@ -445,29 +453,26 @@ class SimpleDataset:
             protein = self.proteins.get(primary_accession)
             if protein is None:
                 protein = Protein(primary_accession, str(Seq))
-                self.proteins[protein.id] = protein
                 num_found_in_trembl += 1
-                logging.debug(f"Created new Protein {protein_id}")
+                logging.debug(f"Created new Protein {protein_id} using TrEMBL")
 
-            # The annotation can already exist due to the fact that the
-            # UniProt-GOA *gaf file can have almost identical entries that
-            # contain the same 'DB_Object_ID' and 'GO_ID' effectively
-            # yielding the same annotation. For example:
-            #
-            # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:P68259
-            # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:Q3HWX0
-            annot = protein.get_annotation(go_term_id)
-            if not annot:
-                go_term = self.ontology.get_primary_term(go_term_id)
-                annotation = Annotation(
+                # The annotation can already exist due to the fact that the
+                # UniProt-GOA *gaf file can have almost identical entries that
+                # contain the same 'DB_Object_ID' and 'GO_ID' effectively
+                # yielding the same annotation. For example:
+                #
+                # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:P68259
+                # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:Q3HWX0
+            
+            annotation = Annotation(
                     go_term_id,
                     primary_accession,
                     evidence,
-                    go_term.is_obsolete,
-                )
+                    has_obsolete,
+            )
+            protein.add_annotation(annotation)
+            self.proteins[protein.id] = protein
 
-                protein.add_annotation(annotation)
-            
         logging.info(f"Found {num_found_in_trembl} proteins in TrEMBL")
 
     def remove_protein(self, protein_id: str) -> None:
@@ -497,8 +502,8 @@ class SimpleDataset:
             None
         """
         os.makedirs(self.output_dir, exist_ok=True)
-        formatter = logging.Formatter('%(levelname)s | %(message)s')
-        file_handler = logging.FileHandler(self.output_dir / 'SimpleDataset.log')
+        formatter = logging.Formatter("%(levelname)s | %(message)s")
+        file_handler = logging.FileHandler(self.output_dir / "SimpleDataset.log")
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 

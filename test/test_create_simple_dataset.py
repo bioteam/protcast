@@ -53,6 +53,9 @@ def main():
 
     dataset.save()
 
+    assert os.path.isfile(Path(args.output_dir, 'SimpleDataset.bin'))
+    assert os.path.isfile(Path(args.output_dir, 'SimpleDataset.log'))
+
     os.unlink(Path(args.output_dir, 'SimpleDataset.bin'))
     os.unlink(Path(args.output_dir, 'SimpleDataset.log'))
 
