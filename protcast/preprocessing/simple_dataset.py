@@ -444,12 +444,9 @@ class SimpleDataset:
                 self.accessions[accession] = accession
                 annotated_trembl_seqs[accession] = str(record.seq)
 
-        for (
-            protein_id,
-            go_term_id,
-            evidence,
-            has_obsolete,
-        ) in trembl_annotations:
+        for annot in tqdm(trembl_annotations, desc=f"Processing records from '{trembl_handle.name}'"):
+            protein_id, go_term_id, evidence, has_obsolete = annot
+
             primary_accession = self.accessions.get(protein_id)
             sequence = annotated_trembl_seqs.get(primary_accession)
             if sequence is None:
@@ -462,7 +459,7 @@ class SimpleDataset:
             # Make a new Protein if it does not exist
             protein = self.proteins.get(primary_accession)
             if protein is None:
-                protein = Protein(primary_accession, str(Seq))
+                protein = Protein(primary_accession, annotated_trembl_seqs[primary_accession])
                 new_proteins_from_trembl += 1
                 logging.debug(f"Created new Protein {protein_id} using TrEMBL")
 
