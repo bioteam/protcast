@@ -28,8 +28,8 @@ if __name__ == "__main__":
     )
 
     assert len(go_terms_not_found) == 0
-    assert len(proteins) == 141
-    assert len(accessions) == 142
+    assert len(proteins) == 142
+    assert len(accessions) == 143
 
     assert accessions["A0A017QRH0"] == "A0A016QRH0"
     assert accessions["A0A016QRH0"] == "A0A016QRH0"

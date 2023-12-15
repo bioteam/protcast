@@ -12,7 +12,7 @@ This implementation uses the Keras library.
 
 ├── doc/
 
-├── preprocessing-scripts/
+├── preprocessing/
 
 ├── test/
 
@@ -38,7 +38,7 @@ of the GO categories.
 For example:
 
 ```
-python preprocessing-scripts/stats/create_dataset_stats.py \
+python preprocessing/stats/create_dataset_stats.py \
   data/dataset/dataset.bin \
   -d data/dataset/stats/ -w
 ```
@@ -51,7 +51,7 @@ Scripts that can provide statistics on datasets.
 
 Schema images.
 
-`preprocessing-scripts`
+`preprocessing`
 
 Contains the scripts to generate the input SimpleDataset.
 
@@ -173,14 +173,14 @@ and save the ontology into a file which can then be deserialized using
 For example:
 
 ```
-python preprocessing-scripts/build_ontology.py \
+python preprocessing/build_ontology.py \
   data/ontology/go_20210901.obo \
   data/ontology/serialized/go.bin
 ```
 
 ## Parsing SwissProt
 
-`preprocessing-scripts/parse_swissprot.py` takes a GO ontology file
+`preprocessing/parse_swissprot.py` takes a GO ontology file
 and a Swissprot database file and converts it into an instance of a `Dataset`
 class. The database was downloaded from:
 https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz.
@@ -189,7 +189,7 @@ Due to file size it is not added to the repository.
 For example:
 
 ```
-python preprocessing-scripts/parse_swissprot.py \
+python preprocessing/parse_swissprot.py \
   data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```

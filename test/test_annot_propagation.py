@@ -23,7 +23,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    dataset = Dataset.from_serialized_file(args.input)
+    dataset = SimpleDataset.from_serialized_file(args.input)
 
     # Original Annot: Q8HZM6 -> GO:0002548
     protein = dataset.proteins.get("Q8HZM6")
