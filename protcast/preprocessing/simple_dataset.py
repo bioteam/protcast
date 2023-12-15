@@ -310,7 +310,7 @@ class SimpleDataset:
         num_annotations_not_labeled_uniprotkb = 0
         num_annotations_labeled_uniprotkb = 0
 
-        logging.info(f"Reading from '{str(self.gaf_path)}'")
+        logging.debug(f"Reading from '{str(self.gaf_path)}'")
         gaf_annotations = parse_gaf(self.gaf_path)
 
         for rec in tqdm(
@@ -387,7 +387,7 @@ class SimpleDataset:
             f"Found {len(trembl_annotations)} 'UniProtKB' annotations not in SwissProt"
         )
         logging.info(
-            f"Made {num_new_swissprot_annots} new annotations for existing SwissProt Proteins"
+            f"Made {num_new_swissprot_annots} new Annotations for existing SwissProt Proteins"
         )
 
         return trembl_annotations
@@ -420,7 +420,7 @@ class SimpleDataset:
         -------
         None
         """
-        logging.info("Adding proteins and annotations from TrEMBL")
+        logging.debug("Adding proteins and annotations from TrEMBL")
 
         with open(self.trembl_path, "r") as trembl_handle:
             self._parse_trembl(trembl_handle, trembl_annotations)
@@ -431,7 +431,8 @@ class SimpleDataset:
         # These databases are not completely in sync at any point in time.
         annotated_trembl_ids = set([x[0] for x in trembl_annotations])
         annotated_trembl_seqs = {}
-        num_found_in_trembl = 0
+        new_proteins_from_trembl = 0
+        new_annotations_from_trembl = 0
 
         for record in tqdm(
             FastaIterator(trembl_handle),
@@ -462,7 +463,7 @@ class SimpleDataset:
             protein = self.proteins.get(primary_accession)
             if protein is None:
                 protein = Protein(primary_accession, str(Seq))
-                num_found_in_trembl += 1
+                new_proteins_from_trembl += 1
                 logging.debug(f"Created new Protein {protein_id} using TrEMBL")
 
                 # The annotation can already exist due to the fact that the
@@ -481,10 +482,12 @@ class SimpleDataset:
                     has_obsolete,
             )
             protein.add_annotation(annotation)
+            new_annotations_from_trembl += 1
             self.proteins[protein.id] = protein
             logging.debug(f"Added Annotation ({go_term_id}, {evidence}) to Protein {protein.id} from TrEMBL")
 
-        logging.info(f"Found {num_found_in_trembl} proteins in TrEMBL")
+        logging.info(f"Made {new_proteins_from_trembl} new Proteins from TrEMBL")
+        logging.info(f"Made {new_annotations_from_trembl} new Annotations from TrEMBL")
 
     def remove_protein(self, protein_id: str) -> None:
         """remove_protein
