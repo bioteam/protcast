@@ -463,7 +463,8 @@ class SimpleDataset:
                 #
                 # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:P68259
                 # UniProtKB	A0A093IGM8	N326_07474	involved_in	GO:0032099	GO_REF:0000024	ISS	UniProtKB:Q3HWX0
-            
+            logging.debug(f"Protein {protein.id} found in TrEMBL")
+
             annotation = Annotation(
                     go_term_id,
                     primary_accession,
@@ -472,6 +473,7 @@ class SimpleDataset:
             )
             protein.add_annotation(annotation)
             self.proteins[protein.id] = protein
+            logging.debug(f"Added Annotation ({go_term_id}, {evidence}) to Protein {protein.id} from TrEMBL")
 
         logging.info(f"Found {num_found_in_trembl} proteins in TrEMBL")
 
