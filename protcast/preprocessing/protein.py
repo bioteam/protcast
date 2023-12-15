@@ -67,10 +67,12 @@ class Protein:
         -------
         None
         """
-        # Check that the pair of GO term and evidence code does not exist
+        # If an Annotation with the pair of GO term and evidence code 
+        # already exists then do not add the incoming Annotation
         protein_annot = self.annotations.get(annot.go_term_id)
         if protein_annot:
-            assert protein_annot.evidence_code != annot.evidence_code
+            if protein_annot.evidence_code == annot.evidence_code:
+                return
         self.annotations[annot.go_term_id] = annot
 
     @typechecked

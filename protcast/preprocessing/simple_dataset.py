@@ -308,6 +308,7 @@ class SimpleDataset:
         num_swissprot_annots = 0
         num_new_swissprot_annots = 0
         num_annotations_not_labeled_uniprotkb = 0
+        num_annotations_labeled_uniprotkb = 0
 
         logging.info(f"Reading from '{str(self.gaf_path)}'")
         gaf_annotations = parse_gaf(self.gaf_path)
@@ -317,6 +318,25 @@ class SimpleDataset:
             desc=f"Processing GOA records from '{str(self.gaf_path)}'",
         ):
             go_term = self.ontology.get_primary_term(rec["GO_ID"])
+
+            # Not "UniProtKB" but can try to get a protein sequence from TrEMBL
+            if rec["DB"] != "UniProtKB":
+                logging.debug(
+                    f"Found protein {rec['DB_Object_ID']} labeled '{rec['DB']} not 'UniProtKB'"
+                )
+                num_annotations_not_labeled_uniprotkb += 1
+                trembl_annotations.append(
+                    (
+                        rec["DB_Object_ID"],
+                        rec["GO_ID"],
+                        rec["Evidence"],
+                        go_term.is_obsolete,
+                    )
+                )
+                continue
+
+            num_annotations_labeled_uniprotkb += 1
+
             # See if the protein is in SwissProt
             if self.accessions.get(rec["DB_Object_ID"]):
                 primary_accession = self.accessions[rec["DB_Object_ID"]]
@@ -350,20 +370,6 @@ class SimpleDataset:
                         go_term.is_obsolete,
                     )
                 )
-            # Not "UniProtKB" but can try to get a protein sequence from TrEMBL
-            if rec["DB"] != "UniProtKB":
-                logging.debug(
-                    f"Found protein {rec['DB_Object_ID']} labeled '{rec['DB']} not 'UniProtKB'"
-                )
-                num_annotations_not_labeled_uniprotkb += 1
-                trembl_annotations.append(
-                    (
-                        rec["DB_Object_ID"],
-                        rec["GO_ID"],
-                        rec["Evidence"],
-                        go_term.is_obsolete,
-                    )
-                )
 
         logging.info(
             f"Found {len(gaf_annotations)} total annotations in '{self.gaf_path}'"
@@ -372,13 +378,16 @@ class SimpleDataset:
             f"Found {num_annotations_not_labeled_uniprotkb} annotations not labelled 'UniProtKB'"
         )
         logging.info(
+            f"Found {num_annotations_labeled_uniprotkb} annotations labelled 'UniProtKB'"
+        )
+        logging.info(
             f"Found {num_swissprot_annots} 'UniProtKB' annotations in Swissprot"
         )
         logging.info(
-            f"Made {num_new_swissprot_annots} new annotations for existing SwissProt Proteins"
+            f"Found {len(trembl_annotations)} 'UniProtKB' annotations not in SwissProt"
         )
         logging.info(
-            f"Found {len(trembl_annotations)} 'UniProtKB' annotations not in SwissProt"
+            f"Made {num_new_swissprot_annots} new annotations for existing SwissProt Proteins"
         )
 
         return trembl_annotations
