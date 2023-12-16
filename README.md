@@ -240,9 +240,16 @@ python3 test_create_simple_dataset.py
 Scripts that can build networks.
 
 ## `utility-scripts`
-Shell scripts. For example, download the 4 input files necessary to build
+Useful scripts. For example, download the 4 input files necessary to build
 a SimpleDataset:
 
 ```
 ./get_simple_dataset_files.sh
 ```
+
+`make_dr_seqs.py`
+Runs the `mash` application to do pairwise protein sequence comparisons using kmers, then runs 
+DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related 
+sequences that are removed to create a "decreased redundancy" (dr) file. If the input file
+is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
+
