@@ -46,7 +46,8 @@ def main():
     parser.add_argument(
         "-v",
         "--verbose",
-        default=True,
+        default=False,
+        action="store_true",
         help="Create DEBUG log",
     )
     args = parser.parse_args()
@@ -64,6 +65,13 @@ def main():
 
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
+
+    # Test TrEMBL parsing
+    trembl_protein = dataset.proteins.get('M5BGM1')
+    annots = trembl_protein.get_all_annotations()
+    len(annots) == 1
+    annots[0].evidence_code == 'IEA'
+    trembl_protein.sequence == 'GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK'
 
     os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
     os.unlink(Path(args.output_dir, "SimpleDataset.log"))

@@ -1,3 +1,5 @@
+import logging
+
 from typeguard import typechecked
 
 from protcast.preprocessing.annotation import Annotation
@@ -67,18 +69,22 @@ class Protein:
         -------
         None
         """
-        # If an Annotation with the pair of GO term and evidence code 
+        # If an Annotation with the same pair of GO term and evidence code
         # already exists then do not add the incoming Annotation
         protein_annot = self.annotations.get(annot.go_term_id)
         if protein_annot:
             if protein_annot.evidence_code == annot.evidence_code:
+                logging.debug(
+                    f"Annotation already exist for Protein {self.id}: "
+                    f"{annot.go_term_id} {annot.evidence_code}"
+                )
                 return
         self.annotations[annot.go_term_id] = annot
 
     @typechecked
     def get_annotation(self, go_term_id: str) -> Annotation | None:
         """get_annotation
-        Get an Annotation given a GO term id
+        Get an Annotation from a Protein given a GO term id
 
         Parameters
         ----------
@@ -132,11 +138,7 @@ class Protein:
         -------
         List of Annotations
         """
-        return [
-            x
-            for x in self.get_all_annotations()
-            if x.evidence_code == "IEA"
-        ]
+        return [x for x in self.get_all_annotations() if x.evidence_code == "IEA"]
 
     def is_manually_annotated(self, go_term_id: str) -> bool | None:
         """is_manually_annotated
