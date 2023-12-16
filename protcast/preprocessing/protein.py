@@ -67,7 +67,7 @@ class Protein:
         -------
         None
         """
-        # If an Annotation with the pair of GO term and evidence code 
+        # If an Annotation with the same pair of GO term and evidence code 
         # already exists then do not add the incoming Annotation
         protein_annot = self.annotations.get(annot.go_term_id)
         if protein_annot:
@@ -78,7 +78,7 @@ class Protein:
     @typechecked
     def get_annotation(self, go_term_id: str) -> Annotation | None:
         """get_annotation
-        Get an Annotation given a GO term id
+        Get an Annotation from a Protein given a GO term id
 
         Parameters
         ----------

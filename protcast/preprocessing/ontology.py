@@ -706,6 +706,9 @@ class Ontology:
         self.populate_ontology_levels()
         self.populate_ontology_ancestry()
 
+        logging.info(f"Found {len(self.terms.values())} total GO ids "
+                     f"and alt_ids in '{go_file}'")
+
         for term in self.terms.values():
             assert term.name
             for parent in term.get_parents():
@@ -728,6 +731,7 @@ class Ontology:
         """
         if not goterm_lines:
             return
+        num_go_terms = 0
         header = goterm_lines[0]
 
         if header != "[Term]":
@@ -740,6 +744,7 @@ class Ontology:
         for line in goterm_lines:
             if line.startswith("id:"):
                 term_id = line.split(":", 1)[1].strip()
+                num_go_terms += 1
                 continue
             if line.startswith("name:"):
                 name = line.split(":", 1)[1].strip()
@@ -832,7 +837,7 @@ class Ontology:
     @typechecked
     def get_term(self, term_id: str) -> GOTerm | None:
         """get_terms
-        Return GOTerm given an id or None
+        Return GOTerm given a GO term id or None
 
         Parameters
         ----------
@@ -848,7 +853,7 @@ class Ontology:
     @typechecked
     def get_primary_term(self, node_id: str) -> GOTerm | None:
         """get_primary_term
-        Get primary GOTerm or None
+        Get primary GOTerm or None given a GO term id
 
         Parameters
         ----------
@@ -934,7 +939,7 @@ class Ontology:
     @classmethod
     def load_ontology(cls, input_file: str) -> Ontology:
         """load_ontology
-        Reads serialized ontology file
+        Read serialized ontology file
 
         Parameters
         ----------
