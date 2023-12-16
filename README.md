@@ -2,90 +2,17 @@
 
 
 
-# Implementation
-
+# Model
 This implementation uses the Keras library.
 
-# Repo Organization
-
-├- protcast/
-
-├── doc/
-
-├── preprocessing/
-
-├── test/
-
-├── training-scripts/
-
-├── utility-scripts/
-
-## protcast/
-
-`protcast/model`
-
-
-
-`protcast/preprocessing`
-
-Contains the code that parses the raw data, builds the python
-structures to represent the inputs for the model and converts them into a
-format that can be used to feed the model for training. More specifically:
-
-- It contains the code that parses the GO database and creates a DAG for each
-of the GO categories.
-
-For example:
-
-```
-python preprocessing/stats/create_dataset_stats.py \
-  data/dataset/dataset.bin \
-  -d data/dataset/stats/ -w
-```
-
-`protcast/stats`
-
-Scripts that can provide statistics on datasets.
-
-`doc`
-
-Schema images.
-
-`preprocessing`
-
-Contains the scripts to generate the input SimpleDataset.
-
-Pre-processing converts the data from the source databases (UniprotKB/GO/GOA)
-into the proper format to be fed to model for training, evaluation and
-prediction. The preprocessing consists of:
-
-  - Parsing the Gene Ontology (GO) database and creating a representation
-    of it.
-  - Parsing the UniprotKB databse and create a representation of the proteins
-    in along with its annotations.
-  - Given the two representations above, create the submodels that make up
-    network. This will be determined from the category of the GO term, its
-    number of associations and its level in the tree.
-  - Generating the feature vectors from the protein sequences. Initially,
-    CTriad will be used.
-  - Split of the dataset into training/validation/test datasets.
-
-`test`
-
-Simple test scripts.
-
-`training-scripts`
-
-Scripts that can build  networks.
 
 # Environment
 
 ## imblearn Package
 
-This repository uses the MLSMOTE algorithm which is currently not part of the
+This code uses the MLSMOTE algorithm which is currently not part of the
 latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
-necessary to install it from a custom branch. Inside the conda environment
-created for this project, follow the steps:
+necessary to install it from a custom branch. To install follow these steps:
 
 1. Clone the `balvisio` fork of imblearn:
 ```
@@ -94,12 +21,13 @@ git clone git@github.com:balvisio/imbalanced-learn.git
 
 2. Checkout the `ba/MLSMOTE` branch:
 ```
+cd imbalanced-learn/
 git checkout ba/MLSMOTE
 ```
 
 3. Install the library from local
 ```
-pip install .
+python3 -m pip install .
 ```
 
 # Usage
@@ -112,15 +40,18 @@ Files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`.
 
 ### UniProtKB/Swiss-Prot Database
 
+# Background
 
+## Source files
 
-### UniProtKB/TrEMBL Database
+### SwissProt
+
+### UniProtKB/TrEMBL 
 The UniProt/TrEMBL database is used to retrieve the AA sequences of proteins
 that are annotated in the UniProt-GOA database. Due to its size it is not
 tracked in this repository. The latest release of the database can be found
 [here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz)
 and it was used to obtain the sequences found in UniProt-GOA database.
-
 
 ### Gene Ontology (GO)
 The Gene Ontology databases `(.obo)` are downloaded from:
@@ -128,7 +59,6 @@ The Gene Ontology databases `(.obo)` are downloaded from:
 https://release.geneontology.org
 
 #### UniProt-GOA
-
 UniProt-GOA is a database that links the Gene Ontology database described
 above with gene products (i.e. genes and any entities encoded by the gene
 such as protein or functional RNAs)[2]. These links are what the Gene Ontology
@@ -160,7 +90,6 @@ The steps to build the dataset to the model are:
 
 
 ## Building the Ontology
-
 Generating the ontology: `protcast/preprocessing/ontology.py` takes a GO
 ontology (that can be downloaded from: http://current.geneontology.org/ontology/go.obo)
 and creates an instance of the `Ontology` class.
@@ -168,15 +97,16 @@ In addition, the script can also serialize
 and save the ontology into a file which can then be deserialized using
 `load_ontology()`.
 
-`test/data/` directory contains an `.obo`.
+### Ontology
+The GO terms are generated from parsing an `.obo` file and the following data
+is obtained:
 
-For example:
-
-```
-python preprocessing/build_ontology.py \
-  data/ontology/go_20210901.obo \
-  data/ontology/serialized/go.bin
-```
+- GO term id
+- GO term namespaces: biological process (BP), cellular component (CC),
+  molecular funcion (MF)
+- GO term parents
+- GO term is obsolete. Check for the presence of the line starting with
+  "is obsolete:"
 
 ## Parsing SwissProt
 
@@ -189,22 +119,10 @@ Due to file size it is not added to the repository.
 For example:
 
 ```
-python preprocessing/parse_swissprot.py \
+python3 preprocessing/parse_swissprot.py \
   data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```
-
-## Ontology
-
-The GO terms are generated from parsing an `.obo` file and the following data
-is obtained:
-- GO term id
-- GO term namespaces: biological process (BP), cellular component (CC),
-  molecular funcion (MF)
-- GO term parents
-- GO term is obsolete. Check for the presence of the line starting with
-  "is obsolete:"
-
 
 
 - Feature vector name: There are multiple feature vectors that can be
@@ -216,24 +134,115 @@ is obtained:
   proteins will belong to the same bucket when creating the submodels (dense
   networks). Idem, for 100 to 200, 200 to 500 and more than 500.
 
-## GOTerm Class
+# Classes
 
+## GOTerm Class
+This class ...
 
 ## Annotation Class
-
+This class ...
 
 ## GODAG Class
-
-A class to represent a typical OBO ontology and present relevant methods.
+This class represents a typical OBO ontology and present relevant methods.
 
 ## Ontology Class
-
 This class reads input files and creates a GODAG for each of the GO namespaces.
+
+## Protein Classes
+This class ...
+
+## SimpleDataset Class
+This class ...
+
+## UML Component Diagrams
+The UML diagrams were generated using the online tool: http://www.plantuml.com/
 
 The following digram describes the sources:
 
 ![Alt text](dataset_generation.png?raw=true)
 
-## UML Component Diagrams
+# Repo Organization
 
-The UML diagrams were generated using the online tool: http://www.plantuml.com/
+├- protcast/
+
+├── doc/
+
+├── preprocessing/
+
+├── test/
+
+├── training-scripts/
+
+├── utility-scripts/
+
+## `protcast``
+
+`protcast/model`
+
+`protcast/preprocessing`
+
+
+
+`protcast/stats`
+
+Scripts that can provide statistics on datasets.
+
+## `doc`
+
+Schema images.
+
+## `preprocessing`
+
+Contains the code that parses the raw data, builds the python
+structures to represent the inputs for the model and converts them into a
+format that can be used to feed the model for training. More specifically:
+
+- It contains the code that parses the GO database and creates a DAG for each
+of the GO categories.
+
+For example:
+
+```
+python preprocessing/stats/create_dataset_stats.py \
+  data/dataset/dataset.bin \
+  -d data/dataset/stats/ -w
+``` 
+
+Contains the scripts to generate the input SimpleDataset.
+
+Pre-processing converts the data from the source databases (UniprotKB/GO/GOA)
+into the proper format to be fed to model for training, evaluation and
+prediction. The preprocessing consists of:
+
+  - Parsing the Gene Ontology (GO) database and creating a representation
+    of it.
+  - Parsing the UniprotKB databse and create a representation of the proteins
+    in along with its annotations.
+  - Given the two representations above, create the submodels that make up
+    network. This will be determined from the category of the GO term, its
+    number of associations and its level in the tree.
+  - Generating the feature vectors from the protein sequences. Initially,
+    CTriad will be used.
+  - Split of the dataset into training/validation/test datasets.
+
+## `test`
+Simple test scripts. `test/data/` directory contains an `.obo` file and small, 
+representative test files. For example:
+
+```
+cd test/
+python3 test_build_ontology.py
+python3 test_gaf_parser.py
+python3 test_create_simple_dataset.py
+```
+
+## `training-scripts`
+Scripts that can build networks.
+
+## `utility-scripts`
+Shell scripts. For example, download the 4 input files necessary to build
+a SimpleDataset:
+
+```
+./get_simple_dataset_files.sh
+```
