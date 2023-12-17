@@ -69,7 +69,7 @@ class Protein:
         -------
         None
         """
-        # If an Annotation with the same pair of GO term and evidence code
+        # If an Annotation with the same pair of GO term and evidence code 
         # already exists then do not add the incoming Annotation
         protein_annot = self.annotations.get(annot.go_term_id)
         if protein_annot:

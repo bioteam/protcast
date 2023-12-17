@@ -15,7 +15,7 @@ sys.path.append(str(package_root_directory))
 from protcast.model.protcast import Deepred
 
 from protcast import BP, CC, MF
-from protcast.preprocessing.oracle_dataset import OracleDataset
+from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 def main():
@@ -85,3 +85,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+"""
+Feature vector of k-mers plus "linkage" - connected sequence - of k-mers
+"""
