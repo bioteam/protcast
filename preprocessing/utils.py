@@ -8,7 +8,7 @@ from typeguard import typechecked
 
 @typechecked
 def get_protein_feature(
-    feature: str, seqs: list[Seq], pids: list[str]
+    feature: str, seqs: list[str], pids: list[str]
 ) -> list[list[float]]:
     """get_protein_feature
     Returns a list of arrays or "feature vectors" using ifeatpro
@@ -36,8 +36,7 @@ def get_protein_feature(
     get_feature(tmpfasta.name, feature, tmpdir.name)
     with open(os.path.join(tmpdir.name, feature + ".csv")) as f:
         features = [
-            [float(x) for x in line.split(",")[1:]]
-            for line in f.readlines()
+            [float(x) for x in line.split(",")[1:]] for line in f.readlines()
         ]
     return features
 

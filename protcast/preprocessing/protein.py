@@ -69,7 +69,7 @@ class Protein:
         -------
         None
         """
-        # If an Annotation with the same pair of GO term and evidence code 
+        # If an Annotation with the same pair of GO term and evidence code
         # already exists then do not add the incoming Annotation
         protein_annot = self.annotations.get(annot.go_term_id)
         if protein_annot:
@@ -138,7 +138,9 @@ class Protein:
         -------
         List of Annotations
         """
-        return [x for x in self.get_all_annotations() if x.evidence_code == "IEA"]
+        return [
+            x for x in self.get_all_annotations() if x.evidence_code == "IEA"
+        ]
 
     def is_manually_annotated(self, go_term_id: str) -> bool | None:
         """is_manually_annotated

@@ -9,7 +9,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.dataset import Dataset
+from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 def main():
@@ -85,10 +85,10 @@ def main():
 
     if args.file:
         logging.info(f"Deserializing dataset from file: {args.file}")
-        dataset = Dataset.from_serialized_file(args.file)
+        dataset = SimpleDataset.from_serialized_file(args.file)
     else:
         logging.info(f"Building dataset from input DBs.")
-        dataset = Dataset(
+        dataset = SimpleDataset(
             Path(args.ontology),
             Path(args.swissprot_t0),
             Path(args.swissprot_t1),
