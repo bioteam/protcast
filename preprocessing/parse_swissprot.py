@@ -8,7 +8,7 @@ from pathlib import Path
 from Bio import SwissProt
 
 from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.ontology import Ontology
+from protcast.preprocessing.ontology import Ontology, GOTerm
 from protcast.preprocessing.protein import Protein
 
 
@@ -99,24 +99,22 @@ def parse_swissprot(
                 # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
                 # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
                 if ref[0] == "GO":
-                    go_term = ref[1]
+                    go_term_id = ref[1]
                     evidence_code = ref[3].split(":")[0]
-                    primary_go_term = ontology.get_primary_term(
-                        go_term
-                    )
+                    primary_go_term = ontology.get_primary_term(go_term_id)
                     if not primary_go_term:
                         logging.error(
-                            f"GO Term {go_term} found in SwissProt but not "
+                            f"GO Term {go_term_id} found in SwissProt but not "
                             "found in ontology"
                         )
-                        go_terms_not_found.add(go_term)
+                        go_terms_not_found.add(go_term_id)
                     else:
                         annot = Annotation(
-                                    go_term,
-                                    protein.id,
-                                    evidence_code,
-                                    primary_go_term.is_obsolete,
-                                )
+                            go_term_id,
+                            protein.id,
+                            evidence_code,
+                            primary_go_term,
+                        )
                         protein.add_annotation(annot)
                         num_annotations += 1
 

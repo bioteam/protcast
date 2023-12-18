@@ -275,12 +275,14 @@ class SimpleDataset:
                 for ancestor in go_term_ancestors:
                     ancestor_annot = protein.get_annotation(ancestor)
                     if not ancestor_annot:
-                        ancestor_go_term = self.ontology.get_primary_term(ancestor)
+                        ancestor_go_term = self.ontology.get_primary_term(
+                            ancestor
+                        )
                         ancestor_annot = Annotation(
                             ancestor_go_term.id,
                             protein.id,
                             annot.evidence_code,
-                            ancestor_go_term.is_obsolete,
+                            ancestor_go_term,
                         )
                         protein.add_annotation(ancestor_annot)
                     else:
@@ -331,7 +333,7 @@ class SimpleDataset:
                         rec["DB_Object_ID"],
                         rec["GO_ID"],
                         rec["Evidence"],
-                        go_term.is_obsolete,
+                        go_term,
                     )
                 )
                 continue
@@ -350,7 +352,7 @@ class SimpleDataset:
                         rec["GO_ID"],
                         primary_accession,
                         rec["Evidence"],
-                        go_term.is_obsolete,
+                        go_term,
                     )
                     self.proteins[primary_accession].add_annotation(annot)
                     logging.debug(
@@ -445,8 +447,12 @@ class SimpleDataset:
                 self.accessions[accession] = accession
                 annotated_trembl_seqs[accession] = str(record.seq)
 
-        for annot in tqdm(trembl_annotations, desc=f"Processing records from '{trembl_handle.name}'"):
+        for annot in tqdm(
+            trembl_annotations,
+            desc=f"Processing records from '{trembl_handle.name}'",
+        ):
             protein_id, go_term_id, evidence, has_obsolete = annot
+            go_term = self.ontology.get_primary_term(go_term_id)
 
             primary_accession = self.accessions.get(protein_id)
             sequence = annotated_trembl_seqs.get(primary_accession)
@@ -460,7 +466,9 @@ class SimpleDataset:
             # Make a new Protein if it does not exist
             protein = self.proteins.get(primary_accession)
             if protein is None:
-                protein = Protein(primary_accession, annotated_trembl_seqs[primary_accession])
+                protein = Protein(
+                    primary_accession, annotated_trembl_seqs[primary_accession]
+                )
                 new_proteins_from_trembl += 1
                 logging.debug(f"Created new Protein {protein_id} using TrEMBL")
 
@@ -474,18 +482,24 @@ class SimpleDataset:
             logging.debug(f"Protein {protein.id} found in TrEMBL")
 
             annotation = Annotation(
-                    go_term_id,
-                    primary_accession,
-                    evidence,
-                    has_obsolete,
+                go_term_id,
+                primary_accession,
+                evidence,
+                go_term,
             )
             protein.add_annotation(annotation)
             new_annotations_from_trembl += 1
             self.proteins[protein.id] = protein
-            logging.debug(f"Added Annotation ({go_term_id}, {evidence}) to Protein {protein.id} from TrEMBL")
+            logging.debug(
+                f"Added Annotation ({go_term_id}, {evidence}) to Protein {protein.id} from TrEMBL"
+            )
 
-        logging.info(f"Made {new_proteins_from_trembl} new Proteins from TrEMBL")
-        logging.info(f"Made {new_annotations_from_trembl} new Annotations from TrEMBL")
+        logging.info(
+            f"Made {new_proteins_from_trembl} new Proteins from TrEMBL"
+        )
+        logging.info(
+            f"Made {new_annotations_from_trembl} new Annotations from TrEMBL"
+        )
 
     def remove_protein(self, protein_id: str) -> None:
         """remove_protein
@@ -515,7 +529,9 @@ class SimpleDataset:
         """
         os.makedirs(self.output_dir, exist_ok=True)
         formatter = logging.Formatter("%(levelname)s | %(message)s")
-        file_handler = logging.FileHandler(self.output_dir / "SimpleDataset.log")
+        file_handler = logging.FileHandler(
+            self.output_dir / "SimpleDataset.log"
+        )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 

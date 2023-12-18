@@ -1,6 +1,8 @@
 from typeguard import typechecked
 import logging
 
+from protcast.preprocessing.ontology import GOTerm
+
 
 class Annotation:
     """Annotation
@@ -67,6 +69,8 @@ class Annotation:
         ....
     has_obsolete: bool
         Has an obsolete GO term
+    has_leaf: bool
+        Has a leaf GO term
 
     Methods
     -------
@@ -76,7 +80,11 @@ class Annotation:
 
     @typechecked
     def __init__(
-        self, go_term_id: str, protein_id: str, evidence_code: str, has_obsolete: bool
+        self,
+        go_term_id: str,
+        protein_id: str,
+        evidence_code: str,
+        go_term: GOTerm,
     ) -> None:
         """__init__
         Initialize Annotation
@@ -89,7 +97,7 @@ class Annotation:
             ...
         evidence_code: str
             ...
-        has_obsolete: bool
+        go_term: GOTerm
             ...
 
         Returns
@@ -128,7 +136,14 @@ class Annotation:
         self.go_term_id = go_term_id
         self.protein_id = protein_id
         self.evidence_code = evidence_code
-        self.has_obsolete = has_obsolete
+
+        self.has_obsolete = go_term.is_obsolete
+
+        children = go_term.get_children()
+        if children:
+            self.has_leaf = False
+        else:
+            self.has_leaf = True
 
         if self.evidence_code == "IEA":
             self.is_manual = False
