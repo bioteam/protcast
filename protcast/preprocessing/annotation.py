@@ -6,11 +6,12 @@ from protcast.preprocessing.ontology import GOTerm
 
 class Annotation:
     """Annotation
-    Annotation objects link one protein and one GO term and store
-    the evidence code for the GO annotation. The code determines
-    if *is_manual* is True or False.
+    The Annotation object links one protein, one GO term and one evidence
+    code. The Annotation also stores the Boolean for *is_manual*, *has_leaf*
+    (GO term) and *has_obsolete* (GO term).
 
-    Evidence Codes for Annotations (see https://geneontology.org/docs/guide-go-evidence-codes/)
+    All codes are 'manual' except for 'IEA'. Evidence Codes for Annotations
+    (https://geneontology.org/docs/guide-go-evidence-codes/):
 
     Experimental evidence:
 
