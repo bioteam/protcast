@@ -110,7 +110,6 @@ def parse_swissprot(
                         go_terms_not_found.add(go_term_id)
                     else:
                         annot = Annotation(
-                            go_term_id,
                             protein.id,
                             evidence_code,
                             primary_go_term,

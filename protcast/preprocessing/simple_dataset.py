@@ -279,7 +279,6 @@ class SimpleDataset:
                             ancestor
                         )
                         ancestor_annot = Annotation(
-                            ancestor_go_term.id,
                             protein.id,
                             annot.evidence_code,
                             ancestor_go_term,
@@ -333,7 +332,7 @@ class SimpleDataset:
                         rec["DB_Object_ID"],
                         rec["GO_ID"],
                         rec["Evidence"],
-                        go_term,
+                        go_term.is_obsolete,
                     )
                 )
                 continue
@@ -349,7 +348,6 @@ class SimpleDataset:
                 # Do not have the Annotation so add it to the Protein
                 else:
                     annot = Annotation(
-                        rec["GO_ID"],
                         primary_accession,
                         rec["Evidence"],
                         go_term,
@@ -482,7 +480,6 @@ class SimpleDataset:
             logging.debug(f"Protein {protein.id} found in TrEMBL")
 
             annotation = Annotation(
-                go_term_id,
                 primary_accession,
                 evidence,
                 go_term,

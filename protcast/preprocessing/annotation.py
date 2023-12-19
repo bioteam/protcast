@@ -82,7 +82,6 @@ class Annotation:
     @typechecked
     def __init__(
         self,
-        go_term_id: str,
         protein_id: str,
         evidence_code: str,
         go_term: GOTerm,
@@ -92,8 +91,6 @@ class Annotation:
 
         Parameters
         ----------
-        go_term_id: str
-            ...
         protein_id: str
             ...
         evidence_code: str
@@ -134,7 +131,7 @@ class Annotation:
             "ND",
         ]
 
-        self.go_term_id = go_term_id
+        self.go_term_id = go_term.id
         self.protein_id = protein_id
         self.evidence_code = evidence_code
 
