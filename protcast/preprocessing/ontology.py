@@ -23,25 +23,23 @@ class GOTerm:
         ....
     namespace: str
         GO namespace
-    id: str
-        ....
     name: str
         ....
     primary: Boolean
-        A primary term is the most specific and detailed description of gene or 
+        A primary term is the most specific and detailed description of gene or
         gene product functions. Usually found in the lowest level of the tree.
     is_obsolete: Boolean
         ....
     level: int
-        Level in ontology tree, starting at level 0 (Molecular Function, 
+        Level in ontology tree, starting at level 0 (Molecular Function,
         Biological Process, Cellular Component)
-    parents:
-        ...
+    parents: dict
+        Key is id, value is GOTerm
     children:
         ...
     ancestors:
         ...
-    annotations:
+    annotations: list
         ...
 
     Methods
@@ -49,26 +47,27 @@ class GOTerm:
     init:
         Initialize
     add_parent:
-        ....
+        ...
     get_parents:
-        ....
+        ...
     add_child:
-        ....
+        ...
     get_children:
-        ....
+        ...
     get_primary:
-        ....
+        ...
     is_primary:
-        ....
+        ...
     set_level:
-        ....
+        ...
     __lt__:
-        ....
+        ...
     __gt__:
-        ....
+        ...
     __eq__:
-        ....
-    to_text
+        ...
+    to_text:
+        ...
     """
 
     @typechecked
@@ -109,12 +108,12 @@ class GOTerm:
         self.is_obsolete = is_obsolete
         self.parents = {}
         self.children = {}
-        self.annotations = {}
+        self.annotations = []
         self.level = level
         self.ancestors: list[str] = None
 
     def add_parent(self, parent: GOTerm) -> None:
-        """add_parentf
+        """add_parent
         Add parent id to term
 
         Parameters
@@ -303,9 +302,7 @@ class GOTerm:
         Str
         """
         annots = len(self.get_non_obsolete_annotations())
-        manual_annots = len(
-            self.get_manual_non_obsolete_annotations()
-        )
+        manual_annots = len(self.get_manual_non_obsolete_annotations())
 
         return (
             f"{self.id}\t{self.level}\t{manual_annots}\t"
@@ -316,12 +313,12 @@ class GOTerm:
 
 class GODAG:
     """GODAG
-    This class represent an acyclic tree of GOTerms
+    This class represents an acyclic tree of GOTerms
 
     Attributes
     ----------
     name: str
-        Name of tree
+        Name of tree (BP, MF, CC)
     nodes: dict
         Keys are ids, values are GOTerms
 
@@ -358,7 +355,7 @@ class GODAG:
         Parameters
         ----------
         name: str
-            ...
+            MF, BP, or CC
         nodes: dict
             Keys are ids, values are GOTerms
 
@@ -402,7 +399,7 @@ class GODAG:
 
     def populate_node_ancestors(self) -> None:
         """populate_node_ancestors
-        Set ancestors of self to a list of ids.
+        Set ancestors of self to a list of ids
 
         Parameters
         ----------
@@ -417,9 +414,7 @@ class GODAG:
             if node.ancestors is None:
                 self.populate_node_ancestors_inner(node)
 
-    def populate_node_ancestors_inner(
-        self, node: GOTerm
-    ) -> list[str]:
+    def populate_node_ancestors_inner(self, node: GOTerm) -> list[str]:
         """populate_node_ancestors_inner
         Recursive method that gets ids of all ancestors (parents)
         of given node.
@@ -437,9 +432,7 @@ class GODAG:
         for parent in node.get_parents():
             parent_ancestors = parent.ancestors
             if parent_ancestors is None:
-                parent_ancestors = self.populate_node_ancestors_inner(
-                    parent
-                )
+                parent_ancestors = self.populate_node_ancestors_inner(parent)
 
             ancestors.update(parent_ancestors)
             ancestors.add(parent.id)
@@ -470,9 +463,7 @@ class GODAG:
                 if not node.level:
                     primary_node = node.get_primary()
                     if not primary_node.level:
-                        self.populate_node_levels_inner(
-                            primary_node, stack
-                        )
+                        self.populate_node_levels_inner(primary_node, stack)
                     node.set_level(primary_node.level)
             assert not stack
 
@@ -495,9 +486,7 @@ class GODAG:
         Int
         """
         if node in stack:
-            print(
-                f"Found a cycle with term: {node.id} in tree: {self.name}"
-            )
+            print(f"Found a cycle with term: {node.id} in tree: {self.name}")
             print(f"Stack: {[x.id for x in stack]}")
             exit(1)
 
@@ -570,9 +559,7 @@ class GODAG:
         None
         """
         term_output_path = output_path + f"_{self.name}_term.tsv"
-        relationship_output_path = (
-            output_path + f"_{self.name}_rel.tsv"
-        )
+        relationship_output_path = output_path + f"_{self.name}_rel.tsv"
 
         with open(term_output_path, "w") as term_file:
             for term in self.nodes.values():
@@ -583,9 +570,7 @@ class GODAG:
             for term in self.nodes.values():
                 if not term.is_obsolete and term.is_primary():
                     for parent in term.get_parents():
-                        rel_file.write(
-                            term.id + "\tis_a\t" + parent.id + "\n"
-                        )
+                        rel_file.write(term.id + "\tis_a\t" + parent.id + "\n")
 
     @typechecked
     def get_valid_terms(self) -> list[GOTerm]:
@@ -623,9 +608,7 @@ class GODAG:
         -------
         List of GOTerms
         """
-        return sorted(
-            filter(lambda x: x.is_obsolete, self.nodes.values())
-        )
+        return sorted(filter(lambda x: x.is_obsolete, self.nodes.values()))
 
 
 class Ontology:
@@ -692,9 +675,7 @@ class Ontology:
 
         goterm_lines = []
 
-        for line in tqdm(
-            lines, desc=f"Processing GO terms from '{go_file}'"
-        ):
+        for line in tqdm(lines, desc=f"Processing GO terms from '{go_file}'"):
             # Look for end of Term
             if line == "":
                 self.process_go_term(goterm_lines)
@@ -706,8 +687,10 @@ class Ontology:
         self.populate_ontology_levels()
         self.populate_ontology_ancestry()
 
-        logging.info(f"Found {len(self.terms.values())} total GO ids "
-                     f"and alt_ids in '{go_file}'")
+        logging.info(
+            f"Found {len(self.terms.values())} total GO ids "
+            f"and alt_ids in '{go_file}'"
+        )
 
         for term in self.terms.values():
             assert term.name
@@ -773,12 +756,12 @@ class Ontology:
 
         go_node = self.get_term(term_id)
         if go_node is None:
-            go_node = GOTerm(
-                term_id, namespace, name, None, None, is_obsolete
-            )
+            go_node = GOTerm(term_id, namespace, name, None, None, is_obsolete)
         else:
             assert not is_obsolete  # A parent node cannot be obsolete
-            go_node.is_obsolete = is_obsolete  # For cases where the Term was created as a parent
+            go_node.is_obsolete = (
+                is_obsolete  # For cases where the Term was created as a parent
+            )
             go_node.name = name
 
         for parent in parents:

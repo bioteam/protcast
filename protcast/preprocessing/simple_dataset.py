@@ -34,6 +34,8 @@ class SimpleDataset:
         ....
     accessions: dict
         ...
+    ontology: Ontology
+        ...
     go_terms_not_found: list
         ...
     ontology_path: Path
@@ -45,6 +47,8 @@ class SimpleDataset:
     gaf_path: Path
         ...
     output_dir: Path
+        ...
+    created_at: Datetime
         ...
     verbose: bool
         ...
@@ -75,6 +79,8 @@ class SimpleDataset:
         ...
     md5:
         Get MD5 checksums
+    to_obo:
+        Write an OBO Flat file
     """
 
     @typechecked
@@ -531,6 +537,61 @@ class SimpleDataset:
         )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
+
+    def to_obo(self, output_dir):
+        """to_obo
+        Write a "terms.obo" OBO Flat file for all primary and non-obsolete GO terms.
+        The protein identifiers from all the are written as *xref* values.
+
+        [Term]
+        id: GO:0000049
+        name: tRNA binding
+        namespace: molecular_function
+        is_a: GO:0003723
+        xref: P99087
+        xref: Q23399
+
+        Parameters
+        ----------
+        output_dir: Path
+            Location of output *obo file
+
+        Returns
+        -------
+        None
+        """
+        # Keys are GO ids, values is a list of Annotations using that GO term
+        all_go_terms = {}
+        for protein in self.proteins.values():
+            for annot in protein.get_all_annotations():
+                if not annot.go_term_id in all_go_terms:
+                    all_go_terms[annot.go_term_id] = []
+                all_go_terms[annot.go_term_id].append(annot)
+
+        obo_output_path = output_dir + "terms.obo"
+
+        with open(obo_output_path, "w") as obo_file:
+            obo_file.write(
+                "format-version: 1.2\ndefault-namespace: gene_ontology\nontology: go\n\n"
+            )
+            for go_term_id in all_go_terms.keys():
+                term = self.ontology.get_primary_term(go_term_id)
+                if not term.is_obsolete:
+                    obo_file.write(
+                        "[Term]"
+                        + "\nid: "
+                        + term.id
+                        + "\nname: "
+                        + term.name
+                        + "\nnamespace: "
+                        + term.namespace
+                        + "\n"
+                    )
+                for parent in term.parents.keys():
+                    obo_file.write("is_a: " + parent + "\n")
+                for annot in all_go_terms[go_term_id]:
+                    obo_file.write("xref: " + annot.protein_id + "\n")
+                obo_file.write("\n")
 
 
 def md5(file_path: str) -> str:
