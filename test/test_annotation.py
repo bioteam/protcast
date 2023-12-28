@@ -51,3 +51,6 @@ if __name__ == "__main__":
     assert protein1.has_annotation(annot2)
     assert protein1.has_annotation(annot3)
     assert protein1.has_annotation(annot4)
+
+    assert len(protein1.get_all_go_ids()) == 3
+    assert len(set(protein1.get_all_go_ids())) == 2

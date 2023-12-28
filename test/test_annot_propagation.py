@@ -25,12 +25,13 @@ if __name__ == "__main__":
 
     dataset = SimpleDataset.from_serialized_file(args.input)
 
-    # Original Annot: Q8HZM6 -> GO:0002548
-    protein = dataset.proteins.get("Q8HZM6")
+    # A0A098C095 is annotation with a single GO term (GO:0009289)
+    protein = dataset.proteins.get("A0A098C095")
+    # ['GO:0005575', 'GO:0110165', 'GO:0042995']
     go_term_ancestors = dataset.ontology.get_primary_term(
-        "GO:0002548"
+        "GO:0009289"
     ).ancestors
+    # {'GO:0009289', 'GO:0005575', 'GO:0110165', 'GO:0042995'}
+    go_ids = set(protein.get_all_go_ids())
 
-    protein_annots = set(protein.annotations.keys())
-
-    assert protein_annots.issuperset(go_term_ancestors)
+    assert go_ids.issuperset(go_term_ancestors)

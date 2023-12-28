@@ -102,7 +102,6 @@ class Protein:
         for annot in self.get_all_annotations():
             if annot.go_term_id == go_term_id:
                 return annot
-        return None
 
     @typechecked
     def get_all_annotations(self) -> list[Annotation]:
@@ -132,6 +131,20 @@ class Protein:
         List of Annotations
         """
         return [x for x in self.get_all_annotations() if x.is_manual]
+
+    def get_all_go_ids(self) -> list[str]:
+        """get_all_go_ids
+        Get all GO ids from all Annotations
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        List of GO ids
+        """
+        return [x.go_term_id for x in self.get_all_annotations()]
 
     def get_electronic_annotations(self) -> list[Annotation]:
         """get_electronic_annotations
