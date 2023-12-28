@@ -92,10 +92,10 @@ class GOTerm:
             GO term name
         primary: Boolean
             Is primary or not
-        is_obsolete: Boolean
-            Default: false
         level: int
             GO tree level
+        is_obsolete: Boolean
+            Default: false
 
         Returns
         -------

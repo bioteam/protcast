@@ -46,6 +46,13 @@ def parse_gaf(gaf_file: Path) -> list[dict[str, dict[str, str]]]:
 
     402, 5952, 310418 entries, respectively. RNAcentral is a non-coding RNA database.
 
+    Note that records can be almost identical, except for the "DB:Reference" and "With":
+    
+    UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0016021	GO_REF:0000043	IEA	UniProtKB-KW:KW-0812	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211010	UniProt		
+    UniProtKB	A0A016QRH0	DEIPH_ctg017orf0080	located_in	GO:0016021	GO_REF:0000002	IEA	InterPro:IPR004772	C	K+ transporter Trk	DEIPH_ctg017orf0080	protein	taxon:1476583	20211009	InterPro		
+
+    These lines will create identical Annotations.
+    
     Parameters
     ----------
     gaf_file: Path

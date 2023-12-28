@@ -26,3 +26,5 @@ if __name__ == "__main__":
     assert len(annotations) == 995
     assert annotations[0]["DB_Object_ID"] == "A0A1Z4V764"
     assert annotations[990]["DB_Object_ID"] == "A0A6N9GJR9"
+    assert annotations[994]["DB_Object_ID"] == "M5BGM1"
+    assert annotations[994]["GO_ID"] == "GO:0046872"

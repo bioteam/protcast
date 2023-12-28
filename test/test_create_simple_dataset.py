@@ -50,14 +50,30 @@ def main():
         action="store_true",
         help="Create DEBUG log",
     )
+    parser.add_argument(
+        "-r",
+        "--remove",
+        default=False,
+        action="store_true",
+        help="Remove files",
+    )
+    parser.add_argument(
+        "-n",
+        "--no_propogate",
+        default=False,
+        action="store_true",
+        help="Propogate annotations",
+    )
     args = parser.parse_args()
 
+    # This must be run with "-n", without propogation
     dataset = SimpleDataset(
         Path(args.ontology),
         Path(args.swissprot),
         Path(args.trembl),
         Path(args.gaf),
         Path(args.output_dir),
+        args.no_propogate,
         args.verbose,
     )
 
@@ -66,19 +82,33 @@ def main():
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
 
+    # Test Swissprot and *gaf parsing
+    # There are near-duplicate lines for A0A016QRH0 in the *gaf file
+    sw_protein = dataset.proteins.get("A0A016QRH0")
+    assert len(sw_protein.annotations) == 10
+    annots = sw_protein.get_all_annotations()
+    assert len(annots) == 10
+    assert annots[0].evidence_code == "IEA"
+    assert annots[0].is_manual == False
+    assert annots[2].go_term_id == "GO:0015379"
+    manuals = sw_protein.get_manual_annotations()
+    assert manuals == []
+    assert len(sw_protein.get_electronic_annotations()) == 10
+
     # Test TrEMBL parsing
     trembl_protein = dataset.proteins.get("M5BGM1")
     annots = trembl_protein.get_all_annotations()
-    len(annots) == 1
-    annots[0].evidence_code == "IEA"
+    assert len(annots) == 1
+    assert annots[0].evidence_code == "IEA"
     trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
 
     dataset.to_obo(args.output_dir)
     assert os.path.isfile(Path(args.output_dir, "terms.obo"))
 
-    os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
-    os.unlink(Path(args.output_dir, "SimpleDataset.log"))
-    os.unlink(Path(args.output_dir, "terms.obo"))
+    if args.remove:
+        os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
+        os.unlink(Path(args.output_dir, "SimpleDataset.log"))
+        os.unlink(Path(args.output_dir, "terms.obo"))
 
 
 if __name__ == "__main__":
