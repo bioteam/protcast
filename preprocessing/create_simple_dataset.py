@@ -43,6 +43,20 @@ def main():
         action="store_true",
         help="Create DEBUG log",
     )
+    parser.add_argument(
+        "-r",
+        "--remove",
+        default=False,
+        action="store_true",
+        help="Remove files",
+    )
+    parser.add_argument(
+        "-n",
+        "--no_propogate",
+        default=False,
+        action="store_true",
+        help="Propogate annotations",
+    )
     parser.add_argument("-O", "--output_dir", help="Output directory")
     args = parser.parse_args()
 
