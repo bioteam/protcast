@@ -19,13 +19,14 @@ if __name__ == "__main__":
         description="Checks that a protein is annotated with all ancestor GO Terms"
     )
     parser.add_argument(
-        "input", metavar="<path/to/input_serialized_dataset_file>"
+        "input",
+        metavar="<path/to/input_serialized_dataset_file>",
     )
     args = parser.parse_args()
 
     dataset = SimpleDataset.from_serialized_file(args.input)
 
-    # A0A098C095 is annotation with a single GO term (GO:0009289)
+    # A0A098C095 is annotated with a single GO term (GO:0009289)
     protein = dataset.proteins.get("A0A098C095")
     # ['GO:0005575', 'GO:0110165', 'GO:0042995']
     go_term_ancestors = dataset.ontology.get_primary_term(
@@ -34,4 +35,6 @@ if __name__ == "__main__":
     # {'GO:0009289', 'GO:0005575', 'GO:0110165', 'GO:0042995'}
     go_ids = set(protein.get_all_go_ids())
 
-    assert go_ids.issuperset(go_term_ancestors)
+    assert go_ids.issuperset(set(go_term_ancestors))
+    assert set(go_term_ancestors).issubset(go_ids)
+    assert len(go_ids) > len(set(go_term_ancestors))
