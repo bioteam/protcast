@@ -23,17 +23,24 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-o", "--ontology", help="Path to Gene Ontology file (*.obo)"
+        "-o",
+        "--ontology",
+        type=Path,
+        help="Path to Gene Ontology file (*.obo)",
     )
     parser.add_argument(
-        "-s", "--swissprot", help="Path to the SwissProt file (*.dat)"
+        "-s",
+        "--swissprot",
+        type=Path,
+        help="Path to the SwissProt file (*.dat)",
     )
     parser.add_argument(
-        "-t", "--trembl", help="Path to the TrEMBL file (*.fa)"
+        "-t", "--trembl", type=Path, help="Path to the TrEMBL file (*.fa)"
     )
     parser.add_argument(
         "-g",
         "--gaf",
+        type=Path,
         help="Path to GO Annotation Format file (*.gaf)",
     )
     parser.add_argument(
@@ -44,28 +51,24 @@ def main():
         help="Create DEBUG log",
     )
     parser.add_argument(
-        "-r",
-        "--remove",
-        default=False,
-        action="store_true",
-        help="Remove files",
-    )
-    parser.add_argument(
         "-n",
         "--no_propogate",
         default=False,
         action="store_true",
         help="Propogate annotations",
     )
-    parser.add_argument("-O", "--output_dir", help="Output directory")
+    parser.add_argument(
+        "-O", "--output_dir", type=Path, help="Output directory"
+    )
     args = parser.parse_args()
 
     dataset = SimpleDataset(
-        Path(args.ontology),
-        Path(args.swissprot),
-        Path(args.trembl),
-        Path(args.gaf),
-        Path(args.output_dir),
+        args.ontology,
+        args.swissprot,
+        args.trembl,
+        args.gaf,
+        args.output_dir,
+        args.no_propogate,
         args.verbose,
     )
 
