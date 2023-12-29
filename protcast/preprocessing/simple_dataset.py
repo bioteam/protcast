@@ -475,9 +475,9 @@ class SimpleDataset:
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
-    def to_obo(self, output_dir) -> None:
+    def to_obo(self) -> None:
         """to_obo
-        Write a "terms.obo" OBO Flat file for all primary and non-obsolete GO terms.
+        Write an OBO Flat file for all primary and non-obsolete GO terms.
         The protein identifiers from all the are written as *xref* values.
 
         [Term]
@@ -505,7 +505,7 @@ class SimpleDataset:
                     all_go_terms[annot.go_term_id] = []
                 all_go_terms[annot.go_term_id].append(annot)
 
-        obo_output_path = output_dir + "terms.obo"
+        obo_output_path = "terms.obo"
 
         with open(obo_output_path, "w") as obo_file:
             obo_file.write(
