@@ -505,7 +505,7 @@ class SimpleDataset:
                     all_go_terms[annot.go_term_id] = set()
                 all_go_terms[annot.go_term_id].add(annot.protein_id)
 
-        obo_output_path = "terms.obo"
+        obo_output_path = "SimpleDataset.obo"
 
         with open(obo_output_path, "w") as obo_file:
             obo_file.write(
