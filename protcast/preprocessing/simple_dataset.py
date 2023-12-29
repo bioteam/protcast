@@ -502,8 +502,8 @@ class SimpleDataset:
         for protein in self.proteins.values():
             for annot in protein.get_all_annotations():
                 if not annot.go_term_id in all_go_terms:
-                    all_go_terms[annot.go_term_id] = []
-                all_go_terms[annot.go_term_id].append(annot)
+                    all_go_terms[annot.go_term_id] = set()
+                all_go_terms[annot.go_term_id].add(annot.protein_id)
 
         obo_output_path = "terms.obo"
 
@@ -526,8 +526,8 @@ class SimpleDataset:
                     )
                 for parent in term.parents.keys():
                     obo_file.write("is_a: " + parent + "\n")
-                for annot in all_go_terms[go_term_id]:
-                    obo_file.write("xref: " + annot.protein_id + "\n")
+                for protein_id in all_go_terms[go_term_id]:
+                    obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")
 
 
