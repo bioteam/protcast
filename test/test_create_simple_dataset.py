@@ -11,37 +11,44 @@ from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 def main():
-    """ "test_create_simple_dataset.py
-    Creates a dataset that can be used by Keras FeatureSpace, which expects
-    protein features and GO terms to be passed in as a dataframe.
+    """test_create_simple_dataset.py
+    Create a SimpleDataset and test parsing
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-o",
         "--ontology",
+        type=Path,
         help="Path to Gene Ontology file (*.obo)",
         default="data/go.obo",
     )
     parser.add_argument(
         "-s",
         "--swissprot",
+        type=Path,
         help="Path to the SwissProt file (*.dat)",
         default="data/uniprot_mini.dat",
     )
     parser.add_argument(
         "-t",
         "--trembl",
+        type=Path,
         help="Path to the TrEMBL file (*.fa)",
         default="data/uniprot_trembl_mini.fasta",
     )
     parser.add_argument(
         "-g",
         "--gaf",
+        type=Path,
         help="Path to GOA format file (*.gaf)",
         default="data/goa_uniprot_mini.gaf",
     )
     parser.add_argument(
-        "--output_dir", help="Output directory", default="data/"
+        "-O",
+        "--output_dir",
+        type=Path,
+        help="Output directory",
+        default="data/",
     )
     parser.add_argument(
         "-v",
@@ -50,6 +57,14 @@ def main():
         action="store_true",
         help="Create DEBUG log",
     )
+    # Make the default "False" just for testing purposes
+    parser.add_argument(
+        "-n",
+        "--propogate",
+        default=False,
+        action="store_true",
+        help="Propogate annotations",
+    )
     parser.add_argument(
         "-r",
         "--remove",
@@ -57,24 +72,15 @@ def main():
         action="store_true",
         help="Remove files",
     )
-    parser.add_argument(
-        "-n",
-        "--no_propogate",
-        default=False,
-        action="store_true",
-        help="Propogate annotations",
-    )
     args = parser.parse_args()
-    #
-    # Run with "-n", without propogation to pass all the tests
-    #
+
     dataset = SimpleDataset(
-        Path(args.ontology),
-        Path(args.swissprot),
-        Path(args.trembl),
-        Path(args.gaf),
-        Path(args.output_dir),
-        args.no_propogate,
+        args.ontology,
+        args.swissprot,
+        args.trembl,
+        args.gaf,
+        args.output_dir,
+        args.propogate,
         args.verbose,
     )
 
@@ -83,7 +89,7 @@ def main():
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
 
-    # Test Swissprot and *gaf parsing
+    # Test Swissprot and *gaf parsing without propagation
     # There are near-duplicate lines for A0A016QRH0 in the *gaf file
     sw_protein = dataset.proteins.get("A0A016QRH0")
     assert len(sw_protein.annotations) == 10
@@ -103,13 +109,13 @@ def main():
     assert annots[0].evidence_code == "IEA"
     trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
 
-    dataset.to_obo(args.output_dir)
-    assert os.path.isfile(Path(args.output_dir, "terms.obo"))
+    dataset.to_obo()
+    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
 
     if args.remove:
         os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
         os.unlink(Path(args.output_dir, "SimpleDataset.log"))
-        os.unlink(Path(args.output_dir, "terms.obo"))
+        os.unlink(Path(args.output_dir, "SimpleDataset.obo"))
 
 
 if __name__ == "__main__":

@@ -51,13 +51,13 @@ class SimpleDataset:
     created_at: Datetime
         ...
     verbose: bool
-        ...
+        Default is False.
     ontology_md5: str
         ...
     swissprot_md5: str
         ...
-    no_propogate: bool
-        ...
+    propogate: bool
+        Propagate Annotations from ancestors to children. Default is True.
 
     Methods
     -------
@@ -93,8 +93,8 @@ class SimpleDataset:
         trembl_path: Path,
         gaf_path: Path,
         output_dir: Path,
-        no_propogate: bool,
-        verbose: bool,
+        propogate: bool = True,
+        verbose: bool = False,
     ):
         """__init__
         ...
@@ -112,16 +112,16 @@ class SimpleDataset:
         output_dir: Path
             Location for saved SimpleDataset and log file
         verbose: bool
-            Write DEBUG level log if True
-        no_propogate: bool
-            Default is False
+            Write DEBUG level log if True. Default is False.
+        propogate: bool
+            Default is True
 
         Returns
         -------
         None
         """
         self.verbose = verbose
-        self.no_propogate = no_propogate
+        self.propogate = propogate
         self.output_dir = output_dir
         self.created_at = datetime.now()
         self.ontology_path = ontology_path
@@ -158,7 +158,7 @@ class SimpleDataset:
         self.add_trembl_proteins(trembl_annotations)
 
         # Propogate annotations to higher levels
-        if not self.no_propogate:
+        if self.propogate:
             self.propagate_annotations()
 
         logging.info(f"GO: '{self.ontology_path}'")
@@ -490,8 +490,7 @@ class SimpleDataset:
 
         Parameters
         ----------
-        output_dir: Path
-            Location of output *obo file
+        None
 
         Returns
         -------
@@ -505,7 +504,7 @@ class SimpleDataset:
                     all_go_terms[annot.go_term_id] = set()
                 all_go_terms[annot.go_term_id].add(annot.protein_id)
 
-        obo_output_path = "SimpleDataset.obo"
+        obo_output_path = self.output_dir / "SimpleDataset.obo"
 
         with open(obo_output_path, "w") as obo_file:
             obo_file.write(
