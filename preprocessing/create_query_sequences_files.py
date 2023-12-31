@@ -15,11 +15,12 @@ from protcast.preprocessing.simple_dataset import SimpleDataset
 def main():
     """"create_query_sequences_files.py
     This script takes:
-    - serialized "Dataset" file.
-    - A text file with a list of protein IDs.
+    - Serialized SimpleDataset file
+    - A text file with a list of protein IDs
+
     It returns:
-    - A text file with the primary accessions of the input IDs.
-    - A FASTA file containing the input sequences.
+    - A text file with the primary accessions of the input IDs
+    - A FASTA file containing the input sequences
 
     This script was used to generate the query sequences to evaluate the BLAST predictor.
     Example:
@@ -31,9 +32,7 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", help="Path to serialized dataset")
-    parser.add_argument(
-        "seq_ids", help="Path to file with a list of seq_ids"
-    )
+    parser.add_argument("seq_ids", help="Path to file with a list of seq_ids")
     parser.add_argument("output", help="Output file")
     parser.add_argument("-v", action="store_true", help="Verbose")
     args = parser.parse_args()
@@ -52,9 +51,7 @@ def main():
     )
     with open(args.seq_ids, "r") as input_file:
         with open(args.output, "w") as output_seq_file:
-            with open(
-                args.output + ".fasta", "w"
-            ) as output_fasta_file:
+            with open(args.output + ".fasta", "w") as output_fasta_file:
                 for in_seq in input_file.readlines():
                     in_seq = in_seq.strip()
                     out_seq = dataset.accessions[in_seq]

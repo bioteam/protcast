@@ -65,8 +65,9 @@ def main():
         help="Propogate annotations",
     )
     args = parser.parse_args()
-
-    # This must be run with "-n", without propogation
+    #
+    # Run with "-n", without propogation to pass all the tests
+    #
     dataset = SimpleDataset(
         Path(args.ontology),
         Path(args.swissprot),
