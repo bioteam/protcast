@@ -1,6 +1,3 @@
-import logging
-from tqdm import tqdm
-
 from pathlib import Path
 
 GAF20FIELDS = [

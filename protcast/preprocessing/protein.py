@@ -1,5 +1,4 @@
 from typeguard import typechecked
-
 from protcast.preprocessing.annotation import Annotation
 
 

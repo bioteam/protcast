@@ -1,15 +1,12 @@
+from protcast.preprocessing.simple_dataset import SimpleDataset
 import sys
-
 import argparse
 import logging
-
 from pathlib import Path
 
 file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
-
-from protcast.preprocessing.simple_dataset import SimpleDataset
 
 
 def main():

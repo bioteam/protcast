@@ -54,9 +54,7 @@ class Metrics(keras.callbacks.Callback):
         None
         """
         val_predict = (
-            np.asarray(
-                self.model.predict(self.model.validation_data[0])
-            )
+            np.asarray(self.model.predict(self.model.validation_data[0]))
         ).round()
         val_target = self.model.validation_data[1]
         val_f1 = f1_score(val_target, val_predict)
@@ -197,9 +195,7 @@ class KerasMetrics(Metrics):
         """
         true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
         predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-        precision = true_positives / (
-            predicted_positives + K.epsilon()
-        )
+        precision = true_positives / (predicted_positives + K.epsilon())
         return precision
 
     def f1_score(y_true, y_pred):
@@ -219,6 +215,4 @@ class KerasMetrics(Metrics):
         """
         precision = precision_m(y_true, y_pred)
         recall = recall_m(y_true, y_pred)
-        return 2 * (
-            (precision * recall) / (precision + recall + K.epsilon())
-        )
+        return 2 * ((precision * recall) / (precision + recall + K.epsilon()))

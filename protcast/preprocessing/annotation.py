@@ -1,7 +1,6 @@
+from protcast.preprocessing.ontology import GOTerm
 from typeguard import typechecked
 import logging
-
-from protcast.preprocessing.ontology import GOTerm
 
 
 class Annotation:

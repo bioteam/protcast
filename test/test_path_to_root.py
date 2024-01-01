@@ -1,14 +1,12 @@
 import sys
-
 import argparse
-
 from pathlib import Path
 
 file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.ontology import GOTerm, Ontology
+from protcast.preprocessing.ontology import GOTerm, Ontology  # noqa: E402
 
 """
 This test showcases traversing the DAG from a given GOTerm to the root of the tree

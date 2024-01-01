@@ -52,9 +52,7 @@ parser.add_argument(
     type=float,
     help="Similarity threshold",
 )
-parser.add_argument(
-    "-o", "--output", help="Output sequence file name"
-)
+parser.add_argument("-o", "--output", help="Output sequence file name")
 parser.add_argument(
     "-c",
     "--cores",
@@ -62,9 +60,7 @@ parser.add_argument(
     type=str,
     help="Number of cores for 'mash dist'",
 )
-parser.add_argument(
-    "-v", "--verbose", action="store_true", help="Verbose"
-)
+parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
 if args.verbose:
@@ -132,9 +128,7 @@ class MakeDRSeqs:
             tmpfasta = tempfile.NamedTemporaryFile()
             if self.verbose:
                 print(f"Creating fasta version of '{self.seqfile}'")
-            SeqIO.convert(
-                self.seqfile, self.informat, tmpfasta.name, "fasta"
-            )
+            SeqIO.convert(self.seqfile, self.informat, tmpfasta.name, "fasta")
         tmph = tempfile.NamedTemporaryFile(delete=False)
         tmpout = open(tmph.name, "w")
         # The same file acts as both query and reference
@@ -153,7 +147,7 @@ class MakeDRSeqs:
         try:
             if self.verbose:
                 print(f"Running 'mash dist': {cmd}")
-            proc = subprocess.run(cmd, stdout=tmpout)
+                subprocess.run(cmd, stdout=tmpout)
         except subprocess.CalledProcessError as exception:
             print(f"Error: {exception}")
             sys.exit(f"Error running 'mash dist' on {tmpfasta.name}")
@@ -167,8 +161,8 @@ class MakeDRSeqs:
         mash_sorted = defaultdict(dict)
         with open(mash_out, "r") as f:
             # mash_sorted = { i[0]:{i[1]:float(i[2])} for i in [l.split("\t") for l in f] }
-            for l in f:
-                arr = l.split("\t")
+            for line in f:
+                arr = line.split("\t")
                 mash_sorted[arr[0]][arr[1]] = float(arr[2])
         return mash_sorted
 
@@ -191,9 +185,7 @@ class MakeDRSeqs:
             for count, seqid in enumerate(sorted(mash_dict.keys()))
         }
         # Create a square matrix filled with 1's since most values are likely 1
-        mat = [
-            [1 for col in range(len(ids))] for row in range(len(ids))
-        ]
+        mat = [[1 for col in range(len(ids))] for row in range(len(ids))]
         # Insert non-1 distances into the prepopulated matrix
         for count, seq1 in enumerate(sorted(mash_dict.keys())):
             for seq2 in mash_dict[seq1].keys():
@@ -215,9 +207,7 @@ class MakeDRSeqs:
         """
         clust = DBSCAN(eps=0.1, min_samples=2, metric="precomputed")
         if self.verbose:
-            print(
-                f"Running DBSCAN on matrix with {len(mat[0])} sequences"
-            )
+            print(f"Running DBSCAN on matrix with {len(mat[0])} sequences")
         predictions = clust.fit_predict(mat)
         if self.verbose:
             print("Completed DBSCAN")
@@ -233,14 +223,10 @@ class MakeDRSeqs:
             sys.exit(1)
         if self.verbose:
             print(f"Reading '{self.seqfile}' with SeqIO")
-        self.seqs = SeqIO.to_dict(
-            SeqIO.parse(self.seqfile, self.informat)
-        )
+        self.seqs = SeqIO.to_dict(SeqIO.parse(self.seqfile, self.informat))
         if self.verbose:
             for k in clusters.keys():
-                print(
-                    f"Cluster {k} ({len(clusters[k])}): {clusters[k]}"
-                )
+                print(f"Cluster {k} ({len(clusters[k])}): {clusters[k]}")
                 for seqid in clusters[k]:
                     print(self.seqs[seqid].description)
         return clusters
@@ -249,9 +235,7 @@ class MakeDRSeqs:
         """Find the sequences in a cluster with the least GO terms"""
         similar_seqs = list()
         for cluster in clusters.values():
-            num_of_terms = [
-                self.get_num_terms(acc) for acc in cluster
-            ]
+            num_of_terms = [self.get_num_terms(acc) for acc in cluster]
             # Index of highest number
             max_index = num_of_terms.index(max(num_of_terms))
             # Remove sequence with most terms
@@ -267,9 +251,7 @@ class MakeDRSeqs:
                 "Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences"
             )
         # For example, input is "data/viruses.dat", output is "viruses-dr.dat"
-        self.output = (
-            os.path.basename(self.seqfile).split(".")[0] + "-dr.dat"
-        )
+        self.output = os.path.basename(self.seqfile).split(".")[0] + "-dr.dat"
         with open(self.output, "w") as out:
             for seqid in seq_dict:
                 if seqid not in similar_seqs:

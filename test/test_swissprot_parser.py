@@ -6,9 +6,8 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from preprocessing.parse_swissprot import parse_swissprot
-from protcast.preprocessing.ontology import Ontology
-
+from preprocessing.parse_swissprot import parse_swissprot  # noqa: E402
+from protcast.preprocessing.ontology import Ontology  # noqa: E402
 
 if __name__ == "__main__":
     """test_swissprot_parser.py
@@ -39,7 +38,7 @@ if __name__ == "__main__":
     annots = proteins["A0A016QRH0"].get_all_annotations()
     assert len(annots) == 3
     assert annots[0].evidence_code == "IEA"
-    assert annots[0].is_manual == False
+    assert annots[0].is_manual is False
     assert annots[2].go_term_id == "GO:0015379"
     manuals = proteins["A0A016QRH0"].get_manual_annotations()
     assert manuals == []
@@ -49,7 +48,7 @@ if __name__ == "__main__":
     assert len(annots) == 9
     assert annots[2].evidence_code == "IEA"
     assert annots[8].evidence_code == "IBA"
-    assert annots[8].is_manual == True
+    assert annots[8].is_manual is True
     manuals = proteins["A0A1D6P109"].get_manual_annotations()
     assert len(manuals) == 8
     assert len(proteins["A0A1D6P109"].get_electronic_annotations()) == 1

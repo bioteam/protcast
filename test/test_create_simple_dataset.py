@@ -7,7 +7,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset
+from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 
 
 def main():
@@ -68,8 +68,8 @@ def main():
     parser.add_argument(
         "-r",
         "--remove",
-        default=False,
-        action="store_true",
+        default=True,
+        action="store_false",
         help="Remove files",
     )
     args = parser.parse_args()
@@ -96,7 +96,7 @@ def main():
     annots = sw_protein.get_all_annotations()
     assert len(annots) == 10
     assert annots[0].evidence_code == "IEA"
-    assert annots[0].is_manual == False
+    assert annots[0].is_manual is False
     assert annots[2].go_term_id == "GO:0015379"
     manuals = sw_protein.get_manual_annotations()
     assert manuals == []

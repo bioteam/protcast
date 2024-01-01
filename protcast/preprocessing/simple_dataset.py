@@ -1,24 +1,20 @@
 from __future__ import annotations
-
-import os
 from collections import defaultdict
 from datetime import datetime
+import os
 import hashlib
 import logging
-from pathlib import Path
 import pickle
+from pathlib import Path
 from tqdm import tqdm
 from typeguard import typechecked
-
 from Bio.SeqIO.FastaIO import FastaIterator
-
+from preprocessing.parse_swissprot import parse_swissprot
+from preprocessing.parse_gaf import parse_gaf
 from protcast import BP, CC, MF
 from protcast.preprocessing.annotation import Annotation
 from protcast.preprocessing.ontology import Ontology
 from protcast.preprocessing.protein import Protein
-
-from preprocessing.parse_swissprot import parse_swissprot
-from preprocessing.parse_gaf import parse_gaf
 
 
 class SimpleDataset:
@@ -155,7 +151,7 @@ class SimpleDataset:
         # Add proteins found in UniProt-GOA *gaf file that are in TrEMBL
         self.add_trembl_proteins(trembl_annotations)
 
-        # Propogate annotations to higher levels
+        # Propogate annotations from lower to higher levels
         if self.propogate:
             self.propagate_annotations()
 
@@ -521,7 +517,7 @@ class SimpleDataset:
                         + term.namespace
                         + "\n"
                         + "\ncomment: level "
-                        + term.level
+                        + str(term.level)
                         + "\n"
                     )
                 for parent in term.parents.keys():

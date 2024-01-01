@@ -1,16 +1,9 @@
 from __future__ import annotations
-
+from protcast import BP, CC, MF
 import logging
 import pickle
 from tqdm import tqdm
 from typeguard import typechecked
-
-from protcast import BP, CC, MF
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from preprocessing.annotation import Annotation
 
 
 class GOTerm:

@@ -2,15 +2,13 @@ import sys
 import os
 import argparse
 import logging
-
 from pathlib import Path
 
 file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.ontology import Ontology
-
+from protcast.preprocessing.ontology import Ontology  # noqa: E402
 
 if __name__ == "__main__":
     """test_build_ontology.py

@@ -1,7 +1,6 @@
 import argparse
 import logging
 from tqdm import tqdm
-
 from Bio.SeqIO.FastaIO import FastaIterator, FastaWriter
 from Bio.UniProt.GOA import gafiterator
 

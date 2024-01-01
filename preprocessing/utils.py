@@ -1,6 +1,5 @@
 import os
 import tempfile
-
 from ifeatpro.features import get_feature
 import numpy as np
 from typeguard import typechecked

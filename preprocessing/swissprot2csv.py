@@ -1,17 +1,14 @@
+from protcast.preprocessing.ontology import Ontology
+from preprocessing.parse_swissprot import parse_swissprot
 import sys
-
 import argparse
 import logging
 import pickle
-
 from pathlib import Path
 
 file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
-
-from protcast.preprocessing.ontology import Ontology
-from preprocessing.parse_swissprot import parse_swissprot
 
 
 def main():
@@ -30,9 +27,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("ontology", help="Path to ontology file")
     parser.add_argument("uniprot_db", help="Path to uniprot db")
-    parser.add_argument(
-        "-o", "--output", help="Output swissprot file"
-    )
+    parser.add_argument("-o", "--output", help="Output swissprot file")
     parser.add_argument("-v", action="store_true", help="Verbose")
     args = parser.parse_args()
 

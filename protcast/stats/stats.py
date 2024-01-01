@@ -1,11 +1,3 @@
-import logging as log
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
-from pathlib import Path
-import pickle
-from typeguard import typechecked
-
 from protcast import BP, CC, MF
 from protcast.preprocessing import utils
 from protcast.preprocessing.simple_dataset import SimpleDataset
@@ -14,8 +6,12 @@ from protcast.preprocessing.deepred_dataset import (
     SubModelDataset,
 )
 from protcast.preprocessing.ontology import GODAG
-
-# matplotlib.use("Qt5Agg")
+import logging as log
+import matplotlib.pyplot as plt
+import numpy as np
+from pathlib import Path
+import pickle
+from typeguard import typechecked
 
 MEAN_IMBALANCE_RATIO_THRESHOLD = 3
 
@@ -55,9 +51,7 @@ def generate_dataset_stats(
             f"Swissprot t1 File: {dataset.swissprot_t1_path} (md5: "
             f"{dataset.swissprot_t1_md5})\n"
         )
-        f.write(
-            f"GOA File: {dataset.goa_path} (md5: {dataset.goa_md5})\n"
-        )
+        f.write(f"GOA File: {dataset.goa_path} (md5: {dataset.goa_md5})\n")
 
     with open(output_dir / Path("bp_go_terms.txt"), "w") as f:
         f.write(dataset.ontology.bp_dag.to_text())
@@ -72,12 +66,7 @@ def generate_dataset_stats(
         with open(output_dir / file_name, "w") as f:
             f.write("Term\n")
             f.write(
-                "\n".join(
-                    [
-                        f"{node.id}"
-                        for node in dag.get_obsolete_nodes()
-                    ]
-                )
+                "\n".join([f"{node.id}" for node in dag.get_obsolete_nodes()])
             )
             f.write("\n")
 
@@ -154,13 +143,8 @@ def generate_protcast_dataset_stats(
             f"DeepredDataset Creation Time: {protcast_dataset.created_at}\n"
         )
 
-        total_number_of_submodels = (
-            protcast_dataset.submodel_global_index
-        )
-        f.write(
-            "Total number of models: "
-            f"{total_number_of_submodels}\n"
-        )
+        total_number_of_submodels = protcast_dataset.submodel_global_index
+        f.write("Total number of models: " f"{total_number_of_submodels}\n")
 
         imbalanced_models = (
             len(bp_imbalanced_models)
@@ -186,9 +170,7 @@ def generate_protcast_dataset_stats(
 @typechecked
 def _generate_namespace_submodel_dataset_stats(
     namespace_name: str,
-    namespace_submodels_dataset: dict[
-        int, dict[int, list[SubModelDataset]]
-    ],
+    namespace_submodels_dataset: dict[int, dict[int, list[SubModelDataset]]],
     output_dir: Path,
 ) -> tuple[list[tuple[str, int]], set[str]]:
     """_generate_namespace_submodel_dataset_stats
@@ -217,9 +199,7 @@ def _generate_namespace_submodel_dataset_stats(
             f"Mean Imbalanced Ratio Threshold: "
             f"{MEAN_IMBALANCE_RATIO_THRESHOLD}\n"
         )
-        for level, buckets in sorted(
-            namespace_submodels_dataset.items()
-        ):
+        for level, buckets in sorted(namespace_submodels_dataset.items()):
             for bucket, datasets in sorted(buckets.items()):
                 for dataset in datasets:
                     samples = dataset.X_train.shape[0]
@@ -297,13 +277,10 @@ def _generate_namespace_submodel_classes_histogram(
         fig,
         open(
             output_dir
-            / Path(
-                f"number_of_samples_per_submodel_{namespace}.fig.pickle"
-            ),
+            / Path(f"number_of_samples_per_submodel_{namespace}.fig.pickle"),
             "wb",
         ),
     )
     plt.savefig(
-        output_dir
-        / Path(f"number_of_samples_per_submodel_{namespace}.png")
+        output_dir / Path(f"number_of_samples_per_submodel_{namespace}.png")
     )

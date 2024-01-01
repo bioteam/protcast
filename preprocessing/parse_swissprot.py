@@ -1,15 +1,12 @@
+from protcast.preprocessing.annotation import Annotation
+from protcast.preprocessing.ontology import Ontology
+from protcast.preprocessing.protein import Protein
 import gzip
 import logging
 from tqdm import tqdm
 from typeguard import typechecked
-
 from pathlib import Path
-
 from Bio import SwissProt
-
-from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.ontology import Ontology, GOTerm
-from protcast.preprocessing.protein import Protein
 
 
 @typechecked
