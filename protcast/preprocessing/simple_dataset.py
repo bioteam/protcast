@@ -10,7 +10,6 @@ import pickle
 from tqdm import tqdm
 from typeguard import typechecked
 
-from Bio.Seq import Seq
 from Bio.SeqIO.FastaIO import FastaIterator
 
 from protcast import BP, CC, MF
@@ -500,7 +499,7 @@ class SimpleDataset:
         all_go_terms = {}
         for protein in self.proteins.values():
             for annot in protein.get_all_annotations():
-                if not annot.go_term_id in all_go_terms:
+                if annot.go_term_id not in all_go_terms:
                     all_go_terms[annot.go_term_id] = set()
                 all_go_terms[annot.go_term_id].add(annot.protein_id)
 
