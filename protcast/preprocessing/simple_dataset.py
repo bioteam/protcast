@@ -24,8 +24,7 @@ from preprocessing.parse_gaf import parse_gaf
 class SimpleDataset:
     """SimpleDataset
     This class runs the SwissProt, TrEMBL, GAF, and Gene Ontology file
-    parsers and creates a SimpleDataset can be saved to disk. Used by
-    *preprocessing/create_simple_dataset.py*.
+    parsers and creates a SimpleDataset can be saved to disk.
 
     Attributes
     ----------
