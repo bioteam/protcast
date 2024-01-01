@@ -19,6 +19,7 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
         echo Found: "$FNAME"
     else
         wget "$URL"
+        echo Downloaded: "$URL"
         if [ $URL =~ gz$ ]; then
             gunzip $(basename "$URL")
             echo Finished gunzip: "$FNAME"
