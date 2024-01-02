@@ -15,19 +15,19 @@ mkdir -p "UniProt/$DATE"
 
 for URL in $GO $GAF $UNIPROT $TREMBL; do
     FNAME=$(basename "$URL" | sed 's/.gz//')
-    if [ -f GO/$DATE/"$FNAME" || -f UniProt/$DATE/"$FNAME" ]; then
+    if [ -f GO/$DATE/"$FNAME" ] || [ -f UniProt/$DATE/"$FNAME" ]; then
         echo Found: "$FNAME"
     else
         wget "$URL"
         echo Downloaded: "$URL"
-        if [ $URL =~ gz$ ]; then
-            gunzip $(basename "$URL")
+        if [[ "$URL" =~ gz$ ]]; then
+            gunzip "$(basename "$URL")"
             echo Finished gunzip: "$FNAME"
         fi
     fi
-    if [ $FNAME =~ go ]; then
-        mv $FNAME GO/$DATE
+    if [[ "$FNAME" =~ go ]]; then
+        mv "$FNAME" GO/$DATE
     else
-        mv $FNAME UniProt/$DATE
+        mv "$FNAME" UniProt/$DATE
     fi
 done

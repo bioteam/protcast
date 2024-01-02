@@ -1,14 +1,17 @@
 from __future__ import annotations
-from collections import defaultdict
-from datetime import datetime
+
 import os
 import hashlib
 import logging
 import pickle
+
 from pathlib import Path
 from tqdm import tqdm
 from typeguard import typechecked
+from collections import defaultdict
+from datetime import datetime
 from Bio.SeqIO.FastaIO import FastaIterator
+
 from preprocessing.parse_swissprot import parse_swissprot
 from preprocessing.parse_gaf import parse_gaf
 from protcast import BP, CC, MF
@@ -353,7 +356,7 @@ class SimpleDataset:
                 trembl_annotations[rec["DB_Object_ID"]].append(
                     (rec["GO_ID"], rec["Evidence"])
                 )
-                # Not "UniProtKB" but can try to get a protein sequence from TrEMBL
+            # Not "UniProtKB" but can try to get a protein sequence from TrEMBL
             if rec["DB"] != "UniProtKB":
                 logging.debug(
                     f"Found protein {rec['DB_Object_ID']} labeled '{rec['DB']} not 'UniProtKB'"
