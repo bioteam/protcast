@@ -10,12 +10,12 @@ GAF=$GO_ROOT/$DATE/annotations/filtered_goa_uniprot_all_noiea.gaf.gz
 UNIPROT=$UNIPROT_ROOT/uniprot_sprot.dat.gz
 TREMBL=$UNIPROT_ROOT/uniprot_trembl.fasta.gz
 
-mkdir -p "GO/$DATE"
-mkdir -p "UniProt/$DATE"
+mkdir -p "$DATE/GO"
+mkdir -p "$DATE/UniProt"
 
 for URL in $GO $GAF $UNIPROT $TREMBL; do
     FNAME=$(basename "$URL" | sed 's/.gz//')
-    if [ -f GO/$DATE/"$FNAME" ] || [ -f UniProt/$DATE/"$FNAME" ]; then
+    if [ -f "$DATE"/GO/"$FNAME" ] || [ -f "$DATE"/UniProt/"$FNAME" ]; then
         echo Found: "$FNAME"
     else
         wget "$URL"
@@ -26,8 +26,8 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
         fi
     fi
     if [[ "$FNAME" =~ go ]]; then
-        mv "$FNAME" GO/$DATE
+        mv "$FNAME" $DATE/GO
     else
-        mv "$FNAME" UniProt/$DATE
+        mv "$FNAME" $DATE/UniProt
     fi
 done
