@@ -18,7 +18,7 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
     if [ -f "$DATE"/GO/"$FNAME" ] || [ -f "$DATE"/UniProt/"$FNAME" ]; then
         echo Found: "$FNAME"
     else
-        wget "$URL"
+        wget -c "$URL"
         echo Downloaded: "$URL"
         if [[ "$URL" =~ gz$ ]]; then
             gunzip "$(basename "$URL")"
