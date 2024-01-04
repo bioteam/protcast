@@ -25,9 +25,9 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
             echo Finished gunzip: "$FNAME"
         fi
         if [[ "$FNAME" =~ go ]]; then
-            mv "$FNAME" $DATE/GO
+            mv "$FNAME" "$DATE"/GO
         else
-            mv "$FNAME" $DATE/UniProt
+            mv "$FNAME" "$DATE"/UniProt
         fi
     fi
 done
