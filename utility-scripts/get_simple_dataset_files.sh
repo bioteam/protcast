@@ -24,10 +24,10 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
             gunzip "$(basename "$URL")"
             echo Finished gunzip: "$FNAME"
         fi
-    fi
-    if [[ "$FNAME" =~ go ]]; then
-        mv "$FNAME" $DATE/GO
-    else
-        mv "$FNAME" $DATE/UniProt
+        if [[ "$FNAME" =~ go ]]; then
+            mv "$FNAME" $DATE/GO
+        else
+            mv "$FNAME" $DATE/UniProt
+        fi
     fi
 done
