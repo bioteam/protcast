@@ -367,7 +367,7 @@ class SimpleDataset:
                 num_annotations_not_labeled_uniprotkb += 1
 
         logging.info(
-            f"Found {len(gaf_annotations)} total annotations in '{self.gaf_path}'"
+            f"Found {len(gaf_annotations)} annotations in '{self.gaf_path}'"
         )
         logging.info(
             f"Found {num_annotations_not_labeled_uniprotkb} annotations not labelled 'UniProtKB'"
@@ -481,6 +481,7 @@ class SimpleDataset:
         id: GO:0000049
         name: tRNA binding
         namespace: molecular_function
+        comment: level 4
         is_a: GO:0003723
         xref: P99087
         xref: Q23399
@@ -528,7 +529,6 @@ class SimpleDataset:
                 for protein_id in all_go_terms[go_term_id]:
                     obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")
-
 
 def md5(file_path: str) -> str:
     """md5
