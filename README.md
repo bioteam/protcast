@@ -1,59 +1,33 @@
 # ProtCast
-
-
-
-# Model
-This implementation uses the Keras library.
-
-
-# Environment
-
-## imblearn Package
-
-This code uses the MLSMOTE algorithm which is currently not part of the
-latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
-necessary to install it from a custom branch. To install follow these steps:
-
-1. Clone the `balvisio` fork of imblearn:
-```
-git clone git@github.com:balvisio/imbalanced-learn.git
-```
-
-2. Checkout the `ba/MLSMOTE` branch:
-```
-cd imbalanced-learn/
-git checkout ba/MLSMOTE
-```
-
-3. Install the library from local
-```
-python3 -m pip install .
-```
+Extract protein sequences and associated Gene Ontology (GO) annotation from UniProt, TrEMBL and the Gene
+Ontology Annotation database and use feature vector representations of the protein sequences to predict
+Molecular Function, Cellular Component, and Biological Process of uncharacterized proteins. This code 
+uses Keras and its FeatureSpace package for structured (tabular) data classification.
 
 # Usage
 
-## Building the Input Dataset
+## Building the SimpleDataset
+A SimpleDataset combines protein sequences and GO annotations from multiple input files. A typical
+SimpleDataset has ~0.5M proteins and ~3M GO annotations. The SimpleDataset is used as input to
+FeatureSpace for processing and subsequent model-building by Keras.
 
-### Sources
+### Data Sources
+Input files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`. The
+largest file comes from TrEMBL and it's ~55GB in size.
 
-Files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`.
+#### UniProt/Swiss-Prot
+A manually curated, high-quality protein database made by extensive annotation and expert review. The
+latest version of the database can be found
+[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
 
-### UniProtKB/Swiss-Prot Database
-
-# Background
-
-## Source files
-
-### SwissProt
-
-### UniProtKB/TrEMBL 
+#### UniProtKB/TrEMBL 
 The UniProt/TrEMBL database is used to retrieve the AA sequences of proteins
 that are annotated in the UniProt-GOA database. Due to its size it is not
 tracked in this repository. The latest release of the database can be found
 [here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz)
 and it was used to obtain the sequences found in UniProt-GOA database.
 
-### Gene Ontology (GO)
+#### Gene Ontology (GO)
 The Gene Ontology databases `(.obo)` are downloaded from:
 
 https://release.geneontology.org
@@ -62,9 +36,8 @@ https://release.geneontology.org
 UniProt-GOA is a database that links the Gene Ontology database described
 above with gene products (i.e. genes and any entities encoded by the gene
 such as protein or functional RNAs)[2]. These links are what the Gene Ontology
-Consortium (GOC) calls annotations which are associations between gene
-products and the GO terms. The sources of these annotations are collaborating
-databases. It is important to note that annotations contain an evidence code
+Consortium (GOC) calls annotations which are associations between biomolecules 
+and the GO terms. It is important to note that annotations contain an evidence code
 which describes the origin of the annotation such as experimental,
 computational analysis or electronic. For a more in-depth explanation and
 documentation of the GO databases please visit the GOC website. The GOC
@@ -113,7 +86,7 @@ is obtained:
 `preprocessing/parse_swissprot.py` takes a GO ontology file
 and a Swissprot database file and converts it into an instance of a `Dataset`
 class. The database was downloaded from:
-https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz.
+[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
 Due to file size it is not added to the repository.
 
 For example:
@@ -123,7 +96,6 @@ python3 preprocessing/parse_swissprot.py \
   data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```
-
 
 - Feature vector name: There are multiple feature vectors that can be
   generated from a protein sequence such as ctriad, PAAC or SPMAP.
@@ -192,7 +164,6 @@ Scripts that can provide statistics on datasets.
 Schema images.
 
 ## `preprocessing`
-
 Contains the code that parses the raw data, builds the python
 structures to represent the inputs for the model and converts them into a
 format that can be used to feed the model for training. More specifically:
@@ -203,7 +174,7 @@ of the GO categories.
 For example:
 
 ```
-python preprocessing/stats/create_dataset_stats.py \
+python3 preprocessing/stats/create_dataset_stats.py \
   data/dataset/dataset.bin \
   -d data/dataset/stats/ -w
 ``` 
@@ -245,4 +216,27 @@ a SimpleDataset:
 
 ```
 ./get_simple_dataset_files.sh
+```
+
+# Environment
+
+## imblearn Package
+This code uses the MLSMOTE algorithm which is currently not part of the
+latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
+necessary to install it from a custom branch. To install follow these steps:
+
+1. Clone the `balvisio` fork of imblearn:
+```
+git clone git@github.com:balvisio/imbalanced-learn.git
+```
+
+2. Checkout the `ba/MLSMOTE` branch:
+```
+cd imbalanced-learn/
+git checkout ba/MLSMOTE
+```
+
+3. Install the library from local
+```
+python3 -m pip install .
 ```
