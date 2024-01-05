@@ -18,7 +18,7 @@ largest file comes from TrEMBL and it's ~55GB in size.
 #### UniProt/Swiss-Prot
 A manually curated, high-quality protein database made by extensive annotation and expert review. The
 latest version of the database can be found
-[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz)
+[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
 
 #### UniProtKB/TrEMBL 
 The UniProt/TrEMBL database is used to retrieve the AA sequences of proteins
@@ -36,9 +36,8 @@ https://release.geneontology.org
 UniProt-GOA is a database that links the Gene Ontology database described
 above with gene products (i.e. genes and any entities encoded by the gene
 such as protein or functional RNAs)[2]. These links are what the Gene Ontology
-Consortium (GOC) calls annotations which are associations between gene
-products and the GO terms. The sources of these annotations are collaborating
-databases. It is important to note that annotations contain an evidence code
+Consortium (GOC) calls annotations which are associations between biomolecules 
+and the GO terms. It is important to note that annotations contain an evidence code
 which describes the origin of the annotation such as experimental,
 computational analysis or electronic. For a more in-depth explanation and
 documentation of the GO databases please visit the GOC website. The GOC
@@ -87,7 +86,7 @@ is obtained:
 `preprocessing/parse_swissprot.py` takes a GO ontology file
 and a Swissprot database file and converts it into an instance of a `Dataset`
 class. The database was downloaded from:
-https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz.
+[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
 Due to file size it is not added to the repository.
 
 For example:
@@ -165,7 +164,6 @@ Scripts that can provide statistics on datasets.
 Schema images.
 
 ## `preprocessing`
-
 Contains the code that parses the raw data, builds the python
 structures to represent the inputs for the model and converts them into a
 format that can be used to feed the model for training. More specifically:
