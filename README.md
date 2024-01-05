@@ -1,34 +1,33 @@
 # ProtCast
-
 Extract protein sequences and associated Gene Ontology (GO) annotation from UniProt, TrEMBL and the Gene
 Ontology Annotation database and use feature vector representations of the protein sequences to predict
 Molecular Function, Cellular Component, and Biological Process of uncharacterized proteins. This code 
-uses the Keras FeatureSpace package for strucured (tabular) data classification.
+uses Keras and its FeatureSpace package for structured (tabular) data classification.
 
 # Usage
 
-## Building the Input Dataset
+## Building the SimpleDataset
+A SimpleDataset combines protein sequences and GO annotations from multiple input files. A typical
+SimpleDataset has ~0.5M proteins and ~3M GO annotations. The SimpleDataset is used as input to
+FeatureSpace for processing and subsequent model-building by Keras.
 
-### Sources
+### Data Sources
+Input files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`. The
+largest file comes from TrEMBL and it's ~55GB in size.
 
-Input files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`.
+#### UniProt/Swiss-Prot
+A manually curated, high-quality protein database made by extensive annotation and expert review. The
+latest version of the database can be found
+[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz)
 
-### UniProtKB/Swiss-Prot Database
-
-# Background
-
-## Source files
-
-### SwissProt
-
-### UniProtKB/TrEMBL 
+#### UniProtKB/TrEMBL 
 The UniProt/TrEMBL database is used to retrieve the AA sequences of proteins
 that are annotated in the UniProt-GOA database. Due to its size it is not
 tracked in this repository. The latest release of the database can be found
 [here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz)
 and it was used to obtain the sequences found in UniProt-GOA database.
 
-### Gene Ontology (GO)
+#### Gene Ontology (GO)
 The Gene Ontology databases `(.obo)` are downloaded from:
 
 https://release.geneontology.org
@@ -98,7 +97,6 @@ python3 preprocessing/parse_swissprot.py \
   data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```
-
 
 - Feature vector name: There are multiple feature vectors that can be
   generated from a protein sequence such as ctriad, PAAC or SPMAP.
@@ -225,7 +223,6 @@ a SimpleDataset:
 # Environment
 
 ## imblearn Package
-
 This code uses the MLSMOTE algorithm which is currently not part of the
 latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
 necessary to install it from a custom branch. To install follow these steps:
