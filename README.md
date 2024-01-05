@@ -1,34 +1,9 @@
 # ProtCast
 
-
-
-# Model
-This implementation uses the Keras library.
-
-
-# Environment
-
-## imblearn Package
-
-This code uses the MLSMOTE algorithm which is currently not part of the
-latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
-necessary to install it from a custom branch. To install follow these steps:
-
-1. Clone the `balvisio` fork of imblearn:
-```
-git clone git@github.com:balvisio/imbalanced-learn.git
-```
-
-2. Checkout the `ba/MLSMOTE` branch:
-```
-cd imbalanced-learn/
-git checkout ba/MLSMOTE
-```
-
-3. Install the library from local
-```
-python3 -m pip install .
-```
+Extract protein sequences and associated Gene Ontology (GO) annotation from UniProt, TrEMBL and the Gene
+Ontology Annotation database and use feature vector representations of the protein sequences to predict
+Molecular Function, Cellular Component, and Biological Process of uncharacterized proteins. This code 
+uses the Keras FeatureSpace package for strucured (tabular) data classification.
 
 # Usage
 
@@ -36,7 +11,7 @@ python3 -m pip install .
 
 ### Sources
 
-Files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`.
+Input files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`.
 
 ### UniProtKB/Swiss-Prot Database
 
@@ -203,7 +178,7 @@ of the GO categories.
 For example:
 
 ```
-python preprocessing/stats/create_dataset_stats.py \
+python3 preprocessing/stats/create_dataset_stats.py \
   data/dataset/dataset.bin \
   -d data/dataset/stats/ -w
 ``` 
@@ -245,4 +220,28 @@ a SimpleDataset:
 
 ```
 ./get_simple_dataset_files.sh
+```
+
+# Environment
+
+## imblearn Package
+
+This code uses the MLSMOTE algorithm which is currently not part of the
+latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
+necessary to install it from a custom branch. To install follow these steps:
+
+1. Clone the `balvisio` fork of imblearn:
+```
+git clone git@github.com:balvisio/imbalanced-learn.git
+```
+
+2. Checkout the `ba/MLSMOTE` branch:
+```
+cd imbalanced-learn/
+git checkout ba/MLSMOTE
+```
+
+3. Install the library from local
+```
+python3 -m pip install .
 ```
