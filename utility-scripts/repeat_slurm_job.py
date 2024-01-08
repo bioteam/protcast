@@ -27,5 +27,5 @@ if __name__ == "__main__":
 
     a = pyslurm.job()
     pending = a.find("job_state", "PENDING")
-    # running = a.find("job_state", "RUNNING")
+    myjobs = a.find("account", args.account)
     # jobs = a.get()
