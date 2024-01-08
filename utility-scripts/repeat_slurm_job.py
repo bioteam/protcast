@@ -14,14 +14,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--name",
-        help="Job name",
         default="get_simple_dataset_files",
+        help="Job name",
     )
     parser.add_argument(
         "-a",
         "--account",
-        help="Account name",
         default="bosborne",
+        help="Account name",
     )
     args = parser.parse_args()
 
