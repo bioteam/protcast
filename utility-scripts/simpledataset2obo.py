@@ -10,7 +10,7 @@ from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 
 
 def main():
-    """ "simpledataset2obo.py
+    """simpledataset2obo.py
     Create an *obo file from a serialized SimpleDataset.
     The *xref* lines are the ids of the proteins annotated
     with that term.

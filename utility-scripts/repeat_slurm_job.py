@@ -7,25 +7,24 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-n",
+    "--name",
+    help="Job name",
+    default="get_simple_dataset_files",
+)
+parser.add_argument(
+    "-a",
+    "--account",
+    help="Account name",
+    default="bosborne",
+)
+args = parser.parse_args()
+
 
 def main():
-    """repeat_slurm_job.py
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-n",
-        "--name",
-        help="Job name",
-        default="get_simple_dataset_files",
-    )
-    parser.add_argument(
-        "-a",
-        "--account",
-        help="Account name",
-        default="bosborne",
-    )
-    args = parser.parse_args()
-
+    """repeat_slurm_job.py"""
     jobs = pyslurm.slurmdb_jobs().get(account=args.account)
 
 
