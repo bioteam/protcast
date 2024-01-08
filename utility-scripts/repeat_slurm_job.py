@@ -25,4 +25,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    jobs = pyslurm.slurmdb_jobs().get(account=args.account)
+    jobs = pyslurm.db.JobFilter(account=args.account)
