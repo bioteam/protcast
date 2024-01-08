@@ -25,4 +25,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    jobs = pyslurm.db.JobFilter(account=args.account)
+    a = pyslurm.job()
+    jobs = a.get()
+    pending = a.find("job_state", "PENDING")
+    # running = a.find("job_state", "RUNNING")
+    
