@@ -29,6 +29,8 @@ if __name__ == "__main__":
     pending = a.find("job_state", "PENDING")
     myjobs = a.find("account", args.account)
 
+    # "wrap" specifies some command to execute before the script,
+    # e.g. "module load def"
     # test_job = {
     #     "wrap": "sleep 3600",
     #     "job_name": "pyslurm_test_job",
