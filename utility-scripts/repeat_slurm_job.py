@@ -34,7 +34,6 @@ if __name__ == "__main__":
     # test_job = {
     #     "wrap": "sleep 3600",
     #     "job_name": "pyslurm_test_job",
-    #     "ntasks": 2,
     #     "cpus_per_task": 3,
     #     "partition": "abc",
     #     "script": "xyz",
