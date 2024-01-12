@@ -13,11 +13,11 @@ class GOTerm:
     Attributes
     ----------
     id: str
-        ....
+        For example, GO:111222
     namespace: str
         GO namespace
     name: str
-        ....
+        For example, "nucleic acid binding"
     primary: Boolean
         A primary term is the most specific and detailed description of gene or
         gene product functions. Usually found in the lowest level of the tree.
@@ -28,10 +28,10 @@ class GOTerm:
         Biological Process, Cellular Component)
     parents: dict
         Key is id, value is GOTerm
-    children:
-        ...
-    ancestors:
-        ...
+    children: dict
+        Key is id, value is GOTerm
+    ancestors: list
+        All the ancestor GOTerms for a GOTerm
     annotations: list
         All the Annotations for a GOTerm
 
