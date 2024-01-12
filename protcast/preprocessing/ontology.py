@@ -33,7 +33,7 @@ class GOTerm:
     ancestors:
         ...
     annotations: list
-        ...
+        All the Annotations for a GOTerm
 
     Methods
     -------
@@ -46,7 +46,7 @@ class GOTerm:
     add_child:
         ...
     get_children:
-        ...
+        Returns list of GOTerms
     get_primary:
         ...
     is_primary:

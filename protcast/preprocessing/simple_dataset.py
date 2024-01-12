@@ -28,31 +28,31 @@ class SimpleDataset:
     Attributes
     ----------
     proteins: dict
-        ....
+        All the Proteins
     accessions: dict
-        ...
+        Relates the primary and secondary protein ids
     ontology: Ontology
-        ...
+        The GO DAGs
     go_terms_not_found: list
         ...
     ontology_path: Path
-        ...
+        Input file
     swissprot_path: Path
-        ...
+        Input file
     trembl_path: Path
-        ...
+        Input file
     gaf_path: Path
-        ...
+        Input file
     output_dir: Path
-        ...
+        Location of serialized SimpleDataset and log file
     created_at: Datetime
         ...
     verbose: bool
         Default is False.
     ontology_md5: str
-        ...
+        Checksum
     swissprot_md5: str
-        ...
+        Checksum
     propogate: bool
         Propagate Annotations from ancestors to children. Default is True.
 
