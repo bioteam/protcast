@@ -1,8 +1,8 @@
 # ProtCast
-Extract protein sequences and associated Gene Ontology (GO) annotation from UniProt, TrEMBL and the Gene
-Ontology Annotation files and use feature vector representations of the protein sequences to predict
-Molecular Function, Cellular Component, and Biological Process of proteins. This code 
-uses Keras and its FeatureSpace package for structured (tabular) data classification.
+Extract protein sequences and associated Gene Ontology (GO) annotations from UniProt, TrEMBL and 
+Gene Ontology Annotation files and use feature vector representations of the protein sequences to 
+predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins. 
+This code uses Keras and its FeatureSpace package for structured (tabular) data classification.
 
 # Usage
 
