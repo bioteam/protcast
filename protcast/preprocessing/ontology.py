@@ -460,9 +460,7 @@ class GODAG:
                     node.set_level(primary_node.level)
             assert not stack
 
-    def populate_node_levels_inner(
-        self, node: GOTerm, stack: list[GOTerm]
-    ) -> int:
+    def populate_node_levels_inner(self, node: GOTerm, stack: list[GOTerm]) -> int:
         """populate_node_levels_inner
         Recursive method that sets the level of input GOTerm and
         returns the level of the GOTerm
@@ -492,9 +490,7 @@ class GODAG:
             for parent in node.get_parents():
                 parent_level = parent.level
                 if parent.level is None:
-                    parent_level = self.populate_node_levels_inner(
-                        parent, stack
-                    )
+                    parent_level = self.populate_node_levels_inner(parent, stack)
 
                 min_parent_level = min(min_parent_level, parent_level)
             node_level = min_parent_level + 1
@@ -760,9 +756,7 @@ class Ontology:
         for parent in parents:
             parent_node = self.get_term(parent)
             if not parent_node:
-                parent_node = GOTerm(
-                    parent, namespace, None, None, None, is_obsolete
-                )
+                parent_node = GOTerm(parent, namespace, None, None, None, is_obsolete)
             go_node.add_parent(parent_node)
             parent_node.add_child(go_node)
             self.add_term(parent_node)
