@@ -15,18 +15,18 @@ def main():
     Example:
 
     python preprocessing-scripts/filter_fasta_from_goa.py \
-    data/goa_uniprot_all_noiea.gaf \
-    trembl/uniprot_trembl.fasta \
-    data/trembl/trembl_seqs_found_in_goa_2021_10_26.fasta
+    -g data/goa_uniprot_all_noiea.gaf \
+    -t trembl/uniprot_trembl.fasta \
+    -o data/trembl/trembl_seqs_found_in_goa_2021_10_26.fasta
     """
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "goa", help="Path to Gene Ontology Annotation (.gaf file)"
+        "--goa", "-g", help="Path to Gene Ontology Annotation (.gaf file)"
     )
-    parser.add_argument("trembl", help="Path to TrEMBL DB (.fasta file)")
-    parser.add_argument("output", help="Output file")
+    parser.add_argument("--trembl", "-t", help="Path to TrEMBL DB (.fasta file)")
+    parser.add_argument("--output", "-o", help="Output file")
     args = parser.parse_args()
 
     goa_path = args.goa
