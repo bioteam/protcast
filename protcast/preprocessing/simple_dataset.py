@@ -10,7 +10,6 @@ import pickle
 from tqdm import tqdm
 from typeguard import typechecked
 
-from Bio.Seq import Seq
 from Bio.SeqIO.FastaIO import FastaIterator
 
 from protcast import BP, CC, MF
