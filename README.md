@@ -80,22 +80,15 @@ is obtained:
 
 ## Parsing SwissProt
 
-`preprocessing/parse_swissprot.py` takes a GO ontology file
-and a Swissprot database file and converts it into an instance of a `Dataset`
-class. The database was downloaded from:
-[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
-Due to file size it is not added to the repository.
-
-For example:
+`preprocessing/parse_swissprot.py` takes a GO ontology file and a Swissprot 
+database file and returns the proteins, the GO terms that are not found in 
+Swissprot, and the protein accessions (ids). For example:
 
 ```
 python3 preprocessing/parse_swissprot.py \
   data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```
-
-- Feature vector name: There are multiple feature vectors that can be
-  generated from a protein sequence such as ctriad, PAAC or SPMAP.
 
 # Classes
 
@@ -207,7 +200,10 @@ python3 test_create_simple_dataset.py
 ```
 
 ## `training-scripts`
-Scripts that can build networks.
+Scripts to build Keras models.
+
+- Feature vector name: There are multiple feature vectors that can be
+  generated from a protein sequence such as ctriad, PAAC or SPMAP.
 
 ## `utility-scripts`
 Useful scripts.
