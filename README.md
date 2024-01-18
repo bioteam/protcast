@@ -141,7 +141,7 @@ The following digram describes the sources:
 
 ├── utility-scripts/
 
-## `protcast``
+## `protcast`
 
 `protcast/model`
 
