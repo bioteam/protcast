@@ -10,6 +10,7 @@ from tqdm import tqdm
 from typeguard import typechecked
 from collections import defaultdict
 from datetime import datetime
+
 from Bio.SeqIO.FastaIO import FastaIterator
 
 from preprocessing.parse_swissprot import parse_swissprot

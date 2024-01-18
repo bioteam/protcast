@@ -99,32 +99,36 @@ python3 preprocessing/parse_swissprot.py \
 
 - Feature vector name: There are multiple feature vectors that can be
   generated from a protein sequence such as ctriad, PAAC or SPMAP.
-- Buckets: It is a list of integers that specifies the boundaries for the
-  buckets in which the GO terms can be placed. For example if
-  `buckets = [30, 100, 200, 500]` then, GO terms with less than 30 annotated
-  proteins will be filtered out. Meanwhile, GO terms with 30 to 100 annotated
-  proteins will belong to the same bucket when creating the submodels (dense
-  networks). Idem, for 100 to 200, 200 to 500 and more than 500.
 
 # Classes
 
-## GOTerm Class
-This class ...
+## GOTerm 
+This class represents a GO term. Its attributes include *id*, *namespace*,
+*name*, its *level* in the DAG, *parents*, *ancestors*, and *annotations*. The 
+object also contains *is_obsolete* and *primary*.
 
-## Annotation Class
-This class ...
+## Annotation
+This class represents an annotation and its attributes including *go_term_id*,
+*protein_id*, and *evidence_code*. The object also specifies *is_manual* 
+(evidence code) and *has_obsolete* (GO term).
 
-## GODAG Class
-This class represents a typical OBO ontology and present relevant methods.
+## GODAG 
+This class represents a typical OBO ontology, a directed acyclic graph. Its
+attributes include *nodes* (GOTerms) and *name*.
 
-## Ontology Class
+## Ontology
 This class reads input files and creates a GODAG for each of the GO namespaces.
+Its attributes include *bp_dag*, *cc_dag*, *mf_dag*, and *terms*, a dict where
+the values are GOTerms.
 
-## Protein Classes
-This class ...
+## Protein
+This class represent a protein, including its *id*, *sequence*, and *annotations*. 
 
-## SimpleDataset Class
-This class ...
+## SimpleDataset
+This class integrates all the classes above. Its attributes include *proteins*, 
+*accessions* (relating primary and secondary protein ids), different input file names 
+(*ontology_path*, *swissprot_path*, *trembl_path*, *gaf_path*), and *output_dir*,
+the location of the serialized SimpleDataset and log files.
 
 ## UML Component Diagrams
 The UML diagrams were generated using the online tool: http://www.plantuml.com/
@@ -211,13 +215,14 @@ python3 test_create_simple_dataset.py
 Scripts that can build networks.
 
 ## `utility-scripts`
-Shell scripts. For example, download the 4 input files necessary to build
+Useful scripts. For example, download the 4 input files necessary to build
 a SimpleDataset:
 
 ```
 ./get_simple_dataset_files.sh
 ```
 
+<<<<<<< HEAD
 # Environment
 
 ## imblearn Package
@@ -240,3 +245,11 @@ git checkout ba/MLSMOTE
 ```
 python3 -m pip install .
 ```
+=======
+`make_dr_seqs.py`
+Runs the `mash` application to do pairwise protein sequence comparisons using kmers, then runs 
+DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related 
+sequences that are removed to create a "decreased redundancy" (dr) file. If the input file
+is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
+
+>>>>>>> bio/README
