@@ -36,10 +36,11 @@ if __name__ == "__main__":
 
     # Levels
 
-    # Assert roots are at level 0
+    # Assert roots are level 0
     assert ontology.get_primary_term("GO:0008150").level == 0 # Biological Process
     assert ontology.get_primary_term("GO:0005575").level == 0 # Cellular Component
     assert ontology.get_primary_term("GO:0003674").level == 0 # Molecular Function
+    # Assert ancestors of GO:0015645
     assert ontology.get_primary_term("GO:0003824").level == 1 # catalytic activity
     assert ontology.get_primary_term("GO:0016874").level == 2 # ligase activity
     assert ontology.get_primary_term("GO:0016877").level == 3 # ligase activity, forming carbon-sulfur bonds
