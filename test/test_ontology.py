@@ -67,7 +67,6 @@ if __name__ == "__main__":
             "GO:0140657",
         ]
     )
-    
     assert set(ontology.get_primary_term("GO:0015645").ancestors) == ancestors
 
     ancestors = set(["GO:0003674"])
