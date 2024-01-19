@@ -34,13 +34,13 @@ if __name__ == "__main__":
     assert os.path.isfile(Path(args.output))
     os.remove(args.output)
 
-    # Levels
+    # level
 
     # Assert roots are level 0
     assert ontology.get_primary_term("GO:0008150").level == 0 # Biological Process
     assert ontology.get_primary_term("GO:0005575").level == 0 # Cellular Component
     assert ontology.get_primary_term("GO:0003674").level == 0 # Molecular Function
-    # Assert ancestors of GO:0015645
+    # Assert levels of ancestors of GO:0031957
     assert ontology.get_primary_term("GO:0003824").level == 1 # catalytic activity
     assert ontology.get_primary_term("GO:0016874").level == 2 # ligase activity
     assert ontology.get_primary_term("GO:0016877").level == 3 # ligase activity, forming carbon-sulfur bonds
@@ -49,8 +49,10 @@ if __name__ == "__main__":
     assert ontology.get_primary_term("GO:0016878").level == 4 # acid-thiol ligase activity
     # Has 2 parents thus could be 2 or 5
     assert ontology.get_primary_term("GO:0015645").level == 2 # fatty acid ligase activity
-
-    # Ancestry
+    # Has 2 parents, one of which also has 2 parents
+    assert ontology.get_primary_term("GO:0031957").level == 3 # very long-chain fatty acid-CoA ligase activity
+ 
+    # ancestors
 
     # Roots should have no ancestors
     assert not ontology.get_primary_term("GO:0008150").ancestors # Biological Process
@@ -83,3 +85,16 @@ if __name__ == "__main__":
     assert (
         set(ontology.get_primary_term("GO:0016878").ancestors) == ancestors
     )  
+
+    # children
+
+    # leaf GO term
+    assert not ontology.get_primary_term("GO:0031957").children
+    assert len(ontology.get_primary_term("GO:0015645").children) == 9
+
+    # parents
+
+    # GO:0016405 CoA-ligase activity, GO:0015645 fatty acid ligase activity
+    assert len(ontology.get_primary_term("GO:0031957").parents) == 2
+    assert len(ontology.get_primary_term("GO:0015645").parents) == 2
+    assert not ontology.get_primary_term("GO:0003674").parents

@@ -19,20 +19,19 @@ class GOTerm:
     name: str
         For example, "nucleic acid binding"
     primary: Boolean
-        A primary term is the most specific and detailed description of gene or
-        gene product functions. Usually found in the lowest level of the tree.
+        A primary term a general category. Usually found in level 1 of the tree.
     is_obsolete: Boolean
         ....
     level: int
         Level in ontology tree, starting at level 0 (Molecular Function,
         Biological Process, Cellular Component)
-    parents: dict
+    parents: dict[str]
         Key is id, value is GOTerm
-    children: dict
+    children: dict[str]
         Key is id, value is GOTerm
-    ancestors: list
-        All the ancestor GOTerms for a GOTerm
-    annotations: list
+    ancestors: list[str]
+        All the ancestor GO term ids for a GOTerm (unordered)
+    annotations: list[Annotation]
         All the Annotations for a GOTerm
 
     Methods
@@ -99,9 +98,9 @@ class GOTerm:
         self.name = name
         self.primary = primary
         self.is_obsolete = is_obsolete
-        self.parents = {}
-        self.children = {}
-        self.annotations = []
+        self.parents: dict[str] = dict()
+        self.children: dict[str] = dict()
+        self.annotations = list()
         self.level = level
         self.ancestors: list[str] = None
 
