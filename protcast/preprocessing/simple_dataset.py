@@ -286,9 +286,7 @@ class SimpleDataset:
                 for ancestor in go_term_ancestors:
                     ancestor_annot = protein.get_annotation(ancestor)
                     if not ancestor_annot:
-                        ancestor_go_term = self.ontology.get_primary_term(
-                            ancestor
-                        )
+                        ancestor_go_term = self.ontology.get_primary_term(ancestor)
                         ancestor_annot = Annotation(
                             protein.id,
                             annot.evidence_code,
@@ -311,8 +309,8 @@ class SimpleDataset:
 
     def annotate_proteins_from_gaf(self) -> dict[list]:
         """annotate_proteins_from_gaf
-        Reads annotations from a *gaf file and returns the annotations that belong to the 
-        UniProtKB/TrEMBL database but do not have DB_Object_IDs. It is a dict of a list of 
+        Reads annotations from a *gaf file and returns the annotations that belong to the
+        UniProtKB/TrEMBL database but do not have DB_Object_IDs. It is a dict of a list of
         tuples where the key is a protein id and the tuple is:
 
         (GO term id, evidence code)
@@ -328,10 +326,9 @@ class SimpleDataset:
         trembl_annotations: dict of list of tuples
         """
         trembl_annotations = defaultdict(list)
-        num_swissprot_annots = 0
-        num_new_swissprot_annots = 0
-        num_annotations_not_labeled_uniprotkb = 0
-        num_annotations_labeled_uniprotkb = 0
+        num_swissprot_annots = ( num_new_swissprot_annots 
+        ) = ( num_annotations_not_labeled_uniprotkb
+        ) = num_annotations_labeled_uniprotkb = 0
 
         logging.debug(f"Reading from '{str(self.gaf_path)}'")
         gaf_annotations = parse_gaf(self.gaf_path)
@@ -381,9 +378,7 @@ class SimpleDataset:
                 )
                 num_annotations_not_labeled_uniprotkb += 1
 
-        logging.info(
-            f"Found {len(gaf_annotations)} annotations in '{self.gaf_path}'"
-        )
+        logging.info(f"Found {len(gaf_annotations)} annotations in '{self.gaf_path}'")
         logging.info(
             f"Found {num_annotations_not_labeled_uniprotkb} annotations not labelled 'UniProtKB'"
         )
@@ -446,12 +441,8 @@ class SimpleDataset:
                         )
                 self.proteins[protein.id] = protein
 
-        logging.info(
-            f"Made {new_proteins_from_trembl} new Proteins from TrEMBL"
-        )
-        logging.info(
-            f"Made {new_annotations_from_trembl} new Annotations from TrEMBL"
-        )
+        logging.info(f"Made {new_proteins_from_trembl} new Proteins from TrEMBL")
+        logging.info(f"Made {new_annotations_from_trembl} new Annotations from TrEMBL")
 
     def remove_protein(self, protein_id: str) -> None:
         """remove_protein
@@ -481,9 +472,7 @@ class SimpleDataset:
         """
         os.makedirs(self.output_dir, exist_ok=True)
         formatter = logging.Formatter("%(levelname)s | %(message)s")
-        file_handler = logging.FileHandler(
-            self.output_dir / "SimpleDataset.log"
-        )
+        file_handler = logging.FileHandler(self.output_dir / "SimpleDataset.log")
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
@@ -544,6 +533,7 @@ class SimpleDataset:
                 for protein_id in all_go_terms[go_term_id]:
                     obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")
+
 
 def md5(file_path: str) -> str:
     """md5
