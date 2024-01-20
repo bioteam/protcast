@@ -13,7 +13,7 @@ class Protein:
         Protein id (Uniprot accession)
     sequence: str
         Protein sequence
-    annotations: list
+    annotations: list[Annotation]
         list of Annotations
 
     Methods

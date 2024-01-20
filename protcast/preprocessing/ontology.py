@@ -6,6 +6,7 @@ from tqdm import tqdm
 from typeguard import typechecked
 
 
+
 class GOTerm:
     """GOTerm
     This class represents a GO term
@@ -20,8 +21,10 @@ class GOTerm:
         For example, "nucleic acid binding"
     primary: Boolean
         A primary term a general category. Usually found in level 1 of the tree.
+    is_leaf: Boolean
+        A term without children
     is_obsolete: Boolean
-        ....
+        Obsolete value from GO file
     level: int
         Level in ontology tree, starting at level 0 (Molecular Function,
         Biological Process, Cellular Component)
@@ -103,6 +106,7 @@ class GOTerm:
         self.annotations = list()
         self.level = level
         self.ancestors: list[str] = None
+        self.is_leaf: bool = False
 
     def add_parent(self, parent: GOTerm) -> None:
         """add_parent
@@ -311,7 +315,7 @@ class GODAG:
     ----------
     name: str
         Name of tree (BP, MF, CC)
-    nodes: dict
+    nodes: dict[str]
         Keys are ids, values are GOTerms
 
     Methods
@@ -358,7 +362,7 @@ class GODAG:
         self.name = name
         self.nodes: dict[str, GOTerm] = {}
 
-    def add_term(self, node: GOTerm):
+    def add_term(self, node: GOTerm) -> None:
         """add_term
         Add node to nodes dict where key is id and value is GOTerm
 
@@ -374,7 +378,7 @@ class GODAG:
         self.nodes[node.id] = node
 
     @typechecked
-    def get_term(self, node_id: str):
+    def get_term(self, node_id: str) -> GOTerm:
         """get_term
         Get GOTerm given an id
 
@@ -462,7 +466,8 @@ class GODAG:
     def populate_node_levels_inner(self, node: GOTerm, stack: list[GOTerm]) -> int:
         """populate_node_levels_inner
         Recursive method that sets the level of input GOTerm and
-        returns the level of the GOTerm
+        returns the level of the GOTerm. This returns the lowest
+        level if a node has parents of different levels.
 
         Parameters
         ----------
@@ -495,6 +500,9 @@ class GODAG:
             node_level = min_parent_level + 1
 
         node.set_level(node_level)
+
+        if not node.children:
+            node.is_leaf = True
 
         stack.remove(node)
         return node_level
@@ -661,6 +669,7 @@ class Ontology:
         with open(go_file, "r") as f:
             lines = [x.strip("\n") for x in f.readlines()]
 
+        # All the lines for one term
         goterm_lines = []
 
         for line in tqdm(lines, desc=f"Processing GO terms from '{go_file}'"):
@@ -685,7 +694,7 @@ class Ontology:
             for parent in term.get_parents():
                 assert parent.is_primary()
 
-    def process_go_term(self, goterm_lines: list(str)):
+    def process_go_term(self, goterm_lines: list(str)) -> None:
         """process_go_term
         Gets id, name, namespace, alt_id, is_a (parent), and
         is_obsolete from different lines and builds GOTerms from
@@ -694,7 +703,7 @@ class Ontology:
         Parameters
         ----------
         goterm_lines: list
-            List of lines from GO file
+            List of lines for one term from GO file
 
         Returns
         -------
@@ -702,7 +711,6 @@ class Ontology:
         """
         if not goterm_lines:
             return
-        num_go_terms = 0
         header = goterm_lines[0]
 
         if header != "[Term]":
@@ -715,7 +723,6 @@ class Ontology:
         for line in goterm_lines:
             if line.startswith("id:"):
                 term_id = line.split(":", 1)[1].strip()
-                num_go_terms += 1
                 continue
             if line.startswith("name:"):
                 name = line.split(":", 1)[1].strip()
@@ -738,9 +745,10 @@ class Ontology:
         assert term_id is not None
         assert namespace
         assert name
+        # Terms that are obsolete should not have/be parents
         assert not (
             is_obsolete and parents
-        )  # Terms that are obsolete should not have/be parents
+        )  
 
         go_node = self.get_term(term_id)
         if go_node is None:
@@ -805,7 +813,7 @@ class Ontology:
 
     @typechecked
     def get_term(self, term_id: str) -> GOTerm | None:
-        """get_terms
+        """get_term
         Return GOTerm given a GO term id or None
 
         Parameters

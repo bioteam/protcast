@@ -60,10 +60,10 @@ def main():
     # Make the default "False" just for testing purposes
     parser.add_argument(
         "-n",
-        "--propogate",
+        "--propagate",
         default=False,
         action="store_true",
-        help="Propogate annotations",
+        help="Propagate annotations",
     )
     parser.add_argument(
         "-r",
@@ -80,7 +80,7 @@ def main():
         args.trembl,
         args.gaf,
         args.output_dir,
-        args.propogate,
+        args.propagate,
         args.verbose,
     )
 
@@ -108,6 +108,17 @@ def main():
     assert len(annots) == 1
     assert annots[0].evidence_code == "IEA"
     trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
+
+    # Test assocation of GOTerms and Annotations
+    annots = dataset.ontology.get_primary_term("GO:0015379").annotations
+    assert len(annots) == 1
+    assert annots[0].protein_id == "A0A016QRH0"
+
+    annots = dataset.ontology.get_primary_term("GO:0070469").annotations
+    assert len(annots) == 3
+    assert annots[0].protein_id == "A0A2U4Z3V2_9DIPT"
+    assert annots[1].protein_id == "N0GT22_9TELE"
+    assert annots[2].protein_id == "A0A7H0LCT9_9MUSC"
 
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
