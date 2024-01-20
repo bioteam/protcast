@@ -65,16 +65,18 @@ class SimpleDataset:
         Save SimpleDataset to disk
     from_serialized_file:
         Load SimpleDataset from disk
-    create_annotation_files
-        ...
-    propagate_annotations
-        ...
     annotate_proteins_from_gaf:
         ...
     add_trembl_proteins:
         ...
     parse:
         Inner function, parse TrEMBL
+    create_annotation_files
+        ...
+    propagate_annotations
+        ...
+    copy_annotations_to_term
+        Copy Annotations from Protein to GOTerm
     remove_protein:
         ...
     md5:
@@ -158,6 +160,8 @@ class SimpleDataset:
         # Propogate annotations from lower to higher levels
         if self.propogate:
             self.propagate_annotations()
+
+        self.copy_annotations_to_term()
 
         logging.info(f"GO: '{self.ontology_path}'")
         logging.info(f"GOA: '{self.gaf_path}'")
@@ -296,14 +300,24 @@ class SimpleDataset:
                         # term, we might update 'is_manual'
                         ancestor_annot.is_manual = annot.is_manual
 
+    def copy_annotations_to_term(self) -> None:
+        """copy_annotations_to_term
+        Copy Annotations from Protein to GOTerm
+        """
+        for protein in self.proteins.values():
+            for annot in protein.annotations:
+                go_term = self.ontology.get_primary_term(annot.go_term_id)
+                go_term.add_annotation(annot)
+
     def annotate_proteins_from_gaf(self) -> dict[list]:
         """annotate_proteins_from_gaf
-        Adds Annotations to the SimpleDataset.ontology and returns the
-        annotations that belong to the UniProtKB/TrEMBL database but do not
-        have DB_Object_IDs. It is a dict of a list of tuples where the key is
-        a protein id and the tuple is:
+        Reads annotations from a *gaf file and returns the annotations that belong to the 
+        UniProtKB/TrEMBL database but do not have DB_Object_IDs. It is a dict of a list of 
+        tuples where the key is a protein id and the tuple is:
 
         (GO term id, evidence code)
+
+        Also adds Annotations to existing Proteins.
 
         Parameters
         ----------

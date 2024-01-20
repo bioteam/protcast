@@ -35,7 +35,6 @@ if __name__ == "__main__":
     os.remove(args.output)
 
     # level
-    # Assert roots are level 0
     assert ontology.get_primary_term("GO:0008150").level == 0 # Biological Process
     assert ontology.get_primary_term("GO:0005575").level == 0 # Cellular Component
     assert ontology.get_primary_term("GO:0003674").level == 0 # Molecular Function
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     assert len(ontology.get_primary_term("GO:0015645").children) == 9
 
     # parents
-    # GO:0016405 CoA-ligase activity, GO:0015645 fatty acid ligase activity
+    # GO:0016405 (CoA-ligase activity), GO:0015645 (fatty acid ligase activity)
     assert len(ontology.get_primary_term("GO:0031957").parents) == 2
     assert len(ontology.get_primary_term("GO:0015645").parents) == 2
     assert not ontology.get_primary_term("GO:0003674").parents
@@ -97,3 +96,4 @@ if __name__ == "__main__":
     # is_leaf 
     assert ontology.get_primary_term("GO:0031957").is_leaf
     assert not ontology.get_primary_term("GO:0015645").is_leaf
+    assert not ontology.get_primary_term("GO:0003674").is_leaf

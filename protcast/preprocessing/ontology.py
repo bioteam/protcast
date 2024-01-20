@@ -6,7 +6,6 @@ from tqdm import tqdm
 from typeguard import typechecked
 
 
-
 class GOTerm:
     """GOTerm
     This class represents a GO term
@@ -46,6 +45,8 @@ class GOTerm:
     get_parents:
         ...
     add_child:
+        ...
+    add_annotation:
         ...
     get_children:
         Returns list of GOTerms
@@ -151,6 +152,21 @@ class GOTerm:
         None
         """
         self.children[child.id] = child
+
+    def add_annotation(self, annot) -> None:
+        """add_annotation
+        Add Annotation to GOTerm
+
+        Parameters
+        ----------
+        annot: object
+            Annotation
+
+        Returns
+        -------
+        None
+        """
+        self.annotations.append(annot)
 
     def get_children(self) -> list[GOTerm]:
         """get_children

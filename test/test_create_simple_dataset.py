@@ -116,9 +116,9 @@ def main():
 
     annots = dataset.ontology.get_primary_term("GO:0070469").annotations
     assert len(annots) == 3
-    assert annots[0].protein_id == "A0A2U4Z3V2_9DIPT"
-    assert annots[1].protein_id == "N0GT22_9TELE"
-    assert annots[2].protein_id == "A0A7H0LCT9_9MUSC"
+    assert annots[0].protein_id == "A0A2U4Z3V2"
+    assert annots[1].protein_id == "A0A7H0LCT9"
+    assert annots[2].protein_id == "N0GT22"
 
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
