@@ -49,7 +49,8 @@ if __name__ == "__main__":
     assert ontology.get_primary_term("GO:0015645").level == 2 # fatty acid ligase activity
     # Has 2 parents, one of which also has 2 parents
     assert ontology.get_primary_term("GO:0031957").level == 3 # very long-chain fatty acid-CoA ligase activity
- 
+    assert len(ontology.mf_dag.get_nodes_by_level(0)) == 1
+
     # ancestors
     # Roots should have no ancestors
     assert not ontology.get_primary_term("GO:0008150").ancestors # Biological Process

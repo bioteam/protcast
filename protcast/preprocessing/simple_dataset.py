@@ -326,9 +326,10 @@ class SimpleDataset:
         trembl_annotations: dict of list of tuples
         """
         trembl_annotations = defaultdict(list)
-        num_swissprot_annots = ( num_new_swissprot_annots 
-        ) = ( num_annotations_not_labeled_uniprotkb
-        ) = num_annotations_labeled_uniprotkb = 0
+        num_swissprot_annots = 0
+        num_new_swissprot_annots = 0
+        num_annotations_not_labeled_uniprotkb = 0
+        num_annotations_labeled_uniprotkb = 0
 
         logging.debug(f"Reading from '{str(self.gaf_path)}'")
         gaf_annotations = parse_gaf(self.gaf_path)

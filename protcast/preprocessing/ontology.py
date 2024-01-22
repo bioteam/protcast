@@ -50,6 +50,10 @@ class GOTerm:
         ...
     get_children:
         Returns list of GOTerms
+    get_manual_annotations:
+        Returns list of manual Annotations
+    get_non_obsolete_annotations:
+        Returns list of manual Annotations
     get_primary:
         ...
     is_primary:
@@ -182,6 +186,35 @@ class GOTerm:
         """
         return self.children.values
 
+    def get_manual_annotations(self):
+        """get_manual_annotations
+        Get manual Annotations
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        list of Annotations
+        """
+        return [x for x in self.annotations if x.is_manual]
+
+    def get_non_obsolete_annotations(self):
+        """get_non_obsolete_annotations
+        Get non-obsolete Annotations
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        list of Annotations
+        """
+        if not self.is_obsolete:
+            return self.annotations
+
     def get_primary(self) -> GOTerm:
         """get_primary
         Get primary GOTerm, if primary is None then this node is primary
@@ -249,8 +282,8 @@ class GOTerm:
         elif self.level > obj.level:
             return False
         else:
-            if len(self.get_manual_non_obsolete_annotations()) > len(
-                obj.get_manual_non_obsolete_annotations()
+            if len(self.get_manual_annotations()) > len(
+                obj.get_manual_annotations()
             ):
                 return True
             else:
@@ -261,7 +294,7 @@ class GOTerm:
         Compare GOTerm to self, return True if input GOTerm has lower
         level number, False if input GOTerm has higher level number.
         If the two have the same level then return True if input GOTerm
-        has more manual, non-obsolete Annotations, else False.
+        has more manual Annotations, else False.
 
         Parameters
         ----------
@@ -277,8 +310,8 @@ class GOTerm:
         elif self.level < obj.level:
             return False
         else:
-            if len(self.get_manual_non_obsolete_annotations()) < len(
-                obj.get_manual_non_obsolete_annotations()
+            if len(self.get_manual_annotations()) < len(
+                obj.get_manual_annotations()
             ):
                 return True
             else:
@@ -314,7 +347,7 @@ class GOTerm:
         Str
         """
         annots = len(self.get_non_obsolete_annotations())
-        manual_annots = len(self.get_manual_non_obsolete_annotations())
+        manual_annots = len(self.get_manual_annotations())
 
         return (
             f"{self.id}\t{self.level}\t{manual_annots}\t"
@@ -622,6 +655,15 @@ class GODAG:
         """
         return sorted(filter(lambda x: x.is_obsolete, self.nodes.values()))
 
+    def get_nodes_by_level(self, level: int) -> list(GOTerm):
+        """get_nodes_by_level
+        Get all the nodes of the given level
+        """
+        nodes_by_level = list()
+        for node in self.nodes.values():
+            if node.level == level:
+                nodes_by_level.append(node)
+        return nodes_by_level
 
 class Ontology:
     """Ontology

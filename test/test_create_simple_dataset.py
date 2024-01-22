@@ -66,11 +66,11 @@ def main():
         help="Propagate annotations",
     )
     parser.add_argument(
-        "-r",
-        "--remove",
-        default=True,
-        action="store_false",
-        help="Remove files",
+        "-k",
+        "--keep",
+        default=False,
+        action="store_true",
+        help="Keep *bin and *log files",
     )
     args = parser.parse_args()
 
