@@ -1,7 +1,7 @@
 #!/bin/bash
 # Download files required for a SimpleDataset
 
-DATE=2023-11-15
+DATE=2024-01-17
 GO_ROOT=https://release.geneontology.org
 UNIPROT_ROOT=https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete
 
