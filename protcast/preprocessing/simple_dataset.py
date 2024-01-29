@@ -161,7 +161,10 @@ class SimpleDataset:
         if self.propogate:
             self.propagate_annotations()
 
+        # Get Annotations from Proteins and add to GOTerms
         self.copy_annotations_to_term()
+        # Create GODAG annotations attribute
+        self.ontology.populate_godag_annotations()
 
         logging.info(f"GO: '{self.ontology_path}'")
         logging.info(f"GOA: '{self.gaf_path}'")
@@ -326,9 +329,10 @@ class SimpleDataset:
         trembl_annotations: dict of list of tuples
         """
         trembl_annotations = defaultdict(list)
-        num_swissprot_annots = ( num_new_swissprot_annots 
-        ) = ( num_annotations_not_labeled_uniprotkb
-        ) = num_annotations_labeled_uniprotkb = 0
+        num_swissprot_annots = 0
+        num_new_swissprot_annots = 0
+        num_annotations_not_labeled_uniprotkb = 0
+        num_annotations_labeled_uniprotkb = 0
 
         logging.debug(f"Reading from '{str(self.gaf_path)}'")
         gaf_annotations = parse_gaf(self.gaf_path)

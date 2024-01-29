@@ -50,6 +50,10 @@ class GOTerm:
         ...
     get_children:
         Returns list of GOTerms
+    get_manual_annotations:
+        Returns list of manual Annotations
+    get_non_obsolete_annotations:
+        Returns list of manual Annotations
     get_primary:
         ...
     is_primary:
@@ -182,6 +186,35 @@ class GOTerm:
         """
         return self.children.values
 
+    def get_manual_annotations(self):
+        """get_manual_annotations
+        Get manual Annotations
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        list of Annotations
+        """
+        return [x for x in self.annotations if x.is_manual]
+
+    def get_non_obsolete_annotations(self):
+        """get_non_obsolete_annotations
+        Get non-obsolete Annotations
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        list of Annotations
+        """
+        if not self.is_obsolete:
+            return self.annotations
+
     def get_primary(self) -> GOTerm:
         """get_primary
         Get primary GOTerm, if primary is None then this node is primary
@@ -249,8 +282,8 @@ class GOTerm:
         elif self.level > obj.level:
             return False
         else:
-            if len(self.get_manual_non_obsolete_annotations()) > len(
-                obj.get_manual_non_obsolete_annotations()
+            if len(self.get_manual_annotations()) > len(
+                obj.get_manual_annotations()
             ):
                 return True
             else:
@@ -261,7 +294,7 @@ class GOTerm:
         Compare GOTerm to self, return True if input GOTerm has lower
         level number, False if input GOTerm has higher level number.
         If the two have the same level then return True if input GOTerm
-        has more manual, non-obsolete Annotations, else False.
+        has more manual Annotations, else False.
 
         Parameters
         ----------
@@ -277,8 +310,8 @@ class GOTerm:
         elif self.level < obj.level:
             return False
         else:
-            if len(self.get_manual_non_obsolete_annotations()) < len(
-                obj.get_manual_non_obsolete_annotations()
+            if len(self.get_manual_annotations()) < len(
+                obj.get_manual_annotations()
             ):
                 return True
             else:
@@ -301,9 +334,8 @@ class GOTerm:
 
     def to_text(self) -> str:
         """to_text
-        Return text summary of GOTerm, including number of Annotations
-        number of manual Annotations, id, level, and ids of manual
-        Annotations, and whether the Annotations are obsolete
+        Return text summary of GOTerm: id, level, number of Annotations,
+        number of manual Annotations, is_obsolete, and primary id
 
         Parameters
         ----------
@@ -314,11 +346,11 @@ class GOTerm:
         Str
         """
         annots = len(self.get_non_obsolete_annotations())
-        manual_annots = len(self.get_manual_non_obsolete_annotations())
+        manual_annots = len(self.get_manual_annotations())
 
         return (
-            f"{self.id}\t{self.level}\t{manual_annots}\t"
-            f"{annots - manual_annots}\t{annots}\t{self.is_obsolete}\t"
+            f"{self.id}\t{self.level}\t{annots}\t"
+            f"{manual_annots}\t{self.is_obsolete}\t"
             f"{self.get_primary().id}"
         )
 
@@ -333,6 +365,8 @@ class GODAG:
         Name of tree (BP, MF, CC)
     nodes: dict[str]
         Keys are ids, values are GOTerms
+    annotations: list
+        List of Annotations
 
     Methods
     -------
@@ -341,6 +375,8 @@ class GODAG:
     add_term:
         ...
     get_term:
+        ...
+    populate_annotations:
         ...
     populate_node_ancestors:
         ...
@@ -368,15 +404,14 @@ class GODAG:
         ----------
         name: str
             MF, BP, or CC
-        nodes: dict
-            Keys are ids, values are GOTerms
 
         Returns
         -------
         None
         """
         self.name = name
-        self.nodes: dict[str, GOTerm] = {}
+        self.nodes: dict[str, GOTerm] = dict()
+        self.annotations = list()
 
     def add_term(self, node: GOTerm) -> None:
         """add_term
@@ -452,6 +487,23 @@ class GODAG:
         node.ancestors = list(ancestors)
 
         return node.ancestors
+
+    def populate_annotations(self) -> None:
+        """populate_annotations
+        Populate annotations for a namespace
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        logging.debug(f"Populating annotations of {self.name}")
+        for node in self.nodes.values():
+            for annot in node.annotations:
+                self.annotations.append(annot)
 
     def populate_node_levels(self) -> None:
         """populate_node_levels
@@ -622,6 +674,15 @@ class GODAG:
         """
         return sorted(filter(lambda x: x.is_obsolete, self.nodes.values()))
 
+    def get_nodes_by_level(self, level: int) -> list(GOTerm):
+        """get_nodes_by_level
+        Get all the nodes of the given level
+        """
+        nodes_by_level = list()
+        for node in self.nodes.values():
+            if node.level == level:
+                nodes_by_level.append(node)
+        return nodes_by_level
 
 class Ontology:
     """Ontology
@@ -658,6 +719,8 @@ class Ontology:
     populate_ontology_levels:
         ...
     populate_ontology_ancestry:
+        ...
+    populate_godag_annotations:
         ...
     load_ontology:
         ...
@@ -896,6 +959,22 @@ class Ontology:
         self.bp_dag.to_files(output_path)
         self.cc_dag.to_files(output_path)
         self.mf_dag.to_files(output_path)
+
+    def populate_godag_annotations(self) -> None:
+        """populate_godag_annotations
+        Call GODAG.populate_annotations for each namespace
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.bp_dag.populate_annotations()
+        self.cc_dag.populate_annotations()
+        self.mf_dag.populate_annotations()
 
     def populate_ontology_levels(self) -> None:
         """populate_ontology_levels
