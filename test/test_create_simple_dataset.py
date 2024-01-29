@@ -86,6 +86,7 @@ def main():
 
     dataset.save()
 
+    # Output files
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
 
@@ -123,7 +124,7 @@ def main():
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
 
-    if args.remove:
+    if not args.keep:
         os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
         os.unlink(Path(args.output_dir, "SimpleDataset.log"))
         os.unlink(Path(args.output_dir, "SimpleDataset.obo"))

@@ -334,9 +334,8 @@ class GOTerm:
 
     def to_text(self) -> str:
         """to_text
-        Return text summary of GOTerm, including number of Annotations
-        number of manual Annotations, id, level, and ids of manual
-        Annotations, and whether the Annotations are obsolete
+        Return text summary of GOTerm: id, level, number of Annotations,
+        number of manual Annotations, is_obsolete, and primary id
 
         Parameters
         ----------
@@ -350,8 +349,8 @@ class GOTerm:
         manual_annots = len(self.get_manual_annotations())
 
         return (
-            f"{self.id}\t{self.level}\t{manual_annots}\t"
-            f"{annots - manual_annots}\t{annots}\t{self.is_obsolete}\t"
+            f"{self.id}\t{self.level}\t{annots}\t"
+            f"{manual_annots}\t{self.is_obsolete}\t"
             f"{self.get_primary().id}"
         )
 
@@ -366,6 +365,8 @@ class GODAG:
         Name of tree (BP, MF, CC)
     nodes: dict[str]
         Keys are ids, values are GOTerms
+    annotations: list
+        List of Annotations
 
     Methods
     -------
@@ -374,6 +375,8 @@ class GODAG:
     add_term:
         ...
     get_term:
+        ...
+    populate_annotations:
         ...
     populate_node_ancestors:
         ...
@@ -401,15 +404,14 @@ class GODAG:
         ----------
         name: str
             MF, BP, or CC
-        nodes: dict
-            Keys are ids, values are GOTerms
 
         Returns
         -------
         None
         """
         self.name = name
-        self.nodes: dict[str, GOTerm] = {}
+        self.nodes: dict[str, GOTerm] = dict()
+        self.annotations = list()
 
     def add_term(self, node: GOTerm) -> None:
         """add_term
@@ -485,6 +487,23 @@ class GODAG:
         node.ancestors = list(ancestors)
 
         return node.ancestors
+
+    def populate_annotations(self) -> None:
+        """populate_annotations
+        Populate annotations for a namespace
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        logging.debug(f"Populating annotations of {self.name}")
+        for node in self.nodes.values():
+            for annot in node.annotations:
+                self.annotations.append(annot)
 
     def populate_node_levels(self) -> None:
         """populate_node_levels
@@ -700,6 +719,8 @@ class Ontology:
     populate_ontology_levels:
         ...
     populate_ontology_ancestry:
+        ...
+    populate_godag_annotations:
         ...
     load_ontology:
         ...
@@ -938,6 +959,22 @@ class Ontology:
         self.bp_dag.to_files(output_path)
         self.cc_dag.to_files(output_path)
         self.mf_dag.to_files(output_path)
+
+    def populate_godag_annotations(self) -> None:
+        """populate_godag_annotations
+        Call GODAG.populate_annotations for each namespace
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+        self.bp_dag.populate_annotations()
+        self.cc_dag.populate_annotations()
+        self.mf_dag.populate_annotations()
 
     def populate_ontology_levels(self) -> None:
         """populate_ontology_levels

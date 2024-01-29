@@ -161,7 +161,10 @@ class SimpleDataset:
         if self.propogate:
             self.propagate_annotations()
 
+        # Get Annotations from Proteins and add to GOTerms
         self.copy_annotations_to_term()
+        # Create GODAG annotations attribute
+        self.ontology.populate_godag_annotations()
 
         logging.info(f"GO: '{self.ontology_path}'")
         logging.info(f"GOA: '{self.gaf_path}'")

@@ -1,6 +1,5 @@
 import argparse
 import logging as log
-import os
 from pathlib import Path
 import sys
 
@@ -8,7 +7,6 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[2]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 from protcast.stats import stats  # noqa: E402
 
 
@@ -28,41 +26,14 @@ def main():
     Example:
     python preprocessing/stats/create_dataset_stats.py \
     -i data/dataset/u-2021-04-g-2021-10-26/dataset.bin \
-    -o data/dataset/u-2021-04-g-2021-10-26/stats/ \
-    -w
     """
     log.basicConfig(level=log.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-i", "--input", help="Path to serialized dataset file"
-    )
-    parser.add_argument(
-        "-o", "--output_dir", default=".", help="Output directory"
-    )
-    parser.add_argument(
-        "-w", default=False, action="store_true", help="Overwrite dir"
-    )
+    parser.add_argument("-i", "--input", help="Path to serialized dataset file")
     args = parser.parse_args()
-    
-    output_dir = args.output_dir
-    if not os.path.isdir(output_dir):
-        if args.w:
-            os.makedirs(output_dir)
-        else:
-            print(f"Output directory: '{output_dir}' not found")
-            exit(1)
 
-    if len(os.listdir(output_dir)) > 0:
-        if not args.w:
-            print(
-                "Output directory not empty. Provide the '-w' flag to overwrite"
-            )
-            exit(1)
-
-    log.info(f"Deserializing SimpleDataset from file: {args.input}")
-    dataset = SimpleDataset.from_serialized_file(args.input)
-    log.info(f"Generating dataset statistics in: {output_dir}")
-    stats.generate_dataset_stats(dataset, Path(output_dir))
+    log.info(f"Generating dataset statistics from: {args.input}")
+    stats.generate_dataset_stats(args.input)
 
 
 if __name__ == "__main__":
