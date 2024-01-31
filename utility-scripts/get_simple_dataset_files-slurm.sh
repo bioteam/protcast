@@ -3,7 +3,8 @@
 #SBATCH --job-name get_simple_dataset_files
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=briano@bioteam.net
-#SBATCH -o /scratch1/04769/bosborne/get_simple_dataset_files.out
+#SBATCH -o get_simple_dataset_files.out
+#SBATCH -e get_simple_dataset_files.err
 
 DATE=2024-01-17
 GO_ROOT=https://release.geneontology.org
