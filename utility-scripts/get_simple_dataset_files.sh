@@ -1,5 +1,9 @@
 #!/bin/bash
 # Download files required for a SimpleDataset
+#SBATCH --job-name get_simple_dataset_files
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=briano@bioteam.net
+#SBATCH -o /scratch1/04769/bosborne/get_simple_dataset_files.out
 
 DATE=2024-01-17
 GO_ROOT=https://release.geneontology.org
@@ -10,6 +14,7 @@ GAF=$GO_ROOT/$DATE/annotations/filtered_goa_uniprot_all_noiea.gaf.gz
 UNIPROT=$UNIPROT_ROOT/uniprot_sprot.dat.gz
 TREMBL=$UNIPROT_ROOT/uniprot_trembl.fasta.gz
 
+cd $SCRATCH
 mkdir -p "$DATE/GO"
 mkdir -p "$DATE/UniProt"
 
@@ -24,10 +29,10 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
             gunzip "$(basename "$URL")"
             echo Finished gunzip: "$FNAME"
         fi
-        if [[ "$FNAME" =~ go ]]; then
+    	if [[ "$FNAME" =~ go ]]; then
             mv "$FNAME" "$DATE"/GO
-        else
+    	else
             mv "$FNAME" "$DATE"/UniProt
-        fi
+    	fi
     fi
 done
