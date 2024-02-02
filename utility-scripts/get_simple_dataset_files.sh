@@ -4,6 +4,9 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=briano@bioteam.net
 #SBATCH -o /scratch1/04769/bosborne/get_simple_dataset_files.out
+#SBATCH -e /scratch1/04769/bosborne/get_simple_dataset_files.err
+#SBATCH -N 1
+#SBATCH -n 20
 
 DATE=2024-01-17
 GO_ROOT=https://release.geneontology.org
@@ -29,10 +32,10 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
             gunzip "$(basename "$URL")"
             echo Finished gunzip: "$FNAME"
         fi
-    	if [[ "$FNAME" =~ go ]]; then
+        if [[ "$FNAME" =~ go ]]; then
             mv "$FNAME" "$DATE"/GO
-    	else
+        else
             mv "$FNAME" "$DATE"/UniProt
-    	fi
+        fi
     fi
 done
