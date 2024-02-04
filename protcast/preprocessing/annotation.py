@@ -1,13 +1,11 @@
-from protcast.preprocessing.ontology import GOTerm
 from typeguard import typechecked
 import logging
 
 
 class Annotation:
     """Annotation
-    The Annotation object links one protein, one GO term and one evidence
-    code. The Annotation also stores the Boolean for *is_manual*, *has_leaf*
-    (GO term) and *has_obsolete* (GO term).
+    The Annotation object links one protein, one GO term id and one evidence
+    code. The Annotation also stores the Boolean for *is_manual*.
 
     All codes are 'manual' except for 'IEA'. Evidence Codes for Annotations
     (https://geneontology.org/docs/guide-go-evidence-codes/):
@@ -59,18 +57,14 @@ class Annotation:
 
     Attributes
     ----------
-    go_term_id : str
+    go_id: str
         ....
-    protein_id : str
+    protein_id: str
         ....
-    evidence_code : str
+    evidence_code: str
         ....
-    is_manual : bool
+    is_manual: bool
         ....
-    has_obsolete: bool
-        Has an obsolete GO term
-    has_leaf: bool
-        Has a leaf GO term
 
     Methods
     -------
@@ -83,7 +77,7 @@ class Annotation:
         self,
         protein_id: str,
         evidence_code: str,
-        go_term: GOTerm,
+        go_id: str,
     ) -> None:
         """__init__
         Initialize Annotation
@@ -94,7 +88,7 @@ class Annotation:
             ...
         evidence_code: str
             ...
-        go_term: GOTerm
+        go_id: str
             ...
 
         Returns
@@ -130,17 +124,9 @@ class Annotation:
             "ND",
         ]
 
-        self.go_term_id = go_term.id
+        self.go_id = go_id
         self.protein_id = protein_id
         self.evidence_code = evidence_code
-
-        self.has_obsolete = go_term.is_obsolete
-
-        children = go_term.get_children()
-        if children:
-            self.has_leaf = False
-        else:
-            self.has_leaf = True
 
         if self.evidence_code == "IEA":
             self.is_manual = False
@@ -149,6 +135,6 @@ class Annotation:
         else:
             logging.error(
                 f"Invalid evidence code: '{self.evidence_code}' (protein {self.protein_id} "
-                f"GO term {self.go_term_id})"
+                f"GO term {self.go_id})"
             )
             exit(1)

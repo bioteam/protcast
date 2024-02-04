@@ -1,5 +1,5 @@
 from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.ontology import Ontology
+from protcast.preprocessing.annotated_godag import Ontology
 from protcast.preprocessing.protein import Protein
 import gzip
 import logging

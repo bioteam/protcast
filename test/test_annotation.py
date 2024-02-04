@@ -6,7 +6,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.ontology import GOTerm  # noqa: E402
+from protcast.preprocessing.annotated_godag import GOTerm  # noqa: E402
 from protcast.preprocessing.protein import Protein  # noqa: E402
 from protcast.preprocessing.annotation import Annotation  # noqa: E402
 

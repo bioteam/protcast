@@ -15,7 +15,7 @@ from typeguard import typechecked
 from protcast import BP, CC, MF
 from protcast.preprocessing import utils
 from protcast.preprocessing.dataset import Dataset
-from protcast.preprocessing.ontology import GOTerm
+from protcast.preprocessing.annotated_godag import GOTerm
 
 
 CTRIAD = "ctriad"
