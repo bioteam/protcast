@@ -15,9 +15,8 @@ from Bio.SeqIO.FastaIO import FastaIterator
 
 from preprocessing.parse_swissprot import parse_swissprot
 from preprocessing.parse_gaf import parse_gaf
-from protcast import BP, CC, MF
 from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.annotated_godag import Ontology
+from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.protein import Protein
 
 
@@ -32,8 +31,8 @@ class SimpleDataset:
         All the Proteins
     accessions: dict
         Relates the primary and secondary protein ids
-    ontology: Ontology
-        The GO DAGs
+    annotated_dag: AnnotatedDag
+        The GO DAGs plus Annotations assigned to AnnotatedGOTerms
     go_terms_not_found: list
         ...
     ontology_path: Path
@@ -140,13 +139,13 @@ class SimpleDataset:
         self.write_log(logger)
 
         # Create Ontology
-        self.ontology: Ontology = Ontology(self.ontology_path)
+        self.annotated_dag: AnnotatedGODag = AnnotatedGODag(self.ontology_path)
         # Parse proteins from SwissProt
         (
             self.proteins,
             self.go_terms_not_found,
             self.accessions,
-        ) = parse_swissprot(self.ontology, self.swissprot_path)
+        ) = parse_swissprot(self.annotated_dag, self.swissprot_path)
 
         # Assert that all terms seen in UniProtKB/SwissProt are in the Ontology
         assert len(self.go_terms_not_found) == 0
@@ -160,11 +159,6 @@ class SimpleDataset:
         # Propogate annotations from lower to higher levels
         if self.propogate:
             self.propagate_annotations()
-
-        # Get Annotations from Proteins and add to GOTerms
-        self.copy_annotations_to_term()
-        # Create GODAG annotations attribute
-        self.ontology.populate_godag_annotations()
 
         logging.info(f"GO: '{self.ontology_path}'")
         logging.info(f"GOA: '{self.gaf_path}'")
@@ -238,19 +232,23 @@ class SimpleDataset:
         missing_proteins_file = open(missing_proteins_path, "w")
 
         namespace_file_map = {
-            BP: bp_file,
-            CC: cc_file,
-            MF: mf_file,
+            "biological_process": bp_file,
+            "cellular_component": cc_file,
+            "molecular_function": mf_file,
         }
 
-        for protein in self.proteins.values():
-            protein_annots = protein.get_manual_annotations()
-            if include_electronic:
-                protein_annots.extend(protein.get_electronic_annotations())
-            for annotation in protein_annots:
-                go_term = self.ontology.get_primary_term(annotation.go_term_id)
+        for go_id in self.annotated_dag.parent.keys():
+            go_term = self.annotated_dag.get_term(go_id)
+            for annot in go_term.get_all_annotations():
                 namespace_file_map[go_term.namespace].write(
-                    protein.id + "\t" + annotation.go_term_id + "\n"
+                    annot.protein_id
+                    + "\t"
+                    + annot.go_id
+                    + "\t"
+                    + annot.evidence_code
+                    + "\t"
+                    + annot.is_manual
+                    + "\n"
                 )
 
         for protein in self.missing_proteins:

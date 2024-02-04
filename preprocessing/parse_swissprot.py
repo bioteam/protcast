@@ -1,5 +1,5 @@
 from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.annotated_godag import Ontology
+from protcast.preprocessing.annotation import AnnotatedGODag
 from protcast.preprocessing.protein import Protein
 import gzip
 import logging
@@ -11,7 +11,7 @@ from Bio import SwissProt
 
 @typechecked
 def parse_swissprot(
-    ontology: Ontology,
+    annotated_dag: AnnotatedGODag,
     swissprot_db: Path,
 ) -> tuple[dict[str, Protein], set[str], dict[str, str]]:
     """parse_swissprot
@@ -96,20 +96,19 @@ def parse_swissprot(
                 # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
                 # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
                 if ref[0] == "GO":
-                    go_term_id = ref[1]
+                    go_id = ref[1]
                     evidence_code = ref[3].split(":")[0]
-                    primary_go_term = ontology.get_primary_term(go_term_id)
-                    if not primary_go_term:
+                    if not annotated_dag.get_term(go_id):
                         logging.error(
-                            f"GO Term {go_term_id} found in SwissProt but not "
-                            "found in ontology"
+                            f"GO Term {go_id} found in SwissProt but not "
+                            "found in GO ontology"
                         )
-                        go_terms_not_found.add(go_term_id)
+                        go_terms_not_found.add(go_id)
                     else:
                         annot = Annotation(
                             protein.id,
                             evidence_code,
-                            primary_go_term,
+                            go_id,
                         )
                         protein.add_annotation(annot)
                         num_annotations += 1

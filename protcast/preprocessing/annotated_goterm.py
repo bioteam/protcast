@@ -1,5 +1,4 @@
 from typeguard import typechecked
-# from goatools.obo_parser import GOTerm
 from protcast.preprocessing.annotation import Annotation
 
 
@@ -39,7 +38,7 @@ class AnnotatedGOTerm:
 
     def __getattr__(self, item):
         """__getattr__
-        Forward attribute access to the parent object
+        Forward attribute access to the parent goatools GOTerm object
         """
         return getattr(self.parent, item)
 
@@ -75,13 +74,13 @@ class AnnotatedGOTerm:
         return False
 
     @typechecked
-    def get_annotation(self, go_term_id: str) -> Annotation | None:
+    def get_annotation(self, go_id: str) -> Annotation | None:
         """get_annotation
-        Get an Annotation from an AnnotatedGOterm given a GO term id
+        Get an Annotation from an AnnotatedGOterm given a GO id
 
         Parameters
         ----------
-        go_term_id: str
+        go_id: str
             GO term id
 
         Returns
@@ -89,7 +88,7 @@ class AnnotatedGOTerm:
         Annotation or None
         """
         for annot in self.get_all_annotations():
-            if annot.go_term_id == go_term_id:
+            if annot.go_id == go_id:
                 return annot
             
     @typechecked
