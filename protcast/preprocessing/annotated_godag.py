@@ -6,14 +6,15 @@ from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 
 class AnnotatedGODag:
     """AnnotatedGODag
-    This is wrapper around the goatools GODag class which represents the 
+    This is wrapper around the goatools GODag class which represents the
     GO acyclic trees of GOTerms
 
     Attributes
     ----------
     annotations: list
         List of Annotations
-
+    nodes: list
+        List of AnnotatedGOTerms
     Methods
     -------
     init:
@@ -43,8 +44,6 @@ class AnnotatedGODag:
         goatools_godag = GODag(input_file)
         self.goatools = goatools_godag
 
-        self.annotations = list()
-
         # Map GO ids to AnnotatedGOTerms
         self.go_terms_map = dict()
         for go_id, go_term in self.goatools.items():
@@ -52,8 +51,15 @@ class AnnotatedGODag:
 
         # Populate parents and children attributes of AnnotatedGOTerm
         for go_id, go_term in self.go_terms_map.items():
-            go_term.parents = [self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents]
-            go_term.children = [self.go_terms_map[child.id] for child in self.goatools[go_id].children]
+            go_term.parents = [
+                self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents
+            ]
+            go_term.children = [
+                self.go_terms_map[child.id] for child in self.goatools[go_id].children
+            ]
+
+        self.nodes = self.go_terms_map.values()
+        self.annotations = list()
 
     @typechecked
     def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
@@ -70,7 +76,7 @@ class AnnotatedGODag:
         AnnotatedGOTerm
         """
         return self.go_terms_map.get(go_id)
-    
+
     def save(self, output_file: str) -> str:
         """save
         Serialize an ontology

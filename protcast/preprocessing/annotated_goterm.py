@@ -14,15 +14,15 @@ class AnnotatedGOTerm:
 
     Methods
     -------
-    init: obj
-        goatools GOterm
+    init: GOTerm
+        Creates AnnotatedGOTerm given a goatools GOterm
     add_annotation: Annotation
         Add Annotation to AnnotatedGOTerm
     has_annotation: Annotation
         Boolean
     get_annotation: str
         Returns Annotation given a GO id
-    get_all_annotation:
+    get_all_annotations:
         Returns all Annotations for an AnnotatedGOTerm
     """
 
