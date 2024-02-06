@@ -39,7 +39,7 @@ class AnnotatedGODag:
         -------
         None
         """
-        # Use goatools GODag attributes
+        # Use goatools GODag for parsing and querying
         goatools_godag = GODag(input_file)
         self.goatools = goatools_godag
 
@@ -49,11 +49,11 @@ class AnnotatedGODag:
             self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
 
         # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
-        for go_id, go_term in self.go_terms_map.items():
-            go_term.parents = [
+        for go_id, annot_go_term in self.go_terms_map.items():
+            annot_go_term.parents = [
                 self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents
             ]
-            go_term.children = [
+            annot_go_term.children = [
                 self.go_terms_map[child.id] for child in self.goatools[go_id].children
             ]
 
