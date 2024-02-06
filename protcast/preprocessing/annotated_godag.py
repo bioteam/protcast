@@ -48,7 +48,7 @@ class AnnotatedGODag:
         for go_id, go_term in self.goatools.items():
             self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
 
-        # Populate parents and children attributes of AnnotatedGOTerm
+        # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
         for go_id, go_term in self.go_terms_map.items():
             go_term.parents = [
                 self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents
