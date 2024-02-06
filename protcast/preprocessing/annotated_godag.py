@@ -11,8 +11,6 @@ class AnnotatedGODag:
 
     Attributes
     ----------
-    annotations: list
-        List of Annotations
 
     Methods
     -------
@@ -56,8 +54,6 @@ class AnnotatedGODag:
             annot_go_term.children = [
                 self.go_terms_map[child.id] for child in self.goatools[go_id].children
             ]
-
-        self.annotations = list()
 
     @typechecked
     def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
