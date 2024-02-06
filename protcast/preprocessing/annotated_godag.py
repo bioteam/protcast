@@ -13,8 +13,7 @@ class AnnotatedGODag:
     ----------
     annotations: list
         List of Annotations
-    nodes: list
-        List of AnnotatedGOTerms
+
     Methods
     -------
     init:
@@ -58,7 +57,6 @@ class AnnotatedGODag:
                 self.go_terms_map[child.id] for child in self.goatools[go_id].children
             ]
 
-        self.nodes = self.go_terms_map.values()
         self.annotations = list()
 
     @typechecked

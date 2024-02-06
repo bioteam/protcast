@@ -66,4 +66,6 @@ if __name__ == "__main__":
     parents = ontology.get_term("GO:0015645").parents
     assert len(parents) == 2
     assert str(type(parents[0])) == "<class 'protcast.preprocessing.annotated_goterm.AnnotatedGOTerm'>"
+    assert parents[1].go_id == "GO:0016878"
+    assert parents[0].go_id == "GO:0140657"
     assert not ontology.get_term("GO:0003674").parents
