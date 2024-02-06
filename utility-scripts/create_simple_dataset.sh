@@ -16,4 +16,4 @@ python3 $HOME/git/ProtCast/preprocessing/create_simple_dataset.py \
     -g $DATE/GO/filtered_goa_uniprot_all_noiea.gaf \
     -t $DATE/UniProt/uniprot_trembl.fasta \
     -s $DATE/UniProt/uniprot_sprot.dat \
-    -O 2-1-2024
+    -O $(date +%m-%d-%Y -d now)

@@ -1,4 +1,3 @@
-import logging
 import pickle
 from typeguard import typechecked
 from goatools.obo_parser import GODag
@@ -19,6 +18,12 @@ class AnnotatedGODag:
     -------
     init:
         Initialize
+    get_term:
+        ...
+    save:
+        ...
+    load_ontology:
+        ...
     """
 
     def __init__(self, input_file) -> None:
@@ -34,22 +39,24 @@ class AnnotatedGODag:
         -------
         None
         """
-        # Use the goatools parser
+        # Use goatools GODag attributes
         goatools_godag = GODag(input_file)
-        self.parent = goatools_godag
+        self.goatools = goatools_godag
+
         self.annotations = list()
 
         # Map GO ids to AnnotatedGOTerms
         self.go_terms_map = dict()
-        for go_id, go_term in goatools_godag.items():
+        for go_id, go_term in self.goatools.items():
             self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
 
-    # Forward attribute access to the parent object
-    def __getattr__(self, item):
-        return getattr(self.parent, item)
+        # Populate parents and children attributes of AnnotatedGOTerm
+        for go_id, go_term in self.go_terms_map.items():
+            go_term.parents = [self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents]
+            go_term.children = [self.go_terms_map[child.id] for child in self.goatools[go_id].children]
 
     @typechecked
-    def get_term(self, go_id: str) -> AnnotatedGOTerm:
+    def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
         """get_term
         Get AnnotatedGOterm given an id
 
@@ -62,25 +69,8 @@ class AnnotatedGODag:
         -------
         AnnotatedGOTerm
         """
-        return self.go_terms_map[go_id]
+        return self.go_terms_map.get(go_id)
     
-    def populate_annotations(self) -> None:
-        """populate_annotations
-        Populate annotations for a namespace
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        """
-        logging.debug(f"Populating annotations of {self.name}")
-        for node in self.nodes.values():
-            for annot in node.annotations:
-                self.annotations.append(annot)
-
     def save(self, output_file: str) -> str:
         """save
         Serialize an ontology

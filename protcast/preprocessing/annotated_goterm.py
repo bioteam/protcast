@@ -16,8 +16,14 @@ class AnnotatedGOTerm:
     -------
     init: obj
         goatools GOterm
-    __getattr__: str
-        Get any parent attribute
+    add_annotation: Annotation
+        Add Annotation to AnnotatedGOTerm
+    has_annotation: Annotation
+        Boolean
+    get_annotation: str
+        Returns Annotation given a GO id
+    get_all_annotation:
+        Returns all Annotations for an AnnotatedGOTerm
     """
 
     def __init__(self, goatools_go_term) -> None:
@@ -33,14 +39,19 @@ class AnnotatedGOTerm:
         -------
         None
         """
-        self.parent = goatools_go_term
-        self.annotations = list()
+        # Use goatools GOTerm attributes
+        self.goatools = goatools_go_term
+        self.level = self.goatools.level
+        self.go_id = self.goatools.id
+        self.name = self.goatools.name
+        self.namespace = self.goatools.namespace
+        self.is_obsolete = self.goatools.is_obsolete
+        self.depth = self.goatools.depth
+        # Populated by AnnotatedGODag
+        self.parents = list()
+        self.children = list()
 
-    def __getattr__(self, item):
-        """__getattr__
-        Forward attribute access to the parent goatools GOTerm object
-        """
-        return getattr(self.parent, item)
+        self.annotations = list()
 
     @typechecked
     def add_annotation(self, annot: Annotation) -> None:
@@ -67,8 +78,9 @@ class AnnotatedGOTerm:
         """
         for term_annot in self.get_all_annotations():
             if (
-                term_annot.go_term_id == annot.go_term_id
+                term_annot.go_id == annot.go_id
                 and term_annot.evidence_code == annot.evidence_code
+                and term_annot.protein_id == annot.protein_id
             ):
                 return True
         return False
