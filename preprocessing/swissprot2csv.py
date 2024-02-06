@@ -1,4 +1,4 @@
-from protcast.preprocessing.ontology import Ontology
+from protcast.preprocessing.annotated_godag import Ontology
 from preprocessing.parse_swissprot import parse_swissprot
 import sys
 import argparse

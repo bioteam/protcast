@@ -1,5 +1,5 @@
 from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.ontology import Ontology
+from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.protein import Protein
 import gzip
 import logging
@@ -11,9 +11,9 @@ from Bio import SwissProt
 
 @typechecked
 def parse_swissprot(
-    ontology: Ontology,
+    annotated_dag: AnnotatedGODag,
     swissprot_db: Path,
-) -> tuple[dict[str, Protein], set[str], dict[str, str]]:
+) -> tuple[list[Annotation], dict[str,Protein], set[str], dict[str, str]]:
     """parse_swissprot
 
     Example Uniprot file:
@@ -62,15 +62,16 @@ def parse_swissprot(
 
     Parameters
     ----------
-    ontology: Ontology object
+    AnnotatedGODag: object
         ...
     swissprot_db: Path
         Path to Swissprot file
 
     Returns
     -------
-    proteins: dict with keys of Swissprot accessions and values of Protein objects
-    go_terms_not_found: list of GO terms (should be empty)
+    annotations: list of all Annotations
+    proteins: dict with keys of Swissprot accessions and values of Proteins
+    go_terms_not_found: list of GO terms, usually obsolete
     accessions: dict with keys of Swissprot accessions and secondary accessions
                 and values of Swissprot accessions
     """
@@ -79,7 +80,6 @@ def parse_swissprot(
         """parse
         Inner function for parse_swissprot()
         """
-        num_annotations = 0
 
         for rec in tqdm(
             SwissProt.parse(handle),
@@ -91,43 +91,40 @@ def parse_swissprot(
             for acc in rec.accessions:
                 accessions[acc] = primary_accession
             protein = Protein(primary_accession, str(rec.sequence))
+            # cross_reference's are tuple of length 3, 4, or 5:
+            # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
+            # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
             for ref in rec.cross_references:
-                # Tuple of length 3, 4, or 5:
-                # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
-                # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
+                # Collect the Annotation
                 if ref[0] == "GO":
-                    go_term_id = ref[1]
-                    evidence_code = ref[3].split(":")[0]
-                    primary_go_term = ontology.get_primary_term(go_term_id)
-                    if not primary_go_term:
-                        logging.error(
-                            f"GO Term {go_term_id} found in SwissProt but not "
-                            "found in ontology"
-                        )
-                        go_terms_not_found.add(go_term_id)
+                    go_id = ref[1]
+                    annot = Annotation(protein.id,ref[3].split(":")[0],go_id)
+                    if annotated_dag.get_term(go_id):
+                        annotations.append(annot)
                     else:
-                        annot = Annotation(
-                            protein.id,
-                            evidence_code,
-                            primary_go_term,
-                        )
-                        protein.add_annotation(annot)
-                        num_annotations += 1
+                        logging.debug(f"{go_id} found in {handle.name} but not in GO ontology")
+                        go_terms_not_found.add(go_id)
+                    # And add it to the Protein
+                    protein.add_annotation(annot)
 
             # The protein should not already exist
             assert proteins.get(protein.id) is None
             proteins[protein.id] = protein
 
         logging.info(
-            f"Found {len(proteins.keys())} total proteins in '{handle.name}'"
+            f"Found {len(proteins.keys())} proteins in '{handle.name}'"
         )
         logging.info(
-            f"Found {num_annotations} total annotations in '{handle.name}'"
+            f"Found {len(annotations)} annotations in '{handle.name}'"
+        )
+        logging.info(
+            f"Found {len(go_terms_not_found)} GO terms in '{handle.name}' not in the *obo file'"
         )
 
+    annotations = []
     proteins = {}
-    accessions = {}
     go_terms_not_found: set[str] = set()
+    accessions = {}
 
     if swissprot_db.suffix == ".gz":
         with gzip.open(swissprot_db, "rt") as f:
@@ -136,4 +133,4 @@ def parse_swissprot(
         with open(swissprot_db, "r") as f:
             parse(f)
 
-    return proteins, go_terms_not_found, accessions
+    return annotations, proteins, go_terms_not_found, accessions

@@ -7,7 +7,7 @@ package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
 from preprocessing.parse_swissprot import parse_swissprot  # noqa: E402
-from protcast.preprocessing.ontology import Ontology  # noqa: E402
+from protcast.preprocessing.annotated_godag import Ontology  # noqa: E402
 
 if __name__ == "__main__":
     """test_swissprot_parser.py

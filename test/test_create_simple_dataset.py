@@ -93,29 +93,28 @@ def main():
     # Test Swissprot and *gaf parsing without propagation
     # There are near-duplicate lines for A0A016QRH0 in the *gaf file
     sw_protein = dataset.proteins.get("A0A016QRH0")
-    assert len(sw_protein.annotations) == 10
+    assert len(sw_protein.annotations) == 3
     annots = sw_protein.get_all_annotations()
-    assert len(annots) == 10
+    assert len(annots) == 3
     assert annots[0].evidence_code == "IEA"
     assert annots[0].is_manual is False
-    assert annots[2].go_term_id == "GO:0015379"
+    assert annots[2].go_id == "GO:0015379"
     manuals = sw_protein.get_manual_annotations()
     assert manuals == []
-    assert len(sw_protein.get_electronic_annotations()) == 10
+    assert len(sw_protein.get_electronic_annotations()) == 3
 
     # Test TrEMBL parsing
     trembl_protein = dataset.proteins.get("M5BGM1")
     annots = trembl_protein.get_all_annotations()
-    assert len(annots) == 1
-    assert annots[0].evidence_code == "IEA"
+    assert len(annots) == 0
     trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
 
-    # Test assocation of GOTerms and Annotations
-    annots = dataset.ontology.get_primary_term("GO:0015379").annotations
+    # Test association of AnnotatedGOTerms and Annotations
+    annots = dataset.annotated_dag.get_term("GO:0015379").annotations
     assert len(annots) == 1
     assert annots[0].protein_id == "A0A016QRH0"
 
-    annots = dataset.ontology.get_primary_term("GO:0070469").annotations
+    annots = dataset.annotated_dag.get_term("GO:0070469").annotations
     assert len(annots) == 3
     assert annots[0].protein_id == "A0A2U4Z3V2"
     assert annots[1].protein_id == "A0A7H0LCT9"

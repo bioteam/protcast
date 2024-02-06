@@ -1,6 +1,6 @@
 from protcast import BP, CC, MF
 from protcast.preprocessing.simple_dataset import SimpleDataset
-from protcast.preprocessing.ontology import GODAG
+from protcast.preprocessing.annotated_godag import GODAG
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typeguard import typechecked

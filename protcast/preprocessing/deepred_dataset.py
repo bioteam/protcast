@@ -1,7 +1,4 @@
-from __future__ import annotations
-
 import os
-
 from datetime import datetime
 import h5py
 from imblearn.over_sampling._mlsmote import MLSMOTE
@@ -15,7 +12,7 @@ from typeguard import typechecked
 from protcast import BP, CC, MF
 from protcast.preprocessing import utils
 from protcast.preprocessing.dataset import Dataset
-from protcast.preprocessing.ontology import GOTerm
+from protcast.preprocessing.annotated_godag import GOTerm
 
 
 CTRIAD = "ctriad"

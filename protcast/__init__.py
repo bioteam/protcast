@@ -1,7 +1,3 @@
+# Using goatools attributes increases recursion on pickle.dump()
 import sys
-
-BP = "biological_process"
-MF = "molecular_function"
-CC = "cellular_component"
-
-sys.setrecursionlimit(1000000)
+sys.setrecursionlimit(100000)
