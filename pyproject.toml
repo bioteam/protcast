@@ -20,4 +20,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["protcast"]
+py_modules = ["preprocessing", "test", "utility-scripts", "model"]
