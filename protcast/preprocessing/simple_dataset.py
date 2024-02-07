@@ -181,7 +181,7 @@ class SimpleDataset:
             pickle.dump(self, f)
 
     @classmethod
-    def from_serialized_file(cls, file: str) -> SimpleDataset:
+    def from_serialized_file(cls, file: str):
         """from_serialized_file
         Gets a saved SimpleDataset from disk
 
