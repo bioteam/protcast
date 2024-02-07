@@ -163,7 +163,7 @@ class SimpleDataset:
         logging.info(f"Created at: '{self.created_at}'")
 
     @typechecked
-    def save(self):
+    def save(self) -> None:
         """save
         Saves SimpleDataset to disk
 
@@ -181,7 +181,7 @@ class SimpleDataset:
             pickle.dump(self, f)
 
     @classmethod
-    def from_serialized_file(cls, file: str):
+    def from_serialized_file(cls, file: str) -> SimpleDataset:
         """from_serialized_file
         Gets a saved SimpleDataset from disk
 
