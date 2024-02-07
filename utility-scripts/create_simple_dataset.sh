@@ -11,7 +11,7 @@
 DATE=2024-01-17
 
 cd $SCRATCH
-python3 $HOME/git/ProtCast/preprocessing/create_simple_dataset.py \
+python3 $HOME/git/ProtCast/utility-scripts/create_simple_dataset.py \
     -o $DATE/GO/go.obo \
     -g $DATE/GO/filtered_goa_uniprot_all_noiea.gaf \
     -t $DATE/UniProt/uniprot_trembl.fasta \
