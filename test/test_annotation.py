@@ -6,9 +6,9 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from preprocessing.annotated_goterm import AnnotatedGOTerm  # noqa: E402
-from preprocessing.protein import Protein  # noqa: E402
-from preprocessing.annotation import Annotation  # noqa: E402
+from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm  # noqa: E402
+from protcast.preprocessing.protein import Protein  # noqa: E402
+from protcast.preprocessing.annotation import Annotation  # noqa: E402
 
 if __name__ == "__main__":
     """test_annotation.py

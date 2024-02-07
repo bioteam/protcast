@@ -6,8 +6,8 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from preprocessing.parse_swissprot import parse_swissprot  # noqa: E402
-from preprocessing.annotated_godag import AnnotatedGODag  # noqa: E402
+from protcast.preprocessing.parse_swissprot import parse_swissprot  # noqa: E402
+from protcast.preprocessing.annotated_godag import AnnotatedGODag  # noqa: E402
 
 if __name__ == "__main__":
     """test_swissprot_parser.py

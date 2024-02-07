@@ -7,7 +7,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from preprocessing.annotated_godag import AnnotatedGODag  # noqa: E402
+from protcast.preprocessing.annotated_godag import AnnotatedGODag  # noqa: E402
 
 if __name__ == "__main__":
     """test_ontology.py
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     assert len(ontology.get_term("GO:0031957").parents) == 2
     parents = ontology.get_term("GO:0015645").parents
     assert len(parents) == 2
-    assert str(type(parents[0])) == "<class 'preprocessing.annotated_goterm.AnnotatedGOTerm'>"
+    assert str(type(parents[0])) == "<class 'protcast.preprocessing.annotated_goterm.AnnotatedGOTerm'>"
     # The order of the parents is deterministic
     assert parents[0].go_id == "GO:0016878" or parents[0].go_id == "GO:0140657"
     assert parents[1].go_id == "GO:0016878" or parents[1].go_id == "GO:0140657"

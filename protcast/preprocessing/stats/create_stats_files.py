@@ -1,5 +1,5 @@
-from preprocessing.simple_dataset import SimpleDataset
-from globals import CC,BP,MF
+from protcast.preprocessing.simple_dataset import SimpleDataset
+from protcast.globals import CC,BP,MF
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typeguard import typechecked

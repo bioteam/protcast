@@ -1,7 +1,7 @@
 import pickle
 from typeguard import typechecked
 from goatools.obo_parser import GODag
-from preprocessing.annotated_goterm import AnnotatedGOTerm
+from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 
 
 class AnnotatedGODag:

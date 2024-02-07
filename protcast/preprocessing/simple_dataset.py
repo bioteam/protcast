@@ -10,11 +10,11 @@ from typeguard import typechecked
 from datetime import datetime
 from Bio.SeqIO.FastaIO import FastaIterator
 
-from preprocessing.parse_swissprot import parse_swissprot
-from preprocessing.parse_gaf import parse_gaf
-from preprocessing.annotation import Annotation
-from preprocessing.annotated_godag import AnnotatedGODag
-from preprocessing.protein import Protein
+from protcast.preprocessing.parse_swissprot import parse_swissprot
+from protcast.preprocessing.parse_gaf import parse_gaf
+from protcast.preprocessing.annotation import Annotation
+from protcast.preprocessing.annotated_godag import AnnotatedGODag
+from protcast.preprocessing.protein import Protein
 
 
 class SimpleDataset:
