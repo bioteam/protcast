@@ -1,7 +1,7 @@
 import pickle
 from typeguard import typechecked
 from goatools.obo_parser import GODag
-from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
+from preprocessing.annotated_goterm import AnnotatedGOTerm
 
 
 class AnnotatedGODag:
@@ -18,6 +18,10 @@ class AnnotatedGODag:
         Initialize
     get_term:
         ...
+    get_all_terms:
+        Returns all AnnotatedGOTerms or by namespace
+    get_all_annotations:
+        Returns all Annotations or by namespace
     save:
         ...
     load_ontology:
@@ -46,7 +50,7 @@ class AnnotatedGODag:
         for go_id, go_term in self.goatools.items():
             self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
 
-        # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
+        # Map parents and children of goaltools GOTerm to AnnotatedGOTerm - no recursion issue
         for go_id, annot_go_term in self.go_terms_map.items():
             annot_go_term.parents = [
                 self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents
@@ -70,6 +74,47 @@ class AnnotatedGODag:
         AnnotatedGOTerm
         """
         return self.go_terms_map.get(go_id)
+
+    @typechecked
+    def get_all_terms(self, namespace=None) -> list[AnnotatedGOTerm]:
+        """get_all_terms
+        Get all AnnotatedGOterms
+
+        Parameters
+        ----------
+        None or namespace
+
+        Returns
+        -------
+        List of AnnotatedGOTerms
+        """
+        if namespace:
+            return [x for x in self.go_terms_map.values() if x.namespace == namespace]
+        else:
+            return self.go_terms_map.values()
+
+    @typechecked
+    def get_all_annotations(self, namespace=None) -> list:
+        """get_all_annotations
+        Get all Annotations
+
+        Parameters
+        ----------
+        None or namespace
+
+        Returns
+        -------
+        List of Annotations
+        """
+        annots = list()
+        if namespace:
+            for term in self.go_terms_map.values():
+                if term.namespace == namespace:
+                    annots.extend(term.annotations)
+        else:
+            for term in self.go_terms_map.values():
+                annots.extend(term.annotations)
+        return annots
 
     def save(self, output_file: str) -> str:
         """save

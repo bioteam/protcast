@@ -1,6 +1,6 @@
-from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.annotated_godag import AnnotatedGODag
-from protcast.preprocessing.protein import Protein
+from preprocessing.annotation import Annotation
+from preprocessing.annotated_godag import AnnotatedGODag
+from preprocessing.protein import Protein
 import gzip
 import logging
 from tqdm import tqdm

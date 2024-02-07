@@ -7,7 +7,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
+from preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 
 
 def main():
@@ -84,12 +84,6 @@ def main():
         args.verbose,
     )
 
-    dataset.save()
-
-    # Output files
-    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
-    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
-
     # Test Swissprot and *gaf parsing without propagation
     # There are near-duplicate lines for A0A016QRH0 in the *gaf file
     sw_protein = dataset.proteins.get("A0A016QRH0")
@@ -122,6 +116,11 @@ def main():
 
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
+
+    dataset.save()
+    # Output files
+    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
+    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
 
     if not args.keep:
         os.unlink(Path(args.output_dir, "SimpleDataset.bin"))

@@ -6,9 +6,9 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.annotated_godag import GOTerm  # noqa: E402
-from protcast.preprocessing.protein import Protein  # noqa: E402
-from protcast.preprocessing.annotation import Annotation  # noqa: E402
+from preprocessing.annotated_goterm import AnnotatedGOTerm  # noqa: E402
+from preprocessing.protein import Protein  # noqa: E402
+from preprocessing.annotation import Annotation  # noqa: E402
 
 if __name__ == "__main__":
     """test_annotation.py
@@ -20,8 +20,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     protein1 = Protein("abc", "MLK")
-    term1 = GOTerm("GO:123456", "molecular function", "kinase", None, 3, True)
-    term2 = GOTerm(
+    term1 = AnnotatedGOTerm("GO:123456", "molecular function", "kinase", None, 3, True)
+    term2 = AnnotatedGOTerm(
         "GO:456789", "molecular function", "phosphatase", None, 3, True
     )
     annot1 = Annotation("abc", "IEA", term1)
