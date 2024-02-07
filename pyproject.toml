@@ -17,6 +17,7 @@ dependencies = [
     "tensorflow",
     "biopython",
     "ifeatpro",
+    "goatools"
 ]
 
 [tool.setuptools]
