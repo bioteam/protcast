@@ -1,12 +1,12 @@
-from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.annotated_godag import AnnotatedGODag
-from protcast.preprocessing.protein import Protein
 import gzip
 import logging
 from tqdm import tqdm
 from typeguard import typechecked
 from pathlib import Path
 from Bio import SwissProt
+from protcast.preprocessing.annotation import Annotation
+from protcast.preprocessing.annotated_godag import AnnotatedGODag
+from protcast.preprocessing.protein import Protein
 
 
 @typechecked
@@ -98,8 +98,8 @@ def parse_swissprot(
                 # Collect the Annotation
                 if ref[0] == "GO":
                     go_id = ref[1]
-                    annot = Annotation(protein.id,ref[3].split(":")[0],go_id)
                     if annotated_dag.get_term(go_id):
+                        annot = Annotation(protein.id,ref[3].split(":")[0],go_id)
                         annotations.append(annot)
                     else:
                         logging.debug(f"{go_id} found in {handle.name} but not in GO ontology")

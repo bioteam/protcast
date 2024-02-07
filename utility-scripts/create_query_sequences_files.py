@@ -1,4 +1,3 @@
-from protcast.preprocessing.simple_dataset import SimpleDataset
 import sys
 import argparse
 import logging
@@ -8,6 +7,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
+from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 
 def main():
     """"create_query_sequences_files.py

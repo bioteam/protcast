@@ -1,5 +1,3 @@
-from protcast.preprocessing.annotated_godag import Ontology
-from protcast.preprocessing.parse_swissprot import parse_swissprot
 import sys
 import argparse
 import logging
@@ -9,6 +7,9 @@ from pathlib import Path
 file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
+
+from protcast.preprocessing.annotated_godag import Ontology  # noqa: E402
+from protcast.preprocessing.parse_swissprot import parse_swissprot  # noqa: E402
 
 
 def main():
@@ -38,7 +39,7 @@ def main():
 
     ontology = Ontology.load_ontology(args.ontology)
 
-    proteins, go_terms_not_found, accessions = parse_swissprot(
+    annotations, proteins, go_terms_not_found, accessions = parse_swissprot(
         ontology, args.uniprot_db
     )
 

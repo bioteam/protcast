@@ -15,6 +15,7 @@ from protcast.preprocessing.parse_gaf import parse_gaf
 from protcast.preprocessing.annotation import Annotation
 from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.protein import Protein
+from protcast.globals import CC,BP,MF
 
 
 class SimpleDataset:
@@ -25,7 +26,7 @@ class SimpleDataset:
     Attributes
     ----------
     proteins: dict
-        All the Proteins
+        Key is id and value is a Protein
     accessions: dict
         Relates the primary and secondary protein ids
     annotated_dag: AnnotatedDag
@@ -131,7 +132,7 @@ class SimpleDataset:
             logger.setLevel(logging.INFO)
         self.write_log(logger)
 
-        # Create Ontology
+        # Create AnnotatedGODag
         self.annotated_dag: AnnotatedGODag = AnnotatedGODag(self.ontology_path)
         # Parse proteins from SwissProt
         (
@@ -141,16 +142,16 @@ class SimpleDataset:
             self.accessions,
         ) = parse_swissprot(self.annotated_dag, self.swissprot_path)
 
-        # Add Annotations to the annotated DAG
+        # Add Annotations to the annotated DAG 
         self.add_annotations(uniprot_annotations)
 
         # Parse annotations from UniProt-GOA *gaf file
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
 
-        # Add Annotations found in UniProt-GOA *gaf file
+        # Add Annotations found in UniProt-GOA *gaf file 
         self.add_annotations(gaf_annotations)
 
-        # Retrieve Proteins from Trembl for the new proteins
+        # Retrieve Proteins from Trembl for the new proteins 
         new_proteins = self.parse_trembl(new_protein_ids)
         self.proteins.update(new_proteins)
 
@@ -226,9 +227,9 @@ class SimpleDataset:
         missing_proteins_file = open(missing_proteins_path, "w")
 
         namespace_file_map = {
-            "biological_process": bp_file,
-            "cellular_component": cc_file,
-            "molecular_function": mf_file,
+            BP: bp_file,
+            CC: cc_file,
+            MF: mf_file,
         }
 
         for go_id in self.annotated_dag.parent.keys():
@@ -274,7 +275,7 @@ class SimpleDataset:
         new_protein_ids: list of protein ids
         """
         gaf_annotations = list()
-        new_protein_ids = list()
+        new_protein_ids = set()
 
         logging.debug(f"Reading from '{str(self.gaf_path)}'")
         gaf_lines = parse_gaf(self.gaf_path)
@@ -289,7 +290,7 @@ class SimpleDataset:
             # If the protein is not in SwissProt then it is a new protein
             if rec["DB_Object_ID"] not in self.accessions:
                 logging.debug(f"New protein id: '{rec['DB_Object_ID']}'")
-                new_protein_ids.append(rec["DB_Object_ID"])
+                new_protein_ids.add(rec["DB_Object_ID"])
 
         logging.info(f"Made {len(gaf_annotations)} new Annotations from '{self.gaf_path}'")
         logging.info(f"Found {len(new_protein_ids)} new protein ids in '{self.gaf_path}'")
@@ -416,7 +417,7 @@ class SimpleDataset:
                         + "\n"
                     )
                     for parent in term.parents:
-                        obo_file.write("is_a: " + parent.go_id + "\n")
+                        obo_file.write("is_a: " + parent + "\n")
                 for protein_id in all_go_terms[go_term_id]:
                     obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")

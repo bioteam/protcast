@@ -6,7 +6,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset
+from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 
 
 def main():
@@ -27,21 +27,24 @@ def main():
         "--ontology",
         type=Path,
         help="Path to Gene Ontology file (*.obo)",
+        required=True
     )
     parser.add_argument(
         "-s",
         "--swissprot",
         type=Path,
         help="Path to the SwissProt file (*.dat)",
+        required=True
     )
     parser.add_argument(
-        "-t", "--trembl", type=Path, help="Path to the TrEMBL file (*.fa)"
+        "-t", "--trembl", type=Path, help="Path to the TrEMBL file (*.fa)", required=True
     )
     parser.add_argument(
         "-g",
         "--gaf",
         type=Path,
         help="Path to GO Annotation Format file (*.gaf)",
+        required=True
     )
     parser.add_argument(
         "-v",

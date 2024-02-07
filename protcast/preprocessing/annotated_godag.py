@@ -11,6 +11,7 @@ class AnnotatedGODag:
 
     Attributes
     ----------
+    None
 
     Methods
     -------
@@ -43,21 +44,22 @@ class AnnotatedGODag:
         """
         # Use goatools GODag for parsing and querying
         goatools_godag = GODag(input_file)
-        self.goatools = goatools_godag
 
-        # Map GO ids to AnnotatedGOTerms
+        # Map GO ids to AnnotatedGOTerms 
         self.go_terms_map = dict()
-        for go_id, go_term in self.goatools.items():
+        for go_id, go_term in goatools_godag.items():
             self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
 
-        # Map parents and children of goaltools GOTerm to AnnotatedGOTerm - no recursion issue
+        # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
         for go_id, annot_go_term in self.go_terms_map.items():
-            annot_go_term.parents = [
-                self.go_terms_map[parent.id] for parent in self.goatools[go_id].parents
-            ]
-            annot_go_term.children = [
-                self.go_terms_map[child.id] for child in self.goatools[go_id].children
-            ]
+            # pickle.dump() recursion error if both loops are executed
+            # and the object is stored rather than its id
+            for parent in goatools_godag[go_id].parents:
+                annot_go_term.parents.append(parent.id)
+            for child in goatools_godag[go_id].children:
+                annot_go_term.children.append(child.id)
+
+        goatools_godag = None
 
     @typechecked
     def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
@@ -134,9 +136,9 @@ class AnnotatedGODag:
         return output_file
 
     @classmethod
-    def load_ontology(cls, input_file: str):
-        """load_ontology
-        Read serialized ontology file
+    def load_godag(cls, input_file: str):
+        """load_godag
+        Read serialized AnnotateeGODag
 
         Parameters
         ----------

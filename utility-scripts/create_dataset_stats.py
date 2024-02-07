@@ -7,7 +7,9 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.stats.create_stats_files import create_stats_files  # noqa: E402
+from protcast.preprocessing.stats.create_stats_files import (
+    create_stats_files,
+)  # noqa: E402
 
 
 def main():
@@ -19,7 +21,9 @@ def main():
     """
     log.basicConfig(level=log.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", help="Path to serialized dataset file", required=True)
+    parser.add_argument(
+        "-i", "--input", help="Path to serialized dataset file", required=True
+    )
     args = parser.parse_args()
 
     log.info(f"Generating dataset statistics from: {args.input}")

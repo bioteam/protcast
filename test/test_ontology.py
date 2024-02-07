@@ -53,10 +53,10 @@ if __name__ == "__main__":
     assert len(ontology.get_term("GO:0031957").parents) == 2
     parents = ontology.get_term("GO:0015645").parents
     assert len(parents) == 2
-    assert str(type(parents[0])) == "<class 'protcast.preprocessing.annotated_goterm.AnnotatedGOTerm'>"
+    # assert str(type(parents[0])) == "<class 'protcast.preprocessing.annotated_goterm.AnnotatedGOTerm'>"
     # The order of the parents is deterministic
-    assert parents[0].go_id == "GO:0016878" or parents[0].go_id == "GO:0140657"
-    assert parents[1].go_id == "GO:0016878" or parents[1].go_id == "GO:0140657"
+    assert parents[0] == "GO:0016878" or parents[0] == "GO:0140657"
+    assert parents[1] == "GO:0016878" or parents[1] == "GO:0140657"
     assert not ontology.get_term("GO:0003674").parents
     # Roots should have no parents
     assert not ontology.get_term("GO:0008150").parents # Biological Process

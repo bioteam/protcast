@@ -32,7 +32,7 @@ class AnnotatedGOTerm:
 
         Parameters
         ----------
-        name: obj
+        goatools_go_term: GOTerm
             goatools GOTerm
 
         Returns
@@ -40,18 +40,19 @@ class AnnotatedGOTerm:
         None
         """
         # Use goatools GOTerm attributes
-        self.goatools = goatools_go_term
-        self.level = self.goatools.level
-        self.go_id = self.goatools.id
-        self.name = self.goatools.name
-        self.namespace = self.goatools.namespace
-        self.is_obsolete = self.goatools.is_obsolete
-        self.depth = self.goatools.depth
-        # Populated by AnnotatedGODag
+        self.level = goatools_go_term.level # shortest distance from root node
+        self.depth = goatools_go_term.depth # longest distance from root node
+        self.go_id = goatools_go_term.id
+        self.name = goatools_go_term.name
+        self.namespace = goatools_go_term.namespace
+        self.is_obsolete = goatools_go_term.is_obsolete
+        # GO ids, populated by AnnotatedGODag, 
         self.parents = list()
         self.children = list()
 
         self.annotations = list()
+
+        goatools_go_term = None
 
     @typechecked
     def add_annotation(self, annot: Annotation) -> None:
