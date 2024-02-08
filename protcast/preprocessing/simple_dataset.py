@@ -51,8 +51,6 @@ class SimpleDataset:
         Checksum
     swissprot_md5: str
         Checksum
-    propogate: bool
-        Propagate Annotations from ancestors to children. Default is True.
 
     Methods
     -------
@@ -106,15 +104,12 @@ class SimpleDataset:
             Location for saved SimpleDataset and log file
         verbose: bool
             Write DEBUG level log if True. Default is False.
-        propogate: bool
-            Default is True
 
         Returns
         -------
         None
         """
         self.verbose = verbose
-        self.propogate = propogate
         self.output_dir = output_dir
         self.created_at = datetime.now()
         self.ontology_path = ontology_path

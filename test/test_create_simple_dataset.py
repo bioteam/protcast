@@ -57,14 +57,6 @@ def main():
         action="store_true",
         help="Create DEBUG log",
     )
-    # Make the default "False" just for testing purposes
-    parser.add_argument(
-        "-n",
-        "--propagate",
-        default=False,
-        action="store_true",
-        help="Propagate annotations",
-    )
     parser.add_argument(
         "-k",
         "--keep",
@@ -80,7 +72,6 @@ def main():
         args.trembl,
         args.gaf,
         args.output_dir,
-        args.propagate,
         args.verbose,
     )
 
