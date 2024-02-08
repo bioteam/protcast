@@ -43,6 +43,7 @@ class AnnotatedGODag:
         None
         """
         # Use goatools GODag for parsing and querying
+        # Recursion error on pickle.dump(): self.goatools = goatools_godag
         goatools_godag = GODag(input_file)
 
         # Map GO ids to AnnotatedGOTerms 
@@ -53,12 +54,13 @@ class AnnotatedGODag:
         # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
         for go_id, annot_go_term in self.go_terms_map.items():
             # pickle.dump() recursion error if both loops are executed
-            # and the object is stored rather than its id
+            # and the GO term object is stored rather than its id
             for parent in goatools_godag[go_id].parents:
                 annot_go_term.parents.append(parent.id)
             for child in goatools_godag[go_id].children:
                 annot_go_term.children.append(child.id)
 
+        # Not required, no recursion error without this
         goatools_godag = None
 
     @typechecked
