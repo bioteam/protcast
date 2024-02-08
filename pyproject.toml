@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ProtCast"
 dynamic = ["version"]
-description = "Protein function prediction based on sequence and GO annotations"
-authors = [{ name = "BioTeam", email = "contact@bioteam.net" }]
+description = "Protein function prediction based on sequence"
+authors = [{ name = "Brian Osborne", email = "briano@bioteam.net" }, {name = "Bruno Alvisio", email = "contact@bioteam.net"}]
 requires-python = ">=3.10"
 dependencies = [
     "matplotlib",
