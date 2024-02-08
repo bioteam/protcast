@@ -146,7 +146,7 @@ class SimpleDataset:
         # Add Annotations found in UniProt-GOA *gaf file 
         self.add_annotations(gaf_annotations)
 
-        # Retrieve Proteins from Trembl for the new proteins 
+        # Retrieve Proteins from Trembl for any new Annotations from the GOA file 
         new_proteins = self.parse_trembl(new_protein_ids)
         self.proteins.update(new_proteins)
 
