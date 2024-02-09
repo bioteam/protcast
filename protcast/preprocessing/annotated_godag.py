@@ -7,7 +7,7 @@ from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 class AnnotatedGODag:
     """AnnotatedGODag
     This is wrapper around the goatools GODag class which represents the
-    GO acyclic trees of GOTerms
+    GO DAGs of GOTerms
 
     Attributes
     ----------
@@ -110,15 +110,17 @@ class AnnotatedGODag:
         -------
         List of Annotations
         """
-        annots = list()
+        # annots = list()
         if namespace:
-            for term in self.go_terms_map.values():
-                if term.namespace == namespace:
-                    annots.extend(term.annotations)
+            # for term in self.go_terms_map.values():
+            #     if term.namespace == namespace:
+            #         annots.extend(term.annotations)
+            return [t.annotations for t in self.go_terms_map.values() if t.namespace == namespace]
         else:
-            for term in self.go_terms_map.values():
-                annots.extend(term.annotations)
-        return annots
+            # for term in self.go_terms_map.values():
+            #     annots.extend(term.annotations)
+            return [t.annotations for t in self.go_terms_map.values()]
+        # return annots
 
     def save(self, output_file: str) -> str:
         """save

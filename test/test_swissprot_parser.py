@@ -26,7 +26,10 @@ if __name__ == "__main__":
         ontology, Path(args.input)
     )
 
-    # assert len(go_terms_not_found) == 0
+    # Totals
+    # All 5 terms are obsolete
+    assert len(go_terms_not_found) == 5
+    assert len(annotations) == 438    
     assert len(proteins) == 142
     assert len(accessions) == 143
 
