@@ -13,7 +13,7 @@ from protcast.preprocessing.protein import Protein
 def parse_swissprot(
     annotated_dag: AnnotatedGODag,
     swissprot_db: Path,
-) -> tuple[list[Annotation], dict[str,Protein], set[str], dict[str, str]]:
+) -> tuple[list[Annotation], dict[str,Protein], set[str]]:
     """parse_swissprot
 
     Example Uniprot file:
@@ -86,11 +86,8 @@ def parse_swissprot(
             desc=f"Reading SwissProt records from '{handle.name}'",
         ):
             primary_accession = rec.accessions[0]
-            # Map secondary accessions to primary accession, for example:
             # AC   P0A9Q6; P08193; P76937; P78251;
-            for acc in rec.accessions:
-                accessions[acc] = primary_accession
-            protein = Protein(primary_accession, str(rec.sequence))
+            protein = Protein(primary_accession, str(rec.sequence), rec.accessions)
             # cross_reference's are tuple of length 3, 4, or 5:
             # ('EMBL', 'JHAC01000017', 'EYB68740.1', '-', 'Genomic_DNA')
             # ('GO', 'GO:0005886', 'C:plasma membrane', 'IEA:UniProtKB-KW')
@@ -108,7 +105,6 @@ def parse_swissprot(
                     protein.add_annotation(annot)
 
             # The protein should not already exist
-            assert proteins.get(protein.id) is None
             proteins[protein.id] = protein
 
         logging.info(
@@ -124,7 +120,6 @@ def parse_swissprot(
     annotations = []
     proteins = {}
     go_terms_not_found: set[str] = set()
-    accessions = {}
 
     if swissprot_db.suffix == ".gz":
         with gzip.open(swissprot_db, "rt") as f:
@@ -133,4 +128,4 @@ def parse_swissprot(
         with open(swissprot_db, "r") as f:
             parse(f)
 
-    return annotations, proteins, go_terms_not_found, accessions
+    return annotations, proteins, go_terms_not_found

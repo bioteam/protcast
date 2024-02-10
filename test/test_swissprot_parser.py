@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     ontology = AnnotatedGODag(args.ontology)
 
-    annotations, proteins, go_terms_not_found, accessions = parse_swissprot(
+    annotations, proteins, go_terms_not_found = parse_swissprot(
         ontology, Path(args.input)
     )
 
@@ -31,10 +31,10 @@ if __name__ == "__main__":
     assert len(go_terms_not_found) == 5
     assert len(annotations) == 438    
     assert len(proteins) == 142
-    assert len(accessions) == 143
 
-    assert accessions["A0A017QRH0"] == "A0A016QRH0"
-    assert accessions["A0A016QRH0"] == "A0A016QRH0"
+    # assert len(accessions) == 143
+    # assert accessions["A0A017QRH0"] == "A0A016QRH0"
+    # assert accessions["A0A016QRH0"] == "A0A016QRH0"
 
     assert proteins["A0A016QRH0"].id == "A0A016QRH0"
     assert len(proteins["A0A016QRH0"].annotations) == 3

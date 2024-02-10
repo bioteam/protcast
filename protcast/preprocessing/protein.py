@@ -11,6 +11,8 @@ class Protein:
     ----------
     id: str
         Protein id (Uniprot accession)
+    accessions: list
+        Secondary accessions
     sequence: str
         Protein sequence
     annotations: list[Annotation]
@@ -36,7 +38,7 @@ class Protein:
         ...
     """
 
-    def __init__(self, id: str, sequence: str) -> None:
+    def __init__(self, id: str, sequence: str, accessions: list[str]) -> None:
         """__init__
         Initialize
 
@@ -46,12 +48,15 @@ class Protein:
             Protein id
         sequence: str
             Protein sequence
-
+        accessions: list
+            One or more accessions, including the Protein id
+        
         Returns
         -------
         None
         """
         self.id: str = id
+        self.accessions: list = accessions
         self.sequence: str = sequence
         self.annotations: list[Annotation] = []
 
