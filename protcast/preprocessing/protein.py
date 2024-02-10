@@ -12,7 +12,7 @@ class Protein:
     id: str
         Protein id (Uniprot accession)
     accessions: list
-        Secondary accessions
+        All accessions
     sequence: str
         Protein sequence
     annotations: list[Annotation]
@@ -22,8 +22,6 @@ class Protein:
     -------
     __init__:
         Initialize
-    is_manually_annotated:
-        Boolean
     get_electronic__annotations:
         ...
     get_manual_annotations:
@@ -166,21 +164,3 @@ class Protein:
             x for x in self.get_all_annotations() if x.evidence_code == "IEA"
         ]
 
-    def is_manually_annotated(self, go_term_id: str) -> bool | None:
-        """is_manually_annotated
-        Get is_manual for a given Annotation, or None if no Annotation
-        for that GO term id
-
-        Parameters
-        ----------
-        go_term_id: str
-            GO term id
-
-        Returns
-        -------
-        Boolean or None
-        """
-        annot = self.annotations.get(go_term_id)
-        if not annot:
-            return None
-        return annot.is_manual
