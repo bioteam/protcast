@@ -1,9 +1,8 @@
-import pickle
 from typeguard import typechecked
 from goatools.obo_parser import GODag
 from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 
-
+@typechecked
 class AnnotatedGODag:
     """AnnotatedGODag
     This is wrapper around the goatools GODag class which represents the
@@ -17,16 +16,6 @@ class AnnotatedGODag:
     -------
     init:
         Initialize
-    get_term:
-        ...
-    get_all_terms:
-        Returns all AnnotatedGOTerms or by namespace
-    get_all_annotations:
-        Returns all Annotations or by namespace
-    save:
-        ...
-    load_ontology:
-        ...
     """
 
     def __init__(self, input_file) -> None:
@@ -63,94 +52,3 @@ class AnnotatedGODag:
         # Not required, no recursion error without this
         # goatools_godag = None
 
-    @typechecked
-    def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
-        """get_term
-        Get AnnotatedGOterm given an id
-
-        Parameters
-        ----------
-        go_id: str
-            Id of GOTerm
-
-        Returns
-        -------
-        AnnotatedGOTerm
-        """
-        return self.go_terms_map.get(go_id)
-
-    @typechecked
-    def get_all_terms(self, namespace=None) -> list[AnnotatedGOTerm]:
-        """get_all_terms
-        Get all AnnotatedGOterms
-
-        Parameters
-        ----------
-        None or namespace
-
-        Returns
-        -------
-        List of AnnotatedGOTerms
-        """
-        terms = list()
-        for term in self.go_terms_map.values():
-            if namespace and term.namespace == namespace:
-                terms.append(term)
-            else:
-                terms.append(term)
-
-    @typechecked
-    def get_all_annotations(self, namespace=None) -> list:
-        """get_all_annotations
-        Get all Annotations
-
-        Parameters
-        ----------
-        None or namespace
-
-        Returns
-        -------
-        List of Annotations
-        """
-        annots = list()
-        for term in self.go_terms_map.values():
-            if namespace and term.namespace == namespace:
-                annots.extend(term.annotations)
-            else:
-                annots.extend(term.annotations)
-        return annots
-
-    def save(self, output_file: str) -> str:
-        """save
-        Serialize an ontology
-
-        Parameters
-        ----------
-        output_file: str
-            Name of output file
-
-        Returns
-        -------
-        File name
-        """
-        with open(output_file, "wb") as f:
-            pickle.dump(self, f)
-        return output_file
-
-    @classmethod
-    def load_godag(cls, input_file: str):
-        """load_godag
-        Read serialized AnnotateeGODag
-
-        Parameters
-        ----------
-        input_file: str
-            Name of serialized ontology file
-
-        Returns
-        -------
-        AnnotatedGODag
-        """
-        with open(input_file, "rb") as f:
-            ontology = pickle.load(f)
-        return ontology

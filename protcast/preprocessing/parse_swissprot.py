@@ -5,15 +5,13 @@ from typeguard import typechecked
 from pathlib import Path
 from Bio import SwissProt
 from protcast.preprocessing.annotation import Annotation
-from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.protein import Protein
 
 
 @typechecked
 def parse_swissprot(
-    annotated_dag: AnnotatedGODag,
     swissprot_db: Path,
-) -> tuple[list[Annotation], dict[str,Protein], set[str]]:
+) -> tuple[list[Annotation], dict[str,Protein]]:
     """parse_swissprot
 
     Example Uniprot file:
@@ -95,12 +93,8 @@ def parse_swissprot(
                 # Collect the Annotation
                 if ref[0] == "GO":
                     go_id = ref[1]
-                    if annotated_dag.get_term(go_id):
-                        annot = Annotation(protein.id,ref[3].split(":")[0],go_id)
-                        annotations.append(annot)
-                    else:
-                        logging.debug(f"{go_id} found in {handle.name} but not in GO ontology")
-                        go_terms_not_found.add(go_id)
+                    annot = Annotation(protein.id,ref[3].split(":")[0],go_id)
+                    annotations.append(annot)
                     # And add it to the Protein
                     protein.add_annotation(annot)
 
@@ -113,13 +107,9 @@ def parse_swissprot(
         logging.info(
             f"Found {len(annotations)} annotations in '{handle.name}'"
         )
-        logging.info(
-            f"Found {len(go_terms_not_found)} GO terms in '{handle.name}' not in the *obo file'"
-        )
 
     annotations = []
     proteins = {}
-    go_terms_not_found: set[str] = set()
 
     if swissprot_db.suffix == ".gz":
         with gzip.open(swissprot_db, "rt") as f:
@@ -128,4 +118,4 @@ def parse_swissprot(
         with open(swissprot_db, "r") as f:
             parse(f)
 
-    return annotations, proteins, go_terms_not_found
+    return annotations, proteins

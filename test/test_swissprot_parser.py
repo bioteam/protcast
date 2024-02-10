@@ -22,14 +22,12 @@ if __name__ == "__main__":
 
     ontology = AnnotatedGODag(args.ontology)
 
-    annotations, proteins, go_terms_not_found = parse_swissprot(
-        ontology, Path(args.input)
-    )
+    annotations, proteins = parse_swissprot(Path(args.input))
 
     # Totals
     # All 5 terms are obsolete
-    assert len(go_terms_not_found) == 5
-    assert len(annotations) == 438    
+    # assert len(go_terms_not_found) == 5
+    assert len(annotations) == 444
     assert len(proteins) == 142
 
     # assert len(accessions) == 143

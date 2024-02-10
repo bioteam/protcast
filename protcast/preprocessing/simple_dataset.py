@@ -14,6 +14,7 @@ from protcast.preprocessing.parse_swissprot import parse_swissprot
 from protcast.preprocessing.parse_gaf import parse_gaf
 from protcast.preprocessing.annotation import Annotation
 from protcast.preprocessing.annotated_godag import AnnotatedGODag
+from protcast.preprocessing.annotated_godag import AnnotatedGOTerm
 from protcast.preprocessing.protein import Protein
 from protcast.globals import CC,BP,MF
 
@@ -58,13 +59,19 @@ class SimpleDataset:
         Save SimpleDataset to disk
     from_serialized_file:
         Load SimpleDataset from disk
-    annotate_proteins_from_gaf:
-        ...
+    get_term: str
+        Returns an AnnotatedGOTerm given an id
+    get_all_annotations: None or namespace
+        Returns a list of Annotations
+    get_all_terms: None or namespace
+        Returns a list of AnnotatedGOTerms
+    add_proteins: dict
+        Adds one or more Proteins
+    get_annotatations_from_gaf:
+        Get all Annotations from a *gaf file
     parse:
         Inner function, parse TrEMBL
     create_annotation_files
-        ...
-    add_proteins:
         ...
     remove_protein:
         ...
@@ -116,8 +123,10 @@ class SimpleDataset:
         # Due to size we skip md5 of the trembl and GOA *gaf files
         self.gaf_path = gaf_path
         self.trembl_path = trembl_path
+
         self.proteins = dict()
         self.accessions = dict()
+        self.go_terms_not_found= set()
 
         logger = logging.getLogger()
         if self.verbose:
@@ -132,8 +141,7 @@ class SimpleDataset:
         (
             uniprot_annotations,
             uniprot_proteins,
-            go_terms_not_found,
-        ) = parse_swissprot(self.annotated_dag, self.swissprot_path)
+        ) = parse_swissprot(self.swissprot_path)
 
         self.add_proteins(uniprot_proteins)
 
@@ -157,7 +165,7 @@ class SimpleDataset:
         logging.info(f"TrEMBL: '{self.trembl_path}'")
         logging.info(f"Saved SimpleDataset: '{self.output_dir}'")
         logging.info(f"Created at: '{self.created_at}'")
-        logging.debug(f"GO terms not found: '{go_terms_not_found}'")
+        logging.debug(f"GO terms not found: '{self.go_terms_not_found}'")
 
     @typechecked
     def save(self) -> None:
@@ -256,10 +264,13 @@ class SimpleDataset:
             if check_pid:
                 # There is no Protein for this Annotation
                 if not self.accessions.get(annot.protein_id):
+                    logging.debug(f"No Protein found for {annot.protein_id} cannot add Annotation")
                     continue
-            go_term = self.annotated_dag.get_term(annot.go_id)
+            go_term = self.get_term(annot.go_id)
             if go_term:
                 go_term.add_annotation(annot)
+            else:
+                self.go_terms_not_found.add(annot.go_id)
 
     def get_annotations_from_gaf(self):
         """get_annotations_from_gaf
@@ -420,7 +431,7 @@ class SimpleDataset:
                 "format-version: 1.2\ndefault-namespace: gene_ontology\nontology: go\n\n"
             )
             for go_term_id in all_go_terms.keys():
-                term = self.annotated_dag.get_term(go_term_id)
+                term = self.get_term(go_term_id)
                 if term:
                     obo_file.write(
                         "[Term]"
@@ -440,6 +451,67 @@ class SimpleDataset:
                 for protein_id in all_go_terms[go_term_id]:
                     obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")
+
+    @typechecked
+    def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
+        """get_term
+        Get AnnotatedGOterm given an id
+
+        Parameters
+        ----------
+        go_id: str
+            Id of GOTerm
+
+        Returns
+        -------
+        AnnotatedGOTerm
+        """
+        return self.annotated_dag.go_terms_map.get(go_id)
+
+    @typechecked
+    def get_all_terms(self, namespace=None) -> list[AnnotatedGOTerm]:
+        """get_all_terms
+        Get all AnnotatedGOterms
+
+        Parameters
+        ----------
+        None or namespace
+
+        Returns
+        -------
+        List of AnnotatedGOTerms
+        """
+        terms = list()
+        for term in self.annotated_dag.go_terms_map.values():
+            if namespace:
+                if term.namespace == namespace:
+                    terms.append(term)
+            else:
+                terms.append(term)
+        return terms
+
+    @typechecked
+    def get_all_annotations(self, namespace=None) -> list:
+        """get_all_annotations
+        Get all Annotations
+
+        Parameters
+        ----------
+        None or namespace
+
+        Returns
+        -------
+        List of Annotations
+        """
+        annots = list()
+        for term in self.annotated_dag.go_terms_map.values():
+            if namespace:
+                if term.namespace == namespace:
+                    annots.extend(term.annotations)
+            else:
+                annots.extend(term.annotations)
+        return annots
+
 
 
 def md5(file_path: str) -> str:

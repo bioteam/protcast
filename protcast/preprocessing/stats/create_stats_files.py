@@ -1,9 +1,9 @@
 from protcast.preprocessing.simple_dataset import SimpleDataset
 from protcast.globals import CC,BP,MF
-import matplotlib.pyplot as plt
 from pathlib import Path
 from typeguard import typechecked
-
+import pandas as pd
+import plotly.express as px
 
 @typechecked
 def create_stats_files(
@@ -42,17 +42,17 @@ def create_stats_files(
         f.write(f"GOA file: {dataset.gaf_path}\n")
         f.write(f"Trembl file: {dataset.trembl_path}\n\n")
 
-        bp_nodes = dataset.annotated_dag.get_all_terms(BP)
-        cc_nodes = dataset.annotated_dag.get_all_terms(CC)
-        mf_nodes = dataset.annotated_dag.get_all_terms(MF)
+        bp_nodes = dataset.get_all_terms(namespace=BP)
+        cc_nodes = dataset.get_all_terms(namespace=CC)
+        mf_nodes = dataset.get_all_terms(namespace=MF)
 
         f.write(f"Nodes in {BP}: {len(bp_nodes)}\n")
         f.write(f"Nodes in {CC}: {len(cc_nodes)}\n")
         f.write(f"Nodes in {MF}: {len(mf_nodes)}\n\n")
 
-        bp_annots = dataset.annotated_dag.get_all_annotations(BP)
-        cc_annots = dataset.annotated_dag.get_all_annotations(CC)
-        mf_annots = dataset.annotated_dag.get_all_annotations(MF)
+        bp_annots = dataset.get_all_annotations(namespace=BP)
+        cc_annots = dataset.get_all_annotations(namespace=CC)
+        mf_annots = dataset.get_all_annotations(namespace=MF)
 
         f.write(f"Annotations in {BP}: {len(bp_annots)}\n")
         f.write(f"Annotations in {CC}: {len(cc_annots)}\n")
@@ -70,9 +70,12 @@ def create_stats_files(
         f.write(CC + "\t" + "\t".join([str(x) for x in cc_levels]) + "\n")
         f.write(MF + "\t" + "\t".join([str(x) for x in mf_levels]) + "\n")
 
-    generate_ontology_levels_histogram(BP, bp_levels, output_dir)
-    generate_ontology_levels_histogram(CC, cc_levels, output_dir)
-    generate_ontology_levels_histogram(MF, mf_levels, output_dir)
+    df = pd.DataFrame({"BP":bp_levels, "CC":cc_levels, "MF":mf_levels})
+    fig = px.bar(df, x=df.index, y=["BP", "CC", "MF"], barmode="stack",
+             title="GO Terms by Level", text_auto=True)
+    fig.update_layout(xaxis_title="Level", yaxis_title="Number of Terms")
+    fig.show()
+    fig.write_image(output_dir/"GO_terms_by_level.png")
 
     with open(output_dir / Path("bp_go_terms.tsv"), "w") as f:
         f.write("Term\tName\tLevel\tDepth\tAnnotations\tManual Annotations\n")
@@ -127,48 +130,5 @@ def create_stats_files(
                 + str(len([x for x in node.annotations if x.is_manual is True]))
                 + "\n"
             )
-
-    # def write_obsolete_go_terms(file_name: Path, dag: AnnotatedGODag):
-    #     with open(file_name, "w") as f:
-    #         f.write("\n".join([f"{node.id}" for node in dag.get_obsolete_nodes()]))
-    # write_obsolete_go_terms(
-    #     Path(output_dir / "obsolete_bp_go_terms.txt"), dataset.ontology.bp_dag
-    # )
-    # write_obsolete_go_terms(
-    #     Path(output_dir / "obsolete_cc_go_terms.txt"), dataset.ontology.cc_dag
-    # )
-    # write_obsolete_go_terms(
-    #     Path(output_dir / "obsolete_mf_go_terms.txt"), dataset.ontology.mf_dag
-    # )
-
     with open(output_dir / Path("go_terms_not_found.txt"), "w") as f:
         f.write("\n".join(dataset.go_terms_not_found))
-
-
-@typechecked
-def generate_ontology_levels_histogram(
-    namespace: str,
-    levels: list[int],
-    output_dir: Path,
-) -> None:
-    """generate_ontology_levels_histogram
-    ...
-
-    Parameters
-    ----------
-    namespace: str
-        GO namespace
-    levels: list of ints
-        Number at each level
-    output_dir: Path
-        ...
-
-    Returns
-    -------
-    None
-    """
-    plt.bar(range(14), levels)
-    plt.title(f"Number of terms per level in {namespace}")
-    plt.xlabel("Level")
-    plt.ylabel("Number of terms")
-    plt.savefig(output_dir / Path(f"number_terms_per_level_in_{namespace}.png"))

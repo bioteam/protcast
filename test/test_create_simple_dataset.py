@@ -96,23 +96,59 @@ def main():
     trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
 
     # Test association of AnnotatedGOTerms and Annotations
-    annots = dataset.annotated_dag.get_term("GO:0015379").annotations
+    annots = dataset.get_term("GO:0015379").annotations
     assert len(annots) == 1
     assert annots[0].protein_id == "A0A016QRH0"
     
-    annots = dataset.annotated_dag.get_term("GO:0070469").annotations
+    annots = dataset.get_term("GO:0070469").annotations
     assert len(annots) == 3
     assert annots[0].protein_id == "A0A2U4Z3V2"
     assert annots[1].protein_id == "A0A7H0LCT9"
     assert annots[2].protein_id == "N0GT22"
 
     # Check that we have Proteins for all the Annotations
-    for annot in dataset.annotated_dag.get_all_annotations():
+    for annot in dataset.get_all_annotations():
         assert dataset.accessions.get(annot.protein_id)
         assert dataset.proteins.get(annot.protein_id)
 
     # Totals
-    assert len(dataset.annotated_dag.get_all_annotations()) == 773
+    assert len(dataset.get_all_annotations()) == 773
+
+    # level
+    assert dataset.get_term("GO:0008150").level == 0 # Biological Process
+    assert dataset.get_term("GO:0005575").level == 0 # Cellular Component
+    assert dataset.get_term("GO:0003674").level == 0 # Molecular Function
+    # Assert levels of get_all_ancestors() of GO:0031957
+    assert dataset.get_term("GO:0003824").level == 1 # catalytic activity
+    assert dataset.get_term("GO:0016874").level == 2 # ligase activity
+    assert dataset.get_term("GO:0016877").level == 3 # ligase activity, forming carbon-sulfur bonds
+    # The 2 parents of GO:0015645
+    assert dataset.get_term("GO:0140657").level == 1 # ATP-dependent activity
+    assert dataset.get_term("GO:0016878").level == 4 # acid-thiol ligase activity
+    # Has 2 parents thus could be 2 or 5
+    assert dataset.get_term("GO:0015645").level == 2 # fatty acid ligase activity
+    # Has 2 parents, one of which also has 2 parents
+    assert dataset.get_term("GO:0031957").level == 3 # very long-chain fatty acid-CoA ligase activity
+    # assert len(dataset.mf_dag.get_nodes_by_level(0)) == 1
+
+    # children
+    assert not dataset.get_term("GO:0031957").children
+    assert len(dataset.get_term("GO:0015645").children) == 9
+
+    # parents
+    # GO:0016405 (CoA-ligase activity), GO:0015645 (fatty acid ligase activity)
+    assert len(dataset.get_term("GO:0031957").parents) == 2
+    parents = dataset.get_term("GO:0015645").parents
+    assert len(parents) == 2
+    # assert str(type(parents[0])) == "<class 'protcast.preprocessing.annotated_goterm.AnnotatedGOTerm'>"
+    # The order of the parents is not deterministic
+    assert parents[0] == "GO:0016878" or parents[0] == "GO:0140657"
+    assert parents[1] == "GO:0016878" or parents[1] == "GO:0140657"
+    assert not dataset.get_term("GO:0003674").parents
+    # Roots should have no parents
+    assert not dataset.get_term("GO:0008150").parents # Biological Process
+    assert not dataset.get_term("GO:0005575").parents # Biological Process
+    assert not dataset.get_term("GO:0003674").parents # Biological Process
 
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
