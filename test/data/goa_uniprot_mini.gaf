@@ -1,10 +1,9 @@
 !gaf-version: 2.2
 !
-!This file contains all GO annotations and gene product information for proteins in the UniProt KnowledgeBase (UniProtKB),
+!This file contains GO annotations and gene product information for proteins in the UniProt KnowledgeBase (UniProtKB),
 !ComplexPortal protein complexes, and RNAcentral identifiers.
+!This file has 995 entries.
 !
-!date-generated: 2021-11-09 08:14 
-!generated-by: UniProt
 !go-version: http://purl.obolibrary.org/obo/go/releases/2021-11-06/extensions/go-plus.owl
 !
 UniProtKB	A0A1Z4V764	NIES806_33130	involved_in	GO:0006508	GO_REF:0000043	IEA	UniProtKB-KW:KW-0645	P	Uncharacterized protein	NIES806_33130	protein	taxon:1973481	20211010	UniProt		

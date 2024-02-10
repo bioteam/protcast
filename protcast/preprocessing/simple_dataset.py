@@ -137,18 +137,19 @@ class SimpleDataset:
             self.accessions,
         ) = parse_swissprot(self.annotated_dag, self.swissprot_path)
 
-        # Add Annotations to the annotated DAG 
+        # Add UniProt Annotations to the annotated DAG 
         self.add_annotations(uniprot_annotations)
 
         # Parse annotations from UniProt-GOA *gaf file
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
 
-        # Add Annotations found in UniProt-GOA *gaf file 
-        self.add_annotations(gaf_annotations)
-
-        # Retrieve Proteins from Trembl for any new Annotations from the GOA file 
+        # Retrieve Proteins from Trembl for new protein ids from the GOA file 
         new_proteins = self.parse_trembl(new_protein_ids)
         self.proteins.update(new_proteins)
+
+        # Add Annotations found in UniProt-GOA *gaf file 
+        # and verify that the Protein exists in self.accessions
+        self.add_annotations(gaf_annotations, check_pid=True)
 
         logging.info(f"GO: '{self.ontology_path}'")
         logging.info(f"GOA: '{self.gaf_path}'")
@@ -249,8 +250,12 @@ class SimpleDataset:
         mf_file.close()
         missing_proteins_file.close()
 
-    def add_annotations(self, annotations) -> None:
+    def add_annotations(self, annotations, check_pid=False) -> None:
         for annot in annotations:
+            if check_pid:
+                # There is no Protein for this Annotation
+                if not self.accessions.get(annot.protein_id):
+                    continue
             go_term = self.annotated_dag.get_term(annot.go_id)
             if go_term:
                 go_term.add_annotation(annot)
@@ -293,8 +298,9 @@ class SimpleDataset:
 
     def parse_trembl(self, new_protein_ids: list) -> dict:
         """parse_trembl
-        Find proteins in TrEMBL that were in the *gaf file but not
-        in the UniProt *dat file.
+        Returns proteins in TrEMBL that were in the *gaf file but not
+        in the UniProt *dat file and adds the ids of these proteins
+        to self.accessions.
 
         Parameters
         ----------
@@ -319,10 +325,12 @@ class SimpleDataset:
                 protein = Protein(pids[1], str(record))
                 logging.debug(f"Created new Protein {pids[1]} using TrEMBL")
                 new_proteins[pids[1]] = protein
+                self.accessions[pids[1]] = pids[1]
             elif pids[2] in new_protein_ids:
                 protein = Protein(pids[2], str(record))
                 logging.debug(f"Created new Protein {pids[2]} using TrEMBL")
                 new_proteins[pids[2]] = protein
+                self.accessions[pids[2]] = pids[2]
 
         logging.info(f"Made {len(new_proteins.keys())} new Proteins from TrEMBL")
         return new_proteins

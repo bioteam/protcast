@@ -61,7 +61,7 @@ class AnnotatedGODag:
                 annot_go_term.children.append(child.id)
 
         # Not required, no recursion error without this
-        goatools_godag = None
+        # goatools_godag = None
 
     @typechecked
     def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
@@ -92,10 +92,12 @@ class AnnotatedGODag:
         -------
         List of AnnotatedGOTerms
         """
-        if namespace:
-            return [x for x in self.go_terms_map.values() if x.namespace == namespace]
-        else:
-            return self.go_terms_map.values()
+        terms = list()
+        for term in self.go_terms_map.values():
+            if namespace and term.namespace == namespace:
+                terms.append(term)
+            else:
+                terms.append(term)
 
     @typechecked
     def get_all_annotations(self, namespace=None) -> list:
@@ -110,17 +112,13 @@ class AnnotatedGODag:
         -------
         List of Annotations
         """
-        # annots = list()
-        if namespace:
-            # for term in self.go_terms_map.values():
-            #     if term.namespace == namespace:
-            #         annots.extend(term.annotations)
-            return [t.annotations for t in self.go_terms_map.values() if t.namespace == namespace]
-        else:
-            # for term in self.go_terms_map.values():
-            #     annots.extend(term.annotations)
-            return [t.annotations for t in self.go_terms_map.values()]
-        # return annots
+        annots = list()
+        for term in self.go_terms_map.values():
+            if namespace and term.namespace == namespace:
+                annots.extend(term.annotations)
+            else:
+                annots.extend(term.annotations)
+        return annots
 
     def save(self, output_file: str) -> str:
         """save

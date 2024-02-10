@@ -75,8 +75,9 @@ def main():
         args.verbose,
     )
 
-    # Test Swissprot and *gaf parsing without propagation
+    # Test Swissprot and *gaf parsing
     # There are near-duplicate lines for A0A016QRH0 in the *gaf file
+    # *gaf file has 995 entries, SwissProt file has 438 annotations
     sw_protein = dataset.proteins.get("A0A016QRH0")
     assert len(sw_protein.annotations) == 3
     annots = sw_protein.get_all_annotations()
@@ -88,7 +89,7 @@ def main():
     assert manuals == []
     assert len(sw_protein.get_electronic_annotations()) == 3
 
-    # Test TrEMBL parsing
+    # Test TrEMBL parsing, *fasta file has 15 sequences
     trembl_protein = dataset.proteins.get("M5BGM1")
     annots = trembl_protein.get_all_annotations()
     assert len(annots) == 0
@@ -98,12 +99,20 @@ def main():
     annots = dataset.annotated_dag.get_term("GO:0015379").annotations
     assert len(annots) == 1
     assert annots[0].protein_id == "A0A016QRH0"
-
+    
     annots = dataset.annotated_dag.get_term("GO:0070469").annotations
     assert len(annots) == 3
     assert annots[0].protein_id == "A0A2U4Z3V2"
     assert annots[1].protein_id == "A0A7H0LCT9"
     assert annots[2].protein_id == "N0GT22"
+
+    # Check that we have Proteins for all the Annotations
+    for annot in dataset.annotated_dag.get_all_annotations():
+        assert dataset.accessions.get(annot.protein_id)
+        assert dataset.proteins.get(annot.protein_id)
+
+    # Totals
+    assert len(dataset.annotated_dag.get_all_annotations()) == 773
 
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
