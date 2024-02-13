@@ -156,7 +156,7 @@ class SimpleDataset:
         self.add_proteins(new_proteins)
 
         # Add Annotations found in UniProt-GOA *gaf file 
-        # and verify that the Protein actually exists 
+        # but first verify that the Protein actually exists 
         self.add_annotations(gaf_annotations, check_pid=True)
 
         logging.info(f"GO: '{self.ontology_path}'")

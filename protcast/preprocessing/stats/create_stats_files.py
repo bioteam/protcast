@@ -9,8 +9,8 @@ import plotly.express as px
 def create_stats_files(
     dataset_location: str
 ):
-    """generate_dataset_stats
-    Create simpledataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
+    """create_stats_files
+    Create SimpleDataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
     mf_go_terms.txt files and histograms of terms, annotations, and levels.
 
     Parameters
@@ -25,14 +25,17 @@ def create_stats_files(
     dataset = SimpleDataset.from_serialized_file(dataset_location)
     output_dir = Path(dataset_location).parent
 
-    bp_node_levels = list()
-    cc_node_levels = list()
-    mf_node_levels = list()
-    bp_annot_levels = list()
-    cc_annot_levels = list()
-    mf_annot_levels = list()
+    bp_node_levels = [0] * 14
+    cc_node_levels = [0] * 14
+    mf_node_levels = [0] * 14
+    bp_annot_levels = [0] * 14
+    cc_annot_levels = [0] * 14
+    mf_annot_levels = [0] * 14
+    # bp_zero_names = list()
+    # cc_zero_names = list()
+    # mf_zero_names = list()
 
-    with open(output_dir / Path("simpledataset_statistics.txt"), "w") as f:
+    with open(output_dir / Path("SimpleDataset_statistics.txt"), "w") as f:
         f.write(f"Creation Time: {dataset.created_at}\n")
         f.write(
             f"Ontology file: {dataset.ontology_path} (md5: "
@@ -57,13 +60,26 @@ def create_stats_files(
         f.write(f"Annotations in {CC}: {len(dataset.get_all_annotations(namespace=CC))}\n")
         f.write(f"Annotations in {MF}: {len(dataset.get_all_annotations(namespace=MF))}\n\n")
 
-        # Nodes by level
-        for level in range(14):
-            bp_node_levels.append(len([x for x in bp_nodes if x.level == level]))
-        for level in range(14):
-            cc_node_levels.append(len([x for x in cc_nodes if x.level == level]))
-        for level in range(14):
-            mf_node_levels.append(len([x for x in mf_nodes if x.level == level]))
+        # Nodes and Annotations by level
+        for t in bp_nodes:
+            bp_annot_levels[t.level] += len(t.annotations)
+            bp_node_levels[t.level] += 1
+            # if t.level == 0:
+            #     bp_zero_names.append(t.name)
+        for t in cc_nodes:
+            cc_annot_levels[t.level] += len(t.annotations)
+            cc_node_levels[t.level] += 1
+            # if t.level == 0:
+            #     cc_zero_names.append(t.name)
+        for t in mf_nodes:
+            mf_annot_levels[t.level] += len(t.annotations)
+            mf_node_levels[t.level] += 1
+            # if t.level == 0:
+            #     mf_zero_names.append(t.name)
+
+        # f.write(f"{BP} level 0: {','.join(bp_zero_names)}\n")
+        # f.write(f"{CC} level 0: {','.join(cc_zero_names)}\n")
+        # f.write(f"{MF} level 0: {','.join(mf_zero_names)}\n\n")
 
         f.write("Nodes by level (0-13)\n")
         f.write(BP + "\t" + "\t".join([str(x) for x in bp_node_levels]) + "\n")
@@ -76,28 +92,6 @@ def create_stats_files(
         fig.update_layout(xaxis_title="Level", yaxis_title="Number of Terms")
         fig.show()
         fig.write_image(output_dir/"GO_terms_by_level.png")
-
-        # Annotations by level
-        for level in range(14):
-            annots = list()
-            for t in bp_nodes:
-                if t.level == level and t.annotations:
-                    annots.extend(t.annotations)
-            bp_annot_levels.append(len(annots))
-
-        for level in range(14):
-            annots = list()
-            for t in cc_nodes:
-                if t.level == level and t.annotations:
-                    annots.extend(t.annotations)
-            cc_annot_levels.append(len(annots))
-
-        for level in range(14):
-            annots = list()
-            for t in mf_nodes:
-                if t.level == level and t.annotations:
-                    annots.extend(t.annotations)
-            mf_annot_levels.append(len(annots))
 
         f.write("Annotations by level (0-13)\n")
         f.write(BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n")

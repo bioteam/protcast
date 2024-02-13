@@ -76,6 +76,8 @@ class AnnotatedGOTerm:
         """has_annotation
         Check to see if the AnnotatedGOterm has the input Annotation
         """
+        if not self.annotations:
+            return False
         for term_annot in self.get_all_annotations():
             if (
                 term_annot.go_id == annot.go_id
