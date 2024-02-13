@@ -296,8 +296,7 @@ class SimpleDataset:
             gaf_lines,
             desc=f"Processing GOA records from '{str(self.gaf_path)}'"
         ):
-            annot = Annotation(rec['DB_Object_ID'], rec["Evidence"], rec["GO_ID"])
-            gaf_annotations.append(annot)
+            gaf_annotations.append(Annotation(rec['DB_Object_ID'], rec["Evidence"], rec["GO_ID"]))
 
             # If the protein is not in SwissProt then it is a new protein
             if rec["DB_Object_ID"] not in self.accessions:
@@ -351,14 +350,14 @@ class SimpleDataset:
         Parameters
         ----------
         proteins: dict
-            ...
+            Key is id, value is Protein
 
         Returns
         -------
         None
         """
         self.proteins.update(new_proteins)
-        for protein in self.proteins.values():
+        for protein in new_proteins.values():
             for acc in protein.accessions:
                 self.accessions[protein.id] = acc
 
@@ -369,7 +368,7 @@ class SimpleDataset:
         Parameters
         ----------
         protein_id: str
-            ...
+            Protein id
 
         Returns
         -------
