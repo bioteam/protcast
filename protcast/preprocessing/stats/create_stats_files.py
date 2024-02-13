@@ -11,7 +11,7 @@ def create_stats_files(
 ):
     """generate_dataset_stats
     Create simpledataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
-    mf_go_terms.txt files and histograms of terms and levels.
+    mf_go_terms.txt files and histograms of terms, annotations, and levels.
 
     Parameters
     ----------
@@ -25,9 +25,12 @@ def create_stats_files(
     dataset = SimpleDataset.from_serialized_file(dataset_location)
     output_dir = Path(dataset_location).parent
 
-    bp_levels = list()
-    cc_levels = list()
-    mf_levels = list()
+    bp_node_levels = list()
+    cc_node_levels = list()
+    mf_node_levels = list()
+    bp_annot_levels = list()
+    cc_annot_levels = list()
+    mf_annot_levels = list()
 
     with open(output_dir / Path("simpledataset_statistics.txt"), "w") as f:
         f.write(f"Creation Time: {dataset.created_at}\n")
@@ -50,32 +53,63 @@ def create_stats_files(
         f.write(f"Nodes in {CC}: {len(cc_nodes)}\n")
         f.write(f"Nodes in {MF}: {len(mf_nodes)}\n\n")
 
-        bp_annots = dataset.get_all_annotations(namespace=BP)
-        cc_annots = dataset.get_all_annotations(namespace=CC)
-        mf_annots = dataset.get_all_annotations(namespace=MF)
+        f.write(f"Annotations in {BP}: {len(dataset.get_all_annotations(namespace=BP))}\n")
+        f.write(f"Annotations in {CC}: {len(dataset.get_all_annotations(namespace=CC))}\n")
+        f.write(f"Annotations in {MF}: {len(dataset.get_all_annotations(namespace=MF))}\n\n")
 
-        f.write(f"Annotations in {BP}: {len(bp_annots)}\n")
-        f.write(f"Annotations in {CC}: {len(cc_annots)}\n")
-        f.write(f"Annotations in {MF}: {len(mf_annots)}\n\n")
-
+        # Nodes by level
         for level in range(14):
-            bp_levels.append(len([x for x in bp_nodes if x.level == level]))
+            bp_node_levels.append(len([x for x in bp_nodes if x.level == level]))
         for level in range(14):
-            cc_levels.append(len([x for x in cc_nodes if x.level == level]))
+            cc_node_levels.append(len([x for x in cc_nodes if x.level == level]))
         for level in range(14):
-            mf_levels.append(len([x for x in mf_nodes if x.level == level]))
+            mf_node_levels.append(len([x for x in mf_nodes if x.level == level]))
 
         f.write("Nodes by level (0-13)\n")
-        f.write(BP + "\t" + "\t".join([str(x) for x in bp_levels]) + "\n")
-        f.write(CC + "\t" + "\t".join([str(x) for x in cc_levels]) + "\n")
-        f.write(MF + "\t" + "\t".join([str(x) for x in mf_levels]) + "\n")
+        f.write(BP + "\t" + "\t".join([str(x) for x in bp_node_levels]) + "\n")
+        f.write(CC + "\t" + "\t".join([str(x) for x in cc_node_levels]) + "\n")
+        f.write(MF + "\t" + "\t".join([str(x) for x in mf_node_levels]) + "\n\n")
 
-    df = pd.DataFrame({"BP":bp_levels, "CC":cc_levels, "MF":mf_levels})
-    fig = px.bar(df, x=df.index, y=["BP", "CC", "MF"], barmode="stack",
+        df = pd.DataFrame({"BP":bp_node_levels, "CC":cc_node_levels, "MF":mf_node_levels})
+        fig = px.bar(df, x=df.index, y=["BP", "CC", "MF"], barmode="stack",
              title="GO Terms by Level", text_auto=True)
-    fig.update_layout(xaxis_title="Level", yaxis_title="Number of Terms")
-    fig.show()
-    fig.write_image(output_dir/"GO_terms_by_level.png")
+        fig.update_layout(xaxis_title="Level", yaxis_title="Number of Terms")
+        fig.show()
+        fig.write_image(output_dir/"GO_terms_by_level.png")
+
+        # Annotations by level
+        for level in range(14):
+            annots = list()
+            for t in bp_nodes:
+                if t.level == level and t.annotations:
+                    annots.extend(t.annotations)
+            bp_annot_levels.append(len(annots))
+
+        for level in range(14):
+            annots = list()
+            for t in cc_nodes:
+                if t.level == level and t.annotations:
+                    annots.extend(t.annotations)
+            cc_annot_levels.append(len(annots))
+
+        for level in range(14):
+            annots = list()
+            for t in mf_nodes:
+                if t.level == level and t.annotations:
+                    annots.extend(t.annotations)
+            mf_annot_levels.append(len(annots))
+
+        f.write("Annotations by level (0-13)\n")
+        f.write(BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n")
+        f.write(CC + "\t" + "\t".join([str(x) for x in cc_annot_levels]) + "\n")
+        f.write(MF + "\t" + "\t".join([str(x) for x in mf_annot_levels]) + "\n")
+
+        df = pd.DataFrame({"BP":bp_annot_levels, "CC":cc_annot_levels, "MF":mf_annot_levels})
+        fig = px.bar(df, x=df.index, y=["BP", "CC", "MF"], barmode="stack",
+             title="Annotations by Level", text_auto=True)
+        fig.update_layout(xaxis_title="Level", yaxis_title="Number of Annotations")
+        fig.show()
+        fig.write_image(output_dir/"annotations_by_level.png")
 
     with open(output_dir / Path("bp_go_terms.tsv"), "w") as f:
         f.write("Term\tName\tLevel\tDepth\tAnnotations\tManual Annotations\n")

@@ -9,7 +9,7 @@ class AnnotatedGOTerm:
 
     Attributes
     ----------
-    annotations: list
+    annotations: list or None
         List of Annotations
 
     Methods
@@ -46,10 +46,9 @@ class AnnotatedGOTerm:
         self.name = goatools_go_term.name
         self.namespace = goatools_go_term.namespace
         self.is_obsolete = goatools_go_term.is_obsolete
-        # GO ids, populated by AnnotatedGODag, 
+        # GO ids, populated by AnnotatedGODag
         self.parents = list()
         self.children = list()
-
         self.annotations = list()
 
         goatools_go_term = None
@@ -105,7 +104,7 @@ class AnnotatedGOTerm:
                 return annot
             
     @typechecked
-    def get_all_annotations(self) -> list[Annotation]:
+    def get_all_annotations(self) -> list[Annotation] | None:
         """get_all_annotations
         Get all Annotations for a AnnotatedGOterm
 
@@ -117,4 +116,5 @@ class AnnotatedGOTerm:
         -------
         List of Annotations
         """
-        return self.annotations
+        if len(self.annotations) > 0:
+            return self.annotations
