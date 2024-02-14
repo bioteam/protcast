@@ -10,6 +10,7 @@ authors = [{ name = "Brian Osborne", email = "briano@bioteam.net" }, {name = "Br
 requires-python = ">=3.10"
 dependencies = [
     "plotly",
+    "kaleido",
     "numpy",
     "typeguard",
     "scikit-learn",
