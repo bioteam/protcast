@@ -146,7 +146,8 @@ class SimpleDataset:
         self.add_proteins(uniprot_proteins)
 
         # Add UniProt Annotations to the annotated DAG 
-        self.add_annotations(uniprot_annotations)
+        num_added = self.add_annotations(uniprot_annotations)
+        logging.info(f"{num_added} Annotations added from '{self.swissprot_path}'")
 
         # Parse annotations from UniProt-GOA *gaf file
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
@@ -157,7 +158,8 @@ class SimpleDataset:
 
         # Add Annotations found in UniProt-GOA *gaf file 
         # but first verify that the Protein actually exists 
-        self.add_annotations(gaf_annotations, check_pid=True)
+        num_added = self.add_annotations(gaf_annotations, check_pid=True)
+        logging.info(f"Added {num_added} Annotations from '{self.gaf_path}'")
 
         logging.info(f"GO: '{self.ontology_path}'")
         logging.info(f"GOA: '{self.gaf_path}'")
@@ -259,7 +261,19 @@ class SimpleDataset:
         mf_file.close()
         missing_proteins_file.close()
 
-    def add_annotations(self, annotations, check_pid=False) -> None:
+    def add_annotations(self, annotations, check_pid=False) -> int:
+        """add_annotations
+        ...
+
+        Parameters
+        ----------
+        ...
+
+        Returns
+        -------
+        num_new_annotations: number of Annotations added
+        """
+        num_new_annotations = 0
         for annot in annotations:
             if check_pid:
                 # There is no Protein for this Annotation
@@ -268,9 +282,12 @@ class SimpleDataset:
                     continue
             go_term = self.get_term(annot.go_id)
             if go_term:
-                go_term.add_annotation(annot)
+                result = go_term.add_annotation(annot)
+                if result:
+                    num_new_annotations += 1
             else:
                 self.go_terms_not_found.add(annot.go_id)
+        return num_new_annotations
 
     def get_annotations_from_gaf(self):
         """get_annotations_from_gaf
@@ -303,8 +320,8 @@ class SimpleDataset:
                 logging.debug(f"New protein id: '{rec['DB_Object_ID']}'")
                 new_protein_ids.add(rec["DB_Object_ID"])
 
-        logging.info(f"Made {len(gaf_annotations)} new Annotations from '{self.gaf_path}'")
         logging.info(f"Found {len(new_protein_ids)} new protein ids in '{self.gaf_path}'")
+        logging.info(f"Found {len(gaf_annotations)} Annotations in '{self.gaf_path}'")
         return gaf_annotations, new_protein_ids
 
     def parse_fasta(self, new_protein_ids: list) -> dict:
@@ -340,7 +357,7 @@ class SimpleDataset:
                 logging.debug(f"Created new Protein {pids[2]} using TrEMBL")
                 new_proteins[pids[2]] = protein
 
-        logging.info(f"Made {len(new_proteins.keys())} new Proteins from TrEMBL")
+        logging.info(f"Found {len(new_proteins.keys())} Proteins from '{self.gaf_path}' in TrEMBL")
         return new_proteins
 
     def add_proteins(self, new_proteins: dict) -> None:

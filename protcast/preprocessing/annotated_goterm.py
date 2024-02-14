@@ -54,7 +54,7 @@ class AnnotatedGOTerm:
         goatools_go_term = None
 
     @typechecked
-    def add_annotation(self, annot: Annotation) -> None:
+    def add_annotation(self, annot: Annotation) -> bool:
         """add_annotation
         Add Annotation to a list of Annotations if the
         AnnotatedGOterm does not have the Annotation
@@ -66,10 +66,12 @@ class AnnotatedGOTerm:
 
         Returns
         -------
-        None
+        True if Annotation is added
         """
         if not self.has_annotation(annot):
             self.annotations.append(annot)
+            return True
+        return False
 
     @typechecked
     def has_annotation(self, annot: Annotation) -> bool:
