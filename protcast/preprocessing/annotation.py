@@ -55,6 +55,27 @@ class Annotation:
 
     Inferred from Electronic Annotation (IEA)
 
+    Example root GO term annotations that are found >40K times in the *gaf file (MF, CC, and BP, respectively):
+
+    UniProtKB	Q2GG83	ECH_0752	enables	GO:0003674	GO_REF:0000015	ND	F	Uncharacterized protein	
+    ECH_0752	protein	taxon:205920	20061212	TIGR
+    UniProtKB	G4NEF6	MGG_00119	is_active_in	GO:0005575	GO_REF:0000015	ND	C	Prothymosin
+    alpha	MGG_00119	protein	taxon:242507	20080211	PAMGO_MGG
+    UniProtKB	G4NHI0	MGG_17744	involved_in	GO:0008150	GO_REF:0000015	ND	P	Uncharacterized
+    protein	MGG_17744	protein	taxon:242507	20080211	PAMGO_MGG
+
+    > grep GO:0003674 GO/filtered_goa_uniprot_all_noiea.gaf |wc
+    43120  697159 6430188
+    > grep GO:0005575 GO/filtered_goa_uniprot_all_noiea.gaf |wc
+    43051  690752 6673018
+    > grep GO:0008150 GO/filtered_goa_uniprot_all_noiea.gaf |wc
+    41828  672831 6389168
+    > wc GO/filtered_goa_uniprot_all_noiea.gaf
+    311758  5197780 49392949 GO/filtered_goa_uniprot_all_noiea.gaf
+
+    Evidence code "ND" signifies a lack of current knowledge, not the complete absence of function 
+    or location. "ND" is only used with annotations to the root terms of each GO DAG.
+
     Attributes
     ----------
     go_id: str
