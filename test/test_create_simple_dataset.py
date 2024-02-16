@@ -85,9 +85,11 @@ def main():
     assert annots[0].evidence_code == "IEA"
     assert annots[0].is_manual is False
     assert annots[2].go_id == "GO:0015379"
-    manuals = sw_protein.get_manual_annotations()
-    assert manuals == []
+    assert len(sw_protein.get_manual_annotations()) == 0
     assert len(sw_protein.get_electronic_annotations()) == 3
+    assert len(sw_protein.accessions) == 2
+    assert sw_protein.accessions[0] == 'A0A016QRH0'
+    assert sw_protein.accessions[1] == 'A0A017QRH0'
     assert sw_protein.sequence.startswith("MTRPPTPPASGRQGPDAPVPRVRKPLFSRVSPPQLIALSFALAILVGGVLLSLPITHGAG")
 
     # Test TrEMBL parsing, *fasta file has 15 sequences
