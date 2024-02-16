@@ -140,6 +140,9 @@ def main():
     assert len(dataset.get_descendants("GO:0031955")) == 0
     # Corroborated with goatools
     assert len(dataset.get_descendants("GO:0015645")) == 15
+    assert len(dataset.get_descendants("GO:0031956")) == 2
+    assert len(dataset.get_descendants("GO:0004467")) == 4
+    assert len(dataset.get_descendants("GO:0016405")) == 57
 
     # parents
     # GO:0016405 (CoA-ligase activity), GO:0015645 (fatty acid ligase activity)
