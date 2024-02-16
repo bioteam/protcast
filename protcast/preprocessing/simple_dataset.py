@@ -528,7 +528,26 @@ class SimpleDataset:
                 annots.extend(term.annotations)
         return annots
 
+    @typechecked
+    def get_descendants(self, go_id: str) -> list[str]:
+        """
+        Recursively retrieve all the GO ids of all descendants of a GO term
 
+        Parameters
+        ----------
+        go_id: str
+        GO ID of the starting node
+
+        Returns
+        -------
+        A list of all descendant GO IDs
+        """
+        descendants = []
+        if go_id in self.annotated_dag.go_terms_map:
+            for child_id in self.annotated_dag.go_terms_map[go_id].children:
+                descendants.append(child_id)
+                descendants.extend(self.get_descendants(child_id))
+        return descendants
 
 def md5(file_path: str) -> str:
     """md5

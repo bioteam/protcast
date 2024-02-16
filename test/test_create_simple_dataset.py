@@ -129,18 +129,23 @@ def main():
     assert dataset.get_term("GO:0015645").level == 2 # fatty acid ligase activity
     # Has 2 parents, one of which also has 2 parents
     assert dataset.get_term("GO:0031957").level == 3 # very long-chain fatty acid-CoA ligase activity
-    # assert len(dataset.mf_dag.get_nodes_by_level(0)) == 1
 
     # children
     assert not dataset.get_term("GO:0031957").children
+    assert len(dataset.get_term("GO:0031955").children) == 0
     assert len(dataset.get_term("GO:0015645").children) == 9
+
+    # descendants
+    assert len(dataset.get_descendants("GO:0031957")) == 0
+    assert len(dataset.get_descendants("GO:0031955")) == 0
+    # Corroborated with goatools
+    assert len(dataset.get_descendants("GO:0015645")) == 15
 
     # parents
     # GO:0016405 (CoA-ligase activity), GO:0015645 (fatty acid ligase activity)
     assert len(dataset.get_term("GO:0031957").parents) == 2
     parents = dataset.get_term("GO:0015645").parents
     assert len(parents) == 2
-    # assert str(type(parents[0])) == "<class 'protcast.preprocessing.annotated_goterm.AnnotatedGOTerm'>"
     # The order of the parents is not deterministic
     assert parents[0] == "GO:0016878" or parents[0] == "GO:0140657"
     assert parents[1] == "GO:0016878" or parents[1] == "GO:0140657"

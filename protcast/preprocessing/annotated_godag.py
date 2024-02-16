@@ -1,6 +1,5 @@
 from typeguard import typechecked
 from goatools.obo_parser import GODag
-from goatools.gosubdag.gosubdag import GoSubDag
 from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 
 @typechecked
