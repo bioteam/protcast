@@ -11,7 +11,7 @@ from protcast.preprocessing.protein import Protein
 @typechecked
 def parse_swissprot(
     swissprot_db: Path,
-) -> tuple[list[Annotation], dict[str,Protein]]:
+) -> tuple[list[Annotation], dict[str, Protein]]:
     """parse_swissprot
 
     Example Uniprot file:
@@ -88,7 +88,7 @@ def parse_swissprot(
                 # Collect the Annotation
                 if ref[0] == "GO":
                     go_id = ref[1]
-                    annot = Annotation(protein.id,ref[3].split(":")[0],go_id)
+                    annot = Annotation(protein.id, ref[3].split(":")[0], go_id)
                     annotations.append(annot)
                     # And add it to the Protein
                     protein.add_annotation(annot)
@@ -96,12 +96,8 @@ def parse_swissprot(
             # The protein should not already exist
             proteins[protein.id] = protein
 
-        logging.info(
-            f"Found {len(proteins.keys())} proteins in '{handle.name}'"
-        )
-        logging.info(
-            f"Found {len(annotations)} annotations in '{handle.name}'"
-        )
+        logging.info(f"Found {len(proteins.keys())} proteins in '{handle.name}'")
+        logging.info(f"Found {len(annotations)} annotations in '{handle.name}'")
 
     annotations = []
     proteins = {}

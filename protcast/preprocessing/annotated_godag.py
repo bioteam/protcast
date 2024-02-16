@@ -2,6 +2,7 @@ from typeguard import typechecked
 from goatools.obo_parser import GODag
 from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 
+
 @typechecked
 class AnnotatedGODag:
     """AnnotatedGODag
@@ -35,7 +36,7 @@ class AnnotatedGODag:
         # Recursion error on pickle.dump(): self.goatools = goatools_godag
         goatools_godag = GODag(input_file)
 
-        # Map GO ids to AnnotatedGOTerms 
+        # Map GO ids to AnnotatedGOTerms
         self.go_terms_map = dict()
         for go_id, go_term in goatools_godag.items():
             self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
@@ -51,4 +52,3 @@ class AnnotatedGODag:
 
         # Not required, no recursion error without this
         # goatools_godag = None
-

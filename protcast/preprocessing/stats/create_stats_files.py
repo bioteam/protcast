@@ -1,14 +1,13 @@
 from protcast.preprocessing.simple_dataset import SimpleDataset
-from protcast.globals import CC,BP,MF
+from protcast.globals import CC, BP, MF
 from pathlib import Path
 from typeguard import typechecked
 import pandas as pd
 import plotly.express as px
 
+
 @typechecked
-def create_stats_files(
-    dataset_location: str
-):
+def create_stats_files(dataset_location: str):
     """create_stats_files
     Create SimpleDataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
     mf_go_terms.txt files and histograms of terms, annotations, and levels.
@@ -56,9 +55,15 @@ def create_stats_files(
         f.write(f"Nodes in {CC}: {len(cc_nodes)}\n")
         f.write(f"Nodes in {MF}: {len(mf_nodes)}\n\n")
 
-        f.write(f"Annotations in {BP}: {len(dataset.get_all_annotations(namespace=BP))}\n")
-        f.write(f"Annotations in {CC}: {len(dataset.get_all_annotations(namespace=CC))}\n")
-        f.write(f"Annotations in {MF}: {len(dataset.get_all_annotations(namespace=MF))}\n\n")
+        f.write(
+            f"Annotations in {BP}: {len(dataset.get_all_annotations(namespace=BP))}\n"
+        )
+        f.write(
+            f"Annotations in {CC}: {len(dataset.get_all_annotations(namespace=CC))}\n"
+        )
+        f.write(
+            f"Annotations in {MF}: {len(dataset.get_all_annotations(namespace=MF))}\n\n"
+        )
 
         # Nodes and Annotations by level
         for t in bp_nodes:
@@ -86,24 +91,40 @@ def create_stats_files(
         f.write(CC + "\t" + "\t".join([str(x) for x in cc_node_levels]) + "\n")
         f.write(MF + "\t" + "\t".join([str(x) for x in mf_node_levels]) + "\n\n")
 
-        df = pd.DataFrame({"BP":bp_node_levels, "CC":cc_node_levels, "MF":mf_node_levels})
-        fig = px.bar(df, x=df.index, y=["BP", "CC", "MF"], barmode="stack",
-             title="GO Terms by Level", text_auto=True)
+        df = pd.DataFrame(
+            {"BP": bp_node_levels, "CC": cc_node_levels, "MF": mf_node_levels}
+        )
+        fig = px.bar(
+            df,
+            x=df.index,
+            y=["BP", "CC", "MF"],
+            barmode="stack",
+            title="GO Terms by Level",
+            text_auto=True,
+        )
         fig.update_layout(xaxis_title="Level", yaxis_title="Number of Terms")
         fig.show()
-        fig.write_image(output_dir/"GO_terms_by_level.png")
+        fig.write_image(output_dir / "GO_terms_by_level.png")
 
         f.write("Annotations by level (0-13)\n")
         f.write(BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n")
         f.write(CC + "\t" + "\t".join([str(x) for x in cc_annot_levels]) + "\n")
         f.write(MF + "\t" + "\t".join([str(x) for x in mf_annot_levels]) + "\n")
 
-        df = pd.DataFrame({"BP":bp_annot_levels, "CC":cc_annot_levels, "MF":mf_annot_levels})
-        fig = px.bar(df, x=df.index, y=["BP", "CC", "MF"], barmode="stack",
-             title="Annotations by Level", text_auto=True)
+        df = pd.DataFrame(
+            {"BP": bp_annot_levels, "CC": cc_annot_levels, "MF": mf_annot_levels}
+        )
+        fig = px.bar(
+            df,
+            x=df.index,
+            y=["BP", "CC", "MF"],
+            barmode="stack",
+            title="Annotations by Level",
+            text_auto=True,
+        )
         fig.update_layout(xaxis_title="Level", yaxis_title="Number of Annotations")
         fig.show()
-        fig.write_image(output_dir/"annotations_by_level.png")
+        fig.write_image(output_dir / "annotations_by_level.png")
 
     with open(output_dir / Path("bp_go_terms.tsv"), "w") as f:
         f.write("Term\tName\tLevel\tDepth\tAnnotations\tManual Annotations\n")

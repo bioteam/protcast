@@ -48,7 +48,7 @@ class Protein:
             Protein sequence
         accessions: list
             One or more accessions, including the Protein id
-        
+
         Returns
         -------
         None
@@ -160,7 +160,4 @@ class Protein:
         -------
         List of Annotations
         """
-        return [
-            x for x in self.get_all_annotations() if x.evidence_code == "IEA"
-        ]
-
+        return [x for x in self.get_all_annotations() if x.evidence_code == "IEA"]

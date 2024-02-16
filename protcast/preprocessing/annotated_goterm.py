@@ -40,8 +40,8 @@ class AnnotatedGOTerm:
         None
         """
         # Use goatools GOTerm attributes
-        self.level = goatools_go_term.level # shortest distance from root node
-        self.depth = goatools_go_term.depth # longest distance from root node
+        self.level = goatools_go_term.level  # shortest distance from root node
+        self.depth = goatools_go_term.depth  # longest distance from root node
         self.go_id = goatools_go_term.id
         self.name = goatools_go_term.name
         self.namespace = goatools_go_term.namespace
@@ -115,7 +115,7 @@ class AnnotatedGOTerm:
         for annot in self.get_all_annotations():
             if annot.go_id == go_id:
                 return annot
-            
+
     @typechecked
     def get_all_annotations(self) -> list[Annotation] | None:
         """get_all_annotations

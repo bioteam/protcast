@@ -9,6 +9,7 @@ sys.path.append(str(package_root_directory))
 
 from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
 
+
 def main():
     """"create_query_sequences_files.py
     This script takes:
@@ -43,9 +44,7 @@ def main():
     dataset = SimpleDataset.from_serialized_file(args.dataset)
     logging.info("Done deserializing 'SimpleDataset'...")
 
-    logging.info(
-        "Converting input sequences IDs to their primary accessions..."
-    )
+    logging.info("Converting input sequences IDs to their primary accessions...")
     with open(args.seq_ids, "r") as input_file:
         with open(args.output, "w") as output_seq_file:
             with open(args.output + ".fasta", "w") as output_fasta_file:
@@ -58,9 +57,7 @@ def main():
                         )
                     output_seq_file.write(out_seq + "\n")
                     output_fasta_file.write(f">{out_seq}\n")
-                    output_fasta_file.write(
-                        f"{dataset.proteins[out_seq].sequence}\n"
-                    )
+                    output_fasta_file.write(f"{dataset.proteins[out_seq].sequence}\n")
 
 
 if __name__ == "__main__":

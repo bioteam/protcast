@@ -12,7 +12,7 @@ from tensorflow import keras
 from tensorflow.keras import backend as K
 
 
-class SingleTermModel (keras.callbacks.Callback):
+class SingleTermModel(keras.callbacks.Callback):
     """SingleTerms
     This class ....
 
@@ -34,6 +34,7 @@ class SingleTermModel (keras.callbacks.Callback):
     on_epoch_end:
         ...
     """
+
     def __init__(self):
         super().__init__()
         self.dense1 = keras.layers.Dense(32, activation="relu")

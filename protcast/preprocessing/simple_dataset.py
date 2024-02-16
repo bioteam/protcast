@@ -15,7 +15,7 @@ from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.annotated_godag import AnnotatedGOTerm
 from protcast.preprocessing.protein import Protein
 from protcast.preprocessing.utils import md5
-from protcast.globals import CC,BP,MF
+from protcast.globals import CC, BP, MF
 
 
 class SimpleDataset:
@@ -125,7 +125,7 @@ class SimpleDataset:
 
         self.proteins = dict()
         self.accessions = dict()
-        self.go_terms_not_found= set()
+        self.go_terms_not_found = set()
 
         logger = logging.getLogger()
         if self.verbose:
@@ -144,19 +144,19 @@ class SimpleDataset:
 
         self.add_proteins(uniprot_proteins)
 
-        # Add UniProt Annotations to the annotated DAG 
+        # Add UniProt Annotations to the annotated DAG
         num_added = self.add_annotations(uniprot_annotations)
         logging.info(f"{num_added} Annotations added from '{self.swissprot_path}'")
 
         # Parse annotations from UniProt-GOA *gaf file
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
 
-        # Retrieve Proteins from Trembl for new protein ids from the GOA file 
+        # Retrieve Proteins from Trembl for new protein ids from the GOA file
         new_proteins = self.parse_fasta(new_protein_ids)
         self.add_proteins(new_proteins)
 
-        # Add Annotations found in UniProt-GOA *gaf file 
-        # but first verify that the Protein actually exists 
+        # Add Annotations found in UniProt-GOA *gaf file
+        # but first verify that the Protein actually exists
         num_added = self.add_annotations(gaf_annotations, check_pid=True)
         logging.info(f"Added {num_added} Annotations from '{self.gaf_path}'")
 
@@ -278,7 +278,9 @@ class SimpleDataset:
             if check_pid:
                 # There is no Protein for this Annotation
                 if not self.accessions.get(annot.protein_id):
-                    logging.debug(f"No Protein found for {annot.protein_id} cannot add Annotation")
+                    logging.debug(
+                        f"No Protein found for {annot.protein_id} cannot add Annotation"
+                    )
                     continue
             go_term = self.get_term(annot.go_id)
             if go_term:
@@ -310,17 +312,20 @@ class SimpleDataset:
         gaf_lines = parse_gaf(self.gaf_path)
 
         for rec in tqdm(
-            gaf_lines,
-            desc=f"Processing GOA records from '{str(self.gaf_path)}'"
+            gaf_lines, desc=f"Processing GOA records from '{str(self.gaf_path)}'"
         ):
-            gaf_annotations.append(Annotation(rec['DB_Object_ID'], rec["Evidence"], rec["GO_ID"]))
+            gaf_annotations.append(
+                Annotation(rec["DB_Object_ID"], rec["Evidence"], rec["GO_ID"])
+            )
 
             # If the protein is not in SwissProt then it is a new protein
             if rec["DB_Object_ID"] not in self.accessions:
                 logging.debug(f"New protein id: '{rec['DB_Object_ID']}'")
                 new_protein_ids.add(rec["DB_Object_ID"])
 
-        logging.info(f"Found {len(new_protein_ids)} new protein ids in '{self.gaf_path}'")
+        logging.info(
+            f"Found {len(new_protein_ids)} new protein ids in '{self.gaf_path}'"
+        )
         logging.info(f"Found {len(gaf_annotations)} Annotations in '{self.gaf_path}'")
         return gaf_annotations, new_protein_ids
 
@@ -349,15 +354,17 @@ class SimpleDataset:
             # >tr|A0A1D8RA60|A0A1D8RA60_9ARCH
             pids = record.id.split("|")
             if pids[1] in new_protein_ids:
-                protein = Protein(pids[1], str(record),[pids[1],pids[2]])
+                protein = Protein(pids[1], str(record), [pids[1], pids[2]])
                 logging.debug(f"Created new Protein {pids[1]} using TrEMBL")
                 new_proteins[pids[1]] = protein
             elif pids[2] in new_protein_ids:
-                protein = Protein(pids[2], str(record),[pids[1],pids[2]])
+                protein = Protein(pids[2], str(record), [pids[1], pids[2]])
                 logging.debug(f"Created new Protein {pids[2]} using TrEMBL")
                 new_proteins[pids[2]] = protein
 
-        logging.info(f"Found {len(new_proteins.keys())} Proteins from '{self.gaf_path}' in TrEMBL")
+        logging.info(
+            f"Found {len(new_proteins.keys())} Proteins from '{self.gaf_path}' in TrEMBL"
+        )
         return new_proteins
 
     def add_proteins(self, new_proteins: dict) -> None:

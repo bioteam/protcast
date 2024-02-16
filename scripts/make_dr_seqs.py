@@ -39,12 +39,8 @@ parser.add_argument(
     required=True,
     help="Path to input sequence file",
 )
-parser.add_argument(
-    "--informat", default="swiss", help="Input sequence file format"
-)
-parser.add_argument(
-    "--outformat", default="swiss", help="Output sequence file format"
-)
+parser.add_argument("--informat", default="swiss", help="Input sequence file format")
+parser.add_argument("--outformat", default="swiss", help="Output sequence file format")
 parser.add_argument(
     "-t",
     "--threshold",
@@ -180,10 +176,7 @@ class MakeDRSeqs:
             print("Making distance matrix")
         # Make a dict with the position of each sequence in the matrix:
         # {CATH_HUMAN':0, CYS1_DICDI':1 ....}
-        ids = {
-            seqid: count
-            for count, seqid in enumerate(sorted(mash_dict.keys()))
-        }
+        ids = {seqid: count for count, seqid in enumerate(sorted(mash_dict.keys()))}
         # Create a square matrix filled with 1's since most values are likely 1
         mat = [[1 for col in range(len(ids))] for row in range(len(ids))]
         # Insert non-1 distances into the prepopulated matrix
@@ -247,9 +240,7 @@ class MakeDRSeqs:
         # Have to use "index" since BioPython cannot write Swissprot format
         seq_dict = SeqIO.index(self.seqfile, self.informat)
         if self.verbose:
-            print(
-                "Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences"
-            )
+            print("Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences")
         # For example, input is "data/viruses.dat", output is "viruses-dr.dat"
         self.output = os.path.basename(self.seqfile).split(".")[0] + "-dr.dat"
         with open(self.output, "w") as out:

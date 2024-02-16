@@ -3,10 +3,11 @@ import hashlib
 from pathlib import Path
 from typeguard import typechecked
 
+
 @typechecked
 def md5(file_path: Path) -> str:
     """md5
-    Calculate the md5 hash of a file.
+    Calculate the md5 hash of a file
 
     Parameters
     ----------

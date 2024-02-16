@@ -99,7 +99,7 @@ def main():
     annots = dataset.get_term("GO:0015379").annotations
     assert len(annots) == 1
     assert annots[0].protein_id == "A0A016QRH0"
-    
+
     annots = dataset.get_term("GO:0070469").annotations
     assert len(annots) == 3
     assert annots[0].protein_id == "A0A2U4Z3V2"
@@ -115,20 +115,24 @@ def main():
     assert len(dataset.get_all_annotations()) == 773
 
     # level
-    assert dataset.get_term("GO:0008150").level == 0 # Biological Process
-    assert dataset.get_term("GO:0005575").level == 0 # Cellular Component
-    assert dataset.get_term("GO:0003674").level == 0 # Molecular Function
+    assert dataset.get_term("GO:0008150").level == 0  # Biological Process
+    assert dataset.get_term("GO:0005575").level == 0  # Cellular Component
+    assert dataset.get_term("GO:0003674").level == 0  # Molecular Function
     # Assert levels of get_all_ancestors() of GO:0031957
-    assert dataset.get_term("GO:0003824").level == 1 # catalytic activity
-    assert dataset.get_term("GO:0016874").level == 2 # ligase activity
-    assert dataset.get_term("GO:0016877").level == 3 # ligase activity, forming carbon-sulfur bonds
+    assert dataset.get_term("GO:0003824").level == 1  # catalytic activity
+    assert dataset.get_term("GO:0016874").level == 2  # ligase activity
+    assert (
+        dataset.get_term("GO:0016877").level == 3
+    )  # ligase activity, forming carbon-sulfur bonds
     # The 2 parents of GO:0015645
-    assert dataset.get_term("GO:0140657").level == 1 # ATP-dependent activity
-    assert dataset.get_term("GO:0016878").level == 4 # acid-thiol ligase activity
+    assert dataset.get_term("GO:0140657").level == 1  # ATP-dependent activity
+    assert dataset.get_term("GO:0016878").level == 4  # acid-thiol ligase activity
     # Has 2 parents thus could be 2 or 5
-    assert dataset.get_term("GO:0015645").level == 2 # fatty acid ligase activity
+    assert dataset.get_term("GO:0015645").level == 2  # fatty acid ligase activity
     # Has 2 parents, one of which also has 2 parents
-    assert dataset.get_term("GO:0031957").level == 3 # very long-chain fatty acid-CoA ligase activity
+    assert (
+        dataset.get_term("GO:0031957").level == 3
+    )  # very long-chain fatty acid-CoA ligase activity
 
     # children
     assert not dataset.get_term("GO:0031957").children
@@ -154,9 +158,9 @@ def main():
     assert parents[1] == "GO:0016878" or parents[1] == "GO:0140657"
     assert not dataset.get_term("GO:0003674").parents
     # Roots should have no parents
-    assert not dataset.get_term("GO:0008150").parents # Biological Process
-    assert not dataset.get_term("GO:0005575").parents # Biological Process
-    assert not dataset.get_term("GO:0003674").parents # Biological Process
+    assert not dataset.get_term("GO:0008150").parents  # Biological Process
+    assert not dataset.get_term("GO:0005575").parents  # Biological Process
+    assert not dataset.get_term("GO:0003674").parents  # Biological Process
 
     dataset.to_obo()
     assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
