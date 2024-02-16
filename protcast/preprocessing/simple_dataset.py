@@ -1,12 +1,10 @@
 import os
-import hashlib
 import logging
 import pickle
 
 from pathlib import Path
 from tqdm import tqdm
 from typeguard import typechecked
-# from collections import defaultdict
 from datetime import datetime
 from Bio.SeqIO.FastaIO import FastaIterator
 
@@ -16,6 +14,7 @@ from protcast.preprocessing.annotation import Annotation
 from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.annotated_godag import AnnotatedGOTerm
 from protcast.preprocessing.protein import Protein
+from protcast.preprocessing.utils import md5
 from protcast.globals import CC,BP,MF
 
 
@@ -551,20 +550,3 @@ class SimpleDataset:
                 descendants.append(child_id)
                 descendants.extend(self.get_descendants(child_id))
         return descendants
-
-def md5(file_path: str) -> str:
-    """md5
-    Calculate the md5 hash of a file.
-
-    Args:
-        file_path (str): The path to the file to be hashed.
-
-    Returns:
-        str: The md5 hash as a string.
-    """
-    logging.debug(f"Calculating md5 of {str(file_path)}")
-
-    with open(file_path, "rb") as file:
-        file_hash = hashlib.md5(file.read()).hexdigest()
-
-    return file_hash
