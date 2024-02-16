@@ -6,12 +6,13 @@ from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 @typechecked
 class AnnotatedGODag:
     """AnnotatedGODag
-    This is wrapper around the goatools GODag class which represents the
+    This is wrapper around the goatools GODag parser which represents the
     GO DAGs of GOTerms
 
     Attributes
     ----------
-    None
+    go_terms_map: dict
+        Keys are GO ids, values are AnnotatedGOTerms
 
     Methods
     -------
@@ -44,7 +45,7 @@ class AnnotatedGODag:
         # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
         for go_id, annot_go_term in self.go_terms_map.items():
             # pickle.dump() recursion error if both loops are executed
-            # and the GO term object is stored rather than its id
+            # and the GO term object is appended rather than its id
             for parent in goatools_godag[go_id].parents:
                 annot_go_term.parents.append(parent.id)
             for child in goatools_godag[go_id].children:

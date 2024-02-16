@@ -9,8 +9,24 @@ class AnnotatedGOTerm:
 
     Attributes
     ----------
-    annotations: list or None
+    annotations: list
         List of Annotations
+    level: int
+        Shortest distance to root
+    depth: int
+        Longest distance to root
+    go_id: str
+        GO id
+    name: str
+        Description
+    namespace: str
+        GO namespace
+    is_obsolete: bool
+        Obsolete or not
+    parents: list
+        List of GO ids
+    children: list
+        List of GO ids
 
     Methods
     -------
