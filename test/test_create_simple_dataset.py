@@ -138,7 +138,7 @@ def main():
     # descendants
     assert len(dataset.get_descendants("GO:0031957")) == 0
     assert len(dataset.get_descendants("GO:0031955")) == 0
-    # Corroborated with goatools
+    # Numbers corroborated by goatools
     assert len(dataset.get_descendants("GO:0015645")) == 15
     assert len(dataset.get_descendants("GO:0031956")) == 2
     assert len(dataset.get_descendants("GO:0004467")) == 4
