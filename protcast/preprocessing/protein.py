@@ -65,8 +65,8 @@ class Protein:
 
         Parameters
         ----------
-        annot: Annotation
-            ...
+        annot: obj
+            Annotation
 
         Returns
         -------

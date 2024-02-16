@@ -267,7 +267,8 @@ class SimpleDataset:
 
         Parameters
         ----------
-        ...
+        annotations: list
+            list of Annotations
 
         Returns
         -------
@@ -332,7 +333,7 @@ class SimpleDataset:
         Parameters
         ----------
         new_protein_ids: list
-            ...
+            list of ids
 
         Returns
         -------
@@ -362,7 +363,7 @@ class SimpleDataset:
 
     def add_proteins(self, new_proteins: dict) -> None:
         """add_proteins
-        Adds Proteins and populates the accessions dict.
+        Adds Proteins and populates the accessions dict
 
         Parameters
         ----------
@@ -398,11 +399,13 @@ class SimpleDataset:
         """write_log
         Write a log in the output directory
 
-        Args:
-            None
+        Parameters
+        ----------
+        None
 
-        Returns:
-            None
+        Returns
+        -------
+        None
         """
         os.makedirs(self.output_dir, exist_ok=True)
         formatter = logging.Formatter("%(levelname)s | %(message)s")
@@ -480,7 +483,7 @@ class SimpleDataset:
 
         Returns
         -------
-        AnnotatedGOTerm
+        AnnotatedGOTerm or None
         """
         return self.annotated_dag.go_terms_map.get(go_id)
 
@@ -536,7 +539,7 @@ class SimpleDataset:
         Parameters
         ----------
         go_id: str
-        GO ID of the starting node
+            GO ID of the starting node
 
         Returns
         -------

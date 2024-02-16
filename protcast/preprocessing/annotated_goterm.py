@@ -32,7 +32,7 @@ class AnnotatedGOTerm:
 
         Parameters
         ----------
-        goatools_go_term: GOTerm
+        goatools_go_term: obj
             goatools GOTerm
 
         Returns
@@ -61,8 +61,8 @@ class AnnotatedGOTerm:
 
         Parameters
         ----------
-        annot: Annotation
-            ...
+        annot: obj
+            Annotation
 
         Returns
         -------
@@ -77,6 +77,15 @@ class AnnotatedGOTerm:
     def has_annotation(self, annot: Annotation) -> bool:
         """has_annotation
         Check to see if the AnnotatedGOterm has the input Annotation
+
+        Parameters
+        ----------
+        annot: ojb
+            Annotation
+
+        Returns
+        -------
+        Boolean
         """
         if not self.annotations:
             return False

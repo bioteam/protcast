@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # Initialize DAG with descendants
     gosubdag = GoSubDag(descendants, godag)
     goploter = GoSubDagPlot(gosubdag)
-    # Plot descendants
+    # Plot ancestors and descendants
     goploter.plt_dag("descendants-test.png")
 
     assert os.path.isfile(Path("descendants-test.png"))

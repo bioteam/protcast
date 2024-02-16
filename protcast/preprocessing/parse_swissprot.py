@@ -60,18 +60,13 @@ def parse_swissprot(
 
     Parameters
     ----------
-    AnnotatedGODag: object
-        ...
     swissprot_db: Path
         Path to Swissprot file
 
     Returns
     -------
-    annotations: list of all Annotations
+    annotations: list of Annotations
     proteins: dict with keys of Swissprot accessions and values of Proteins
-    go_terms_not_found: list of GO terms, usually obsolete
-    accessions: dict with keys of Swissprot accessions and secondary accessions
-                and values of Swissprot accessions
     """
 
     def parse(handle):
