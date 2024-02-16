@@ -68,7 +68,7 @@ class SimpleDataset:
         Adds one or more Proteins
     get_annotatations_from_gaf:
         Get all Annotations from a *gaf file
-    parse:
+    parse_fasta:
         Inner function, parse TrEMBL
     create_annotation_files
         ...
@@ -354,11 +354,11 @@ class SimpleDataset:
             # >tr|A0A1D8RA60|A0A1D8RA60_9ARCH
             pids = record.id.split("|")
             if pids[1] in new_protein_ids:
-                protein = Protein(pids[1], str(record), [pids[1], pids[2]])
+                protein = Protein(pids[1], str(record.seq), [pids[1], pids[2]])
                 logging.debug(f"Created new Protein {pids[1]} using TrEMBL")
                 new_proteins[pids[1]] = protein
             elif pids[2] in new_protein_ids:
-                protein = Protein(pids[2], str(record), [pids[1], pids[2]])
+                protein = Protein(pids[2], str(record.seq), [pids[1], pids[2]])
                 logging.debug(f"Created new Protein {pids[2]} using TrEMBL")
                 new_proteins[pids[2]] = protein
 

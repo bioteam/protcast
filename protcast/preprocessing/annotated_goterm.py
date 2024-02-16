@@ -23,9 +23,9 @@ class AnnotatedGOTerm:
         GO namespace
     is_obsolete: bool
         Obsolete or not
-    parents: list
+    parents: list[str]
         List of GO ids
-    children: list
+    children: list[str]
         List of GO ids
 
     Methods

@@ -88,12 +88,12 @@ def main():
     manuals = sw_protein.get_manual_annotations()
     assert manuals == []
     assert len(sw_protein.get_electronic_annotations()) == 3
+    assert sw_protein.sequence.startswith("MTRPPTPPASGRQGPDAPVPRVRKPLFSRVSPPQLIALSFALAILVGGVLLSLPITHGAG")
 
     # Test TrEMBL parsing, *fasta file has 15 sequences
     trembl_protein = dataset.proteins.get("M5BGM1")
-    annots = trembl_protein.get_all_annotations()
-    assert len(annots) == 0
-    trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
+    assert len(trembl_protein.get_all_annotations()) == 0
+    assert trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
 
     # Test association of AnnotatedGOTerms and Annotations
     annots = dataset.get_term("GO:0015379").annotations
