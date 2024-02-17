@@ -94,7 +94,7 @@ def main():
 
     # Test TrEMBL parsing, *fasta file has 15 sequences
     trembl_protein = dataset.proteins.get("M5BGM1")
-    assert len(trembl_protein.get_all_annotations()) == 0
+    assert not trembl_protein.get_all_annotations()
     assert trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
 
     # Test association of AnnotatedGOTerms and Annotations
