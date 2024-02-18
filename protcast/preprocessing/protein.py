@@ -72,7 +72,8 @@ class Protein:
         -------
         None
         """
-        self.annotations.append(annot)
+        if not self.has_annotation(annot):
+            self.annotations.append(annot)
 
     @typechecked
     def has_annotation(self, annot: Annotation) -> bool:
@@ -81,20 +82,20 @@ class Protein:
         """
         for protein_annot in self.get_all_annotations():
             if (
-                protein_annot.go_term_id == annot.go_term_id
+                protein_annot.go_id == annot.go_id
                 and protein_annot.evidence_code == annot.evidence_code
             ):
                 return True
         return False
 
     @typechecked
-    def get_annotation(self, go_term_id: str) -> Annotation | None:
+    def get_annotation(self, go_id: str) -> Annotation | None:
         """get_annotation
         Get an Annotation from a Protein given a GO term id
 
         Parameters
         ----------
-        go_term_id: str
+        go_id: str
             GO term id
 
         Returns
@@ -102,7 +103,7 @@ class Protein:
         Annotation or None
         """
         for annot in self.get_all_annotations():
-            if annot.go_term_id == go_term_id:
+            if annot.go_id == go_id:
                 return annot
 
     @typechecked
@@ -146,7 +147,7 @@ class Protein:
         -------
         List of GO ids
         """
-        return [x.go_term_id for x in self.get_all_annotations()]
+        return [x.go_id for x in self.get_all_annotations()]
 
     def get_electronic_annotations(self) -> list[Annotation]:
         """get_electronic_annotations

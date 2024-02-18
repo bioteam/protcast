@@ -98,7 +98,7 @@ This class represents a GO term. Its attributes include *id*, *namespace*,
 object also contains *is_obsolete* and *primary*.
 
 ## Annotation
-This class represents an annotation and its attributes including *go_term_id*,
+This class represents an annotation and its attributes including *go_id*,
 *protein_id*, and *evidence_code*. The object also specifies *is_manual* 
 (evidence code) and *has_obsolete* (GO term).
 

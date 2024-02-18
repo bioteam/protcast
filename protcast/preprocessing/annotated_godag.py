@@ -52,4 +52,4 @@ class AnnotatedGODag:
                 annot_go_term.children.append(child.id)
 
         # Not required, no recursion error without this
-        # goatools_godag = None
+        goatools_godag = None

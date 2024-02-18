@@ -453,8 +453,8 @@ class SimpleDataset:
             obo_file.write(
                 "format-version: 1.2\ndefault-namespace: gene_ontology\nontology: go\n\n"
             )
-            for go_term_id in all_go_terms.keys():
-                term = self.get_term(go_term_id)
+            for go_id in all_go_terms.keys():
+                term = self.get_term(go_id)
                 if term:
                     obo_file.write(
                         "[Term]"
@@ -471,7 +471,7 @@ class SimpleDataset:
                     )
                     for parent in term.parents:
                         obo_file.write("is_a: " + parent + "\n")
-                for protein_id in all_go_terms[go_term_id]:
+                for protein_id in all_go_terms[go_id]:
                     obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")
 
