@@ -134,7 +134,7 @@ class SimpleDataset:
 
         # Create AnnotatedGODag
         self.annotated_dag: AnnotatedGODag = AnnotatedGODag(self.ontology_path)
-        # Parse proteins from SwissProt
+        # Get proteins and annotations from SwissProt
         (
             uniprot_annotations,
             uniprot_proteins,
@@ -146,7 +146,7 @@ class SimpleDataset:
         num_added = self.add_annotations(uniprot_annotations)
         logging.info(f"{num_added} Annotations added from '{self.swissprot_path}'")
 
-        # Parse annotations from UniProt-GOA *gaf file
+        # Get Annotations from UniProt-GOA *gaf file
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
 
         # Retrieve Proteins from Trembl for new protein ids from the GOA file
@@ -154,7 +154,7 @@ class SimpleDataset:
         self.add_proteins(new_proteins)
 
         # Add Annotations found in UniProt-GOA *gaf file
-        # but first verify that the Protein actually exists
+        # but verify that we have the Protein
         num_added = self.add_annotations(gaf_annotations, check_pid=True)
         logging.info(f"Added {num_added} Annotations from '{self.gaf_path}'")
 
