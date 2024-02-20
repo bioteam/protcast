@@ -164,8 +164,9 @@ class SimpleDataset:
         logging.info(f"GOA: '{self.gaf_path}'")
         logging.info(f"UniProt: '{self.swissprot_path}'")
         logging.info(f"TrEMBL: '{self.trembl_path}'")
+        logging.info(f"Started at: {self.created_at}")
+        logging.info(f"Completed at: {datetime.now()}")
         logging.info(f"Saved SimpleDataset: '{self.output_dir}'")
-        logging.info(f"Created at: '{self.created_at}'")
         logging.debug(f"GO terms not found: '{self.go_terms_not_found}'")
 
     @typechecked
