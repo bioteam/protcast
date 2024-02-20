@@ -151,7 +151,7 @@ class Protein:
 
     def get_electronic_annotations(self) -> list[Annotation]:
         """get_electronic_annotations
-        Get all electronic Annotations for a Protein (evidence code is IEA)
+        Get all electronic Annotations for a Protein (evidence code IEA)
 
         Parameters
         ----------
