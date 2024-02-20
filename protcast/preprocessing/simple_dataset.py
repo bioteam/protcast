@@ -72,8 +72,10 @@ class SimpleDataset:
         Parse TrEMBL, return list of Proteins
     create_annotation_files:
         ...
-    remove_protein:
-        ...
+    get_descendants: str
+        Return list of descendant ids
+    remove_protein: str
+        Remove Protein and accession
     to_obo:
         Write an OBO Flat file
     """
@@ -540,6 +542,10 @@ class SimpleDataset:
         """
         Recursively retrieve all the GO ids of all descendants of a GO term
 
+        Each time a recursive function calls itself, it creates a new stack frame. 
+        This stack frame acts as a separate environment with its own local variables, 
+        including its own copy of the descendants list.
+        
         Parameters
         ----------
         go_id: str

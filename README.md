@@ -74,9 +74,8 @@ is obtained:
 - GO term id
 - GO term namespaces: biological process (BP), cellular component (CC),
   molecular funcion (MF)
-- GO term parents
-- GO term is obsolete. Check for the presence of the line starting with
-  "is obsolete:"
+- GO term parents and children
+- GO term is obsolete.
 
 ## Parsing SwissProt
 
@@ -92,7 +91,7 @@ python3 preprocessing/parse_swissprot.py \
 
 # Classes
 
-## GOTerm 
+## Annotated_GOTerm 
 This class represents a GO term. Its attributes include *id*, *namespace*,
 *name*, its *level* in the DAG, *parents*, *ancestors*, and *annotations*. The 
 object also contains *is_obsolete* and *primary*.
@@ -102,14 +101,9 @@ This class represents an annotation and its attributes including *go_id*,
 *protein_id*, and *evidence_code*. The object also specifies *is_manual* 
 (evidence code) and *has_obsolete* (GO term).
 
-## GODAG 
-This class represents a typical OBO ontology, a directed acyclic graph. Its
-attributes include *nodes* (GOTerms) and *name*.
-
-## Ontology
-This class reads input files and creates a GODAG for each of the GO namespaces.
-Its attributes include *bp_dag*, *cc_dag*, *mf_dag*, and *terms*, a dict where
-the values are GOTerms.
+## Annotated_GODAG 
+This class represents an OBO ontology plus associated Annotations. It is a directed 
+acyclic graph. Its attributes include *nodes* (GOTerms) and *name*.
 
 ## Protein
 This class represent a protein, including its *id*, *sequence*, and *annotations*. 
@@ -133,29 +127,15 @@ The following digram describes the sources:
 
 ├── doc/
 
-├── preprocessing/
-
 ├── test/
 
-├── training-scripts/
-
-├── utility-scripts/
+├── scripts/
 
 ## `protcast`
 
-`protcast/model`
+### `protcast/model`
 
-`protcast/preprocessing`
-
-`protcast/stats`
-
-Scripts that can provide statistics on datasets.
-
-## `doc`
-
-Schema images.
-
-## `preprocessing`
+### `protcast/preprocessing`
 Contains the code that parses the raw data, builds the python
 structures to represent the inputs for the model and converts them into a
 format that can be used to feed the model for training. More specifically:
@@ -188,25 +168,31 @@ prediction. The preprocessing consists of:
     CTriad will be used.
   - Split of the dataset into training/validation/test datasets.
 
+#### `protcast/preprocessing/stats`
+
+Scripts that can provide statistics on datasets.
+
+## `doc`
+
+Schema images.
+
 ## `test`
 Simple test scripts. `test/data/` directory contains an `.obo` file and small, 
 representative test files. For example:
 
 ```
 cd test/
-python3 test_build_ontology.py
+python3 test_swissprot_parser.py
 python3 test_gaf_parser.py
 python3 test_create_simple_dataset.py
+python3 test_goatools.py
 ```
 
-## `training-scripts`
+## `scripts`
 Scripts to build Keras models.
 
 - Feature vector name: There are multiple feature vectors that can be
   generated from a protein sequence such as ctriad, PAAC or SPMAP.
-
-## `utility-scripts`
-Useful scripts.
 
 ### `get_simple_dataset_files.sh`
 Download the 4 input files necessary to build a SimpleDataset:
