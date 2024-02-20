@@ -15,7 +15,6 @@ from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.annotated_godag import AnnotatedGOTerm
 from protcast.preprocessing.protein import Protein
 from protcast.preprocessing.utils import md5
-from protcast.globals import CC, BP, MF
 
 
 class SimpleDataset:
@@ -70,8 +69,6 @@ class SimpleDataset:
         Get all Annotations from a *gaf file
     parse_fasta: list
         Parse TrEMBL, return list of Proteins
-    create_annotation_files:
-        ...
     get_descendants: str
         Return list of descendant ids
     remove_protein: str
@@ -204,62 +201,6 @@ class SimpleDataset:
         with open(file, "rb") as f:
             ds = pickle.load(f)
         return ds
-
-    def create_annotation_files(
-        self, output_path: str, include_electronic: bool = False
-    ):
-        """create_annotation_files
-        Creates *tsv files for all the proteins in each namespace and a
-        text file with the ids of all missing proteins.
-
-        Parameters
-        ----------
-        output_path: str
-            ...
-        include_electronic: bool
-            Default is False
-
-        Returns
-        -------
-        None
-        """
-        bp_output_path = output_path + "_bpo.tsv"
-        cc_output_path = output_path + "_cco.tsv"
-        mf_output_path = output_path + "_mfo.tsv"
-        missing_proteins_path = output_path + "_missing_proteins.txt"
-
-        bp_file = open(bp_output_path, "w")
-        cc_file = open(cc_output_path, "w")
-        mf_file = open(mf_output_path, "w")
-        missing_proteins_file = open(missing_proteins_path, "w")
-
-        namespace_file_map = {
-            BP: bp_file,
-            CC: cc_file,
-            MF: mf_file,
-        }
-
-        for go_id in self.annotated_dag.parent.keys():
-            go_term = self.annotated_dag.get_term(go_id)
-            for annot in go_term.get_all_annotations():
-                namespace_file_map[go_term.namespace].write(
-                    annot.protein_id
-                    + "\t"
-                    + annot.go_id
-                    + "\t"
-                    + annot.evidence_code
-                    + "\t"
-                    + annot.is_manual
-                    + "\n"
-                )
-
-        for protein in self.missing_proteins:
-            missing_proteins_file.write(protein + "\n")
-
-        bp_file.close()
-        cc_file.close()
-        mf_file.close()
-        missing_proteins_file.close()
 
     def add_annotations(self, annotations, check_pid=False) -> int:
         """add_annotations
