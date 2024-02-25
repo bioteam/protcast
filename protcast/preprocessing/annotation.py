@@ -155,7 +155,7 @@ class Annotation:
             self.is_manual = True
         else:
             logging.error(
-                f"Invalid evidence code: '{self.evidence_code}' (protein {self.protein_id} "
+                f"Invalid evidence code: '{self.evidence_code}' (protein {self.protein_id}, "
                 f"GO term {self.go_id})"
             )
             exit(1)
