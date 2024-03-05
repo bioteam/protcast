@@ -101,7 +101,7 @@ class Annotation:
         go_id: str,
     ) -> None:
         """__init__
-        Initialize Annotation
+        Instantiate Annotation
 
         Parameters
         ----------
