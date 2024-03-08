@@ -5,7 +5,7 @@ from typeguard import typechecked
 
 
 @typechecked
-def get_ifeatpro_features(feature: str, seqs: dict) -> list[list[float]]:
+def get_ifeatpro_features(feature: str, seqs: dict[str, str]) -> list[list[float]]:
     """get_ifeatpro_features
     Returns a list of arrays or "feature vectors" using ifeatpro
 

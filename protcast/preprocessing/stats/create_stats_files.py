@@ -23,13 +23,15 @@ def create_stats_files(dataset_location: str):
     """
     dataset = SimpleDataset.from_serialized_file(dataset_location)
     output_dir = Path(dataset_location).parent
+    # No terms at level 14
+    num_levels = 14
 
-    bp_node_levels = [0] * 14
-    cc_node_levels = [0] * 14
-    mf_node_levels = [0] * 14
-    bp_annot_levels = [0] * 14
-    cc_annot_levels = [0] * 14
-    mf_annot_levels = [0] * 14
+    bp_node_levels = [0] * num_levels
+    cc_node_levels = [0] * num_levels
+    mf_node_levels = [0] * num_levels
+    bp_annot_levels = [0] * num_levels
+    cc_annot_levels = [0] * num_levels
+    mf_annot_levels = [0] * num_levels
 
     with open(output_dir / Path("SimpleDataset_statistics.txt"), "w") as f:
         f.write(f"Creation Time: {dataset.created_at}\n")
