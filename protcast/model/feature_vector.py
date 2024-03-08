@@ -7,7 +7,8 @@ from typeguard import typechecked
 @typechecked
 def get_ifeatpro_features(feature: str, seqs: dict[str, str]) -> list[list[float]]:
     """get_ifeatpro_features
-    Returns a list of arrays or "feature vectors" using ifeatpro
+    Returns a list of arrays or "feature vectors" using ifeatpro. ifeatpro
+    creates a CSV file given a fasta file.
 
     Parameters
     ----------
