@@ -26,23 +26,29 @@ if __name__ == "__main__":
     for alignment in blast_record.alignments:
         for hsp in alignment.hsps:
             percent_identity = float(hsp.identities / len(hsp.query) * 100)
-            # Skip 100% identity, could be the same protein 
+            # Skip 100% identity, could be the same protein
             if percent_identity < 100 and percent_identity >= args.min_identity:
                 # ref|WP_021461111.1|
                 pid = alignment.hit_id.split("|")[1]
                 # https://rest.uniprot.org/uniprotkb/search?query=WP_021461111
                 response = requests.get(uniprot_url, params={"query": pid})
                 result = json.loads(response.text)["results"]
-                # UniProt may not use the id used by NCBI
+                # UniProt may not have the id used by NCBI
                 if len(result) > 0:
                     """
                     >>> result[0]["uniProtKBCrossReferences"][4]
-                    {'database': 'GO', 'id': 'GO:0005737', 'properties': 
-                    [{'key': 'GoTerm', 'value': 'C:cytoplasm'}, 
+                    {'database': 'GO', 'id': 'GO:0005737', 'properties':
+                    [{'key': 'GoTerm', 'value': 'C:cytoplasm'},
                     {'key': 'GoEvidenceType', 'value': 'IEA:UniProtKB-SubCell'}]}
                     """
-                    go_ids = [x["id"] for x in result[0]["uniProtKBCrossReferences"] if x["database"] == "GO"]
+                    go_ids = [
+                        x["id"]
+                        for x in result[0]["uniProtKBCrossReferences"]
+                        if x["database"] == "GO"
+                    ]
                     acc = result[0]["primaryAccession"]
-                    print(f"NCBI id: {pid} UniProt primary accession: {acc} GO terms: {go_ids}")
+                    print(
+                        f"NCBI id: {pid} UniProt primary accession: {acc} GO terms: {go_ids}"
+                    )
                 else:
                     print(f"No match in UniProt for {pid}")
