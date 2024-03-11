@@ -36,8 +36,9 @@ if __name__ == "__main__":
                 # UniProt may not use the id used by NCBI
                 if len(result) > 0:
                     """
-                    result[0]["uniProtKBCrossReferences"][4]
-                    {'database': 'GO', 'id': 'GO:0005737', 'properties': [{'key': 'GoTerm', 'value': 'C:cytoplasm'}, 
+                    >>> result[0]["uniProtKBCrossReferences"][4]
+                    {'database': 'GO', 'id': 'GO:0005737', 'properties': 
+                    [{'key': 'GoTerm', 'value': 'C:cytoplasm'}, 
                     {'key': 'GoEvidenceType', 'value': 'IEA:UniProtKB-SubCell'}]}
                     """
                     go_ids = [x["id"] for x in result[0]["uniProtKBCrossReferences"] if x["database"] == "GO"]
