@@ -32,7 +32,8 @@ if __name__ == "__main__":
                 pid = alignment.hit_id.split("|")[1]
                 # https://rest.uniprot.org/uniprotkb/search?query=WP_021461111
                 response = requests.get(uniprot_url, params={"query": pid})
-                result = json.loads(response.text)["results"]   
+                result = json.loads(response.text)["results"]
+                # UniProt may not use the id used by NCBI
                 if len(result) > 0:
                     """
                     result[0]["uniProtKBCrossReferences"][4]
@@ -41,4 +42,6 @@ if __name__ == "__main__":
                     """
                     go_ids = [x["id"] for x in result[0]["uniProtKBCrossReferences"] if x["database"] == "GO"]
                     acc = result[0]["primaryAccession"]
-                    print(f"Id: {acc} {go_ids}")
+                    print(f"NCBI id: {pid} UniProt primary accession: {acc} GO terms: {go_ids}")
+                else:
+                    print(f"No match in UniProt for {pid}")
