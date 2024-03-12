@@ -10,8 +10,14 @@ from Bio import Entrez
 @typechecked
 class BlastToGo:
     """BlastToGo
-    This clast takes a protein sequence and performs a protein Blast search
-    against a NCBI database, returning proteins with at least min_identity percent similarity.
+    This class takes a protein sequence and performs a Blast search
+    using the NCBI Blast API, returning a protein with at least min_identity 
+    percent similarity. Example: 
+
+    from blast_to_go import BlastToGo
+    seq = "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVV"
+    app = BlastToGo(verbose=True)
+    go_ids = app.blast_to_go(seq)
 
     Attributes
     ----------
@@ -60,7 +66,7 @@ class BlastToGo:
         self.program = program
         self.alignments = alignments
         self.verbose = verbose
-        self.uniprot_url = "https://rest.uniprot.org/uniprotkb/search"
+        self.uniprot_api = "https://rest.uniprot.org/uniprotkb/search"
 
     def blast_to_go(self, seq: str) -> list[str]:
         """blast_to_go
@@ -135,7 +141,7 @@ class BlastToGo:
         List of GO ids
         """
         for pid in pids:
-            response = requests.get(self.uniprot_url, params={"query": pid})
+            response = requests.get(self.uniprot_api, params={"query": pid})
             result = json.loads(response.text)["results"]
             # UniProt may not have the id provided by NCBI Blast
             if len(result) > 0:
