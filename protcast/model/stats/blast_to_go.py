@@ -38,11 +38,11 @@ class BlastToGo:
 
     def __init__(
         self,
-        e_value: float = 0.001,
-        program: str = "blastp",
-        min_identity: float = 95.0,
         database: str = "nr",
-        alignments: int = 10,
+        program: str = "blastp",
+        e_value: float = 0.001,
+        min_identity: float = 95.0,
+        alignments: int = 100,
         verbose: bool = False
     ) -> None:
         """__init__
