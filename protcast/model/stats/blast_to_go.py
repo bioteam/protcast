@@ -15,14 +15,14 @@ class BlastToGo:
 
     Attributes
     ----------
-    protein_seq (str): 
-        Path to the protein FASTA file.
-    database (str): 
-        Name of the NCBI protein database (e.g., "nr").
-    e_value (float): 
-        E-value threshold for significant alignments.
-    min_identity (float): 
-        Minimum percent sequence identity for hits.
+    protein_seq: str
+        Path to the protein FASTA file
+    database: str
+        Name of the NCBI protein database (e.g., "nr")
+    e_value: float
+        E-value threshold for significant alignments
+    min_identity: float
+        Minimum percent sequence identity for hits
 
     Methods
     -------
@@ -64,13 +64,16 @@ class BlastToGo:
 
     def blast_to_go(self, seq: str) -> list[str]:
         """blast_to_go
-
+        Wrapper method for Blast API and Uniprot API queries
+        
         Parameters
         ----------
+        seq: str
+            Protein sequence
 
         Returns
         -------
-        List of protein ids
+        List of GO ids
         """
         pids = self.web_blast(seq)
         go_ids = self.get_go_from_uniprot(pids)
@@ -82,6 +85,8 @@ class BlastToGo:
 
         Parameters
         ----------
+        seq: str
+            Protein sequence
 
         Returns
         -------
@@ -122,7 +127,9 @@ class BlastToGo:
 
         Parameters
         ----------
-
+        pids: list
+            List of protein ids
+        
         Returns
         -------
         List of GO ids
