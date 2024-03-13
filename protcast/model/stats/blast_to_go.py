@@ -1,22 +1,21 @@
 import json
 import logging
-import os
 import requests
 from typeguard import typechecked
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
-from Bio import Entrez
 
 @typechecked
 class BlastToGo:
     """BlastToGo
     This class takes a protein sequence and performs a Blast search
-    using the NCBI Blast API, returning a protein with at least min_identity 
-    percent similarity. Example: 
+    using the NCBI Blast API, returning proteins with at least min_identity 
+    percent similarity to the query. Those ids are used to query the UniProt
+    API to get records which contain GO term ids. Example: 
 
     from blast_to_go import BlastToGo
     seq = "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVV"
-    app = BlastToGo(verbose=True)
+    app = BlastToGo()
     go_ids = app.blast_to_go(seq)
 
     Attributes
@@ -29,6 +28,8 @@ class BlastToGo:
         E-value threshold for significant alignments
     min_identity: float
         Minimum percent sequence identity for hits
+    alignments: int
+        Number of alignments to retrieve
 
     Methods
     -------
@@ -98,9 +99,6 @@ class BlastToGo:
         -------
         List of protein ids
         """
-        Entrez.email = "briano@bioteam.net"
-        Entrez.NCBI_API_KEY = os.getenv('NCBI_API_KEY')
-
         pids = list()
         # Run BLAST search using NCBIWWW
         blast_results = NCBIWWW.qblast(
@@ -128,7 +126,9 @@ class BlastToGo:
     @typechecked
     def get_go_from_uniprot(self, pids: list[str]) -> list[str]:
         """get_go_from_uniprot
-
+        Return all GO term ids for a single protein using the UniProt API. 
+        The entire record as JSON, for example:
+        
         https://rest.uniprot.org/uniprotkb/search?query=WP_021461111
 
         Parameters
@@ -143,7 +143,7 @@ class BlastToGo:
         for pid in pids:
             response = requests.get(self.uniprot_api, params={"query": pid})
             result = json.loads(response.text)["results"]
-            # UniProt may not have the id provided by NCBI Blast
+            # If UniProt has the id provided by NCBI Blast
             if len(result) > 0:
                 """
                 >>> result[0]["uniProtKBCrossReferences"][4]
