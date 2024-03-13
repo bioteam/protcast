@@ -68,20 +68,13 @@ and save the ontology into a file which can then be deserialized using
 `load_ontology()`.
 
 ### Ontology
-The GO terms are generated from parsing an `.obo` file and the following data
-is obtained:
-
-- GO term id
-- GO term namespaces: biological process (BP), cellular component (CC),
-  molecular funcion (MF)
-- GO term parents and children
-- GO term is obsolete.
+GO file parsing is done by the [goatools](https://github.com/tanghaibao/goatools) package.
 
 ## Parsing SwissProt
 
 `preprocessing/parse_swissprot.py` takes a GO ontology file and a Swissprot 
 database file and returns the proteins, the GO terms that are not found in 
-Swissprot, and the protein accessions (ids). For example:
+Swissprot, and the protein accessions. For example:
 
 ```
 python3 preprocessing/parse_swissprot.py \
