@@ -118,33 +118,31 @@ The following digram describes the sources:
 
 ├- protcast/
 
-├── doc/
+The package directory. 
 
-├── test/
+├─ doc/
 
-├── scripts/
+├─ test/
+
+├─ scripts/
 
 ## `protcast`
 
 ### `protcast/model`
 
+
+### `protcast/model/stats`
+
+
 ### `protcast/preprocessing`
-Contains the code that parses the raw data, builds the python
-structures to represent the inputs for the model and converts them into a
-format that can be used to feed the model for training. More specifically:
+Contains the classes that parses the raw data, builds the python
+objects to represent the inputs to the models and converts them into a
+format that can be used for training. More specifically:
 
 - It contains the code that parses the GO database and creates a DAG for each
 of the GO categories.
 
-For example:
 
-```
-python3 preprocessing/stats/create_dataset_stats.py \
-  data/dataset/dataset.bin \
-  -d data/dataset/stats/ -w
-``` 
-
-Contains the scripts to generate the input SimpleDataset.
 
 Pre-processing converts the data from the source databases (UniprotKB/GO/GOA)
 into the proper format to be fed to model for training, evaluation and
@@ -182,23 +180,50 @@ python3 test_goatools.py
 ```
 
 ## `scripts`
-Scripts to build Keras models.
+Scripts to preprocess and then build Keras models.
 
-- Feature vector name: There are multiple feature vectors that can be
-  generated from a protein sequence such as ctriad, PAAC or SPMAP.
+### `create_dataset_stats.py`
 
-### `get_simple_dataset_files.sh`
-Download the 4 input files necessary to build a SimpleDataset:
+### `create_query_sequences_files.py`
+
+### `create_simple_dataset.py`
+For example:
 
 ```
-./get_simple_dataset_files.sh
-```
+python3 scripts/create_simple_dataset.py \
+  data/dataset/dataset.bin \
+  -d data/dataset/stats/ -w
+``` 
+
+### `filter_fasta_from_goa.py`
+
+### `repeat_slurm_job.py`
+
+### `simpledataset2obo.py`
+
+### `swissprot2csv.py`
 
 ### `make_dr_seqs.py`
 Runs the `mash` application to do pairwise protein sequence comparisons using kmers, then runs 
 DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related 
 sequences that are removed to create a "decreased redundancy" (dr) file. If the input file
 is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
+
+
+- Feature vector name: There are multiple feature vectors that can be
+  generated from a protein sequence such as ctriad, PAAC or SPMAP.
+
+### `scripts/sh`
+
+#### `get_simple_dataset_files.sh`
+Download the 4 input files necessary to build a SimpleDataset:
+
+```
+./get_simple_dataset_files.sh
+```
+
+#### `create_simple_dataset.sh`
+
 
 # Environment
 
