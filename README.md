@@ -12,25 +12,23 @@ SimpleDataset has ~0.5M proteins and ~3M GO annotations. The SimpleDataset is us
 FeatureSpace for processing and subsequent model-building by Keras.
 
 ### Data Sources
-Input files can be downloaded using `utility-scripts/get_simple_dataset_files.sh`. The
+All the input files can be downloaded using `scripts/sh/get_simple_dataset_files.sh`. The
 largest file comes from TrEMBL and it's ~55GB in size.
 
 #### UniProt/Swiss-Prot
 A manually curated, high-quality protein database made by extensive annotation and expert review. The
-latest version of the database can be found
-[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
+latest version of the database can be found at 
+[ftp.uniprot.org](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
 
 #### UniProtKB/TrEMBL 
 The UniProt/TrEMBL database is used to retrieve the AA sequences of proteins
 that are annotated in the UniProt-GOA database. Due to its size it is not
-tracked in this repository. The latest release of the database can be found
-[here](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz)
+tracked in this repository. The latest release of the database can be found at 
+[ftp.uniprot.org](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz)
 and it was used to obtain the sequences found in UniProt-GOA database.
 
 #### Gene Ontology (GO)
-The Gene Ontology databases `(.obo)` are downloaded from:
-
-https://release.geneontology.org
+The Gene Ontology databases `(.obo)` are downloaded from [release.geneontology.org](https://release.geneontology.org).
 
 #### UniProt-GOA
 UniProt-GOA is a database that links the Gene Ontology database described
