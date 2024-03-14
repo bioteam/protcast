@@ -6,20 +6,18 @@ import logging
 import subprocess
 import tempfile
 
+from io import StringIO
 from Bio import SeqIO
 from collections import defaultdict
-from pathlib import Path
 from shutil import which
 from sklearn.cluster import DBSCAN
-
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
 
 """
 Run the `mash` application to do pairwise protein sequence comparisons using kmers, and run 
 DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related 
 sequences that are removed to create a "decreased redundancy" ("dr") file. If the input file
 is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
+
 
 Example using a file from Uniprot:
 
@@ -184,7 +182,7 @@ class MakeDRSeqs:
             for seq2 in mash_dict[seq1].keys():
                 mat[count][ids[seq2]] = mash_dict[seq1][seq2]
         if self.verbose:
-            print("Completed distance matrix")
+            print(f"Created square distance matrix of length {len(ids)}")
         return mat, ids
 
     def find_dbscan_clusters(self, mat, ids):
@@ -221,7 +219,7 @@ class MakeDRSeqs:
             for k in clusters.keys():
                 print(f"Cluster {k} ({len(clusters[k])}): {clusters[k]}")
                 for seqid in clusters[k]:
-                    print(self.seqs[seqid].description)
+                    print("\t" + self.seqs[seqid].description)
         return clusters
 
     def get_similar_seqs(self, clusters):
@@ -237,23 +235,41 @@ class MakeDRSeqs:
         return similar_seqs
 
     def write_seqs(self, similar_seqs):
-        # Have to use "index" since BioPython cannot write Swissprot format
+        format_map = {"swiss": "dat", "fasta": "fa"}
+        # Have to use index() since BioPython cannot write Swissprot format
         seq_dict = SeqIO.index(self.seqfile, self.informat)
         if self.verbose:
-            print("Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences")
+            print(f"Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences")
         # For example, input is "data/viruses.dat", output is "viruses-dr.dat"
-        self.output = os.path.basename(self.seqfile).split(".")[0] + "-dr.dat"
+        self.output = (
+            os.path.basename(self.seqfile).split(".")[0]
+            + "-dr."
+            + format_map[self.outformat]
+        )
         with open(self.output, "w") as out:
             for seqid in seq_dict:
+                seqstr = seq_dict.get_raw(seqid).decode()
                 if seqid not in similar_seqs:
-                    out.write(seq_dict.get_raw(seqid).decode())
+                    if self.outformat != "swiss":
+                        seqstr = self.swiss_to_format(seqstr)
+                    out.write(seqstr)
+
         if self.verbose:
             print(
-                "Output file '{0}' has {1} sequences".format(
-                    self.output,
-                    (len(seq_dict.keys()) - len(similar_seqs)),
-                )
+                f"Output file '{self.output}' has {(len(seq_dict.keys()) - len(similar_seqs))} sequences"
             )
+
+    def swiss_to_format(self, str):
+        """Convert between sequence formats in memory"""
+        # Create StringIO objects to act as an in-memory files
+        in_memory_in = StringIO(str)
+        in_memory_out = StringIO()
+        # Parse the string as a sequence record
+        record = SeqIO.read(in_memory_in, "swiss")
+        # Write the record to the in-memory file-like object
+        SeqIO.write(record, in_memory_out, self.outformat)
+        # Get the converted sequence data as a string
+        return in_memory_out.getvalue()
 
     def get_num_terms(self, seqid):
         """
@@ -265,7 +281,7 @@ class MakeDRSeqs:
         return len([t for t in seq.dbxrefs if t.startswith("GO:")])
 
     def check_for_mash(self):
-        """Check whether `mash` is in PATH and is executable."""
+        """Check whether `mash` is in PATH and is executable"""
         if which("mash") is None:
             sys.exit("'mash' is not installed or not in PATH")
 
