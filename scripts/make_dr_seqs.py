@@ -242,7 +242,9 @@ class MakeDRSeqs:
         # For example, input is "data/viruses.dat", output is "viruses-dr.dat"
         self.output = (
             os.path.basename(self.seqfile).split(".")[0]
-            + "-dr."
+            + "-dr-"
+            + self.threshold
+            + "."
             + format_map[self.outformat]
         )
         with open(self.output, "w") as out:
