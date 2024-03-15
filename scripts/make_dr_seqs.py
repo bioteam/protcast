@@ -243,7 +243,7 @@ class MakeDRSeqs:
         self.output = (
             os.path.basename(self.seqfile).split(".")[0]
             + "-dr-"
-            + self.threshold
+            + str(self.threshold)
             + "."
             + format_map[self.outformat]
         )
