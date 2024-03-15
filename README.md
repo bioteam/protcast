@@ -166,16 +166,10 @@ Scripts that can provide statistics on datasets.
 Schema images.
 
 ## `test`
-Simple test scripts. `test/data/` directory contains an `.obo` file and small, 
-representative test files. For example:
+Simple test scripts. The `test/data/` directory contains an `.obo` file and small, 
+representative test files.
 
-```
-cd test/
-python3 test_swissprot_parser.py
-python3 test_gaf_parser.py
-python3 test_create_simple_dataset.py
-python3 test_goatools.py
-```
+
 
 ## `scripts`
 Scripts to preprocess and then build Keras models.
