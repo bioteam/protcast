@@ -18,15 +18,21 @@ DBSCAN from scikit-learn with the resulting distance data to identify clusters o
 sequences that are removed to create a "decreased redundancy" ("dr") file. If the input file
 is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
 
-Example using a file from Uniprot:
+Example using a file from Uniprot with 17039 sequences:
 
 > time python3 preprocessing-scripts/make_dr_seqs.py -c 16 -s data/uniprot_sprot_viruses.dat 
 real	6m15.980s
 
-Input file 'data/uniprot_sprot_viruses.dat' has 17039 sequences
-Output file 'uniprot_sprot_viruses-dr.dat' has 10572 sequences
+2137 clusters found and 6,467 sequences removed using a EC2 r5a.4xlarge (16 cores).
 
-2137 clusters found and 6,467 sequences removed (62% of the sequences) using a EC2 r5a.4xlarge (16 cores).
+Input uniprot_sprot_viruses.dat file: 17387 sequences. Number of sequences in output files:
+
+Threshold   0.1     0.05    0.01    0.005   0.001   0.0005  0.0001  0.00005  0.00001 0.000001
+
+Sequences   10377   11746   14720   15680   16435   16460   16466   16466    16466   16466
+
+Thresholds from 0.99 to 0.1: 10377 sequences.
+
 """
 
 parser = argparse.ArgumentParser()
