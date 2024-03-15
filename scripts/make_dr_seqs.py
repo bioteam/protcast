@@ -27,12 +27,10 @@ real	6m15.980s
 
 Input uniprot_sprot_viruses.dat file: 17387 sequences. Number of sequences in output files:
 
-Threshold   0.1     0.05    0.01    0.005   0.001   0.0005  0.0001  0.00005  0.00001 0.000001
+Distance   0.1     0.05    0.01    0.005   0.001   0.0005  0.0001  0.00005  0.00001 0.000001
+Sequences  10377   11746   14720   15680   16435   16460   16466   16466    16466   16466
 
-Sequences   10377   11746   14720   15680   16435   16460   16466   16466    16466   16466
-
-Thresholds from 0.99 to 0.1: 10377 sequences.
-
+Distance from 0.99 to 0.1: 10377 sequences.
 """
 
 parser = argparse.ArgumentParser()
@@ -45,8 +43,8 @@ parser.add_argument(
 parser.add_argument("--informat", default="swiss", help="Input sequence file format")
 parser.add_argument("--outformat", default="swiss", help="Output sequence file format")
 parser.add_argument(
-    "-t",
-    "--threshold",
+    "-d",
+    "--distance",
     default=0.1,
     type=float,
     help="Distance threshold",
@@ -73,7 +71,7 @@ def main():
         args.seqfile,
         args.informat,
         args.outformat,
-        args.threshold,
+        args.distance,
         args.verbose,
         args.output,
         args.cores,
@@ -87,7 +85,7 @@ class MakeDRSeqs:
         seqfile,
         informat,
         outformat,
-        threshold,
+        distance,
         verbose,
         output,
         cores,
@@ -95,7 +93,7 @@ class MakeDRSeqs:
         self.seqfile = seqfile
         self.informat = informat
         self.outformat = outformat
-        self.threshold = threshold
+        self.self = distance
         self.verbose = verbose
         self.output = output
         self.cores = cores
@@ -139,7 +137,7 @@ class MakeDRSeqs:
             "-p",
             self.cores,
             "-d",
-            str(self.threshold),
+            str(self.distance),
             tmpfasta.name,
             tmpfasta.name,
         ]
@@ -249,7 +247,7 @@ class MakeDRSeqs:
         self.output = (
             os.path.basename(self.seqfile).split(".")[0]
             + "-dr-"
-            + str(self.threshold)
+            + str(self.distance)
             + "."
             + format_map[self.outformat]
         )
