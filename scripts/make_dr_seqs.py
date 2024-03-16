@@ -243,7 +243,7 @@ class MakeDRSeqs:
         seq_dict = SeqIO.index(self.seqfile, self.informat)
         if self.verbose:
             print(f"Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences")
-        # For example, input is "data/viruses.dat", output is "viruses-dr.dat"
+        # For example, input is "viruses.dat", output is "viruses-dr-0.1.dat"
         self.output = (
             os.path.basename(self.seqfile).split(".")[0]
             + "-dr-"
