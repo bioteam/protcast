@@ -94,18 +94,19 @@ class MakeDRSeqs:
         self.seqfile = seqfile
         self.informat = informat
         self.outformat = outformat
-        self.self = distance
+        self.distance = distance
         self.verbose = verbose
         self.output = output
         self.cores = cores
+        self.mash_input = self.seqfile
 
     def make_dr(self):
         mash_out = self.run_mash()
         mash_dict = self.convert_mash_out_to_dict(mash_out)
         mat, ids = self.make_dist_matrix(mash_dict)
         clusters = self.find_dbscan_clusters(mat, ids)
-        similar_seqs = self.get_similar_seqs(clusters)
-        self.write_seqs(similar_seqs)
+        seqs_to_remove = self.get_seqs_to_remove(clusters)
+        self.write_seqs(seqs_to_remove)
 
     def run_mash(self):
         """
@@ -127,6 +128,8 @@ class MakeDRSeqs:
             if self.verbose:
                 print(f"Creating fasta version of '{self.seqfile}'")
             SeqIO.convert(self.seqfile, self.informat, tmpfasta.name, "fasta")
+            self.mash_input = tmpfasta.name
+
         tmph = tempfile.NamedTemporaryFile(delete=False)
         tmpout = open(tmph.name, "w")
         # The same file acts as both query and reference
@@ -139,8 +142,8 @@ class MakeDRSeqs:
             self.cores,
             "-d",
             str(self.distance),
-            tmpfasta.name,
-            tmpfasta.name,
+            self.mash_input,
+            self.mash_input,
         ]
         try:
             if self.verbose:
@@ -226,17 +229,21 @@ class MakeDRSeqs:
                     print("\t" + self.seqs[seqid].description)
         return clusters
 
-    def get_similar_seqs(self, clusters):
+    def get_seqs_to_remove(self, clusters):
         """Find the sequences in a cluster with the least GO terms"""
-        similar_seqs = list()
+        seqs_to_remove = list()
         for cluster in clusters.values():
-            num_of_terms = [self.get_num_terms(acc) for acc in cluster]
-            # Index of highest number
-            max_index = num_of_terms.index(max(num_of_terms))
-            # Remove sequence with most terms
-            cluster.pop(max_index)
-            similar_seqs.extend(cluster)
-        return similar_seqs
+            if self.informat == 'swiss':
+                num_of_terms = [self.get_num_terms(acc) for acc in cluster]
+                # Index of highest number
+                max_index = num_of_terms.index(max(num_of_terms))
+                # Remove sequence with most terms
+                cluster.pop(max_index)
+            else:
+                # Arbitrary choice
+                cluster.pop()
+            seqs_to_remove.extend(cluster)            
+        return seqs_to_remove
 
     def write_seqs(self, similar_seqs):
         format_map = {"swiss": "dat", "fasta": "fa"}
@@ -271,7 +278,7 @@ class MakeDRSeqs:
         in_memory_in = StringIO(str)
         in_memory_out = StringIO()
         # Parse the string as a sequence record
-        record = SeqIO.read(in_memory_in, "swiss")
+        record = SeqIO.read(in_memory_in, self.informat)
         # Write the record to the in-memory file-like object
         SeqIO.write(record, in_memory_out, self.outformat)
         # Get the converted sequence data as a string
