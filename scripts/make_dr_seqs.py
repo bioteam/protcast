@@ -15,8 +15,9 @@ from sklearn.cluster import DBSCAN
 """
 Run the `mash` application to do pairwise protein sequence comparisons using kmers, and run 
 DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related 
-sequences that are removed to create a "decreased redundancy" ("dr") file. If the input file
-is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
+sequences. All the sequences in the cluster but 1 are removed to create a "decreased redundancy" 
+("dr") file. If the input file is in Swissprot format, the removed sequences will be the ones with 
+the fewest GO terms.
 
 Example using a file from Uniprot with 17039 sequences:
 
