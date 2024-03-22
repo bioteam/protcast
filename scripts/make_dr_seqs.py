@@ -286,7 +286,7 @@ class MakeDRSeqs:
 
     def get_num_terms(self, seqid):
         """
-        >seq.dbxrefs
+        >>> seq.dbxrefs
         ['EMBL:AY548484', 'RefSeq:YP_031579.1', 'SwissPalm:Q6GZX4', 'GeneID:2947773', 'KEGG:vg:2947773',
         'Proteomes:UP000008770', 'GO:GO:0046782', 'InterPro:IPR007031', 'Pfam:PF04947']
         """
