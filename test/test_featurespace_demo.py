@@ -6,7 +6,6 @@ from keras.utils import FeatureSpace
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
-file_url = "http://storage.googleapis.com/download.tensorflow.org/data/heart.csv"
 """
 age	sex	cp	trestbps	chol	fbs	restecg	thalach	exang	oldpeak	slope	ca	thal	target
 63	1	1	145	233	1	2	150	0	2.3	3	0	fixed	0
@@ -14,6 +13,7 @@ age	sex	cp	trestbps	chol	fbs	restecg	thalach	exang	oldpeak	slope	ca	thal	target
 67	1	4	120	229	0	2	129	1	2.6	2	2	reversible	0
 ....
 """
+file_url = "http://storage.googleapis.com/download.tensorflow.org/data/heart.csv"
 
 def dataframe_to_dataset(dataframe):
     dataframe = dataframe.copy()
@@ -101,9 +101,9 @@ val_ds = val_ds.batch(32)
 train_ds_with_no_labels = train_ds.map(lambda x, _: x)
 
 # adapt is kind of magical. During this time the FeatureSpace will:
-# Index the set of possible values for the categorical features, compute mean and variance to aid with
-# normalizing the numerical features plus compute the value boundaries for the different bins for
-# numerical features to discretize.
+# Index the set of possible values for the categorical features
+# Compute mean and variance to aid with normalizing the numerical features
+# Compute the value boundaries for the different bins for numerical features to discretize.
 feature_space.adapt(train_ds_with_no_labels)
 
 # Attempt at asynch preprocessing not sure if CLAB hardware is optimized for this yet though
@@ -134,9 +134,14 @@ output = keras.layers.Dense(1, activation="sigmoid")(x)
 # dict_inputs = feature_space.get_inputs()
 # inference_model = keras.Model(inputs=dict_inputs, outputs=predictions)
 
-training_model = keras.Model(inputs=encoded_features, outputs=output)
+training_model = keras.Model(
+    inputs=encoded_features, 
+    outputs=output
+)
 training_model.compile(
-    optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"]
+    optimizer="adam", 
+    loss="binary_crossentropy", 
+    metrics=["accuracy"]
 )
 
 # Here's a pipeline model that will be trained and called seperately
