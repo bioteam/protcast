@@ -1,12 +1,20 @@
 import os
+import sys
 import tensorflow as tf
-import pandas as pd
 import keras
+import pandas as pd
+from pathlib import Path
 from keras.utils import FeatureSpace
+from Bio import SeqIO
+
+file = Path(__file__).resolve()
+package_root_directory = file.parents[1]
+sys.path.append(str(package_root_directory))
+
+from protcast.model.feature_vector import get_ifeatpro_features  # noqa: E402
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
-file_url = "http://storage.googleapis.com/download.tensorflow.org/data/heart.csv"
 
 def dataframe_to_dataset(dataframe):
     dataframe = dataframe.copy()
@@ -14,6 +22,7 @@ def dataframe_to_dataset(dataframe):
     ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
     ds = ds.shuffle(buffer_size=len(dataframe))
     return ds
+
 
 def prediction_preprocessing(sample_dict):
     # Convert dict into dataframe
@@ -28,56 +37,31 @@ def prediction_preprocessing(sample_dict):
     )
     return preprocessed_sample_ds
 
-feature_space = FeatureSpace(
-    features={
-        # Categorical features encoded as integers
-        "sex": FeatureSpace.integer_categorical(num_oov_indices=0),
-        "cp": FeatureSpace.integer_categorical(num_oov_indices=0),
-        "fbs": FeatureSpace.integer_categorical(num_oov_indices=0),
-        "restecg": FeatureSpace.integer_categorical(num_oov_indices=0),
-        "exang": FeatureSpace.integer_categorical(num_oov_indices=0),
-        "ca": FeatureSpace.integer_categorical(num_oov_indices=0),
-        # Categorical feature encoded as string
-        "thal": FeatureSpace.string_categorical(num_oov_indices=0),
-        # Numerical features to discretize
-        "age": FeatureSpace.float_discretized(num_bins=30),
-        # Numerical features to normalize
-        "trestbps": FeatureSpace.float_normalized(),
-        "chol": FeatureSpace.float_normalized(),
-        "thalach": FeatureSpace.float_normalized(),
-        "oldpeak": FeatureSpace.float_normalized(),
-        "slope": FeatureSpace.float_normalized(),
-    },
-    # We create additional features by hashing
-    # value co-occurrences for the
-    # following groups of categorical features.
-    crosses=[("sex", "age"), ("thal", "ca")],
-    # The hashing space for these co-occurrences
-    # wil be 32-dimensional.
-    crossing_dim=32,
-    # Our utility will one-hot encode all categorical
-    # features and concat all features into a single
-    # vector (one vector per sample).
-    output_mode="concat",
-)
 
-sample = {
-    "age": 60,
-    "sex": 1,
-    "cp": 1,
-    "trestbps": 145,
-    "chol": 233,
-    "fbs": 1,
-    "restecg": 2,
-    "thalach": 150,
-    "exang": 0,
-    "oldpeak": 2.3,
-    "slope": 3,
-    "ca": 0,
-    "thal": "fixed",
-}
+gpcr_seqs = SeqIO.to_dict(SeqIO.parse("test/data/uniprotkb_gpcrs.fasta", "fasta"))
+non_gpcr_seqs = SeqIO.to_dict(SeqIO.parse("test/data/uniprotkb_non-gpcrs.fasta", "fasta"))
 
-dataframe = pd.read_csv(file_url)
+# Get feature vectors for all proteins as a list of lists
+gpcr_features, gpcr_ids = get_ifeatpro_features("ctriad", gpcr_seqs)
+non_gpcr_features, non_gpcr_ids = get_ifeatpro_features("ctriad", non_gpcr_seqs)
+
+# Set up the size and type (float) in the FeatureSpace object and get the column names
+features = dict()
+column_names = list()
+for count in range(len(gpcr_features[0])):
+    features[str(count)] = FeatureSpace.float_normalized()
+    column_names.append(str(count))
+feature_space = FeatureSpace(features=features)
+
+# Add target values of 0 or 1 and "target" column name
+gpcr_features = [x + [1] for x in gpcr_features]
+non_gpcr_features = [x + [0] for x in non_gpcr_features]
+column_names.append("target")
+
+all_features = gpcr_features + non_gpcr_features
+all_ids = gpcr_ids + non_gpcr_ids
+
+dataframe = pd.DataFrame(all_features, columns=column_names)
 val_dataframe = dataframe.sample(frac=0.2, random_state=1337)
 train_dataframe = dataframe.drop(val_dataframe.index)
 train_ds = dataframe_to_dataset(train_dataframe)
@@ -90,10 +74,11 @@ val_ds = val_ds.batch(32)
 # The function adapt() that adapts the Featurespace to the training data only works on
 # datasets dicts of feature values so we have to make a version of the dataset with the labels stripped
 train_ds_with_no_labels = train_ds.map(lambda x, _: x)
+#train_ds_with_no_labels = [x for x, _ in train_ds]
 
 # adapt() is kind of magical. During this time the FeatureSpace will:
 # Index the set of possible values for the categorical features, compute mean and variance to aid with
-# normalizing the numerical features plus compute the value boundaries for the different bins for 
+# normalizing the numerical features plus compute the value boundaries for the different bins for
 # numerical features to discretize.
 feature_space.adapt(train_ds_with_no_labels)
 
@@ -111,13 +96,13 @@ preprocessed_val_ds = preprocessed_val_ds.prefetch(tf.data.AUTOTUNE)
 
 encoded_features = feature_space.get_encoded_features()
 
-# Create a dense layer with 32 neurons and apply the ReLU activation function to 
+# Create a dense layer with 32 neurons and apply the ReLU activation function to
 # the data received from encoded_features.
 x = keras.layers.Dense(32, activation="relu")(encoded_features)
-# Apply a dropout layer with a rate of 0.5 to the input data represented by x. 
+# Apply a dropout layer with a rate of 0.5 to the input data represented by x.
 # Dropout() is a regularization technique commonly used to prevent overfitting.
 x = keras.layers.Dropout(0.5)(x)
-# Create a dense layer with a single neuron and apply the sigmoid activation function 
+# Create a dense layer with a single neuron and apply the sigmoid activation function
 # to its input. This is a common approach for the output layer in binary classification.
 output = keras.layers.Dense(1, activation="sigmoid")(x)
 
@@ -125,30 +110,32 @@ output = keras.layers.Dense(1, activation="sigmoid")(x)
 # dict_inputs = feature_space.get_inputs()
 # inference_model = keras.Model(inputs=dict_inputs, outputs=predictions)
 
-training_model = keras.Model(inputs=encoded_features, outputs=output)
+training_model = keras.Model(
+    inputs=encoded_features,
+    outputs=output,
+)
 training_model.compile(
     optimizer="adam", 
     loss="binary_crossentropy", 
     metrics=["accuracy"]
 )
-
 # Here's a pipeline model that will be trained and called seperately
 training_model.fit(
     preprocessed_train_ds,
     epochs=20,
     validation_data=preprocessed_val_ds,
-    verbose=2,
 )
 
-# Pre-process the sample you want a prediction from
-preprocessed_sample_ds = prediction_preprocessing(sample)
+for i, r in val_dataframe.iterrows():
+    if r["target"] == 1.0:
+        type = "GPCR"
+    else:
+        type = "Non-GPCR"
+    # Pre-process the sample you want a prediction from
+    del r["target"]
+    preprocessed_sample_ds = prediction_preprocessing(r)
+    # Get a prediction
+    predictions = training_model.predict(preprocessed_sample_ds)
+    print(f"{type}\t{all_ids[i]}\t{100 * predictions[0][0]:.2f}")
 
-# Get a prediction
-predictions = training_model.predict(preprocessed_sample_ds)
-
-print(
-    f"Sample has a {100 * predictions[0][0]:.2f}% probability "
-    "of having heart disease, as evaluated by our model."
-)
-
-training_model.save("example_model.keras")
+training_model.save("test_featurespace_gpcrs.keras")
