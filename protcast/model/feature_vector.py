@@ -1,17 +1,40 @@
 import os
+import sys
 import tempfile
 from ifeatpro.features import get_feature
 
 
-def get_ifeatpro_features(feature, seqs):
+def get_ifeatpro_features(alg, seqs):
     """get_ifeatpro_features
     Returns a list of arrays or "feature vectors" using ifeatpro. ifeatpro
-    creates a CSV file given a fasta file.
+    creates a CSV file given a fasta file. The algorithms are:
+
+    aac
+    apaac
+    cksaagp
+    cksaap
+    ctdc
+    ctdd
+    ctdt
+    ctriad
+    dde
+    dpc
+    gaac
+    gdpc
+    geary
+    gtpc
+    ksctriad
+    moran
+    nmbroto
+    paac
+    qsorder
+    socnumber
+    tpc
 
     Parameters
     ----------
-    feature: str
-        Feature name, e.g. 'ctriad'
+    alg: str
+        Algorithm name, e.g. 'ctriad'
     seqs: dict
         Key is protein id, value is protein sequence
 
@@ -19,6 +42,32 @@ def get_ifeatpro_features(feature, seqs):
     -------
     List of lists of floats
     """
+    algs = [
+        "aac",
+        "apaac",
+        "cksaagp",
+        "cksaap",
+        "ctdc",
+        "ctdd",
+        "ctdt",
+        "ctriad",
+        "dde",
+        "dpc",
+        "gaac",
+        "gdpc",
+        "geary",
+        "gtpc",
+        "ksctriad",
+        "moran",
+        "nmbroto",
+        "paac",
+        "qsorder",
+        "socnumber",
+        "tpc",
+    ]
+    if alg not in algs:
+        sys.exit(f"Algorithm {alg} not part of ifeatpro")
+
     tmpdir = tempfile.TemporaryDirectory()
     tmpfasta = tempfile.NamedTemporaryFile()
     ids = list()
@@ -28,8 +77,8 @@ def get_ifeatpro_features(feature, seqs):
         for pid, seq in seqs.items():
             f.write(">" + pid + "\n" + str(seq.seq) + "\n")
 
-    get_feature(tmpfasta.name, feature, tmpdir.name)
-    with open(os.path.join(tmpdir.name, feature + ".csv")) as f:
+    get_feature(tmpfasta.name, alg, tmpdir.name)
+    with open(os.path.join(tmpdir.name, alg + ".csv")) as f:
         for line in f.readlines():
             arr = line.rstrip().split(",")
             # Skip the first column which contains the id
