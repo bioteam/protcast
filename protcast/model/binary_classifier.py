@@ -113,6 +113,7 @@ class BinaryClassifier():
 
         self.encoded_features = self.feature_space.get_encoded_features()
 
+    @typechecked
     def make_model(self):
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
         # the data received from encoded_features.
@@ -140,6 +141,7 @@ class BinaryClassifier():
             validation_data=preprocessed_val_ds,
         )
 
+    @typechecked
     def write_report(self):
         for i, r in val_dataframe.iterrows():
             if r["target"] == 1.0:
@@ -153,5 +155,6 @@ class BinaryClassifier():
             predictions = self.training_model.predict(preprocessed_sample_ds)
             print(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}")
 
+    @typechecked
     def save(self):
         self.training_model.save(f"{self.name}.keras")
