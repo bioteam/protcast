@@ -1,14 +1,14 @@
 import os
-import sys
 import tensorflow as tf
 import keras
 import pandas as pd
-from pathlib import Path
+from typeguard import typechecked
 from keras.utils import FeatureSpace
+from protcast.model.feature_vector import get_ifeatpro_features
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
-
+@typechecked
 class BinaryClassifier():
     """BinaryClassifier
     This class ....
@@ -23,7 +23,135 @@ class BinaryClassifier():
         Initialize
     """
 
-    def __init__(self):
-        self.dense1 = keras.layers.Dense(32, activation="relu")
-        self.dense2 = keras.layers.Dense(10, activation="softmax")
+    def __init__(self, name, target_seqs, non_target_seqs, algorithm) -> None:
+        self.name = name
+        self.target_seqs = target_seqs
+        self.non_target_seqs = non_target_seqs
+        self.algorithm = algorithm
 
+
+    def run(self):
+        self.make_featurespace()
+
+    @typechecked
+    def make_featurespace(self) -> None:
+        # Get feature vectors for all proteins as a list of lists
+        target_features, target_ids = get_ifeatpro_features(self.algorithm, self.target_seqs)
+        non_target_features, non_target_ids = get_ifeatpro_features("ctriad", self.non_target_seqs)
+        # Set up the size and type (float) in the FeatureSpace object and get the column names
+        features = dict()
+        column_names = list()
+        for count in range(len(target_features[0])):
+            features[str(count)] = FeatureSpace.float_normalized()
+            column_names.append(str(count))
+        self.feature_space = FeatureSpace(features=features)
+
+        # Add target values of 0 or 1 and "target" column name
+        target_features = [x + [1] for x in target_features]
+        non_target_features = [x + [0] for x in non_target_features]
+        self.column_names.append("target")
+
+        self.all_features = target_features + non_target_features
+        self.all_ids = target_ids + non_target_ids
+
+    @typechecked
+    def dataframe_to_dataset(self, dataframe) -> tf.data.Dataset:
+        dataframe = dataframe.copy()
+        labels = dataframe.pop("target")
+        ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+        ds = ds.shuffle(buffer_size=len(dataframe))
+        return ds
+
+    @typechecked
+    def prediction_preprocessing(self, sample_dict) -> tf.data.Dataset:
+        # Convert dict into dataframe
+        sample_frame = pd.DataFrame([sample_dict])
+        # Convert datafrane into Tensor Datasest with stub target
+        sample_ds = tf.data.Dataset.from_tensor_slices((dict(sample_frame), [0]))
+        # Batch of 1 since there's only 1 sample
+        sample_ds = sample_ds.batch(1)
+        # Pre-process the dataset using the FeatureSpace map
+        preprocessed_sample_ds = sample_ds.map(
+            lambda x, y: (self.feature_space(x), y), num_parallel_calls=tf.data.AUTOTUNE
+        )
+        return preprocessed_sample_ds
+
+    @typechecked
+    def prepare_data(self) -> None:
+        all_dataframe = pd.DataFrame(self.all_features, columns=self.column_names)
+        val_dataframe = all_dataframe.sample(frac=0.2, random_state=1337)
+        train_dataframe = all_dataframe.drop(val_dataframe.index)
+        train_ds = self.dataframe_to_dataset(train_dataframe)
+        val_ds = self.dataframe_to_dataset(val_dataframe)
+
+        # why batched into 32?
+        train_ds = train_ds.batch(32)
+        val_ds = val_ds.batch(32)
+
+        # The function adapt() that adapts the Featurespace to the training data only works on
+        # datasets dicts of feature values so we have to make a version of the dataset with the labels stripped
+        train_ds_with_no_labels = train_ds.map(lambda x, _: x)
+        #train_ds_with_no_labels = [x for x, _ in train_ds]
+
+        # adapt() is kind of magical. During this time the FeatureSpace will:
+        # Index the set of possible values for the categorical features, compute mean and variance to aid with
+        # normalizing the numerical features plus compute the value boundaries for the different bins for
+        # numerical features to discretize.
+        self.feature_space.adapt(train_ds_with_no_labels)
+
+        # Attempt at asynch preprocessing not sure if CLAB hardware is optimized for this yet though
+        # Running it as part of the tf.data pipeline instead of the model itself
+        preprocessed_train_ds = train_ds.map(
+            lambda x, y: (self.feature_space(x), y), num_parallel_calls=tf.data.AUTOTUNE
+        )
+        preprocessed_train_ds = preprocessed_train_ds.prefetch(tf.data.AUTOTUNE)
+
+        preprocessed_val_ds = val_ds.map(
+            lambda x, y: (self.feature_space(x), y), num_parallel_calls=tf.data.AUTOTUNE
+        )
+        preprocessed_val_ds = preprocessed_val_ds.prefetch(tf.data.AUTOTUNE)
+
+        self.encoded_features = self.feature_space.get_encoded_features()
+
+    def make_model(self):
+        # Create a dense layer with 32 neurons and apply the ReLU activation function to
+        # the data received from encoded_features.
+        x = keras.layers.Dense(32, activation="relu")(self.encoded_features)
+        # Apply a dropout layer with a rate of 0.5 to the input data represented by x.
+        # Dropout() is a regularization technique commonly used to prevent overfitting.
+        x = keras.layers.Dropout(0.5)(x)
+        # Create a dense layer with a single neuron and apply the sigmoid activation function
+        # to its input. This is a common approach for the output layer in binary classification.
+        output = keras.layers.Dense(1, activation="sigmoid")(x)
+
+        self.training_model = keras.Model(
+            inputs=self.encoded_features,
+            outputs=output,
+        )
+        self.training_model.compile(
+            optimizer="adam", 
+            loss="binary_crossentropy", 
+            metrics=["accuracy"]
+        )
+        # Here's a pipeline model that will be trained and called seperately
+        self.training_model.fit(
+            preprocessed_train_ds,
+            epochs=20,
+            validation_data=preprocessed_val_ds,
+        )
+
+    def write_report(self):
+        for i, r in val_dataframe.iterrows():
+            if r["target"] == 1.0:
+                type = "target"
+            else:
+                type = "non-target"
+            # Pre-process the sample you want a prediction from
+            del r["target"]
+            preprocessed_sample_ds = self.prediction_preprocessing(r)
+            # Get a prediction
+            predictions = self.training_model.predict(preprocessed_sample_ds)
+            print(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}")
+
+    def save(self):
+        self.training_model.save(f"{self.name}.keras")
