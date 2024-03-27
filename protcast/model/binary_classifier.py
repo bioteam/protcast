@@ -29,7 +29,10 @@ class BinaryClassifier:
     make_model:
         ...
     test_model:
-        ...
+        Test model against validation set, save results
+        to a *tsv file.
+    save:
+        Save Keras model to file
     """
 
     @typechecked
@@ -68,7 +71,7 @@ class BinaryClassifier:
             self.algorithm, self.target_seqs
         )
         non_target_features, non_target_ids = get_ifeatpro_features(
-            "ctriad", self.non_target_seqs
+            self.algorithm, self.non_target_seqs
         )
         # Set up the size and type (float) in the FeatureSpace object and get the column names
         features = dict()
@@ -91,10 +94,10 @@ class BinaryClassifier:
     @typechecked
     def prepare_data(self) -> tuple:
         all_dataframe = pd.DataFrame(self.all_features, columns=self.column_names)
-        val_dataframe = all_dataframe.sample(frac=self.fraction, random_state=1337)
-        train_dataframe = all_dataframe.drop(val_dataframe.index)
-        train_ds = self.dataframe_to_dataset(train_dataframe)
-        val_ds = self.dataframe_to_dataset(val_dataframe)
+        self.val_dataframe = all_dataframe.sample(frac=self.fraction, random_state=1337)
+        self.train_dataframe = all_dataframe.drop(self.val_dataframe.index)
+        train_ds = self.dataframe_to_dataset(self.train_dataframe)
+        val_ds = self.dataframe_to_dataset(self.val_dataframe)
 
         # why batched into 32?
         train_ds = train_ds.batch(32)
@@ -156,17 +159,18 @@ class BinaryClassifier:
 
     @typechecked
     def test_model(self):
-        for i, r in val_dataframe.iterrows():
-            if r["target"] == 1.0:
-                type = "target"
-            else:
-                type = "non-target"
-            # Pre-process the sample you want a prediction from
-            del r["target"]
-            preprocessed_sample_ds = self.sample_preprocessing(r)
-            # Get a prediction
-            predictions = self.training_model.predict(preprocessed_sample_ds)
-            print(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}")
+        with open(f"{self.name}_{self.algorithm}.tsv", "w") as f:
+            for i, r in self.val_dataframe.iterrows():
+                if r["target"] == 1.0:
+                    type = self.name
+                else:
+                    type = f"non-{self.name}"
+                # Pre-process the sample you want a prediction from
+                del r["target"]
+                preprocessed_sample_ds = self.sample_preprocessing(r)
+                # Get a prediction
+                predictions = self.training_model.predict(preprocessed_sample_ds)
+                f.write(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}\n")
 
     @typechecked
     def dataframe_to_dataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
@@ -177,7 +181,7 @@ class BinaryClassifier:
         return ds
 
     @typechecked
-    def sample_preprocessing(self, sample_dict: dict) -> tf.data.Dataset:
+    def sample_preprocessing(self, sample_dict: pd.core.series.Series) -> tf.data.Dataset:
         # Convert dict into dataframe
         sample_frame = pd.DataFrame([sample_dict])
         # Convert datafrane into Tensor Datasest with stub target
@@ -192,4 +196,4 @@ class BinaryClassifier:
 
     @typechecked
     def save(self) -> None:
-        self.training_model.save(f"{self.name}.keras")
+        self.training_model.save(f"{self.name}_{self.algorithm}.keras")
