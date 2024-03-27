@@ -8,14 +8,15 @@ from protcast.model.feature_vector import get_ifeatpro_features
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
+
 @typechecked
-class BinaryClassifier():
+class BinaryClassifier:
     """BinaryClassifier
     This class ....
 
     Attributes
     ----------
-    
+
 
     Methods
     -------
@@ -23,61 +24,62 @@ class BinaryClassifier():
         Initialize
     """
 
-    def __init__(self, name, target_seqs, non_target_seqs, algorithm) -> None:
+    @typechecked
+    def __init__(
+        self,
+        name: str,
+        target_seqs: dict,
+        non_target_seqs: dict,
+        algorithm: str,
+        optimizer: str = "adam",
+        loss: str = "binary_crossentropy",
+        metrics: list = ["accuracy"],
+        epochs: int = 20
+    ) -> None:
         self.name = name
         self.target_seqs = target_seqs
         self.non_target_seqs = non_target_seqs
         self.algorithm = algorithm
+        self.optimizer = optimizer
+        self.loss = loss
+        self.metrics = metrics
+        self.epochs = epochs
 
-
-    def run(self):
+    @typechecked
+    def run(self) -> None:
         self.make_featurespace()
+        train_dataset, val_dataset = self.prepare_data()
+        self.make_model(train_dataset, val_dataset)
 
     @typechecked
     def make_featurespace(self) -> None:
         # Get feature vectors for all proteins as a list of lists
-        target_features, target_ids = get_ifeatpro_features(self.algorithm, self.target_seqs)
-        non_target_features, non_target_ids = get_ifeatpro_features("ctriad", self.non_target_seqs)
+        target_features, target_ids = get_ifeatpro_features(
+            self.algorithm, self.target_seqs
+        )
+        non_target_features, non_target_ids = get_ifeatpro_features(
+            "ctriad", self.non_target_seqs
+        )
         # Set up the size and type (float) in the FeatureSpace object and get the column names
         features = dict()
-        column_names = list()
+        self.column_names = list()
         for count in range(len(target_features[0])):
             features[str(count)] = FeatureSpace.float_normalized()
-            column_names.append(str(count))
+            self.column_names.append(str(count))
         self.feature_space = FeatureSpace(features=features)
 
-        # Add target values of 0 or 1 and "target" column name
+        # Add target values of 0 or 1 to data
         target_features = [x + [1] for x in target_features]
         non_target_features = [x + [0] for x in non_target_features]
+
+        # Add "target" column name to data
         self.column_names.append("target")
 
         self.all_features = target_features + non_target_features
         self.all_ids = target_ids + non_target_ids
 
     @typechecked
-    def dataframe_to_dataset(self, dataframe) -> tf.data.Dataset:
-        dataframe = dataframe.copy()
-        labels = dataframe.pop("target")
-        ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
-        ds = ds.shuffle(buffer_size=len(dataframe))
-        return ds
-
-    @typechecked
-    def prediction_preprocessing(self, sample_dict) -> tf.data.Dataset:
-        # Convert dict into dataframe
-        sample_frame = pd.DataFrame([sample_dict])
-        # Convert datafrane into Tensor Datasest with stub target
-        sample_ds = tf.data.Dataset.from_tensor_slices((dict(sample_frame), [0]))
-        # Batch of 1 since there's only 1 sample
-        sample_ds = sample_ds.batch(1)
-        # Pre-process the dataset using the FeatureSpace map
-        preprocessed_sample_ds = sample_ds.map(
-            lambda x, y: (self.feature_space(x), y), num_parallel_calls=tf.data.AUTOTUNE
-        )
-        return preprocessed_sample_ds
-
-    @typechecked
-    def prepare_data(self) -> None:
+    def prepare_data(self) -> tuple:
         all_dataframe = pd.DataFrame(self.all_features, columns=self.column_names)
         val_dataframe = all_dataframe.sample(frac=0.2, random_state=1337)
         train_dataframe = all_dataframe.drop(val_dataframe.index)
@@ -91,7 +93,7 @@ class BinaryClassifier():
         # The function adapt() that adapts the Featurespace to the training data only works on
         # datasets dicts of feature values so we have to make a version of the dataset with the labels stripped
         train_ds_with_no_labels = train_ds.map(lambda x, _: x)
-        #train_ds_with_no_labels = [x for x, _ in train_ds]
+        # train_ds_with_no_labels = [x for x, _ in train_ds]
 
         # adapt() is kind of magical. During this time the FeatureSpace will:
         # Index the set of possible values for the categorical features, compute mean and variance to aid with
@@ -111,10 +113,11 @@ class BinaryClassifier():
         )
         preprocessed_val_ds = preprocessed_val_ds.prefetch(tf.data.AUTOTUNE)
 
-        self.encoded_features = self.feature_space.get_encoded_features()
+        return preprocessed_train_ds, preprocessed_val_ds
 
     @typechecked
-    def make_model(self):
+    def make_model(self, train_ds: tf.data.Dataset, val_ds: tf.data.Dataset) -> None:
+        self.encoded_features = self.feature_space.get_encoded_features()
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
         # the data received from encoded_features.
         x = keras.layers.Dense(32, activation="relu")(self.encoded_features)
@@ -130,15 +133,15 @@ class BinaryClassifier():
             outputs=output,
         )
         self.training_model.compile(
-            optimizer="adam", 
-            loss="binary_crossentropy", 
-            metrics=["accuracy"]
+            optimizer=self.optimizer, 
+            loss=self.loss, 
+            metrics=self.metrics
         )
         # Here's a pipeline model that will be trained and called seperately
         self.training_model.fit(
-            preprocessed_train_ds,
-            epochs=20,
-            validation_data=preprocessed_val_ds,
+            train_ds,
+            epochs=self.epochs,
+            validation_data=val_ds,
         )
 
     @typechecked
@@ -156,5 +159,27 @@ class BinaryClassifier():
             print(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}")
 
     @typechecked
-    def save(self):
+    def dataframe_to_dataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
+        dataframe = dataframe.copy()
+        labels = dataframe.pop("target")
+        ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+        ds = ds.shuffle(buffer_size=len(dataframe))
+        return ds
+
+    @typechecked
+    def prediction_preprocessing(self, sample_dict: dict) -> tf.data.Dataset:
+        # Convert dict into dataframe
+        sample_frame = pd.DataFrame([sample_dict])
+        # Convert datafrane into Tensor Datasest with stub target
+        sample_ds = tf.data.Dataset.from_tensor_slices((dict(sample_frame), [0]))
+        # Batch of 1 since there's only 1 sample
+        sample_ds = sample_ds.batch(1)
+        # Pre-process the dataset using the FeatureSpace map
+        preprocessed_sample_ds = sample_ds.map(
+            lambda x, y: (self.feature_space(x), y), num_parallel_calls=tf.data.AUTOTUNE
+        )
+        return preprocessed_sample_ds
+
+    @typechecked
+    def save(self) -> None:
         self.training_model.save(f"{self.name}.keras")
