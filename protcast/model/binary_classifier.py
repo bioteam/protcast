@@ -177,7 +177,7 @@ class BinaryClassifier:
         return ds
 
     @typechecked
-    def _preprocessing(self, sample_dict: dict) -> tf.data.Dataset:
+    def sample_preprocessing(self, sample_dict: dict) -> tf.data.Dataset:
         # Convert dict into dataframe
         sample_frame = pd.DataFrame([sample_dict])
         # Convert datafrane into Tensor Datasest with stub target
