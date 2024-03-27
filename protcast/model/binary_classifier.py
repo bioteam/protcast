@@ -46,7 +46,9 @@ class BinaryClassifier:
         loss: str = "binary_crossentropy",
         metrics: list = ["accuracy"],
         epochs: int = 20,
-        fraction: float = 0.2
+        fraction: float = 0.2,
+        neurons: int = 32,
+        dropout: float = 0.5
     ) -> None:
         self.name = name
         self.target_seqs = target_seqs
@@ -57,6 +59,8 @@ class BinaryClassifier:
         self.metrics = metrics
         self.epochs = epochs
         self.fraction = fraction
+        self.neurons = neurons
+        self.dropout = dropout
 
     @typechecked
     def run(self) -> None:
@@ -133,10 +137,10 @@ class BinaryClassifier:
         encoded_features = self.feature_space.get_encoded_features()
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
         # the data received from encoded_features.
-        x = keras.layers.Dense(32, activation="relu")(encoded_features)
+        x = keras.layers.Dense(self.neurons, activation="relu")(encoded_features)
         # Apply a dropout layer with a rate of 0.5 to the input data represented by x.
         # Dropout() is a regularization technique commonly used to prevent overfitting.
-        x = keras.layers.Dropout(0.5)(x)
+        x = keras.layers.Dropout(self.dropout)(x)
         # Create a dense layer with a single neuron and apply the sigmoid activation function
         # to its input. This is a common approach for the output layer in binary classification.
         output = keras.layers.Dense(1, activation="sigmoid")(x)
@@ -181,9 +185,9 @@ class BinaryClassifier:
         return ds
 
     @typechecked
-    def sample_preprocessing(self, sample_dict: pd.core.series.Series) -> tf.data.Dataset:
-        # Convert dict into dataframe
-        sample_frame = pd.DataFrame([sample_dict])
+    def sample_preprocessing(self, sample: pd.core.series.Series) -> tf.data.Dataset:
+        # Convert pandas Series into dataframe
+        sample_frame = pd.DataFrame([sample])
         # Convert datafrane into Tensor Datasest with stub target
         sample_ds = tf.data.Dataset.from_tensor_slices((dict(sample_frame), [0]))
         # Batch of 1 since there's only 1 sample
