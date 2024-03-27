@@ -178,6 +178,7 @@ class BinaryClassifier:
 
     @typechecked
     def dataframe_to_dataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
+        # Ensure original dataframe passed to method is unchanged
         dataframe = dataframe.copy()
         labels = dataframe.pop("target")
         ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
