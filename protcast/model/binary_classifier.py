@@ -22,6 +22,14 @@ class BinaryClassifier:
     -------
     init:
         Initialize
+    make_featurespace:
+        ...
+    prepare_data:
+        ...
+    make_model:
+        ...
+    test_model:
+        ...
     """
 
     @typechecked
@@ -147,7 +155,7 @@ class BinaryClassifier:
         )
 
     @typechecked
-    def write_report(self):
+    def test_model(self):
         for i, r in val_dataframe.iterrows():
             if r["target"] == 1.0:
                 type = "target"
@@ -155,7 +163,7 @@ class BinaryClassifier:
                 type = "non-target"
             # Pre-process the sample you want a prediction from
             del r["target"]
-            preprocessed_sample_ds = self.prediction_preprocessing(r)
+            preprocessed_sample_ds = self.sample_preprocessing(r)
             # Get a prediction
             predictions = self.training_model.predict(preprocessed_sample_ds)
             print(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}")
@@ -169,7 +177,7 @@ class BinaryClassifier:
         return ds
 
     @typechecked
-    def prediction_preprocessing(self, sample_dict: dict) -> tf.data.Dataset:
+    def _preprocessing(self, sample_dict: dict) -> tf.data.Dataset:
         # Convert dict into dataframe
         sample_frame = pd.DataFrame([sample_dict])
         # Convert datafrane into Tensor Datasest with stub target
