@@ -34,7 +34,8 @@ class BinaryClassifier:
         optimizer: str = "adam",
         loss: str = "binary_crossentropy",
         metrics: list = ["accuracy"],
-        epochs: int = 20
+        epochs: int = 20,
+        fraction: float = 0.2
     ) -> None:
         self.name = name
         self.target_seqs = target_seqs
@@ -44,6 +45,7 @@ class BinaryClassifier:
         self.loss = loss
         self.metrics = metrics
         self.epochs = epochs
+        self.fraction = fraction
 
     @typechecked
     def run(self) -> None:
@@ -81,7 +83,7 @@ class BinaryClassifier:
     @typechecked
     def prepare_data(self) -> tuple:
         all_dataframe = pd.DataFrame(self.all_features, columns=self.column_names)
-        val_dataframe = all_dataframe.sample(frac=0.2, random_state=1337)
+        val_dataframe = all_dataframe.sample(frac=self.fraction, random_state=1337)
         train_dataframe = all_dataframe.drop(val_dataframe.index)
         train_ds = self.dataframe_to_dataset(train_dataframe)
         val_ds = self.dataframe_to_dataset(val_dataframe)

@@ -11,12 +11,14 @@ from protcast.model.binary_classifier import BinaryClassifier  # noqa: E402
 
 if __name__ == "__main__":
     """"binary_classify.py
-    This script ...
+    This script uses Keras and Keras FeatureSpace to classify sequences.
+    Provide a *fasta file with some group of related sequences ("target")
+    and a second *fasta file with unrelated or control sequences ("non-target").
     Example:
 
     python scripts/binary_classify.py \
-    ... \
-    .... \
+    -t gpcr-sequences.fasta \
+    -nt non-gpcr-sequences.fasta \
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-t","--target", required=True, help="Path to target sequences")
