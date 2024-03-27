@@ -127,10 +127,10 @@ class BinaryClassifier:
 
     @typechecked
     def make_model(self, train_ds: tf.data.Dataset, val_ds: tf.data.Dataset) -> None:
-        self.encoded_features = self.feature_space.get_encoded_features()
+        encoded_features = self.feature_space.get_encoded_features()
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
         # the data received from encoded_features.
-        x = keras.layers.Dense(32, activation="relu")(self.encoded_features)
+        x = keras.layers.Dense(32, activation="relu")(encoded_features)
         # Apply a dropout layer with a rate of 0.5 to the input data represented by x.
         # Dropout() is a regularization technique commonly used to prevent overfitting.
         x = keras.layers.Dropout(0.5)(x)
@@ -139,7 +139,7 @@ class BinaryClassifier:
         output = keras.layers.Dense(1, activation="sigmoid")(x)
 
         self.training_model = keras.Model(
-            inputs=self.encoded_features,
+            inputs=encoded_features,
             outputs=output,
         )
         self.training_model.compile(
