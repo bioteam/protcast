@@ -100,8 +100,8 @@ class BinaryClassifier:
         all_dataframe = pd.DataFrame(self.all_features, columns=self.column_names)
         self.val_dataframe = all_dataframe.sample(frac=self.fraction, random_state=1337)
         self.train_dataframe = all_dataframe.drop(self.val_dataframe.index)
-        train_ds = self.dataframe_to_dataset(self.train_dataframe)
-        val_ds = self.dataframe_to_dataset(self.val_dataframe)
+        train_ds = self.dataframe_to_tfdataset(self.train_dataframe)
+        val_ds = self.dataframe_to_tfdataset(self.val_dataframe)
 
         # why batched into 32?
         train_ds = train_ds.batch(32)
@@ -177,13 +177,13 @@ class BinaryClassifier:
                 f.write(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}\n")
 
     @typechecked
-    def dataframe_to_dataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
+    def dataframe_to_tfdataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
         # The original dataframe passed to method is unchanged
         dataframe = dataframe.copy()
         labels = dataframe.pop("target")
-        ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
-        ds = ds.shuffle(buffer_size=len(dataframe))
-        return ds
+        tfds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+        tfds = tfds.shuffle(buffer_size=len(dataframe))
+        return tfds
 
     @typechecked
     def sample_preprocessing(self, sample: pd.core.series.Series) -> tf.data.Dataset:
