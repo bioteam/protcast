@@ -31,7 +31,7 @@ class BinaryClassifier:
     test_model:
         Test model against validation set, save results
         to a *tsv file.
-    save:
+    save_model:
         Save Keras model to file
     """
 
@@ -200,5 +200,5 @@ class BinaryClassifier:
         return preprocessed_sample_ds
 
     @typechecked
-    def save(self) -> None:
+    def save_model(self) -> None:
         self.training_model.save(f"{self.name}_{self.algorithm}.keras")

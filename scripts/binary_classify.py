@@ -34,4 +34,4 @@ if __name__ == "__main__":
     classifier = BinaryClassifier(args.name, target_seqs, non_target_seqs, args.algorithm)
     classifier.run()
     classifier.test_model()
-    classifier.save()
+    classifier.save_model()
