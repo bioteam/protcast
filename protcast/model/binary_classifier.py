@@ -171,9 +171,9 @@ class BinaryClassifier:
                     type = f"non-{self.name}"
                 # Pre-process the sample you want a prediction from
                 del r["target"]
-                preprocessed_sample_ds = self.sample_preprocessing(r)
+                sample_ds = self.sample_preprocessing(r)
                 # Get a prediction
-                predictions = self.training_model.predict(preprocessed_sample_ds)
+                predictions = self.training_model.predict(sample_ds)
                 f.write(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}\n")
 
     @typechecked
