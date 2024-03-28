@@ -178,7 +178,7 @@ class BinaryClassifier:
 
     @typechecked
     def dataframe_to_dataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
-        # Ensure original dataframe passed to method is unchanged
+        # The original dataframe passed to method is unchanged
         dataframe = dataframe.copy()
         labels = dataframe.pop("target")
         ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
@@ -189,7 +189,7 @@ class BinaryClassifier:
     def sample_preprocessing(self, sample: pd.core.series.Series) -> tf.data.Dataset:
         # Convert pandas Series into dataframe
         sample_frame = pd.DataFrame([sample])
-        # Convert datafrane into Tensor Datasest with stub target
+        # Convert datafrane into Tensorflow Datasest with stub target
         sample_ds = tf.data.Dataset.from_tensor_slices((dict(sample_frame), [0]))
         # Batch of 1 since there's only 1 sample
         sample_ds = sample_ds.batch(1)
