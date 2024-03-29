@@ -138,24 +138,24 @@ class BinaryClassifier:
 
     @typechecked
     def make_model(self, train_tfds: tf.data.Dataset, val_tfds: tf.data.Dataset) -> None:
-        """
+        """make_model
         
         """
-        # Not explicitly defined in the code, the first layer accepts the encoded features.
+        # The first layer is the encoded features as a KerasTensor
         encoded_features = self.feature_space.get_encoded_features()
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
-        # introduces non-linearity.
-        x = keras.layers.Dense(self.neurons, activation="relu")(encoded_features)
+        # introduce non-linearity.
+        kt = keras.layers.Dense(self.neurons, activation="relu")(encoded_features)
         # Apply a dropout layer with a rate of 0.5 to the input data represented by x.
         # Dropout() is a regularization technique commonly used to prevent overfitting.
-        x = keras.layers.Dropout(self.dropout)(x)
+        kt = keras.layers.Dropout(self.dropout)(kt)
         # Create a dense layer with a single neuron and apply the sigmoid activation function
         # which outputs 0 or 1. This is a common approach for the output layer in binary classification.
-        output = keras.layers.Dense(1, activation="sigmoid")(x)
-        # 
+        ktoutput = keras.layers.Dense(1, activation="sigmoid")(kt)
+        # Create a keras.src.engine.functional.Functional object
         self.training_model = keras.Model(
             inputs=encoded_features,
-            outputs=output,
+            outputs=ktoutput,
         )
         # 
         self.training_model.compile(
