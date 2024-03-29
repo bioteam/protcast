@@ -17,13 +17,13 @@ GAF=$GO_ROOT/$DATE/annotations/filtered_goa_uniprot_all_noiea.gaf.gz
 UNIPROT=$UNIPROT_ROOT/uniprot_sprot.dat.gz
 TREMBL=$UNIPROT_ROOT/uniprot_trembl.fasta.gz
 
-cd $SCRATCH
-mkdir -p "$DATE/GO"
-mkdir -p "$DATE/UniProt"
+cd /data
+mkdir -p GO/"$DATE"
+mkdir -p UniProt/"$DATE"
 
 for URL in $GO $GAF $UNIPROT $TREMBL; do
     FNAME=$(basename "$URL" | sed 's/.gz//')
-    if [ -f "$DATE"/GO/"$FNAME" ] || [ -f "$DATE"/UniProt/"$FNAME" ]; then
+    if [ -f GO/"$DATE"/"$FNAME" ] || [ -f UniProt/"$DATE"/"$FNAME" ]; then
         echo Found: "$FNAME"
     else
         wget -c "$URL"
@@ -32,10 +32,10 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
             gunzip "$(basename "$URL")"
             echo Finished gunzip: "$FNAME"
         fi
-        if [[ "$FNAME" =~ go ]]; then
-            mv "$FNAME" "$DATE"/GO
-        else
-            mv "$FNAME" "$DATE"/UniProt
-        fi
+    	if [[ "$FNAME" =~ go ]]; then
+            mv "$FNAME" GO/"$DATE"
+    	else
+            mv "$FNAME" UniProt/"$DATE"
+    	fi
     fi
 done
