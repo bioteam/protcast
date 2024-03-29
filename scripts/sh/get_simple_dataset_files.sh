@@ -17,7 +17,7 @@ GAF=$GO_ROOT/$DATE/annotations/filtered_goa_uniprot_all_noiea.gaf.gz
 UNIPROT=$UNIPROT_ROOT/uniprot_sprot.dat.gz
 TREMBL=$UNIPROT_ROOT/uniprot_trembl.fasta.gz
 
-cd /data
+cd /data || exit
 mkdir -p GO/"$DATE"
 mkdir -p UniProt/"$DATE"
 
@@ -32,10 +32,10 @@ for URL in $GO $GAF $UNIPROT $TREMBL; do
             gunzip "$(basename "$URL")"
             echo Finished gunzip: "$FNAME"
         fi
-    	if [[ "$FNAME" =~ go ]]; then
+        if [[ "$FNAME" =~ go ]]; then
             mv "$FNAME" GO/"$DATE"
-    	else
+        else
             mv "$FNAME" UniProt/"$DATE"
-    	fi
+        fi
     fi
 done
