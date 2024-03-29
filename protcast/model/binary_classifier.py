@@ -90,13 +90,14 @@ class BinaryClassifier:
             self.column_names.append(str(count))
         self.feature_space = FeatureSpace(features=features)
 
+        # Add "target" column name
+        self.column_names.append("target")
+
         # Add target values of 0 or 1 to data
         self.target_features = [x + [1] for x in self.target_features]
         self.non_target_features = [x + [0] for x in self.non_target_features]
         self.all_features = self.target_features + self.non_target_features
 
-        # Add "target" column name
-        self.column_names.append("target")
 
     @typechecked
     def prepare_data(self) -> tuple:
@@ -165,7 +166,7 @@ class BinaryClassifier:
         )
 
     @typechecked
-    def test_model(self):
+    def test_model(self) -> None:
         with open(f"{self.name}_{self.algorithm}.tsv", "w") as f:
             for i, r in self.val_dataframe.iterrows():
                 if r["target"] == 1.0:
