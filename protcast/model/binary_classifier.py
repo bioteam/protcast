@@ -2,6 +2,7 @@ import os
 import tensorflow as tf
 import keras
 import pandas as pd
+from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
 from protcast.model.feature_vector import get_ifeatpro_features
@@ -33,6 +34,8 @@ class BinaryClassifier:
         to a *tsv file.
     save_model:
         Save Keras model to file
+    load_model:
+        Load model from a file
     """
 
     @typechecked
@@ -146,7 +149,7 @@ class BinaryClassifier:
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
         # introduce non-linearity.
         kt = keras.layers.Dense(self.neurons, activation="relu")(encoded_features)
-        # Apply a dropout layer with a rate of 0.5 to the input data represented by x.
+        # Apply a dropout layer with a rate of 0.5 to the input data represented by kt.
         # Dropout() is a regularization technique commonly used to prevent overfitting.
         kt = keras.layers.Dropout(self.dropout)(kt)
         # Create a dense layer with a single neuron and apply the sigmoid activation function
@@ -211,3 +214,7 @@ class BinaryClassifier:
     @typechecked
     def save_model(self) -> None:
         self.training_model.save(f"{self.name}_{self.algorithm}.keras")
+
+    @typechecked
+    def load_model(self, model_path: Path) -> None:
+        self.model = keras.models.load_model(model_path)
