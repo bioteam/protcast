@@ -7,7 +7,7 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.stats.create_stats_files import (
+from protcast.preprocessing.stats.create_stats_files import (  # noqa: E402
     create_stats_files,
 )  # noqa: E402
 

@@ -78,7 +78,16 @@ class Protein:
     @typechecked
     def has_annotation(self, annot: Annotation) -> bool:
         """has_annotation
-        Check to see if the Protein has the input Annotation
+
+        Parameters
+        ----------
+        annot : Annotation
+            _description_
+
+        Returns
+        -------
+        bool
+            _description_
         """
         for protein_annot in self.get_all_annotations():
             if (
