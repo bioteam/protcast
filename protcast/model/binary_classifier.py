@@ -68,6 +68,9 @@ class BinaryClassifier:
 
     @typechecked
     def run(self) -> None:
+        """run
+        
+        """
         self.get_feature_vectors()
         self.make_featurespace()
         train_tfdataset, val_tfdataset = self.prepare_data()
@@ -75,6 +78,9 @@ class BinaryClassifier:
 
     @typechecked
     def get_feature_vectors(self) -> None:
+        """get_feature_vector
+
+        """
         # Get feature vectors for all proteins as a list of lists
         self.target_features, target_ids = get_ifeatpro_features(
             self.algorithm, self.target_seqs
@@ -86,6 +92,9 @@ class BinaryClassifier:
 
     @typechecked
     def make_featurespace(self) -> None:
+        """make_featurespace
+
+        """
         # Set up the size and type (float) of the FeatureSpace object and get the column names
         features = dict()
         for count in range(len(self.target_features[0])):
@@ -104,6 +113,13 @@ class BinaryClassifier:
 
     @typechecked
     def prepare_data(self) -> tuple:
+        """prepare_data
+
+        Returns
+        -------
+        tuple
+            
+        """
         all_dataframe = pd.DataFrame(self.all_features, columns=self.column_names)
         self.val_dataframe = all_dataframe.sample(frac=self.fraction, random_state=1337)
         self.train_dataframe = all_dataframe.drop(self.val_dataframe.index)
@@ -142,9 +158,15 @@ class BinaryClassifier:
     @typechecked
     def make_model(self, train_tfds: tf.data.Dataset, val_tfds: tf.data.Dataset) -> None:
         """make_model
-        
+
+        Parameters
+        ----------
+        train_tfds : tf.data.Dataset
+            _description_
+        val_tfds : tf.data.Dataset
+            _description_
         """
-        # The first layer is the encoded features as a KerasTensor
+         # The first layer is the encoded features as a KerasTensor
         encoded_features = self.feature_space.get_encoded_features()
         # Create a dense layer with 32 neurons and apply the ReLU activation function to
         # introduce non-linearity.
@@ -175,6 +197,9 @@ class BinaryClassifier:
 
     @typechecked
     def test_model(self) -> None:
+        """test_model
+
+        """
         with open(f"{self.name}_{self.algorithm}.tsv", "w") as f:
             for i, r in self.val_dataframe.iterrows():
                 if r["target"] == 1.0:
@@ -190,6 +215,18 @@ class BinaryClassifier:
 
     @typechecked
     def dataframe_to_tfdataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
+        """dataframe_to_tfdataset
+
+        Parameters
+        ----------
+        dataframe : pd.DataFrame
+            _description_
+
+        Returns
+        -------
+        tf.data.Dataset
+            _description_
+        """
         # The original dataframe passed to method is unchanged
         dataframe = dataframe.copy()
         labels = dataframe.pop("target")
@@ -199,6 +236,18 @@ class BinaryClassifier:
 
     @typechecked
     def sample_preprocessing(self, sample: pd.core.series.Series) -> tf.data.Dataset:
+        """sample_preprocessing
+
+        Parameters
+        ----------
+        sample : pd.core.series.Series
+            _description_
+
+        Returns
+        -------
+        tf.data.Dataset
+            _description_
+        """
         # Convert pandas Series into dataframe
         sample_frame = pd.DataFrame([sample])
         # Convert datafrane into Tensorflow Datasest with stub target
@@ -213,8 +262,19 @@ class BinaryClassifier:
 
     @typechecked
     def save_model(self) -> None:
+        """save_model
+
+        """
         self.training_model.save(f"{self.name}_{self.algorithm}.keras")
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
+        """load_model
+
+
+        Parameters
+        ----------
+        model_path : Path
+            _description_
+        """
         self.training_model = keras.models.load_model(model_path)
