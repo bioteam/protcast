@@ -86,7 +86,7 @@ class BinaryClassifier:
 
     @typechecked
     def make_featurespace(self) -> None:
-        # Set up the size and type (float) in the FeatureSpace object and get the column names
+        # Set up the size and type (float) of the FeatureSpace object and get the column names
         features = dict()
         for count in range(len(self.target_features[0])):
             features[str(count)] = FeatureSpace.float_normalized()
@@ -217,4 +217,4 @@ class BinaryClassifier:
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
-        self.model = keras.models.load_model(model_path)
+        self.training_model = keras.models.load_model(model_path)
