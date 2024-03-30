@@ -53,6 +53,35 @@ class BinaryClassifier:
         neurons: int = 32,
         dropout: float = 0.5
     ) -> None:
+        """__init__
+
+        Parameters
+        ----------
+        name : str
+            _description_
+        target_seqs : dict
+            _description_
+        non_target_seqs : dict
+            _description_
+        algorithm : str
+            _description_
+        optimizer : str, optional
+            _description_, by default "adam"
+        loss : str, optional
+            _description_, by default "binary_crossentropy"
+        metrics : list, optional
+            _description_, by default ["accuracy"]
+        epochs : int, optional
+            _description_, by default 20
+        fraction : float, optional
+            _description_, by default 0.2
+        neurons : int, optional
+            _description_, by default 32
+        dropout : float, optional
+            _description_, by default 0.5
+        training_model: keras.src.engine.functional.Functional
+            Trained model
+        """
         self.name = name
         self.target_seqs = target_seqs
         self.non_target_seqs = non_target_seqs
@@ -69,7 +98,7 @@ class BinaryClassifier:
     @typechecked
     def run(self) -> None:
         """run
-        
+
         """
         self.get_feature_vectors()
         self.make_featurespace()
@@ -159,6 +188,24 @@ class BinaryClassifier:
     def make_model(self, train_tfds: tf.data.Dataset, val_tfds: tf.data.Dataset) -> None:
         """make_model
 
+        (Pdb) classifier.training_model.summary()
+        Model: "model_1"
+        _________________________________________________________________
+        Layer (type)                Output Shape              Param #   
+        =================================================================
+        input_2 (InputLayer)        [(None, 343)]             0         
+                                                                        
+        dense_2 (Dense)             (None, 32)                11008     
+                                                                        
+        dropout_1 (Dropout)         (None, 32)                0         
+                                                                        
+        dense_3 (Dense)             (None, 1)                 33        
+                                                                        
+        =================================================================
+        Total params: 11041 (43.13 KB)
+        Trainable params: 11041 (43.13 KB)
+        Non-trainable params: 0 (0.00 Byte)
+
         Parameters
         ----------
         train_tfds : tf.data.Dataset
@@ -168,8 +215,7 @@ class BinaryClassifier:
         """
          # The first layer is the encoded features as a KerasTensor
         encoded_features = self.feature_space.get_encoded_features()
-        # Create a dense layer with 32 neurons and apply the ReLU activation function to
-        # introduce non-linearity.
+        # Create a dense layer with 32 neurons and apply the ReLU activation function for non-linearity.
         kt = keras.layers.Dense(self.neurons, activation="relu")(encoded_features)
         # Apply a dropout layer with a rate of 0.5 to the input data represented by kt.
         # Dropout() is a regularization technique commonly used to prevent overfitting.
