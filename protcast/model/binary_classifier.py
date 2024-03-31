@@ -6,6 +6,7 @@ from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
 from protcast.model.feature_vector import get_ifeatpro_features
+from protcast.model.stats.utils import calculate_sensitivity_specificity
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -51,7 +52,8 @@ class BinaryClassifier:
         epochs: int = 20,
         fraction: float = 0.2,
         neurons: int = 32,
-        dropout: float = 0.5
+        dropout: float = 0.5,
+        pred_threshold: float = 75.0
     ) -> None:
         """__init__
 
@@ -79,6 +81,8 @@ class BinaryClassifier:
             _description_, by default 32
         dropout : float, optional
             _description_, by default 0.5
+        pred_threshold : float, optional
+            Probability threshold for classification, by default 80.0
         training_model: keras.src.engine.functional.Functional
             Trained model
         """
@@ -93,6 +97,7 @@ class BinaryClassifier:
         self.fraction = fraction
         self.neurons = neurons
         self.dropout = dropout
+        self.pred_threshold = pred_threshold
         self.column_names = list()
 
     @typechecked
@@ -246,18 +251,29 @@ class BinaryClassifier:
         """test_model
 
         """
-        with open(f"{self.name}_{self.algorithm}.tsv", "w") as f:
-            for i, r in self.val_dataframe.iterrows():
-                if r["target"] == 1.0:
-                    type = self.name
-                else:
-                    type = f"non-{self.name}"
-                # Pre-process the sample you want a prediction from
-                del r["target"]
-                sample_tfds = self.sample_preprocessing(r)
-                # Get a prediction
-                predictions = self.training_model.predict(sample_tfds)
-                f.write(f"{type}\t{self.all_ids[i]}\t{100 * predictions[0][0]:.2f}\n")
+        y_true = list()
+        y_pred = list()
+        f = open(f"{self.name}_{self.algorithm}.tsv", "w")
+        for i, r in self.val_dataframe.iterrows():
+            # Pre-process the sample you want a prediction from
+            if r["target"] == 1.0:
+                type = self.name
+                y_true.append(1)
+            else:
+                type = f"non-{self.name}"
+                y_true.append(0)
+            del r["target"]
+            sample_tfds = self.sample_preprocessing(r)
+            # Get a prediction
+            predictions = self.training_model.predict(sample_tfds)
+            prob = float(100 * predictions[0][0])
+            if prob >= self.pred_threshold:
+                y_pred.append(1)
+            else:
+                y_pred.append(0)
+            f.write(f"{type}\t{self.all_ids[i]}\t{prob}\n")
+        sens, spec = calculate_sensitivity_specificity(y_true, y_pred)
+        f.write(f"Sensitivity\t{sens}\tSpecificity\t{spec}\n")
 
     @typechecked
     def dataframe_to_tfdataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
