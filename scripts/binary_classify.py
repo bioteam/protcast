@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t","--target", required=True, help="Path to target sequences")
     parser.add_argument("-nt","--non_target", required=True, help="Path to non-target sequences")
-    parser.add_argument("-a", "--algorithms", default=["ctriad"], help="Feature vector algorithms")
+    parser.add_argument("-a", "--algorithm", default="ctriad", help="Feature vector algorithm")
     parser.add_argument("-n", "--name", default="test", help="Name")
     parser.add_argument("-v", action="store_true", help="Verbose")
     args = parser.parse_args()
@@ -31,8 +31,7 @@ if __name__ == "__main__":
     target_seqs = SeqIO.to_dict(SeqIO.parse(args.target, "fasta"))
     non_target_seqs = SeqIO.to_dict(SeqIO.parse(args.non_target, "fasta"))
 
-    for alg in args.algorithms:
-        classifier = BinaryClassifier(args.name, target_seqs, non_target_seqs, alg)
-        classifier.run()
-        classifier.test_model()
-        classifier.save_model()
+    classifier = BinaryClassifier(args.name, target_seqs, non_target_seqs, alg)
+    classifier.run()
+    classifier.test_model()
+    classifier.save_model()
