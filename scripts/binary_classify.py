@@ -31,7 +31,7 @@ if __name__ == "__main__":
     target_seqs = SeqIO.to_dict(SeqIO.parse(args.target, "fasta"))
     non_target_seqs = SeqIO.to_dict(SeqIO.parse(args.non_target, "fasta"))
 
-    classifier = BinaryClassifier(args.name, target_seqs, non_target_seqs, args.alg)
+    classifier = BinaryClassifier(args.name, target_seqs, non_target_seqs, args.algorithm)
     classifier.run()
     classifier.test_model()
     classifier.save_model()
