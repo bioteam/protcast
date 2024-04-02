@@ -5,7 +5,6 @@
 #SBATCH --mail-user=briano@bioteam.net
 #SBATCH -o run_ifeatpro.out
 #SBATCH -e run_ifeatpro.err
-#SBATCH -N 1
 #SBATCH -n 20
 
 algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad de dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
