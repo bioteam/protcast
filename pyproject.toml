@@ -7,7 +7,7 @@ name = "ProtCast"
 version = "0.0.1"
 description = "Protein function prediction based on sequence"
 authors = [{ name = "Brian Osborne", email = "briano@bioteam.net" }, {name = "Bruno Alvisio", email = "contact@bioteam.net"}]
-requires-python = ">=3.9.2"
+requires-python = ">=3.7.0"
 dependencies = [
     "plotly",
     "kaleido",
@@ -15,11 +15,12 @@ dependencies = [
     "typeguard",
     "scikit-learn",
     "tqdm",
-    "tensorflow",
     "biopython",
     "ifeatpro",
     "goatools",
     "pandas",
+    "grpcio==1.28.1",
+    "tensorflow-gpu==2.1.0",
     "keras"
 ]
 
