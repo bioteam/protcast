@@ -70,9 +70,9 @@ class SimpleDataset:
     parse_fasta: list
         Parse TrEMBL, return list of Proteins
     get_subgraph: str
-        Return list of subgraph ids
-    get_subgraph_sequences: list
-        Return list of sequences for all subgraphs
+        Return list of subgraph GO ids given a GO id
+    get_sequences: list
+        Return list of sequences given a list of GO ids
     remove_protein: str
         Remove Protein and accession
     to_obo:
@@ -485,27 +485,27 @@ class SimpleDataset:
     def get_subgraph(self, go_id: str) -> list[str]:
         """get_subgraph
 
-        Calls the recursive _rget_subgraph method and then inserts
+        Calls the recursive rget_subgraph method and then inserts
         the parent GO id in the list that is returned.
         
         Parameters
         ----------
-        go_id : str
-            _description_
+        go_id: str
+            GO id
 
         Returns
         -------
-        list[str]
-            _description_
+        go_ids: list[str]
+             A list of all subgraph GO IDs including parent GO id
         """
-        go_ids = self._rget_subgraph(go_id)
+        go_ids = self.rget_subgraph(go_id)
         go_ids.insert(0, go_id)
         return go_ids
 
     @typechecked
-    def _rget_subgraph(self, go_id: str) -> list[str]:
-        """_rget_subgraph
-        Private method that recursively retrieve all the GO ids of all subgraphs 
+    def rget_subgraph(self, go_id: str) -> list[str]:
+        """rget_subgraph
+        Recursively retrieve all the GO ids of all subgraphs 
         of a GO term. Each time a recursive function calls itself, it creates a new 
         stack frame. This stack frame acts as a separate environment with its own 
         local variables, including its own copy of the subgraphs list.
@@ -517,17 +517,18 @@ class SimpleDataset:
 
         Returns
         -------
-        A list of all subgraph GO IDs including parent GO id
+        go_ids: list[str]
+            A list of all subgraph GO IDs without parent GO id
         """
         subgraph = []
         if go_id in self.annotated_dag.go_terms_map:
             for child_id in self.annotated_dag.go_terms_map[go_id].children:
                 subgraph.append(child_id)
-                subgraph.extend(self._rget_subgraph(child_id))
+                subgraph.extend(self.rget_subgraph(child_id))
         return subgraph
 
-    def get_subgraph_sequences(self, go_ids: list[str]) -> list[str]:
-        """get_subgraph_sequences
+    def get_sequences(self, go_ids: list[str]) -> list[str]:
+        """get_sequences
 
         Parameters
         ----------
