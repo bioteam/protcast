@@ -276,7 +276,7 @@ class SimpleDataset:
         return gaf_annotations, new_protein_ids
 
     @typechecked
-    def parse_fasta(self, new_protein_ids: list) -> dict:
+    def parse_fasta(self, new_protein_ids: set) -> dict:
         """parse_fasta
         Returns proteins in TrEMBL that were in the *gaf file but not
         in the UniProt *dat file.
