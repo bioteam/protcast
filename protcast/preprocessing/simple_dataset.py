@@ -283,7 +283,7 @@ class SimpleDataset:
 
         Parameters
         ----------
-        new_protein_ids: list
+        new_protein_ids: set
             list of ids
 
         Returns
@@ -418,6 +418,9 @@ class SimpleDataset:
                         + "\n"
                         + "\ncomment: level "
                         + str(term.level)
+                        + "\n"
+                        + "\ncomment: depth "
+                        + str(term.depth)
                         + "\n"
                     )
                     for parent in term.parents:
