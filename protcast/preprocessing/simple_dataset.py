@@ -415,13 +415,11 @@ class SimpleDataset:
                         + term.name
                         + "\nnamespace: "
                         + term.namespace
-                        + "\n"
                         + "\ncomment: level "
                         + str(term.level)
-                        + "\n"
                         + "\ncomment: depth "
                         + str(term.depth)
-                        + "\n"
+                        + "\n\n"
                     )
                     for parent in term.parents:
                         obo_file.write("is_a: " + parent + "\n")
