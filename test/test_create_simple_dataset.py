@@ -141,14 +141,14 @@ def main():
     assert len(dataset.get_term("GO:0031955").children) == 0
     assert len(dataset.get_term("GO:0015645").children) == 9
 
-    # descendants
-    assert len(dataset.get_descendants("GO:0031957")) == 0
-    assert len(dataset.get_descendants("GO:0031955")) == 0
-    # Numbers corroborated by goatools
-    assert len(dataset.get_descendants("GO:0015645")) == 15
-    assert len(dataset.get_descendants("GO:0031956")) == 2
-    assert len(dataset.get_descendants("GO:0004467")) == 4
-    assert len(dataset.get_descendants("GO:0016405")) == 57
+    # Subgraphs
+    assert len(dataset.get_subgraph("GO:0031957")) == 1
+    assert len(dataset.get_subgraph("GO:0031955")) == 1
+    # Numbers validated by goatools
+    assert len(dataset.get_subgraph("GO:0015645")) == 16
+    assert len(dataset.get_subgraph("GO:0031956")) == 3
+    assert len(dataset.get_subgraph("GO:0004467")) == 5
+    assert len(dataset.get_subgraph("GO:0016405")) == 58
 
     # parents
     # GO:0016405 (CoA-ligase activity), GO:0015645 (fatty acid ligase activity)
