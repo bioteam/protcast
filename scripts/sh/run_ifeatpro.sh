@@ -7,7 +7,9 @@
 #SBATCH -e run_ifeatpro.err
 #SBATCH -n 20
 
-algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad de dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
+#algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad de dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
+
+algorithms=(ctriad moran nmbroto paac qsorder socnumber tpc)
 
 for alg in "${algorithms[@]}"; do
     python3 scripts/binary_classify.py -n gpcrs -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta -a "$alg"
