@@ -310,7 +310,7 @@ class BinaryClassifier:
         Parameters
         ----------
         sample : pd.core.series.Series
-            _description_
+            
 
         Returns 
         -------
@@ -344,6 +344,6 @@ class BinaryClassifier:
         Parameters
         ----------
         model_path : Path
-            _description_
+            Path to saved model
         """
         self.training_model = keras.models.load_model(model_path)
