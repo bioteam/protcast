@@ -7,6 +7,8 @@
 #SBATCH -e run_ifeatpro.err
 #SBATCH -n 20
 
+module load all/TensorFlow/2.15.1-Python-3.10
+
 #algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad de dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
 
 algorithms=(ctriad moran nmbroto paac qsorder socnumber tpc)
