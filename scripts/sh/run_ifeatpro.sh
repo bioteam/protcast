@@ -10,6 +10,7 @@
 module load all/TensorFlow/2.15.1-Python-3.10
 
 #algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad dde dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
+
 algorithms=(cksaap dde tpc)
 
 for alg in "${algorithms[@]}"; do

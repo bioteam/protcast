@@ -279,7 +279,7 @@ class BinaryClassifier:
             f.write(f"{type}\t{self.all_ids[i]}\t{prob}\n")
         sens, spec = calculate_sensitivity_specificity(y_true, y_pred)
         f.write(f"Sensitivity\t{sens}\tSpecificity\t{spec}\n")
-        f.write(f"Elapsed time\t{time.time() - self.start_time} seconds\n")
+        f.write(f"Elapsed time\t{int(time.time() - self.start_time)} seconds\n")
         f.write(f"Vector length\t{self.vector_length}")
 
     @typechecked
@@ -310,7 +310,7 @@ class BinaryClassifier:
         Parameters
         ----------
         sample : pd.core.series.Series
-            _description_
+            
 
         Returns 
         -------
@@ -344,6 +344,6 @@ class BinaryClassifier:
         Parameters
         ----------
         model_path : Path
-            _description_
+            Path to saved model
         """
         self.training_model = keras.models.load_model(model_path)
