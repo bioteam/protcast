@@ -132,7 +132,7 @@ class BinaryClassifier:
     @typechecked
     def make_featurespace(self) -> None:
         """make_featurespace
-
+        
         """
         # Set up the size and type (float) of the FeatureSpace object and get the column names
         features = dict()
