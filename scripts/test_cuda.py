@@ -8,14 +8,14 @@ num = 10000000
 
 
 # normal function to run on cpu
-def func(a):
+def func_cpu(a):
     for i in range(num):
         a[i] += 1
 
 
 # function optimized to run on gpu
 @jit(target_backend="cuda")
-def func2(a):
+def func_gpu(a):
     for i in range(num):
         a[i] += 1
 
@@ -23,8 +23,8 @@ def func2(a):
 if __name__ == "__main__":
     a = np.ones(num, dtype=np.float64)
     start = timer()
-    func(a)
+    func_cpu(a)
     print("Without GPU:", timer() - start)
     start = timer()
-    func2(a)
+    func_gpu(a)
     print("With GPU:", timer() - start)
