@@ -1,25 +1,30 @@
-from numba import jit, cuda 
-import numpy as np 
-# to measure exec time 
-from timeit import default_timer as timer    
+from numba import jit, cuda  # noqa: F401
+import numpy as np
 
-# normal function to run on cpu 
-def func(a):
-    for i in range(10000000): 
-        a[i]+= 1
+# to measure exec time
+from timeit import default_timer as timer
 
-# function optimized to run on gpu  
-@jit(target_backend='cuda')
-def func2(a): 
-    for i in range(10000000): 
-        a[i]+= 1
+num = 10000000
 
-if __name__=="__main__":
-    n = 10000000
-    a = np.ones(n, dtype = np.float64) 
-    start = timer() 
-    func(a) 
-    print("without GPU:", timer()-start)
-    start = timer() 
-    func2(a) 
-    print("with GPU:", timer()-start) 
+
+# normal function to run on cpu
+def func_cpu(a):
+    for i in range(num):
+        a[i] += 1
+
+
+# function optimized to run on gpu
+@jit(target_backend="cuda")
+def func_gpu(a):
+    for i in range(num):
+        a[i] += 1
+
+
+if __name__ == "__main__":
+    a = np.ones(num, dtype=np.float64)
+    start = timer()
+    func_cpu(a)
+    print("Without GPU:", timer() - start)
+    start = timer()
+    func_gpu(a)
+    print("With GPU:", timer() - start)

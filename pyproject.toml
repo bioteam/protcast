@@ -12,6 +12,7 @@ dependencies = [
     "plotly",
     "kaleido",
     "numpy",
+    "numba",
     "typeguard",
     "scikit-learn",
     "tqdm",
