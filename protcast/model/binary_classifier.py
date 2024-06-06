@@ -2,11 +2,13 @@ import os
 import tensorflow as tf
 import keras
 import pandas as pd
+import time
 from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
 from protcast.model.feature_vector import get_ifeatpro_features
 from protcast.model.stats.utils import calculate_sensitivity_specificity
+from protcast.model.stats.utils import calculate_f1_score
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -67,6 +69,8 @@ class BinaryClassifier:
             _description_
         algorithm : str
             _description_
+        vector_length: int
+            Length of feature vector
         optimizer : str, optional
             _description_, by default "adam"
         loss : str, optional
@@ -105,6 +109,7 @@ class BinaryClassifier:
         """run
 
         """
+        self.start_time = time.time()
         self.get_feature_vectors()
         self.make_featurespace()
         train_tfdataset, val_tfdataset = self.prepare_data()
@@ -123,11 +128,12 @@ class BinaryClassifier:
             self.algorithm, self.non_target_seqs
         )
         self.all_ids = target_ids + non_target_ids
+        self.vector_length = len(self.target_features[0])
 
     @typechecked
     def make_featurespace(self) -> None:
         """make_featurespace
-
+        
         """
         # Set up the size and type (float) of the FeatureSpace object and get the column names
         features = dict()
@@ -274,6 +280,9 @@ class BinaryClassifier:
             f.write(f"{type}\t{self.all_ids[i]}\t{prob}\n")
         sens, spec = calculate_sensitivity_specificity(y_true, y_pred)
         f.write(f"Sensitivity\t{sens}\tSpecificity\t{spec}\n")
+        f.write(f"F1 score\t{calculate_f1_score(y_true, y_pred)}\n")
+        f.write(f"Elapsed time\t{int(time.time() - self.start_time)} seconds\n")
+        f.write(f"Vector length\t{self.vector_length}")
 
     @typechecked
     def dataframe_to_tfdataset(self, dataframe: pd.DataFrame) -> tf.data.Dataset:
@@ -303,9 +312,9 @@ class BinaryClassifier:
         Parameters
         ----------
         sample : pd.core.series.Series
-            _description_
+            
 
-        Returns
+        Returns 
         -------
         tf.data.Dataset
             _description_
@@ -337,6 +346,6 @@ class BinaryClassifier:
         Parameters
         ----------
         model_path : Path
-            _description_
+            Path to saved model
         """
         self.training_model = keras.models.load_model(model_path)

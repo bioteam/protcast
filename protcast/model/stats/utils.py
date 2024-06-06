@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import f1_score
 from typeguard import typechecked
 
 
@@ -48,3 +49,21 @@ def calculate_sensitivity_specificity(y_true: list, y_pred: list) -> tuple:
     # Also known as true negative rate
     spec = tn / (tn + fp)
     return f"{sens:.3f}", f"{spec:.3f}"
+
+@typechecked
+def calculate_f1_score(y_true: list, y_pred: list) -> float:
+    """calculate_f1_score
+
+    Parameters
+    ----------
+    y_true : list
+        _description_
+    y_pred : list
+        _description_
+
+    Returns
+    -------
+    f1_score
+        float
+    """
+    return f1_score(y_true, y_pred)

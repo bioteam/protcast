@@ -40,6 +40,8 @@ class AnnotatedGOTerm:
         Returns Annotation given a GO id
     get_all_annotations:
         Returns all Annotations for an AnnotatedGOTerm
+    get_all_sequences: dict
+        Returns all sequences for all Annotations for an AnnotatedGOTerm
     """
 
     def __init__(self, goatools_go_term) -> None:
@@ -147,3 +149,19 @@ class AnnotatedGOTerm:
         """
         if len(self.annotations) > 0:
             return self.annotations
+
+    @typechecked
+    def get_all_sequences(self) -> dict[str, str] | None:
+        """get_all_sequences
+        Get all sequences for all Proteins for an AnnotatedGOterm
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        Dict of protein ids and protein sequences
+        """
+        if len(self.annotations) > 0:
+            return {p.id:p.sequence for p in [annot.protein for annot in self.annotations]}

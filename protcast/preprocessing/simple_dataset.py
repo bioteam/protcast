@@ -69,8 +69,10 @@ class SimpleDataset:
         Get all Annotations from a *gaf file
     parse_fasta: list
         Parse TrEMBL, return list of Proteins
-    get_descendants: str
-        Return list of descendant ids
+    get_subgraph: str
+        Return list of subgraph GO ids given a GO id
+    get_sequences: list
+        Return list of sequences given a list of GO ids
     remove_protein: str
         Remove Protein and accession
     to_obo:
@@ -202,6 +204,7 @@ class SimpleDataset:
             ds = pickle.load(f)
         return ds
 
+    @typechecked
     def add_annotations(self, annotations, check_pid=False) -> int:
         """add_annotations
         ...
@@ -233,7 +236,8 @@ class SimpleDataset:
                 self.go_terms_not_found.add(annot.go_id)
         return num_new_annotations
 
-    def get_annotations_from_gaf(self):
+    @typechecked
+    def get_annotations_from_gaf(self) -> tuple:
         """get_annotations_from_gaf
         Read annotations from a *gaf file and return a list of Annotations and
         a list of protein ids that are not found in the UniProt input file.
@@ -271,14 +275,15 @@ class SimpleDataset:
         logging.info(f"Found {len(gaf_annotations)} Annotations in '{self.gaf_path}'")
         return gaf_annotations, new_protein_ids
 
-    def parse_fasta(self, new_protein_ids: list) -> dict:
+    @typechecked
+    def parse_fasta(self, new_protein_ids: set) -> dict:
         """parse_fasta
         Returns proteins in TrEMBL that were in the *gaf file but not
         in the UniProt *dat file.
 
         Parameters
         ----------
-        new_protein_ids: list
+        new_protein_ids: set
             list of ids
 
         Returns
@@ -309,6 +314,7 @@ class SimpleDataset:
         )
         return new_proteins
 
+    @typechecked
     def add_proteins(self, new_proteins: dict) -> None:
         """add_proteins
         Adds Proteins and populates the accessions dict
@@ -327,6 +333,7 @@ class SimpleDataset:
             for acc in protein.accessions:
                 self.accessions[protein.id] = acc
 
+    @typechecked
     def remove_protein(self, protein_id: str) -> None:
         """remove_protein
         Deletes protein from SimpleDataset.proteins
@@ -408,9 +415,10 @@ class SimpleDataset:
                         + term.name
                         + "\nnamespace: "
                         + term.namespace
-                        + "\n"
                         + "\ncomment: level "
                         + str(term.level)
+                        + "\ncomment: depth "
+                        + str(term.depth)
                         + "\n"
                     )
                     for parent in term.parents:
@@ -480,14 +488,34 @@ class SimpleDataset:
         return annots
 
     @typechecked
-    def get_descendants(self, go_id: str) -> list[str]:
-        """
-        Recursively retrieve all the GO ids of all descendants of a GO term
+    def get_subgraph(self, go_id: str) -> list[str]:
+        """get_subgraph
 
-        Each time a recursive function calls itself, it creates a new stack frame. 
-        This stack frame acts as a separate environment with its own local variables, 
-        including its own copy of the descendants list.
-        
+        Calls the recursive rget_subgraph method and then inserts
+        the parent GO id in the list that is returned.
+
+        Parameters
+        ----------
+        go_id: str
+            GO id
+
+        Returns
+        -------
+        go_ids: list[str]
+             A list of all subgraph GO IDs including parent GO id
+        """
+        go_ids = self.rget_subgraph(go_id)
+        go_ids.insert(0, go_id)
+        return go_ids
+
+    @typechecked
+    def rget_subgraph(self, go_id: str) -> list[str]:
+        """rget_subgraph
+        Recursively retrieve all the GO ids of all subgraphs
+        of a GO term. Each time a recursive function calls itself, it creates a new
+        stack frame. This stack frame acts as a separate environment with its own
+        local variables, including its own copy of the subgraphs list.
+
         Parameters
         ----------
         go_id: str
@@ -495,11 +523,32 @@ class SimpleDataset:
 
         Returns
         -------
-        A list of all descendant GO IDs
+        go_ids: list[str]
+            A list of all subgraph GO IDs without parent GO id
         """
-        descendants = []
+        subgraph = []
         if go_id in self.annotated_dag.go_terms_map:
             for child_id in self.annotated_dag.go_terms_map[go_id].children:
-                descendants.append(child_id)
-                descendants.extend(self.get_descendants(child_id))
-        return descendants
+                subgraph.append(child_id)
+                subgraph.extend(self.rget_subgraph(child_id))
+        return subgraph
+
+    @typechecked
+    def get_sequences(self, go_ids: list[str]) -> list[str]:
+        """get_sequences
+
+        Parameters
+        ----------
+        go_ids: list[str]
+            List of GO ids
+
+        Returns
+        -------
+        all_seqs: list[str]
+            List of protein sequences
+        """
+        all_seqs = list()
+        for go_id in go_ids:
+            seqs = go_id.get_all_sequences(go_id)
+            all_seqs.extend(seqs)
+        return all_seqs
