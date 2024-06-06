@@ -21,6 +21,7 @@ dependencies = [
     "pandas",
     "grpcio",
     "tensorflow",
+    "tensorrt",
     "keras"
 ]
 
