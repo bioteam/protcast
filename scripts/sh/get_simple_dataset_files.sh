@@ -8,7 +8,7 @@
 #SBATCH -N 1
 #SBATCH -n 20
 
-DATE=2024-01-17
+DATE=2024-06-17
 GO_ROOT=https://release.geneontology.org
 UNIPROT_ROOT=https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete
 
