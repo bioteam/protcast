@@ -148,7 +148,7 @@ class MakeDRSeqs:
         try:
             if self.verbose:
                 print(f"Running 'mash dist': {cmd}")
-                subprocess.run(cmd, stdout=tmpout)
+            subprocess.run(cmd, stdout=tmpout)
         except subprocess.CalledProcessError as exception:
             print(f"Error: {exception}")
             sys.exit(f"Error running 'mash dist' on {tmpfasta.name}")
