@@ -160,8 +160,8 @@ class MakeDRSeqs:
     def convert_mash_out_to_dict(self, mash_out):
         """Create a dict of dicts for the distances"""
         mash_sorted = defaultdict(dict)
-	if self.verbose:
-	    print(f"Reading {maah_out}") 
+        if self.verbose:
+            print(f"Reading {mash_out}")
         with open(mash_out, "r") as f:
             # mash_sorted = { i[0]:{i[1]:float(i[2])} for i in [l.split("\t") for l in f] }
             for line in f:
@@ -235,7 +235,7 @@ class MakeDRSeqs:
         """Find the sequences in a cluster with the least GO terms"""
         seqs_to_remove = list()
         for cluster in clusters.values():
-            if self.informat == 'swiss':
+            if self.informat == "swiss":
                 num_of_terms = [self.get_num_terms(acc) for acc in cluster]
                 # Index of highest number
                 max_index = num_of_terms.index(max(num_of_terms))
@@ -244,7 +244,7 @@ class MakeDRSeqs:
             else:
                 # Arbitrary choice
                 cluster.pop()
-            seqs_to_remove.extend(cluster)            
+            seqs_to_remove.extend(cluster)
         return seqs_to_remove
 
     def write_seqs(self, similar_seqs):
