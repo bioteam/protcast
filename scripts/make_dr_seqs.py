@@ -148,7 +148,7 @@ class MakeDRSeqs:
         try:
             if self.verbose:
                 print(f"Running 'mash dist': {cmd}")
-                subprocess.run(cmd, stdout=tmpout)
+            subprocess.run(cmd, stdout=tmpout)
         except subprocess.CalledProcessError as exception:
             print(f"Error: {exception}")
             sys.exit(f"Error running 'mash dist' on {tmpfasta.name}")
@@ -160,6 +160,8 @@ class MakeDRSeqs:
     def convert_mash_out_to_dict(self, mash_out):
         """Create a dict of dicts for the distances"""
         mash_sorted = defaultdict(dict)
+	if self.verbose:
+	    print(f"Reading {maah_out}") 
         with open(mash_out, "r") as f:
             # mash_sorted = { i[0]:{i[1]:float(i[2])} for i in [l.split("\t") for l in f] }
             for line in f:
