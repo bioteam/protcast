@@ -14,14 +14,15 @@ UNIPROT_ROOT=https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowl
 
 GO=$GO_ROOT/$DATE/ontology/go.obo
 GAF=$GO_ROOT/$DATE/annotations/filtered_goa_uniprot_all_noiea.gaf.gz
-UNIPROT=$UNIPROT_ROOT/uniprot_sprot.dat.gz
+UNIPROT_DAT=$UNIPROT_ROOT/uniprot_sprot.dat.gz
+UNIPROT_FA=$UNIPROT_ROOT/uniprot_sprot.fasta.gz
 TREMBL=$UNIPROT_ROOT/uniprot_trembl.fasta.gz
 
 cd /data || exit
 mkdir -p GO/"$DATE"
 mkdir -p UniProt/"$DATE"
 
-for URL in $GO $GAF $UNIPROT $TREMBL; do
+for URL in $GO $GAF $UNIPROT_DAT $UNIPROT_FA $TREMBL; do
     FNAME=$(basename "$URL" | sed 's/.gz//')
     if [ -f GO/"$DATE"/"$FNAME" ] || [ -f UniProt/"$DATE"/"$FNAME" ]; then
         echo Found: "$FNAME"
