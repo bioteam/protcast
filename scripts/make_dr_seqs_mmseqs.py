@@ -127,7 +127,7 @@ class MakeDRSeqs:
         """Create a dict with the clusters"""
         clusters = defaultdict(list)
         if self.verbose:
-            print(f"Reading {self.mmseqs_tsv_file}")
+            print(f"Reading '{self.mmseqs_tsv_file}'")
         with open(self.mmseqs_tsv_file, "r") as f:
             # mash_sorted = { i[0]:{i[1]:float(i[2])} for i in [l.split("\t") for l in f] }
             for line in f:
@@ -141,6 +141,8 @@ class MakeDRSeqs:
         if self.verbose:
             print(f"Finding sequences to remove from {len(clusters.values())} clusters")
         for cluster in clusters.values():
+            if len(cluster) == 1:
+                continue
             if self.informat == "swiss":
                 num_of_terms = [self.get_num_terms(acc) for acc in cluster]
                 # Index of highest number
