@@ -20,7 +20,7 @@ the fewest GO terms.
 
 Example using a file from Uniprot with 571609 sequences:
 
-> time python3 scripts/make_dr_seqs_mmseqs.py -s data/uniprot_sprot.dat
+> time python3 scripts/make_dr_seqs_mmseqs.py -s /data/UniProt/2024-06-17/uniprot_sprot.dat
 ...
 Reading 'uniprot_sprot_cluster.tsv'
 Finding sequences to remove from 243344 clusters
