@@ -151,6 +151,8 @@ class MakeDRSeqs:
                 # Index of highest number
                 max_index = num_of_terms.index(max(num_of_terms))
                 # Remove sequence with most terms
+                if self.verbose:
+                    print(f"IDs\t{cluster}\tnum_of_terms\t{num_of_terms}\tmax_index\t{max_index}")
                 cluster.pop(max_index)
             else:
                 # Arbitrary choice
