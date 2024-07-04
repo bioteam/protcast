@@ -139,7 +139,7 @@ class MakeDRSeqs:
         return clusters
 
     def get_seqs_to_remove(self, clusters):
-        """Find the sequences in a cluster with the least GO terms"""
+        """Find the sequences in a cluster with the fewest GO terms"""
         seqs_to_remove = list()
         if self.verbose:
             print(f"Finding sequences to remove from {len(clusters.values())} clusters")
