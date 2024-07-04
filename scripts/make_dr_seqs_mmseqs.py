@@ -21,9 +21,13 @@ the fewest GO terms.
 Example using a file from Uniprot with 571609 sequences:
 
 > time python3 scripts/make_dr_seqs_mmseqs.py -s data/uniprot_sprot.dat
-real	6m15.980s
-
-2137 clusters found and 6,467 sequences removed.
+...
+Reading 'uniprot_sprot_cluster.tsv'
+Finding sequences to remove from 243344 clusters
+Input file '/data/UniProt/2024-06-17/uniprot_sprot.dat' has 571609 sequences
+Output file '/data/UniProt/2024-06-17/uniprot_sprot-dr-0.75.dat' has 243344 sequences
+...
+1:05:21 elapsed 
 """
 
 parser = argparse.ArgumentParser()
@@ -129,7 +133,6 @@ class MakeDRSeqs:
         if self.verbose:
             print(f"Reading '{self.mmseqs_tsv_file}'")
         with open(self.mmseqs_tsv_file, "r") as f:
-            # mash_sorted = { i[0]:{i[1]:float(i[2])} for i in [l.split("\t") for l in f] }
             for line in f:
                 arr = line.strip().split("\t")
                 clusters[arr[0]].append(arr[1])
