@@ -13,14 +13,14 @@ from collections import defaultdict
 from shutil import which
 
 """
-Run the `mmseqs` application to find clusters of related sequences based on minimum sequence identity. 
-All the sequences in the cluster but 1 are removed to create a "decreased redundancy" 
-("dr") file. If the input file is in Swissprot format, the removed sequences will be the ones with 
+Run the `mmseqs` application to find clusters of related sequences based on minimum sequence 
+identity. All the sequences in the cluster but 1 are removed to create a "decreased redundancy" 
+("dr") file. If the input file is in 'swiss' format, the removed sequences will be the ones with 
 the fewest GO terms.
 
-Example using a file from Uniprot with 571609 sequences:
+Example using Uniprot (CLAB):
 
-> time python3 scripts/make_dr_seqs_mmseqs.py -s /data/UniProt/2024-06-17/uniprot_sprot.dat
+> time python3 scripts/make_dr_seqs_mmseqs.py -s /data/UniProt/2024-06-17/uniprot_sprot.dat -v
 ...
 Reading 'uniprot_sprot_cluster.tsv'
 Finding sequences to remove from 243344 clusters
@@ -37,8 +37,6 @@ parser.add_argument(
     required=True,
     help="Path to input sequence file",
 )
-parser.add_argument("--informat", default="swiss", help="Input sequence file format")
-parser.add_argument("--outformat", default="swiss", help="Output sequence file format")
 parser.add_argument(
     "-m",
     "--min-seq-id",
@@ -46,6 +44,8 @@ parser.add_argument(
     type=float,
     help="Minimum sequenece identity",
 )
+parser.add_argument("--informat", default="swiss", help="Input sequence file format")
+parser.add_argument("--outformat", default="swiss", help="Output sequence file format")
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
