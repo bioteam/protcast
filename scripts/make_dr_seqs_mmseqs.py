@@ -191,10 +191,10 @@ class MakeDRSeqs:
 
     def clean_up(self):
         """Remove mmseqs output files"""
-        shutil.rmtree(self.timestamp)
-        os.remove(self.mmseqs_tsv_file)
-        os.remove(self.output_name + "_rep_seq.fasta")
-        os.remove(self.output_name + "_all_seqs.fasta")
+        shutil.rmtree(self.output_dir + self.timestamp)
+        os.remove(self.output_dir + self.mmseqs_tsv_file)
+        os.remove(self.output_dir + self.output_name + "_rep_seq.fasta")
+        os.remove(self.output_dir + self.output_name + "_all_seqs.fasta")
 
     def swiss_to_format(self, str):
         """Convert between sequence formats in memory"""
