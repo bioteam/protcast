@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ProtCast"
 version = "0.0.1"
 description = "Protein function prediction based on sequence"
-authors = [{ name = "Brian Osborne", email = "briano@bioteam.net" }, {name = "Bruno Alvisio", email = "contact@bioteam.net"}]
+authors = [{ name = "Wisdom Akpan", email = "wisdom@bioteam.net" },{ name = "Brian Osborne", email = "briano@bioteam.net" }, {name = "Bruno Alvisio", email = "contact@bioteam.net"}]
 requires-python = ">=3.10.0"
 dependencies = [
     "plotly",
