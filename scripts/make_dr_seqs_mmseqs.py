@@ -13,7 +13,7 @@ from collections import defaultdict
 from shutil import which
 
 """
-Run the `mmseqs` application to find clusters of related sequences based on minimum sequence 
+Run `mmseqs easy-cluster` to find clusters of related sequences based on minimum sequence 
 identity. All the sequences in the cluster but 1 are removed to create a "decreased redundancy" 
 ("dr") file. If the input file is in 'swiss' format, the removed sequences will be the ones with 
 the fewest GO terms.
@@ -28,6 +28,10 @@ Input file '/data/UniProt/2024-06-17/uniprot_sprot.dat' has 571609 sequences
 Output file '/data/UniProt/2024-06-17/uniprot_sprot-dr-0.75.dat' has 243344 sequences
 ...
 1:05:21 elapsed 
+
+-m 0.9:
+Input file '/scratch1/04769/bosborne/UniProt/2024-06-17/uniprot_sprot.dat' has 571609 sequences
+Output file '/scratch1/04769/bosborne/UniProt/2024-06-17/uniprot_sprot-dr-0.9.dat' has 335670 sequences
 """
 
 parser = argparse.ArgumentParser()
@@ -90,14 +94,14 @@ class MakeDRSeqs:
         self.run_mmseqs()
         clusters = self.find_clusters()
         if self.informat == "swiss":
-            self.seqs = SeqIO.to_dict(SeqIO.parse(self.seqfile, self.informat))
+            self.seqs = SeqIO.to_dict(SeqIO.parse(self.seqfile, "swiss"))
         seqs_to_remove = self.get_seqs_to_remove(clusters)
         self.write_seqs(seqs_to_remove)
         self.clean_up()
 
     def run_mmseqs(self):
         """
-        Get tab-delimited data from `mmseqs easy-cluster`:
+        Get tab-delimited data from `mmseqs easy-cluster ...`:
         """
         self.check_for_mmseqs()
         # Create fasta format file if input file is not fasta format
@@ -147,7 +151,7 @@ class MakeDRSeqs:
             if len(cluster) == 1:
                 continue
             if self.informat == "swiss":
-                num_of_terms = [self.get_num_terms(acc) for acc in cluster]
+                num_of_terms = [self.get_num_go_terms(acc) for acc in cluster]
                 # Index of highest number
                 max_index = num_of_terms.index(max(num_of_terms))
                 # Remove sequence with most terms
@@ -160,7 +164,7 @@ class MakeDRSeqs:
             seqs_to_remove.extend(cluster)
         return seqs_to_remove
 
-    def write_seqs(self, similar_seqs):
+    def write_seqs(self, seqs_to_remove):
         format_map = {"swiss": "dat", "fasta": "fa"}
         # Have to use index() since BioPython cannot write Swissprot format
         seq_dict = SeqIO.index(self.seqfile, self.informat)
@@ -179,14 +183,14 @@ class MakeDRSeqs:
         with open(self.output, "w") as out:
             for seqid in seq_dict:
                 seqstr = seq_dict.get_raw(seqid).decode()
-                if seqid not in similar_seqs:
+                if seqid not in seqs_to_remove:
                     if self.outformat != "swiss":
                         seqstr = self.swiss_to_format(seqstr)
                     out.write(seqstr)
 
         if self.verbose:
             print(
-                f"Output file '{self.output}' has {(len(seq_dict.keys()) - len(similar_seqs))} sequences"
+                f"Output file '{self.output}' has {(len(seq_dict.keys()) - len(seqs_to_remove))} sequences"
             )
 
     def clean_up(self):
@@ -208,7 +212,7 @@ class MakeDRSeqs:
         # Get the converted sequence data as a string
         return in_memory_out.getvalue()
 
-    def get_num_terms(self, seqid):
+    def get_num_go_terms(self, seqid):
         """
         >>> seq.dbxrefs
         ['EMBL:AY548484', 'RefSeq:YP_031579.1', 'SwissPalm:Q6GZX4', 'GeneID:2947773', 'KEGG:vg:2947773',
