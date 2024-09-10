@@ -28,7 +28,7 @@ class BlastToGo:
         E-value threshold for significant alignments
     min_identity: float
         Minimum percent sequence identity for hits
-    alignments: int
+    num_alignments: int
         Number of alignments to retrieve
 
     Methods
@@ -49,7 +49,7 @@ class BlastToGo:
         program: str = "blastp",
         e_value: float = 0.001,
         min_identity: float = 95.0,
-        alignments: int = 100,
+        num_alignments: int = 100,
         verbose: bool = False
     ) -> None:
         """__init__
@@ -65,7 +65,7 @@ class BlastToGo:
         self.min_identity = min_identity
         self.database = database
         self.program = program
-        self.alignments = alignments
+        self.num_alignments = num_alignments
         self.verbose = verbose
         self.uniprot_api = "https://rest.uniprot.org/uniprotkb/search"
 
@@ -106,7 +106,7 @@ class BlastToGo:
             self.database,
             seq,
             expect=self.e_value,
-            alignments=self.alignments,
+            alignments=self.num_alignments,
         )
         blast_record = NCBIXML.read(blast_results)
 
