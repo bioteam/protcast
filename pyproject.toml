@@ -24,7 +24,9 @@ dependencies = [
     "tensorflow",
     "tensorrt",
     "tensorboard",
-    "keras"
+    "keras",
+    "py-spy",
+    "virtualenv"
 ]
 
 [tool.setuptools]

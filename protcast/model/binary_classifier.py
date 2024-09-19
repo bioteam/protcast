@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import tensorflow as tf
 import keras
@@ -245,11 +246,16 @@ class BinaryClassifier:
             loss=self.loss, 
             metrics=self.metrics
         )
-        # 
+
+        # Profiler callback 
+        log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+        
         self.training_model.fit(
             train_tfds,
             epochs=self.epochs,
             validation_data=val_tfds,
+            callbacks=[tensorboard_callback]
         )
 
     @typechecked
