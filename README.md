@@ -216,6 +216,41 @@ Download the 4 input files necessary to build a SimpleDataset:
 
 #### `create_simple_dataset.sh`
 
+# Profiling and Benchmarking
+
+## Tensorflow Profiling
+1. The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as a part of the pyproject.toml 
+
+2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model
+  ```
+          # Profiler callback in binary_classifier.py
+          log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+          tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+          
+          self.training_model.fit(
+              train_tfds,
+              epochs=self.epochs,
+              validation_data=val_tfds,
+              callbacks=[tensorboard_callback]
+          )
+  ```
+
+3. Load the relevant modules
+
+   ```
+    module load all/TensorFlow/2.15.1-Python-3.10 
+    module load all/CUDA   
+   ```
+   
+4. Run the script that fits your model.
+   eg. to profile the model in binary_classifier.py you'd run
+   
+   `python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py`
+
+
+## Python Profiling
+
+
 
 # Environment
 
