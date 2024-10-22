@@ -243,13 +243,36 @@ Download the 4 input files necessary to build a SimpleDataset:
    ```
    
 4. Run the script that fits your model.
-   eg. to profile the model in binary_classifier.py you'd run
+   eg. to profile the model in binary_classifier.py you would run
    
    `python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py`
 
 
 ## Python Profiling
+We are currently using py-spy to profile the Python scripts in this project. Refer to the py-spy's [docs](https://github.com/benfred/py-spy) for more instructions and guidances. 
 
+1. Load the relevant modules
+
+   ```
+    module load all/TensorFlow/2.15.1-Python-3.10 
+   ```
+
+2. py-spy should be isntalled from local as part of the pyproject.toml set up but you can verify by running the following which will either return that the requirement is fulfilled or install it fresh.
+   ```
+    pip3 install --user py-spy 
+   ```
+
+3. Export local to make py-spy findable 
+  ```
+    export PATH=$HOME/bin:$HOME/.local/bin
+  ```
+
+4. To collect a profile of your python script and save it to an svg file as a speedscope flamegraph specify the script in a command similar to the following.
+  ```
+    py-spy record -o profile_speedscope.svg --format speedscope -- python test/test_featurespace_demo.py
+  ```
+
+5. The svg file will be in the directory from which the command was run unless specified otherwise. Open it using an image viewer or the [Speedscope website](https://www.speedscope.app/)
 
 
 # Environment
