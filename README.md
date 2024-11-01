@@ -125,9 +125,7 @@ The following digram describes the sources:
 
 ## Repo Organization
 
-├- protcast/
-
-The package directory.
+├- protcast/ The package directory.
 
 ├─ doc/
 
