@@ -1,40 +1,45 @@
 # ProtCast
-Extract protein sequences and associated Gene Ontology (GO) annotations from UniProt, TrEMBL and 
-Gene Ontology Annotation files and use feature vector representations of the protein sequences to 
-predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins. 
+
+Extract protein sequences and associated Gene Ontology (GO) annotations from UniProt, TrEMBL and
+Gene Ontology Annotation files and use feature vector representations of the protein sequences to
+predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins.
 This code uses Keras and its FeatureSpace package for structured (tabular) data classification.
 
-# Usage
-
 ## Building the SimpleDataset
+
 A SimpleDataset combines protein sequences and GO annotations from multiple input files. A typical
 SimpleDataset has ~0.5M proteins and ~3M GO annotations. The SimpleDataset is used as input to
 FeatureSpace for processing and subsequent model-building by Keras.
 
 ### Data Sources
+
 All the input files can be downloaded using `scripts/sh/get_simple_dataset_files.sh`. The
 largest file comes from TrEMBL and it's ~55GB in size.
 
 #### UniProt/Swiss-Prot
+
 A manually curated, high-quality protein database made by extensive annotation and expert review. The
-latest version of the database can be found at 
+latest version of the database can be found at
 [ftp.uniprot.org](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.dat.gz).
 
-#### UniProtKB/TrEMBL 
+#### UniProtKB/TrEMBL
+
 The UniProt/TrEMBL database is used to retrieve the AA sequences of proteins
 that are annotated in the UniProt-GOA database. Due to its size it is not
-tracked in this repository. The latest release of the database can be found at 
+tracked in this repository. The latest release of the database can be found at
 [ftp.uniprot.org](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz)
 and it was used to obtain the sequences found in UniProt-GOA database.
 
 #### Gene Ontology (GO)
+
 The Gene Ontology databases `(.obo)` are downloaded from [release.geneontology.org](https://release.geneontology.org).
 
 #### UniProt-GOA
+
 UniProt-GOA is a database that links the Gene Ontology database described
 above with gene products (i.e. genes and any entities encoded by the gene
 such as protein or functional RNAs)[2]. These links are what the Gene Ontology
-Consortium (GOC) calls annotations which are associations between biomolecules 
+Consortium (GOC) calls annotations which are associations between biomolecules
 and the GO terms. It is important to note that annotations contain an evidence code
 which describes the origin of the annotation such as experimental,
 computational analysis or electronic. For a more in-depth explanation and
@@ -48,75 +53,81 @@ publishes two types of GOA-UniProt databases:
   includes automation generated annotations.
 
 ### Processing
-The steps to build the dataset to the model are:
 
+The steps to build the dataset to the model are:
 
 ## Building Model Dataset
 
-
 ## Create a Model
 
-
 ## Building the Ontology
+
 Generating the ontology: `protcast/preprocessing/ontology.py` takes a GO
-ontology (that can be downloaded from: http://current.geneontology.org/ontology/go.obo)
+ontology (that can be downloaded from: <http://current.geneontology.org/ontology/go.obo>)
 and creates an instance of the `Ontology` class.
 In addition, the script can also serialize
 and save the ontology into a file which can then be deserialized using
 `load_ontology()`.
 
 ### Ontology
+
 GO file parsing is done by the [goatools](https://github.com/tanghaibao/goatools) package.
 
 ## Parsing SwissProt
 
-`preprocessing/parse_swissprot.py` takes a GO ontology file and a Swissprot 
-database file and returns the proteins, the GO terms that are not found in 
+`preprocessing/parse_swissprot.py` takes a GO ontology file and a Swissprot
+database file and returns the proteins, the GO terms that are not found in
 Swissprot, and the protein accessions. For example:
 
-```
+```shell
 python3 preprocessing/parse_swissprot.py \
   data/ontology/go.obo \
   data/uniprot/uniprot_sprot.dat
 ```
 
-# Classes
+## Classes
 
-## Annotated_GOTerm 
+### Annotated_GOTerm
+
 This class represents a GO term. Its attributes include *id*, *namespace*,
-*name*, its *level* in the DAG, *parents*, *ancestors*, and *annotations*. The 
+*name*, its *level* in the DAG, *parents*, *ancestors*, and *annotations*. The
 object also contains *is_obsolete* and *primary*.
 
-## Annotation
+### Annotation
+
 This class represents an annotation and its attributes including *go_id*,
-*protein_id*, and *evidence_code*. The object also specifies *is_manual* 
+*protein_id*, and *evidence_code*. The object also specifies *is_manual*
 (evidence code) and *has_obsolete* (GO term).
 
-## Annotated_GODAG 
-This class represents an OBO ontology plus associated Annotations. It is a directed 
+### Annotated_GODAG
+
+This class represents an OBO ontology plus associated Annotations. It is a directed
 acyclic graph. Its attributes include *nodes* (GOTerms) and *name*.
 
-## Protein
-This class represent a protein, including its *id*, *sequence*, and *annotations*. 
+### Protein
 
-## SimpleDataset
-This class integrates all the classes above. Its attributes include *proteins*, 
-*accessions* (relating primary and secondary protein ids), different input file names 
+This class represent a protein, including its *id*, *sequence*, and *annotations*.
+
+### SimpleDataset
+
+This class integrates all the classes above. Its attributes include *proteins*,
+*accessions* (relating primary and secondary protein ids), different input file names
 (*ontology_path*, *swissprot_path*, *trembl_path*, *gaf_path*), and *output_dir*,
 the location of the serialized SimpleDataset and log files.
 
-## UML Component Diagrams
-The UML diagrams were generated using the online tool: http://www.plantuml.com/
+### UML Component Diagrams
+
+The UML diagrams were generated using the online tool: <http://www.plantuml.com/>
 
 The following digram describes the sources:
 
 ![Alt text](dataset_generation.png?raw=true)
 
-# Repo Organization
+## Repo Organization
 
 ├- protcast/
 
-The package directory. 
+The package directory.
 
 ├─ doc/
 
@@ -124,15 +135,14 @@ The package directory.
 
 ├─ scripts/
 
-## `protcast`
+### `protcast`
 
-### `protcast/model`
+#### `protcast/model`
 
+#### `protcast/model/stats`
 
-### `protcast/model/stats`
+#### `protcast/preprocessing`
 
-
-### `protcast/preprocessing`
 Contains the classes that parses the raw data, builds the python
 objects to represent the inputs to the models and converts them into a
 format that can be used for training. More specifically:
@@ -140,22 +150,20 @@ format that can be used for training. More specifically:
 - It contains the code that parses the GO database and creates a DAG for each
 of the GO categories.
 
-
-
 Pre-processing converts the data from the source databases (UniprotKB/GO/GOA)
 into the proper format to be fed to model for training, evaluation and
 prediction. The preprocessing consists of:
 
-  - Parsing the Gene Ontology (GO) database and creating a representation
+- Parsing the Gene Ontology (GO) database and creating a representation
     of it.
-  - Parsing the UniprotKB databse and create a representation of the proteins
+- Parsing the UniprotKB databse and create a representation of the proteins
     in along with its annotations.
-  - Given the two representations above, create the submodels that make up
+- Given the two representations above, create the submodels that make up
     network. This will be determined from the category of the GO term, its
     number of associations and its level in the tree.
-  - Generating the feature vectors from the protein sequences. Initially,
+- Generating the feature vectors from the protein sequences. Initially,
     CTriad will be used.
-  - Split of the dataset into training/validation/test datasets.
+- Split of the dataset into training/validation/test datasets.
 
 #### `protcast/preprocessing/stats`
 
@@ -166,12 +174,12 @@ Scripts that can provide statistics on datasets.
 Schema images.
 
 ## `test`
-Simple test scripts. The `test/data/` directory contains an `.obo` file and small, 
+
+Simple test scripts. The `test/data/` directory contains an `.obo` file and small,
 representative test files.
 
-
-
 ## `scripts`
+
 Scripts to preprocess and then build Keras models.
 
 ### `create_dataset_stats.py`
@@ -179,13 +187,14 @@ Scripts to preprocess and then build Keras models.
 ### `create_query_sequences_files.py`
 
 ### `create_simple_dataset.py`
+
 For example:
 
-```
+```shell
 python3 scripts/create_simple_dataset.py \
   data/dataset/dataset.bin \
   -d data/dataset/stats/ -w
-``` 
+```
 
 ### `filter_fasta_from_goa.py`
 
@@ -196,11 +205,11 @@ python3 scripts/create_simple_dataset.py \
 ### `swissprot2csv.py`
 
 ### `make_dr_seqs.py`
-Runs the `mash` application to do pairwise protein sequence comparisons using kmers, then runs 
-DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related 
+
+Runs the `mash` application to do pairwise protein sequence comparisons using kmers, then runs
+DBSCAN from scikit-learn with the resulting distance data to identify clusters of closely related
 sequences that are removed to create a "decreased redundancy" (dr) file. If the input file
 is in Swissprot format, the removed sequences will be the ones with the fewest GO terms.
-
 
 - Feature vector name: There are multiple feature vectors that can be
   generated from a protein sequence such as ctriad, PAAC or SPMAP.
@@ -208,21 +217,24 @@ is in Swissprot format, the removed sequences will be the ones with the fewest G
 ### `scripts/sh`
 
 #### `get_simple_dataset_files.sh`
+
 Download the 4 input files necessary to build a SimpleDataset:
 
-```
+```shell
 ./get_simple_dataset_files.sh
 ```
 
 #### `create_simple_dataset.sh`
 
-# Profiling and Benchmarking
+## Profiling and Benchmarking
 
-## Tensorflow Profiling
-1. The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as a part of the pyproject.toml 
+### Tensorflow Profiling
 
-2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model
-  ```
+1.The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as a part of the pyproject.toml
+
+2.Add a tensorboard callback to the model fitting step to profile your TensorFlow model
+
+  ```py
           # Profiler callback in binary_classifier.py
           log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
           tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
@@ -235,43 +247,43 @@ Download the 4 input files necessary to build a SimpleDataset:
           )
   ```
 
-3. Load the relevant modules
+3.Load the relevant modules
 
-   ```
+   ```shell
     module load all/TensorFlow/2.15.1-Python-3.10 
     module load all/CUDA   
    ```
-   
-4. Run the script that fits your model.
+
+4.Run the script that fits your model.
    eg. to profile the model in binary_classifier.py you'd run
-   
+
    `python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py`
 
+### Python Profiling
 
-## Python Profiling
+## Environment
 
+### imblearn Package
 
-
-# Environment
-
-## imblearn Package
 This code uses the MLSMOTE algorithm which is currently not part of the
 latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
 necessary to install it from a custom branch. To install follow these steps:
 
-1. Clone the `balvisio` fork of imblearn:
-```
+1.Clone the `balvisio` fork of imblearn:
+
+```shell
 git clone git@github.com:balvisio/imbalanced-learn.git
 ```
 
-2. Checkout the `ba/MLSMOTE` branch:
-```
+2.Checkout the `ba/MLSMOTE` branch:
+
+```shell
 cd imbalanced-learn/
 git checkout ba/MLSMOTE
 ```
 
-3. Install the library from local
-```
+3.Install the library from local
+
+```shell
 python3 -m pip install .
 ```
-
