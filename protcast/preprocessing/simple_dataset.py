@@ -71,6 +71,8 @@ class SimpleDataset:
         Parse TrEMBL, return list of Proteins
     get_subgraph: str
         Return list of subgraph GO ids given a GO id
+    is_in_subgraph: boolean
+        Return true if first GO id is in the subgraph of second GO id
     get_sequences: list
         Return list of sequences given a list of GO ids
     remove_protein: str
@@ -532,6 +534,30 @@ class SimpleDataset:
                 subgraph.append(child_id)
                 subgraph.extend(self.rget_subgraph(child_id))
         return subgraph
+    
+    @typechecked
+    def is_in_subgraph(self, predicted_go_id, actual_go_id) -> bool:
+        """is_in_subgraph        
+
+        Parameters
+        ----------
+        predicted_go_id : str
+            GO id
+        actual_go_id: str
+            GO id
+
+        Returns
+        -------
+        Bool
+            True if predicted GO id is actual GO id or is in 
+            the actual GO id's subgraph
+        """        
+        if predicted_go_id == actual_go_id:
+            return True
+        subgraph = self.get_subgraph(actual_go_id)
+        if predicted_go_id in subgraph:
+            return True
+        return False
 
     @typechecked
     def get_sequences(self, go_ids: list[str]) -> list[str]:
