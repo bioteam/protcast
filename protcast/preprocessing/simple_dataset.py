@@ -147,7 +147,9 @@ class SimpleDataset:
 
         # Add UniProt Annotations to the annotated DAG
         num_added = self.add_annotations(uniprot_annotations)
-        logging.info(f"{num_added} Annotations added from '{self.swissprot_path}'")
+        logging.info(
+            f"{num_added} Annotations added from '{self.swissprot_path}'"
+        )
 
         # Get Annotations from UniProt-GOA *gaf file
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
@@ -260,7 +262,8 @@ class SimpleDataset:
         gaf_lines = parse_gaf(self.gaf_path)
 
         for rec in tqdm(
-            gaf_lines, desc=f"Processing GOA records from '{str(self.gaf_path)}'"
+            gaf_lines,
+            desc=f"Processing GOA records from '{str(self.gaf_path)}'",
         ):
             gaf_annotations.append(
                 Annotation(rec["DB_Object_ID"], rec["Evidence"], rec["GO_ID"])
@@ -274,7 +277,9 @@ class SimpleDataset:
         logging.info(
             f"Found {len(new_protein_ids)} new protein ids in '{self.gaf_path}'"
         )
-        logging.info(f"Found {len(gaf_annotations)} Annotations in '{self.gaf_path}'")
+        logging.info(
+            f"Found {len(gaf_annotations)} Annotations in '{self.gaf_path}'"
+        )
         return gaf_annotations, new_protein_ids
 
     @typechecked
@@ -366,7 +371,9 @@ class SimpleDataset:
         """
         os.makedirs(self.output_dir, exist_ok=True)
         formatter = logging.Formatter("%(levelname)s | %(message)s")
-        file_handler = logging.FileHandler(self.output_dir / "SimpleDataset.log")
+        file_handler = logging.FileHandler(
+            self.output_dir / "SimpleDataset.log"
+        )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
@@ -534,10 +541,12 @@ class SimpleDataset:
                 subgraph.append(child_id)
                 subgraph.extend(self.rget_subgraph(child_id))
         return subgraph
-    
+
     @typechecked
     def is_in_subgraph(self, predicted_go_id, actual_go_id) -> bool:
-        """is_in_subgraph        
+        """is_in_subgraph
+        Return True if predicted GO id is the same as the actual GO id
+        or is in the actual GO id's subgraph
 
         Parameters
         ----------
@@ -549,9 +558,7 @@ class SimpleDataset:
         Returns
         -------
         Bool
-            True if predicted GO id is actual GO id or is in 
-            the actual GO id's subgraph
-        """        
+        """
         if predicted_go_id == actual_go_id:
             return True
         subgraph = self.get_subgraph(actual_go_id)
