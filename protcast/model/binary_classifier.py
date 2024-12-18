@@ -328,7 +328,6 @@ class BinaryClassifier:
         ----------
         sample : pd.core.series.Series
 
-
         Returns
         -------
         tf.data.Dataset

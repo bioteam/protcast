@@ -164,4 +164,7 @@ class AnnotatedGOTerm:
         Dict of protein ids and protein sequences
         """
         if len(self.annotations) > 0:
-            return {p.id:p.sequence for p in [annot.protein for annot in self.annotations]}
+            return {
+                p.id: p.sequence
+                for p in [annot.protein for annot in self.annotations]
+            }
