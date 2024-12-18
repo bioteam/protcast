@@ -46,7 +46,7 @@ class AnnotatedGOTerm:
 
     def __init__(self, goatools_go_term) -> None:
         """__init__
-        Initialize
+        Initialize using goatools GOTerm attributes
 
         Parameters
         ----------
@@ -57,14 +57,15 @@ class AnnotatedGOTerm:
         -------
         None
         """
-        # Use goatools GOTerm attributes
-        self.level = goatools_go_term.level  # shortest distance from root node
-        self.depth = goatools_go_term.depth  # longest distance from root node
+        # Shortest distance from root node
+        self.level = goatools_go_term.level
+        # Longest distance from root node
+        self.depth = goatools_go_term.depth
         self.go_id = goatools_go_term.id
         self.name = goatools_go_term.name
         self.namespace = goatools_go_term.namespace
         self.is_obsolete = goatools_go_term.is_obsolete
-        # GO ids, populated by AnnotatedGODag
+        # These will be GO ids, populated by AnnotatedGODag
         self.parents = list()
         self.children = list()
         self.annotations = list()
