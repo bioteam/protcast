@@ -1,8 +1,6 @@
 import numpy as np
 from sklearn.metrics import (
     f1_score,
-    precision_score,
-    recall_score,
     confusion_matrix,
 )
 from typeguard import typechecked
@@ -75,60 +73,33 @@ def calculate_f1_score(y_true: list, y_pred: list) -> float:
     return f1_score(y_true, y_pred)
 
 
-@typechecked
-def calculate_fmax_score(y_true: list, y_pred: list) -> float:
-    """calculate_fmax_score
-
-    Parameters
-    ----------
-    y_true : list
-        _description_
-    y_pred : list
-        _description_
-
-    Returns
-    -------
-    fmax
-        float
-    """
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
-    fmax = 2 * precision * recall / (precision + recall)
-    return fmax
-
-
 """     
-Fmax
+F1 Score
 
-Fmax, also known as the Maximum F-measure, combines precision and recall:
-
-Fmax = 2 * Precision * Recall / (Precision + Recall)
-
-Where:
-
-Precision: the ratio of true positives to the sum of true positives and false positives (TP / (TP + FP)).
-Recall: the ratio of true positives to the sum of true positives and false negatives (TP / (TP + FN)).
-Fmax is a non-symmetric metric, meaning it can be affected by variations in precision and recall. 
-It's often used when you want to emphasize both accuracy and completeness of predictions.
-
-F1 score
-
-The F1 score, also known as the Harmonic Mean of Precision and Recall, also combines precision and recall:
+The F1 score is calculated using the following formula:
 
 F1 = 2 * (Precision * Recall) / (Precision + Recall)
 
-The F1 score is also non-symmetric, but it's more sensitive to variations in precision than recall.
+Where:
 
-The main differences between Fmax and F1 score are:
+Precision is the number of true positives divided by the total number of predicted positives (true positives + false positives). It measures how many of the predicted positive cases were actually positive.   
+Recall is the number of true positives divided by the total number of actual positives (true positives + false negatives). It measures how many of the actual positive cases were correctly predicted.   
+Alternatively, the F1 score can be expressed in terms of true positives (TP), false positives (FP), and false negatives (FN):   
 
-Fmax: This metric tends to be more sensitive to precision than recall.
-F1 score: This metric is more balanced, with a stronger emphasis on precision when precision and recall are similar.
+F1 = 2 * TP / (2 * TP + FP + FN)
 
-Use Fmax when:
-Precision is crucial for your application (e.g., medical diagnosis).
-Recall is less important, but still relevant (e.g., spam filtering).
+Fmax
 
-Use the F1 score when:
-Both precision and recall are equally important.
-You want a more balanced metric that doesn't favor one aspect over the other.
+There isn't a single, direct formula to calculate Fmax. Instead, it's determined algorithmically:
+
+Calculate Precision and Recall for various thresholds: For a given classifier, you can vary the classification threshold (e.g., the probability above which an instance is classified as positive). At each threshold, calculate the precision and recall.
+Calculate F1 Score for each threshold: Using the precision and recall values obtained in the previous step, calculate the F1 score for each threshold using the F1 score formula.   
+Find the Maximum F1 Score: The Fmax is the highest F1 score among all the calculated F1 scores across the different thresholds.
+In essence, finding Fmax involves an optimization process where you search for the threshold that maximizes the F1 score.
+
+Key Points:
+
+F1 score is a single value calculated for a specific threshold.   
+Fmax is the maximum F1 score achievable across all possible thresholds.
+Calculating Fmax involves an iterative process of calculating F1 scores at different thresholds.
 """

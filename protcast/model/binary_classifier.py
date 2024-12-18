@@ -289,7 +289,6 @@ class BinaryClassifier:
         sens, spec = calculate_sensitivity_specificity(y_true, y_pred)
         f.write(f"Sensitivity\t{sens}\tSpecificity\t{spec}\n")
         f.write(f"F1 score\t{calculate_f1_score(y_true, y_pred)}\n")
-        f.write(f"Fmax score\t{calculate_fmax_score(y_true, y_pred)}\n")
         f.write(
             f"Elapsed time\t{int(time.time() - self.start_time)} seconds\n"
         )
