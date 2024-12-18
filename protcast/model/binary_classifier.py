@@ -10,7 +10,6 @@ from keras.utils import FeatureSpace
 from protcast.model.feature_vector import get_ifeatpro_features
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score
-from protcast.model.stats.utils import calculate_fmax_score
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
