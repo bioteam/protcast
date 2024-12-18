@@ -100,7 +100,7 @@ def calculate_fmax_score(y_true: list, y_pred: list) -> float:
 """     
 Fmax
 
-Fmax, also known as the Maximum F-measure, is a metric that combines precision and recall into a single value.
+Fmax, also known as the Maximum F-measure, combines precision and recall:
 
 Fmax = 2 * Precision * Recall / (Precision + Recall)
 
