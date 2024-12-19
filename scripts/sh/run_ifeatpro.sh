@@ -7,11 +7,17 @@
 #SBATCH -e run_ifeatpro.err
 #SBATCH -n 20
 
-#module load all/TensorFlow/2.15.1-Python-3.10
+source ~/.bash_profile
+cd ~/git/ProtCast
+
+module load cuda/12.2
+source activate base
+conda activate pytorch
+
+pip3 install .
 
 #algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad dde dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
-
-algorithms=(ctriad)
+algorithms=(dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
 
 for alg in "${algorithms[@]}"; do
    start_time=$(date +%s)
