@@ -192,8 +192,8 @@ For example:
 
 ```shell
 python3 scripts/create_protcast_dataset.py \
-  data/dataset/dataset.bin \
-  -d data/dataset/stats/ -w
+data/dataset/dataset.bin \
+-d data/dataset/stats/ -w
 ```
 
 ### `filter_fasta_from_goa.py`
@@ -234,7 +234,7 @@ Download the 4 input files necessary to build a ProtCastDataset:
 
 2.Add a tensorboard callback to the model fitting step to profile your TensorFlow model
 
-  ```py
+```py
           # Profiler callback in binary_classifier.py
           log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
           tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
@@ -245,14 +245,14 @@ Download the 4 input files necessary to build a ProtCastDataset:
               validation_data=val_tfds,
               callbacks=[tensorboard_callback]
           )
-  ```
+```
 
 3.Load the relevant modules
 
-   ```shell
+```shell
     module load all/TensorFlow/2.15.1-Python-3.10 
     module load all/CUDA   
-   ```
+```
 
 4.Run the script that fits your model.
    eg. to profile the model in binary_classifier.py you'd run
