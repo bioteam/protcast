@@ -14,7 +14,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-n",
         "--name",
-        default="get_simple_dataset_files",
+        default="get_protcast_dataset_files",
         help="Job name",
     )
     parser.add_argument(

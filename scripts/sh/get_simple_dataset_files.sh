@@ -1,10 +1,10 @@
 #!/bin/bash
-# Download files required for a SimpleDataset
-#SBATCH --job-name get_simple_dataset_files
+# Download files required for a ProtCastDataset
+#SBATCH --job-name get_protcast_dataset_files
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=briano@bioteam.net
-#SBATCH -o get_simple_dataset_files.out
-#SBATCH -e get_simple_dataset_files.err
+#SBATCH -o get_protcast_dataset_files.out
+#SBATCH -e get_protcast_dataset_files.err
 #SBATCH -N 1
 #SBATCH -n 20
 

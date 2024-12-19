@@ -1,4 +1,4 @@
-from protcast.preprocessing.simple_dataset import SimpleDataset
+from protcast.preprocessing.protcast_dataset import ProtCastDataset
 from protcast.globals import CC, BP, MF
 from pathlib import Path
 from typeguard import typechecked
@@ -9,19 +9,19 @@ import plotly.express as px
 @typechecked
 def create_stats_files(dataset_location: str):
     """create_stats_files
-    Create SimpleDataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
+    Create ProtCastDataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
     mf_go_terms.txt files and histograms of terms, annotations, and levels.
 
     Parameters
     ----------
     dataset: str
-        Location of serialized SimpleDataset
+        Location of serialized ProtCastDataset
 
     Returns
     -------
     None
     """
-    dataset = SimpleDataset.from_serialized_file(dataset_location)
+    dataset = ProtCastDataset.load_serialized_file(dataset_location)
     output_dir = Path(dataset_location).parent
     # No terms at level 14
     num_levels = 14
@@ -33,7 +33,7 @@ def create_stats_files(dataset_location: str):
     cc_annot_levels = [0] * num_levels
     mf_annot_levels = [0] * num_levels
 
-    with open(output_dir / Path("SimpleDataset_statistics.txt"), "w") as f:
+    with open(output_dir / Path("ProtCastDataset_statistics.txt"), "w") as f:
         f.write(f"Creation Time: {dataset.created_at}\n")
         f.write(
             f"Ontology file: {dataset.ontology_path} (md5: "
@@ -78,7 +78,9 @@ def create_stats_files(dataset_location: str):
         f.write("Nodes by level (0-13)\n")
         f.write(BP + "\t" + "\t".join([str(x) for x in bp_node_levels]) + "\n")
         f.write(CC + "\t" + "\t".join([str(x) for x in cc_node_levels]) + "\n")
-        f.write(MF + "\t" + "\t".join([str(x) for x in mf_node_levels]) + "\n\n")
+        f.write(
+            MF + "\t" + "\t".join([str(x) for x in mf_node_levels]) + "\n\n"
+        )
 
         df = pd.DataFrame(
             {"BP": bp_node_levels, "CC": cc_node_levels, "MF": mf_node_levels}
@@ -96,12 +98,22 @@ def create_stats_files(dataset_location: str):
         fig.write_image(output_dir / "GO_terms_by_level.png")
 
         f.write("Annotations by level (0-13)\n")
-        f.write(BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n")
-        f.write(CC + "\t" + "\t".join([str(x) for x in cc_annot_levels]) + "\n")
-        f.write(MF + "\t" + "\t".join([str(x) for x in mf_annot_levels]) + "\n")
+        f.write(
+            BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n"
+        )
+        f.write(
+            CC + "\t" + "\t".join([str(x) for x in cc_annot_levels]) + "\n"
+        )
+        f.write(
+            MF + "\t" + "\t".join([str(x) for x in mf_annot_levels]) + "\n"
+        )
 
         df = pd.DataFrame(
-            {"BP": bp_annot_levels, "CC": cc_annot_levels, "MF": mf_annot_levels}
+            {
+                "BP": bp_annot_levels,
+                "CC": cc_annot_levels,
+                "MF": mf_annot_levels,
+            }
         )
         fig = px.bar(
             df,
@@ -111,16 +123,24 @@ def create_stats_files(dataset_location: str):
             title="Annotations by Level",
             text_auto=True,
         )
-        fig.update_layout(xaxis_title="Level", yaxis_title="Number of Annotations")
+        fig.update_layout(
+            xaxis_title="Level", yaxis_title="Number of Annotations"
+        )
         fig.show()
         fig.write_image(output_dir / "annotations_by_level.png")
 
     bp_file = open(output_dir / Path("bp_go_terms.tsv"), "w")
     cc_file = open(output_dir / Path("cc_go_terms.tsv"), "w")
     mf_file = open(output_dir / Path("mf_go_terms.tsv"), "w")
-    bp_file.write("go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n")
-    cc_file.write("go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n")
-    mf_file.write("go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n")
+    bp_file.write(
+        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n"
+    )
+    cc_file.write(
+        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n"
+    )
+    mf_file.write(
+        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n"
+    )
 
     namespace_file_map = {
         BP: bp_file,

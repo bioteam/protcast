@@ -13,26 +13,24 @@ from protcast.preprocessing.protcast_dataset import (
 
 
 def main():
-    """"create_query_sequences_files.py
+    """"create_subgraph_sequences_files.py
+
     This script takes:
     - Serialized ProtCastDataset file
-    - A text file with a list of protein IDs
+    - A text file with a list of GO IDs
 
     It returns:
-    - A text file with the primary accessions of the input IDs
     - A FASTA file containing the input sequences
 
-    This script was used to generate the query sequences to evaluate the BLAST predictor.
     Example:
 
-    python preprocessing/create_query_sequences_files.py \
-    data/dataset/u-2021-04-g-2021-10-26/dataset.bin \
-    input_sequences.txt \
-    output_sequences
+    python scripts/create_subgraph_sequences_files.py \
+    -p data/dataset/u-2021-04-g-2021-10-26/dataset.bin \
+    -i GO_ids.txt 
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("dataset", help="Path to serialized dataset")
-    parser.add_argument("seq_ids", help="Path to file with a list of seq_ids")
+    parser.add_argument("seq_ids", help="Path to file with a list of GO ids")
     parser.add_argument("output", help="Output file")
     parser.add_argument("-v", action="store_true", help="Verbose")
     args = parser.parse_args()

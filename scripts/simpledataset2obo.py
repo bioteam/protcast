@@ -6,12 +6,14 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
+from protcast.preprocessing.protcast_dataset import (
+    ProtCastDataset,
+)  # noqa: E402
 
 
 def main():
-    """simpledataset2obo.py
-    Create an *obo file from a serialized SimpleDataset.
+    """ProtCastDataset2obo.py
+    Create an *obo file from a serialized ProtCastDataset.
     The *xref* lines are the ids of the proteins annotated
     with that term.
     """
@@ -20,11 +22,11 @@ def main():
         "-i",
         "--input",
         help="Input file",
-        default="SimpleDataset.bin",
+        default="ProtCastDataset.bin",
     )
     args = parser.parse_args()
 
-    dataset = SimpleDataset.from_serialized_file(args.input)
+    dataset = ProtCastDataset.load_serialized_file(args.input)
     dataset.to_obo()
 
 

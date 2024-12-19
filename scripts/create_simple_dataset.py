@@ -6,15 +6,17 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
+from protcast.preprocessing.protcast_dataset import (
+    ProtCastDataset,
+)  # noqa: E402
 
 
 def main():
-    """"create_simple_dataset.py
+    """"create_protcast_dataset.py
     Creates a dataset that can be used by Keras FeatureSpace, which expects
     protein features and GO terms to be passed in as a dataframe. Example:
 
-    python3 preprocessing-scripts/create_simple_dataset.py \
+    python3 preprocessing-scripts/create_protcast_dataset.py \
     -o /data/GO/2023-11-15/go.obo \
     -s /data/UniProt/2023-11-15/uniprot_sprot.dat \
     -t /data/UniProt/2023-11-15/uniprot_trembl.fasta \
@@ -57,10 +59,12 @@ def main():
         action="store_true",
         help="Create DEBUG log",
     )
-    parser.add_argument("-O", "--output_dir", type=Path, help="Output directory")
+    parser.add_argument(
+        "-O", "--output_dir", type=Path, help="Output directory"
+    )
     args = parser.parse_args()
 
-    dataset = SimpleDataset(
+    dataset = ProtCastDataset(
         args.ontology,
         args.swissprot,
         args.trembl,

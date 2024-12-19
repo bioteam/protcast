@@ -5,15 +5,15 @@ Gene Ontology Annotation files and use feature vector representations of the pro
 predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins.
 This code uses Keras and its FeatureSpace package for structured (tabular) data classification.
 
-## Building the SimpleDataset
+## Building the ProtCastDataset
 
-A SimpleDataset combines protein sequences and GO annotations from multiple input files. A typical
-SimpleDataset has ~0.5M proteins and ~3M GO annotations. The SimpleDataset is used as input to
+A ProtCastDataset combines protein sequences and GO annotations from multiple input files. A typical
+ProtCastDataset has ~0.5M proteins and ~3M GO annotations. The ProtCastDataset is used as input to
 FeatureSpace for processing and subsequent model-building by Keras.
 
 ### Data Sources
 
-All the input files can be downloaded using `scripts/sh/get_simple_dataset_files.sh`. The
+All the input files can be downloaded using `scripts/sh/get_protcast_dataset_files.sh`. The
 largest file comes from TrEMBL and it's ~55GB in size.
 
 #### UniProt/Swiss-Prot
@@ -108,12 +108,12 @@ acyclic graph. Its attributes include *nodes* (GOTerms) and *name*.
 
 This class represent a protein, including its *id*, *sequence*, and *annotations*.
 
-### SimpleDataset
+### ProtCastDataset
 
 This class integrates all the classes above. Its attributes include *proteins*,
 *accessions* (relating primary and secondary protein ids), different input file names
 (*ontology_path*, *swissprot_path*, *trembl_path*, *gaf_path*), and *output_dir*,
-the location of the serialized SimpleDataset and log files.
+the location of the serialized ProtCastDataset and log files.
 
 ### UML Component Diagrams
 
@@ -186,12 +186,12 @@ Scripts to preprocess and then build Keras models.
 
 ### `create_query_sequences_files.py`
 
-### `create_simple_dataset.py`
+### `create_protcast_dataset.py`
 
 For example:
 
 ```shell
-python3 scripts/create_simple_dataset.py \
+python3 scripts/create_protcast_dataset.py \
   data/dataset/dataset.bin \
   -d data/dataset/stats/ -w
 ```
@@ -200,7 +200,7 @@ python3 scripts/create_simple_dataset.py \
 
 ### `repeat_slurm_job.py`
 
-### `simpledataset2obo.py`
+### `ProtCastDataset2obo.py`
 
 ### `swissprot2csv.py`
 
@@ -216,15 +216,15 @@ is in Swissprot format, the removed sequences will be the ones with the fewest G
 
 ### `scripts/sh`
 
-#### `get_simple_dataset_files.sh`
+#### `get_protcast_dataset_files.sh`
 
-Download the 4 input files necessary to build a SimpleDataset:
+Download the 4 input files necessary to build a ProtCastDataset:
 
 ```shell
-./get_simple_dataset_files.sh
+./get_protcast_dataset_files.sh
 ```
 
-#### `create_simple_dataset.sh`
+#### `create_protcast_dataset.sh`
 
 ## Profiling and Benchmarking
 

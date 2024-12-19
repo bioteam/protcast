@@ -7,12 +7,14 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.simple_dataset import SimpleDataset  # noqa: E402
+from protcast.preprocessing.protcast_dataset import (
+    ProtCastDataset,
+)  # noqa: E402
 
 
 def main():
-    """test_create_simple_dataset.py
-    Create a SimpleDataset and test parsing
+    """test_create_protcast_dataset.py
+    Create a ProtCastDataset and test parsing
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -66,7 +68,7 @@ def main():
     )
     args = parser.parse_args()
 
-    dataset = SimpleDataset(
+    dataset = ProtCastDataset(
         args.ontology,
         args.swissprot,
         args.trembl,
@@ -88,14 +90,19 @@ def main():
     assert len(sw_protein.get_manual_annotations()) == 0
     assert len(sw_protein.get_electronic_annotations()) == 3
     assert len(sw_protein.accessions) == 2
-    assert sw_protein.accessions[0] == 'A0A016QRH0'
-    assert sw_protein.accessions[1] == 'A0A017QRH0'
-    assert sw_protein.sequence.startswith("MTRPPTPPASGRQGPDAPVPRVRKPLFSRVSPPQLIALSFALAILVGGVLLSLPITHGAG")
+    assert sw_protein.accessions[0] == "A0A016QRH0"
+    assert sw_protein.accessions[1] == "A0A017QRH0"
+    assert sw_protein.sequence.startswith(
+        "MTRPPTPPASGRQGPDAPVPRVRKPLFSRVSPPQLIALSFALAILVGGVLLSLPITHGAG"
+    )
 
     # Test TrEMBL parsing, *fasta file has 15 sequences
     trembl_protein = dataset.proteins.get("M5BGM1")
     assert not trembl_protein.get_all_annotations()
-    assert trembl_protein.sequence == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
+    assert (
+        trembl_protein.sequence
+        == "GTGTEELKSLFNXTATLWCVHQRIDIKDTKEALDKVEEXQNKSKQKTQQAAAAAGSSSQNYPIVQNAQGQMTHQSMSPRTLNAWVKVIEEKASAQK"
+    )
 
     # Test association of AnnotatedGOTerms and Annotations
     annots = dataset.get_term("GO:0015379").annotations
@@ -128,9 +135,13 @@ def main():
     )  # ligase activity, forming carbon-sulfur bonds
     # The 2 parents of GO:0015645
     assert dataset.get_term("GO:0140657").level == 1  # ATP-dependent activity
-    assert dataset.get_term("GO:0016878").level == 4  # acid-thiol ligase activity
+    assert (
+        dataset.get_term("GO:0016878").level == 4
+    )  # acid-thiol ligase activity
     # Has 2 parents thus could be 2 or 5
-    assert dataset.get_term("GO:0015645").level == 2  # fatty acid ligase activity
+    assert (
+        dataset.get_term("GO:0015645").level == 2
+    )  # fatty acid ligase activity
     # Has 2 parents, one of which also has 2 parents
     assert (
         dataset.get_term("GO:0031957").level == 3
@@ -165,17 +176,17 @@ def main():
     assert not dataset.get_term("GO:0003674").parents  # Biological Process
 
     dataset.to_obo()
-    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.obo"))
+    assert os.path.isfile(Path(args.output_dir, "ProtCastDataset.obo"))
 
     dataset.save()
     # Output files
-    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.bin"))
-    assert os.path.isfile(Path(args.output_dir, "SimpleDataset.log"))
+    assert os.path.isfile(Path(args.output_dir, "ProtCastDataset.bin"))
+    assert os.path.isfile(Path(args.output_dir, "ProtCastDataset.log"))
 
     if not args.keep:
-        os.unlink(Path(args.output_dir, "SimpleDataset.bin"))
-        os.unlink(Path(args.output_dir, "SimpleDataset.log"))
-        os.unlink(Path(args.output_dir, "SimpleDataset.obo"))
+        os.unlink(Path(args.output_dir, "ProtCastDataset.bin"))
+        os.unlink(Path(args.output_dir, "ProtCastDataset.log"))
+        os.unlink(Path(args.output_dir, "ProtCastDataset.obo"))
 
 
 if __name__ == "__main__":

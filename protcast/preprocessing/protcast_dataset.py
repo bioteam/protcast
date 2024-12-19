@@ -17,10 +17,10 @@ from protcast.preprocessing.protein import Protein
 from protcast.preprocessing.utils import md5
 
 
-class SimpleDataset:
-    """SimpleDataset
+class ProtCastDataset:
+    """ProtCastDataset
     This class runs the SwissProt, TrEMBL, GAF, and Gene Ontology file
-    parsers and creates a SimpleDataset can be saved to disk.
+    parsers and creates a ProtCastDataset can be saved to disk.
 
     Attributes
     ----------
@@ -39,7 +39,7 @@ class SimpleDataset:
     gaf_path: Path
         Input file
     output_dir: Path
-        Location of serialized SimpleDataset and log file
+        Location of serialized ProtCastDataset and log file
     created_at: Datetime
         ...
     verbose: bool
@@ -54,9 +54,9 @@ class SimpleDataset:
     init:
         Initialize
     save:
-        Save SimpleDataset to disk
-    from_serialized_file:
-        Load SimpleDataset from disk
+        Save ProtCastDataset to disk
+    load_serialized_file:
+        Load ProtCastDataset from disk
     get_term: str
         Returns an AnnotatedGOTerm given an id
     get_all_annotations: None or namespace
@@ -105,7 +105,7 @@ class SimpleDataset:
         gaf_path: Path
             ...
         output_dir: Path
-            Location for saved SimpleDataset and log file
+            Location for saved ProtCastDataset and log file
         verbose: bool
             Write DEBUG level log if True. Default is False.
 
@@ -169,13 +169,13 @@ class SimpleDataset:
         logging.info(f"TrEMBL: '{self.trembl_path}'")
         logging.info(f"Started at: {self.created_at}")
         logging.info(f"Completed at: {datetime.now()}")
-        logging.info(f"Saved SimpleDataset: '{self.output_dir}'")
+        logging.info(f"Saved ProtCastDataset: '{self.output_dir}'")
         logging.debug(f"GO terms not found: '{self.go_terms_not_found}'")
 
     @typechecked
     def save(self) -> None:
         """save
-        Saves SimpleDataset to disk
+        Saves ProtCastDataset to disk
 
         Parameters
         ----------
@@ -186,14 +186,14 @@ class SimpleDataset:
         None
         """
         os.makedirs(self.output_dir, exist_ok=True)
-        logging.debug(f"Saving SimpleDataset.bin to '{self.output_dir}'")
-        with open(self.output_dir / Path("SimpleDataset.bin"), "wb") as f:
+        logging.debug(f"Saving ProtCastDataset.bin to '{self.output_dir}'")
+        with open(self.output_dir / Path("ProtCastDataset.bin"), "wb") as f:
             pickle.dump(self, f)
 
     @classmethod
-    def from_serialized_file(cls, file: str):
-        """from_serialized_file
-        Gets a saved SimpleDataset from disk
+    def load_serialized_file(cls, file: str):
+        """load_serialized_file
+        Gets a saved ProtCastDataset from disk
 
         Parameters
         ----------
@@ -202,7 +202,7 @@ class SimpleDataset:
 
         Returns
         -------
-        SimpleDataset
+        ProtCastDataset
         """
         with open(file, "rb") as f:
             ds = pickle.load(f)
@@ -343,7 +343,7 @@ class SimpleDataset:
     @typechecked
     def remove_protein(self, protein_id: str) -> None:
         """remove_protein
-        Deletes protein from SimpleDataset.proteins
+        Deletes protein from ProtCastDataset.proteins
 
         Parameters
         ----------
@@ -372,7 +372,7 @@ class SimpleDataset:
         os.makedirs(self.output_dir, exist_ok=True)
         formatter = logging.Formatter("%(levelname)s | %(message)s")
         file_handler = logging.FileHandler(
-            self.output_dir / "SimpleDataset.log"
+            self.output_dir / "ProtCastDataset.log"
         )
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
@@ -407,7 +407,7 @@ class SimpleDataset:
                     all_go_terms[annot.go_id] = set()
                 all_go_terms[annot.go_id].add(annot.protein_id)
 
-        obo_output_path = self.output_dir / "SimpleDataset.obo"
+        obo_output_path = self.output_dir / "ProtCastDataset.obo"
 
         with open(obo_output_path, "w") as obo_file:
             obo_file.write(

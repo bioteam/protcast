@@ -2,9 +2,9 @@
 object GO
 object Uniprot
 object UniprotGOA
-object SimpleDataset
+object ProtCastDataset
 
-SimpleDataset <|-- GO
-SimpleDataset <|-- Uniprot
-SimpleDataset <|-- UniprotGOA
+ProtCastDataset <|-- GO
+ProtCastDataset <|-- Uniprot
+ProtCastDataset <|-- UniprotGOA
 @enduml

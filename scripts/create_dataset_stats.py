@@ -14,7 +14,7 @@ from protcast.preprocessing.stats.create_stats_files import (  # noqa: E402
 
 def main():
     """
-    Generate statistics files for an existing SimpleDataset. Example:
+    Generate statistics files for an existing ProtCastDataset. Example:
     
     python utility-scripts/create_dataset_stats.py \
     -i data/dataset/u-2021-04-g-2021-10-26/dataset.bin \
