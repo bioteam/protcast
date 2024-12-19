@@ -16,12 +16,15 @@ conda activate pytorch
 
 pip3 install .
 
-#algorithms=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad dde dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
-algorithms=(dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
+ALGORITHMS=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad dde dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber tpc)
+FAMILY='gpcrs'
 
-for alg in "${algorithms[@]}"; do
+for alg in "${ALGORITHMS[@]}"; do
+   if [ -s ${FAMILY}_${alg}.tsv ]; then
+      next
+   fi
    start_time=$(date +%s)
-   python3 scripts/binary_classify.py -n gpcrs -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta -a "$alg"
+   python3 scripts/binary_classify.py -n $FAMILY -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta -a "$alg"
    end_time=$(date +%s)
    elapsed=$((end_time - start_time))
    echo "Elapsed clock time (${alg}): $elapsed seconds"

@@ -15,8 +15,8 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 
 
 @typechecked
-class BinaryClassifier:
-    """BinaryClassifier
+class MultiClassifier:
+    """MultiClassifier
     This class ....
 
     Attributes
@@ -355,7 +355,6 @@ class BinaryClassifier:
     def load_model(self, model_path: Path) -> None:
         """load_model
 
-
         Parameters
         ----------
         model_path : Path
@@ -381,6 +380,7 @@ array([[1., 0., 0.],
        [0., 1., 0.],
        [1., 0., 0.],
        [0., 1., 0.]])
+
 2. Embeddings: This is a more modern and efficient technique to represent categorical features in numerical form.
 
 from keras.layers import Embedding
@@ -390,10 +390,8 @@ embedding_layer = Embedding(input_dim=3, output_dim=10)
 
 # Process your input data using the embedding layer
 X_embedded = embedding_layer(X_onehot)
+
 3. Multi-Class Classification: Now that you've converted your categorical features into numerical representations, you can train a Keras model for multi-class classification.
-
-
-
 
 from keras.models import Sequential
 
@@ -411,24 +409,6 @@ model.fit(X_embedded, Y_onehot, epochs=10)
 
 """
 """
-from tensorflow import keras
-from keras_feature_space import FeatureSpace
-
-# Assuming 'X_train', 'y_train', 'X_test', 'y_test' are your data
-
-fs = FeatureSpace(
-    model=keras.Sequential([
-        keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
-        keras.layers.Dense(32, activation='relu'),
-        keras.layers.Dense(1, activation='sigmoid')  # Binary output
-    ]),
-    loss='binary_crossentropy',
-    metrics=['accuracy']
-)
-
-fs.fit(X_train, y_train)
-y_pred = fs.predict(X_test)
-
 from tensorflow import keras
 from keras_feature_space import FeatureSpace
 
