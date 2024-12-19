@@ -163,9 +163,11 @@ prediction. The preprocessing consists of:
     CTriad will be used.
 - Split of the dataset into training/validation/test datasets.
 
-#### `protcast/preprocessing/stats`
+##### `protcast/preprocessing/stats`
 
 Scripts that can provide statistics on datasets.
+
+#### `protcast/utils`
 
 ## `doc`
 
