@@ -86,5 +86,5 @@ for go_id in go_ids:
     with open(f"{go_id}_inv_subgraph.fa", "w") as non_target_seq_file:
         for id in random_non_target_seq_ids:
             non_target_seq_file.write(
-                f">{id} {go_id} {go_term.name}\n{dataset.proteins[id].sequence}\n"
+                f">{id} Not in {go_id} subgraph\n{dataset.proteins[id].sequence}\n"
             )
