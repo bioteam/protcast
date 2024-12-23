@@ -21,8 +21,8 @@ This script takes:
 
 It returns for each GO id:
 
-- A FASTA file containing all the sequences in the DAG associated with the GO term
-- A FASTA file containing an equal number of sequences in the DAG not associated with the GO term
+- A FASTA file containing all the sequences from the DAG in the GO term's subgraph
+- A FASTA file containing an equal number of sequences not in the GO term's subgraph
 
 Example:
 
