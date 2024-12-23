@@ -52,6 +52,7 @@ with open(args.go_ids, "r") as f:
 for go_id in go_ids:
     target_go_ids = dataset.get_subgraph(go_id)
     go_terms = dataset.get_terms(target_go_ids)
+<<<<<<< HEAD
     annots = [go_term.get_all_annotations() for go_term in go_terms]
     target_seq_ids = [
         annot.protein_id for annot in [x for y in annots for x in y]
@@ -63,6 +64,23 @@ for go_id in go_ids:
     non_target_seq_ids = [
         annot.protein_id for annot in [x for y in annots for x in y]
     ]
+=======
+    all_annots = list()
+    for go_term in go_terms:
+        annots = go_term.get_all_annotations()
+        if annots:
+            all.extend(annots)
+    target_seq_ids = [annot.protein_id for annot in annots]
+
+    non_target_go_ids = dataset.get_inverse_subgraph(go_id)
+    go_terms = dataset.get_terms(target_go_ids)
+    all_annots = list()
+    for go_term in go_terms:
+        annots = go_term.get_all_annotations()
+        if annots:
+            all.extend(annots)
+    non_target_seq_ids = [annot.protein_id for annot in annots]
+>>>>>>> 096a632c302ce89be3a408e7ac89e77ad869738a
 
     random_non_target_seq_ids = [
         random.choice(non_target_go_ids) for x in range(len(target_seq_ids))
