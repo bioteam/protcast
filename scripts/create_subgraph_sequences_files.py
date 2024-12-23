@@ -48,10 +48,8 @@ args = parser.parse_args()
 
 dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
 
-go_ids = list()
 with open(args.go_ids, "r") as f:
-    for line in f:
-        go_ids.append(line.strip())
+    go_ids = [line.strip() for line in f]
 
 
 for go_id in go_ids:
