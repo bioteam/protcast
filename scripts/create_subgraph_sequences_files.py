@@ -31,9 +31,14 @@ python scripts/create_subgraph_sequences_files.py \
 -g GO_ids.txt 
 """
 parser = argparse.ArgumentParser()
-parser.add_argument("-n", "--num_seqs", default=500, help="Number of sequences")
 parser.add_argument(
-    "-p", "--protcast_dataset", required=True, help="Path to serialized dataset"
+    "-n", "--num_seqs", default=500, help="Number of sequences"
+)
+parser.add_argument(
+    "-p",
+    "--protcast_dataset",
+    required=True,
+    help="Path to serialized dataset",
 )
 parser.add_argument(
     "-g", "--go_ids", required=True, help="Path to file with a list of GO ids"
@@ -50,21 +55,17 @@ with open(args.go_ids, "r") as f:
 
 
 for go_id in go_ids:
-    target_go_ids = dataset.get_subgraph(go_id)
-    go_terms = dataset.get_terms(target_go_ids)
+    go_terms = dataset.get_terms(dataset.get_subgraph(go_id))
     all_annots = list()
     for go_term in go_terms:
-        annots = go_term.get_all_annotations()
-        if annots:
+        for annots in go_term.get_all_annotations():
             all_annots.extend(annots)
     target_seq_ids = [annot.protein_id for annot in all_annots]
 
-    non_target_go_ids = dataset.get_inverse_subgraph(go_id)
-    go_terms = dataset.get_terms(target_go_ids)
+    go_terms = dataset.get_terms(dataset.get_inverse_subgraph(go_id))
     all_annots = list()
     for go_term in go_terms:
-        annots = go_term.get_all_annotations()
-        if annots:
+        for annots in go_term.get_all_annotations():
             all_annots.extend(annots)
     non_target_seq_ids = [annot.protein_id for annot in all_annots]
 
@@ -74,10 +75,10 @@ for go_id in go_ids:
 
     with open(f"{go_id}_subgraph.fa", "w") as target_seq_file:
         for id in target_seq_ids:
-            target_seq_file.write(f">{id}\n")
-            target_seq_file.write(f"{dataset.proteins[id].sequence}\n")
+            target_seq_file.write(f">{id}\n{dataset.proteins[id].sequence}\n")
 
     with open(f"{go_id}_inv_subgraph.fa", "w") as non_target_seq_file:
         for id in random_non_target_seq_ids:
-            non_target_seq_file.write(f">{id}\n")
-            non_target_seq_file.write(f"{dataset.proteins[id].sequence}\n")
+            non_target_seq_file.write(
+                f">{id}\n{dataset.proteins[id].sequence}\n"
+            )
