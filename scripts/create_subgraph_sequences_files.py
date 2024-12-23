@@ -58,14 +58,16 @@ for go_id in go_ids:
     go_terms = dataset.get_terms(dataset.get_subgraph(go_id))
     all_annots = list()
     for go_term in go_terms:
-        for annots in go_term.get_all_annotations():
+        annots = go_term.get_all_annotations()
+        if annots:
             all_annots.extend(annots)
     target_seq_ids = [annot.protein_id for annot in all_annots]
 
     go_terms = dataset.get_terms(dataset.get_inverse_subgraph(go_id))
     all_annots = list()
     for go_term in go_terms:
-        for annots in go_term.get_all_annotations():
+        annots = go_term.get_all_annotations()
+        if annots:
             all_annots.extend(annots)
     non_target_seq_ids = [annot.protein_id for annot in all_annots]
 
