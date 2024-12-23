@@ -410,6 +410,22 @@ class ProtCastDataset:
         return self.annotated_dag.go_terms_map.get(go_id)
 
     @typechecked
+    def get_terms(self, go_ids: list) -> list[AnnotatedGOTerm] | None:
+        """get_terms
+        Get AnnotatedGOterms given a list of ids
+
+        Parameters
+        ----------
+        go_ids: list
+            list of GO ids
+
+        Returns
+        -------
+        List of AnnotatedGOTerms or None
+        """
+        return [self.annotated_dag.go_terms_map.get(go_id) for go_id in go_ids]
+
+    @typechecked
     def get_all_terms(self, namespace=None) -> list[AnnotatedGOTerm]:
         """get_all_terms
         Get all AnnotatedGOterms
