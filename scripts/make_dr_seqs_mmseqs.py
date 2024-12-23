@@ -48,8 +48,12 @@ parser.add_argument(
     type=float,
     help="Minimum sequenece identity",
 )
-parser.add_argument("--informat", default="swiss", help="Input sequence file format")
-parser.add_argument("--outformat", default="swiss", help="Output sequence file format")
+parser.add_argument(
+    "--informat", default="swiss", help="Input sequence file format"
+)
+parser.add_argument(
+    "--outformat", default="swiss", help="Output sequence file format"
+)
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
@@ -100,8 +104,8 @@ class MakeDRSeqs:
         self.clean_up()
 
     def run_mmseqs(self):
-        """
-        Get tab-delimited data from `mmseqs easy-cluster ...`:
+        """run_mmseqs
+        Create tab-delimited data using `mmseqs easy-cluster ...`:
         """
         self.check_for_mmseqs()
         # Create fasta format file if input file is not fasta format
@@ -146,7 +150,9 @@ class MakeDRSeqs:
         """Find the sequences in a cluster with the fewest GO terms"""
         seqs_to_remove = list()
         if self.verbose:
-            print(f"Finding sequences to remove from {len(clusters.values())} clusters")
+            print(
+                f"Finding sequences to remove from {len(clusters.values())} clusters"
+            )
         for cluster in clusters.values():
             if len(cluster) == 1:
                 continue
@@ -156,7 +162,9 @@ class MakeDRSeqs:
                 max_index = num_of_terms.index(max(num_of_terms))
                 # Remove sequence with most terms
                 if self.verbose:
-                    print(f"IDs\t{cluster}\tnum_of_terms\t{num_of_terms}\tmax_index\t{max_index}")
+                    print(
+                        f"IDs\t{cluster}\tnum_of_terms\t{num_of_terms}\tmax_index\t{max_index}"
+                    )
                 cluster.pop(max_index)
             else:
                 # Arbitrary choice
@@ -165,12 +173,22 @@ class MakeDRSeqs:
         return seqs_to_remove
 
     def write_seqs(self, seqs_to_remove):
+        """write_seqs
+        Create decreased redundancy file. For example, input is "viruses.dat",
+        output is "viruses-dr-0.1.dat"
+
+        Parameters
+        ----------
+        seqs_to_remove : _type_
+            _description_
+        """
         format_map = {"swiss": "dat", "fasta": "fa"}
         # Have to use index() since BioPython cannot write Swissprot format
         seq_dict = SeqIO.index(self.seqfile, self.informat)
         if self.verbose:
-            print(f"Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences")
-        # For example, input is "viruses.dat", output is "viruses-dr-0.1.dat"
+            print(
+                f"Input file '{self.seqfile}' has {len(seq_dict.keys())} sequences"
+            )
         self.output = (
             self.output_dir
             + "/"
@@ -213,7 +231,7 @@ class MakeDRSeqs:
         return in_memory_out.getvalue()
 
     def get_num_go_terms(self, seqid):
-        """
+        """get_num_go_terms
         >>> seq.dbxrefs
         ['EMBL:AY548484', 'RefSeq:YP_031579.1', 'SwissPalm:Q6GZX4', 'GeneID:2947773', 'KEGG:vg:2947773',
         'Proteomes:UP000008770', 'GO:GO:0046782', 'InterPro:IPR007031', 'Pfam:PF04947']

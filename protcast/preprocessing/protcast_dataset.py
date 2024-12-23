@@ -6,15 +6,13 @@ from pathlib import Path
 from tqdm import tqdm
 from typeguard import typechecked
 from datetime import datetime
-from Bio.SeqIO.FastaIO import FastaIterator
 
 from protcast.preprocessing.parse_swissprot import parse_swissprot
 from protcast.preprocessing.parse_gaf import parse_gaf
 from protcast.preprocessing.annotation import Annotation
 from protcast.preprocessing.annotated_godag import AnnotatedGODag
 from protcast.preprocessing.annotated_godag import AnnotatedGOTerm
-from protcast.preprocessing.protein import Protein
-from protcast.preprocessing.utils import md5
+from protcast.preprocessing.utils import md5, parse_fasta
 
 
 class ProtCastDataset:
@@ -67,8 +65,6 @@ class ProtCastDataset:
         Adds one or more Proteins
     get_annotatations_from_gaf:
         Get all Annotations from a *gaf file
-    parse_fasta: list
-        Parse TrEMBL, return list of Proteins
     get_subgraph: str
         Return list of subgraph GO ids given a GO id
     is_in_subgraph: boolean
@@ -155,7 +151,7 @@ class ProtCastDataset:
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
 
         # Retrieve Proteins from Trembl for new protein ids from the GOA file
-        new_proteins = self.parse_fasta(new_protein_ids)
+        new_proteins = parse_fasta(new_protein_ids)
         self.add_proteins(new_proteins)
 
         # Add Annotations found in UniProt-GOA *gaf file
@@ -281,45 +277,6 @@ class ProtCastDataset:
             f"Found {len(gaf_annotations)} Annotations in '{self.gaf_path}'"
         )
         return gaf_annotations, new_protein_ids
-
-    @typechecked
-    def parse_fasta(self, new_protein_ids: set) -> dict:
-        """parse_fasta
-        Returns proteins in TrEMBL that were in the *gaf file but not
-        in the UniProt *dat file.
-
-        Parameters
-        ----------
-        new_protein_ids: set
-            list of ids
-
-        Returns
-        -------
-        Dict of protein ids and Proteins
-        """
-        logging.debug("Adding proteins and annotations from TrEMBL")
-        new_proteins = dict()
-
-        trembl_handle = open(self.trembl_path, "r")
-        for record in tqdm(
-            FastaIterator(trembl_handle),
-            desc=f"Reading TrEMBL records from '{trembl_handle.name}'",
-        ):
-            # >tr|A0A1D8RA60|A0A1D8RA60_9ARCH
-            pids = record.id.split("|")
-            if pids[1] in new_protein_ids:
-                pids[0] = pids[1]
-            elif pids[2] in new_protein_ids:
-                pids[0] = pids[2]
-
-            protein = Protein(pids[0], str(record.seq), [pids[1], pids[2]])
-            logging.debug(f"Created new Protein {pids[0]} using TrEMBL")
-            new_proteins[pids[0]] = protein
-
-        logging.info(
-            f"Found {len(new_proteins.keys())} Proteins from '{self.gaf_path}' in TrEMBL"
-        )
-        return new_proteins
 
     @typechecked
     def add_proteins(self, new_proteins: dict) -> None:
@@ -541,6 +498,18 @@ class ProtCastDataset:
                 subgraph.append(child_id)
                 subgraph.extend(self.rget_subgraph(child_id))
         return subgraph
+
+    @typechecked
+    def get_inverse_subgraph(self, go_id) -> list:
+        """get_inverse_subgraph"""
+        subgraph = self.get_subgraph(go_id)
+        goterm = self.get_term(go_id)
+        all_namespace_ids = [
+            t.id
+            for t in self.annotated_dag.go_terms_map.values()
+            if t.namespace == goterm.namespace
+        ]
+        return [x for x in all_namespace_ids if x not in subgraph]
 
     @typechecked
     def is_in_subgraph(self, predicted_go_id, actual_go_id) -> bool:
