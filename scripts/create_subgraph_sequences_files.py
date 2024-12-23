@@ -52,25 +52,12 @@ with open(args.go_ids, "r") as f:
 for go_id in go_ids:
     target_go_ids = dataset.get_subgraph(go_id)
     go_terms = dataset.get_terms(target_go_ids)
-<<<<<<< HEAD
-    annots = [go_term.get_all_annotations() for go_term in go_terms]
-    target_seq_ids = [
-        annot.protein_id for annot in [x for y in annots for x in y]
-    ]
-
-    non_target_go_ids = dataset.get_inverse_subgraph(go_id)
-    go_terms = dataset.get_terms(non_target_go_ids)
-    annots = [go_term.get_all_annotations() for go_term in go_terms]
-    non_target_seq_ids = [
-        annot.protein_id for annot in [x for y in annots for x in y]
-    ]
-=======
     all_annots = list()
     for go_term in go_terms:
         annots = go_term.get_all_annotations()
         if annots:
-            all.extend(annots)
-    target_seq_ids = [annot.protein_id for annot in annots]
+            all_annots.extend(annots)
+    target_seq_ids = [annot.protein_id for annot in all_annots]
 
     non_target_go_ids = dataset.get_inverse_subgraph(go_id)
     go_terms = dataset.get_terms(target_go_ids)
@@ -78,20 +65,19 @@ for go_id in go_ids:
     for go_term in go_terms:
         annots = go_term.get_all_annotations()
         if annots:
-            all.extend(annots)
-    non_target_seq_ids = [annot.protein_id for annot in annots]
->>>>>>> 096a632c302ce89be3a408e7ac89e77ad869738a
+            all_annots.extend(annots)
+    non_target_seq_ids = [annot.protein_id for annot in all_annots]
 
     random_non_target_seq_ids = [
-        random.choice(non_target_go_ids) for x in range(len(target_seq_ids))
+        random.choice(non_target_seq_ids) for x in range(len(target_seq_ids))
     ]
 
-    with open(f"{id}_subgraph.fa", "w") as target_seq_file:
+    with open(f"{go_id}_subgraph.fa", "w") as target_seq_file:
         for id in target_seq_ids:
             target_seq_file.write(f">{id}\n")
             target_seq_file.write(f"{dataset.proteins[id].sequence}\n")
 
-    with open(f"{id}_inv_subgraph.fa", "w") as non_target_seq_file:
+    with open(f"{go_id}_inv_subgraph.fa", "w") as non_target_seq_file:
         for id in random_non_target_seq_ids:
             non_target_seq_file.write(f">{id}\n")
             non_target_seq_file.write(f"{dataset.proteins[id].sequence}\n")
