@@ -505,7 +505,7 @@ class ProtCastDataset:
         subgraph = self.get_subgraph(go_id)
         goterm = self.get_term(go_id)
         all_namespace_ids = [
-            t.id
+            t.go_id
             for t in self.annotated_dag.go_terms_map.values()
             if t.namespace == goterm.namespace
         ]

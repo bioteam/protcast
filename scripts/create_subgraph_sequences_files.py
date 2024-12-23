@@ -31,12 +31,12 @@ python scripts/create_subgraph_sequences_files.py \
 -g GO_ids.txt 
 """
 parser = argparse.ArgumentParser()
-parser.add_argument("n", "num_seqs", default=500, help="Number of sequences")
+parser.add_argument("-n", "--num_seqs", default=500, help="Number of sequences")
 parser.add_argument(
-    "p", "protcast_dataset", required=True, help="Path to serialized dataset"
+    "-p", "--protcast_dataset", required=True, help="Path to serialized dataset"
 )
 parser.add_argument(
-    "g", "go_ids", required=True, help="Path to file with a list of GO ids"
+    "-g", "--go_ids", required=True, help="Path to file with a list of GO ids"
 )
 parser.add_argument("-v", action="store_true", help="Verbose")
 args = parser.parse_args()
