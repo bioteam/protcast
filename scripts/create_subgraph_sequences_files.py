@@ -56,14 +56,14 @@ for go_id in go_ids:
         annot.protein_id
         for annot in [
             go_term.get_all_annotations()
-            for go_term in [t for t in dataset.get_term(target_go_ids)]
+            for go_term in [t for t in dataset.get_terms(target_go_ids)]
         ]
     ]
     non_target_seq_ids = [
         annot.protein_id
         for annot in [
             go_term.get_all_annotations()
-            for go_term in [t for t in dataset.get_term(non_target_go_ids)]
+            for go_term in [t for t in dataset.get_terms(non_target_go_ids)]
         ]
     ]
 
