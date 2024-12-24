@@ -7,7 +7,7 @@ import plotly.express as px
 
 
 @typechecked
-def create_stats_files(dataset_location: str):
+def create_stats_files(dataset_location: str) -> None:
     """create_stats_files
     Create ProtCastDataset_statistics.txt, cc_go_terms.txt, bp_go_terms.txt,
     mf_go_terms.txt files and histograms of terms, annotations, and levels.
@@ -133,13 +133,13 @@ def create_stats_files(dataset_location: str):
     cc_file = open(output_dir / Path("cc_go_terms.tsv"), "w")
     mf_file = open(output_dir / Path("mf_go_terms.tsv"), "w")
     bp_file.write(
-        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n"
+        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
     )
     cc_file.write(
-        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n"
+        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
     )
     mf_file.write(
-        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\n"
+        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
     )
 
     namespace_file_map = {
@@ -149,6 +149,7 @@ def create_stats_files(dataset_location: str):
     }
 
     for go_term in dataset.annotated_dag.go_terms_map.values():
+        num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(go_term)
         namespace_file_map[go_term.namespace].write(
             go_term.go_id
             + "\t"
@@ -161,6 +162,10 @@ def create_stats_files(dataset_location: str):
             + str(len(go_term.annotations))
             + "\t"
             + str(len([x for x in go_term.annotations if x.is_manual is True]))
+            + "\t"
+            + str(num_nodes_subgraph)
+            + "\t"
+            + str(len(num_seqs_subgraph))
             + "\n"
         )
 
@@ -193,3 +198,14 @@ def create_stats_files(dataset_location: str):
                     + str(annot.is_manual)
                     + "\n"
                 )
+
+
+def get_subgraph_data(go_term, dataset):
+    go_terms = dataset.get_terms(dataset.get_subgraph(go_term.go_id))
+    all_annots = list()
+    for go_term in go_terms:
+        annots = go_term.get_all_annotations()
+        if annots:
+            all_annots.extend(annots)
+    subgraph_seq_ids = [annot.protein_id for annot in all_annots]
+    return len(go_terms), len(subgraph_seq_ids)
