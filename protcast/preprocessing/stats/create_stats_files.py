@@ -149,7 +149,7 @@ def create_stats_files(dataset_location: str) -> None:
     }
 
     for go_term in dataset.annotated_dag.go_terms_map.values():
-        num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(go_term)
+        num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(go_term, dataset)
         namespace_file_map[go_term.namespace].write(
             go_term.go_id
             + "\t"
@@ -165,7 +165,7 @@ def create_stats_files(dataset_location: str) -> None:
             + "\t"
             + str(num_nodes_subgraph)
             + "\t"
-            + str(len(num_seqs_subgraph))
+            + str(num_seqs_subgraph)
             + "\n"
         )
 
