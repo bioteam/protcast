@@ -34,6 +34,7 @@ def create_stats_files(dataset_location: str) -> None:
     mf_annot_levels = [0] * num_levels
 
     with open(output_dir / Path("ProtCastDataset_statistics.txt"), "w") as f:
+        """Make ProtCastDataset.statistics.txt file"""
         f.write(f"Creation Time: {dataset.created_at}\n")
         f.write(
             f"Ontology file: {dataset.ontology_path} (md5: "
@@ -64,7 +65,6 @@ def create_stats_files(dataset_location: str) -> None:
             f"Annotations in {MF}: {len(dataset.get_all_annotations(namespace=MF))}\n\n"
         )
 
-        # Nodes and Annotations by level
         for t in bp_nodes:
             bp_annot_levels[t.level] += len(t.annotations)
             bp_node_levels[t.level] += 1
@@ -82,6 +82,18 @@ def create_stats_files(dataset_location: str) -> None:
             MF + "\t" + "\t".join([str(x) for x in mf_node_levels]) + "\n\n"
         )
 
+        f.write("Annotations by level (0-13)\n")
+        f.write(
+            BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n"
+        )
+        f.write(
+            CC + "\t" + "\t".join([str(x) for x in cc_annot_levels]) + "\n"
+        )
+        f.write(
+            MF + "\t" + "\t".join([str(x) for x in mf_annot_levels]) + "\n"
+        )
+
+        """Make 'GO Terms by Level' figure"""
         df = pd.DataFrame(
             {"BP": bp_node_levels, "CC": cc_node_levels, "MF": mf_node_levels}
         )
@@ -97,17 +109,7 @@ def create_stats_files(dataset_location: str) -> None:
         fig.show()
         fig.write_image(output_dir / "GO_terms_by_level.png")
 
-        f.write("Annotations by level (0-13)\n")
-        f.write(
-            BP + "\t" + "\t".join([str(x) for x in bp_annot_levels]) + "\n"
-        )
-        f.write(
-            CC + "\t" + "\t".join([str(x) for x in cc_annot_levels]) + "\n"
-        )
-        f.write(
-            MF + "\t" + "\t".join([str(x) for x in mf_annot_levels]) + "\n"
-        )
-
+        """Make 'Annotations by Level' figure"""
         df = pd.DataFrame(
             {
                 "BP": bp_annot_levels,
@@ -129,27 +131,22 @@ def create_stats_files(dataset_location: str) -> None:
         fig.show()
         fig.write_image(output_dir / "annotations_by_level.png")
 
-    bp_file = open(output_dir / Path("bp_go_terms.tsv"), "w")
-    cc_file = open(output_dir / Path("cc_go_terms.tsv"), "w")
-    mf_file = open(output_dir / Path("mf_go_terms.tsv"), "w")
-    bp_file.write(
-        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
-    )
-    cc_file.write(
-        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
-    )
-    mf_file.write(
-        "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
-    )
-
+    """GO term data"""
     namespace_file_map = {
-        BP: bp_file,
-        CC: cc_file,
-        MF: mf_file,
+        BP: open(output_dir / Path("bp_go_terms.tsv"), "w"),
+        CC: open(output_dir / Path("cc_go_terms.tsv"), "w"),
+        MF: open(output_dir / Path("mf_go_terms.tsv"), "w"),
     }
 
+    for fh in namespace_file_map.values():
+        fh.write(
+            "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
+        )
+
     for go_term in dataset.annotated_dag.go_terms_map.values():
-        num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(go_term, dataset)
+        num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(
+            go_term, dataset
+        )
         namespace_file_map[go_term.namespace].write(
             go_term.go_id
             + "\t"
@@ -169,21 +166,19 @@ def create_stats_files(dataset_location: str) -> None:
             + "\n"
         )
 
+    """GO Terms not found"""
     with open(output_dir / Path("go_terms_not_found.txt"), "w") as f:
         f.write("\n".join(dataset.go_terms_not_found))
 
-    bp_file = open(output_dir / Path("bp_annotations.tsv"), "w")
-    cc_file = open(output_dir / Path("cc_annotations.tsv"), "w")
-    mf_file = open(output_dir / Path("mf_annotations.tsv"), "w")
-    bp_file.write("protein_id\tgo_id\tevidence_code\tis_manual\n")
-    cc_file.write("protein_id\tgo_id\tevidence_code\tis_manual\n")
-    mf_file.write("protein_id\tgo_id\tevidence_code\tis_manual\n")
-
+    """Annotation data"""
     namespace_file_map = {
-        BP: bp_file,
-        CC: cc_file,
-        MF: mf_file,
+        BP: open(output_dir / Path("bp_annotations.tsv"), "w"),
+        CC: open(output_dir / Path("cc_annotations.tsv"), "w"),
+        MF: open(output_dir / Path("mf_annotations.tsv"), "w"),
     }
+
+    for fh in namespace_file_map.values():
+        fh.write("protein_id\tgo_id\tevidence_code\tis_manual\n")
 
     for go_term in dataset.annotated_dag.go_terms_map.values():
         if go_term.get_all_annotations():
@@ -201,11 +196,11 @@ def create_stats_files(dataset_location: str) -> None:
 
 
 def get_subgraph_data(go_term, dataset):
-    go_terms = dataset.get_terms(dataset.get_subgraph(go_term.go_id))
+    subgraph_terms = dataset.get_terms(dataset.get_subgraph(go_term.go_id))
     all_annots = list()
-    for go_term in go_terms:
+    for go_term in subgraph_terms:
         annots = go_term.get_all_annotations()
         if annots:
             all_annots.extend(annots)
     subgraph_seq_ids = [annot.protein_id for annot in all_annots]
-    return len(go_terms), len(subgraph_seq_ids)
+    return len(subgraph_terms), len(subgraph_seq_ids)
