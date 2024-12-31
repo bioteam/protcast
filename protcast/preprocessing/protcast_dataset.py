@@ -151,7 +151,9 @@ class ProtCastDataset:
         gaf_annotations, new_protein_ids = self.get_annotations_from_gaf()
 
         # Retrieve Proteins from Trembl for new protein ids from the GOA file
-        new_proteins = parse_fasta(new_protein_ids)
+        new_proteins = parse_fasta(
+            self.trembl_path, self.gaf_path, new_protein_ids
+        )
         self.add_proteins(new_proteins)
 
         # Add Annotations found in UniProt-GOA *gaf file

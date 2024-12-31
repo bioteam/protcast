@@ -30,7 +30,7 @@ def md5(file_path: Path) -> str:
 
 
 @typechecked
-def parse_fasta(self, new_protein_ids: set) -> dict:
+def parse_fasta(trembl_path, gaf_path, new_protein_ids: set) -> dict:
     """parse_fasta
     Returns proteins in TrEMBL that were in the *gaf file but not
     in the UniProt *dat file.
@@ -47,7 +47,7 @@ def parse_fasta(self, new_protein_ids: set) -> dict:
     logging.debug("Adding proteins and annotations from TrEMBL")
     new_proteins = dict()
 
-    trembl_handle = open(self.trembl_path, "r")
+    trembl_handle = open(trembl_path, "r")
     for record in tqdm(
         FastaIterator(trembl_handle),
         desc=f"Reading TrEMBL records from '{trembl_handle.name}'",
@@ -64,6 +64,6 @@ def parse_fasta(self, new_protein_ids: set) -> dict:
         new_proteins[pids[0]] = protein
 
     logging.info(
-        f"Found {len(new_proteins.keys())} Proteins from '{self.gaf_path}' in TrEMBL"
+        f"Found {len(new_proteins.keys())} Proteins from '{gaf_path}' in TrEMBL"
     )
     return new_proteins
