@@ -5,7 +5,7 @@ from protcast.preprocessing.annotation import Annotation
 class AnnotatedGOTerm:
     """AnnotatedGOTerm
     This class is a wrapper for the goatools GOTerm class that
-    adds an Annotation attribute.
+    adds an Annotation attribute. Only non-obsolete terms are used.
 
     Attributes
     ----------
@@ -21,14 +21,12 @@ class AnnotatedGOTerm:
         Description
     namespace: str
         GO namespace
-    is_obsolete: bool
-        Obsolete or not
     parents: list[str]
         List of GO ids
     children: list[str]
         List of GO ids
 
-    Methods
+    Methodss
     -------
     init: GOTerm
         Creates AnnotatedGOTerm given a goatools GOterm
@@ -64,7 +62,6 @@ class AnnotatedGOTerm:
         self.go_id = goatools_go_term.id
         self.name = goatools_go_term.name
         self.namespace = goatools_go_term.namespace
-        self.is_obsolete = goatools_go_term.is_obsolete
         # These will be GO ids, populated by AnnotatedGODag
         self.parents = list()
         self.children = list()
