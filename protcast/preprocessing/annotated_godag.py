@@ -7,7 +7,8 @@ from protcast.preprocessing.annotated_goterm import AnnotatedGOTerm
 class AnnotatedGODag:
     """AnnotatedGODag
     This is wrapper around the goatools GODag parser which represents the
-    GO DAGs of GOTerms
+    GO DAGs of GOTerms. The namespace is implicit since any GO term by
+    definition only exists in one namespace.
 
     Attributes
     ----------
@@ -41,7 +42,8 @@ class AnnotatedGODag:
         # Map GO ids to AnnotatedGOTerms
         self.go_terms_map = dict()
         for go_id, go_term in goatools_godag.items():
-            self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
+            if go_term.is_obsolete is False:
+                self.go_terms_map[go_id] = AnnotatedGOTerm(go_term)
 
         # Map parents and children of goaltools GOTerm to AnnotatedGOTerm
         for go_id, annot_go_term in self.go_terms_map.items():
