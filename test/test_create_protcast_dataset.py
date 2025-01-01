@@ -7,9 +7,9 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.protcast_dataset import (
+from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,
-)  # noqa: E402
+)
 
 
 def main():
@@ -22,35 +22,35 @@ def main():
         "--ontology",
         type=Path,
         help="Path to Gene Ontology file (*.obo)",
-        default="data/go.obo",
+        default="test/data/go-2023-11-15.obo",
     )
     parser.add_argument(
         "-s",
         "--swissprot",
         type=Path,
         help="Path to the SwissProt file (*.dat)",
-        default="data/uniprot_mini.dat",
+        default="test/data/uniprot_mini.dat",
     )
     parser.add_argument(
         "-t",
         "--trembl",
         type=Path,
         help="Path to the TrEMBL file (*.fa)",
-        default="data/uniprot_trembl_mini.fasta",
+        default="test/data/uniprot_trembl_mini.fasta",
     )
     parser.add_argument(
         "-g",
         "--gaf",
         type=Path,
         help="Path to GOA format file (*.gaf)",
-        default="data/goa_uniprot_mini.gaf",
+        default="test/data/goa_uniprot_mini.gaf",
     )
     parser.add_argument(
         "-O",
         "--output_dir",
         type=Path,
         help="Output directory",
-        default="data/",
+        default="test/data/",
     )
     parser.add_argument(
         "-v",
@@ -155,7 +155,8 @@ def main():
     # Subgraphs
     assert len(dataset.get_subgraph("GO:0031957")) == 1
     assert len(dataset.get_subgraph("GO:0031955")) == 1
-    # Numbers validated by goatools
+    assert len(dataset.get_subgraph("GO:0022857")) == 5628
+    # Subgraph numbers validated by goatools
     assert len(dataset.get_subgraph("GO:0015645")) == 16
     assert len(dataset.get_subgraph("GO:0031956")) == 3
     assert len(dataset.get_subgraph("GO:0004467")) == 5

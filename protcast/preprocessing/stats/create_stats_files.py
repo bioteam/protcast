@@ -140,15 +140,17 @@ def create_stats_files(dataset_location: str) -> None:
 
     for fh in namespace_file_map.values():
         fh.write(
-            "go_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
+            "go_id\talt_id\tname\tlevel\tdepth\t# annotations\t# manual annotations\t# nodes in subgraph\t#seqs in subgraph\n"
         )
 
-    for go_term in dataset.annotated_dag.go_terms_map.values():
+    for key, go_term in dataset.annotated_dag.go_terms_map.items():
         num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(
             go_term, dataset
         )
         namespace_file_map[go_term.namespace].write(
             go_term.go_id
+            + "\t"
+            + key
             + "\t"
             + go_term.name
             + "\t"
