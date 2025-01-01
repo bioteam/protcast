@@ -147,7 +147,7 @@ def create_stats_files(dataset_location: str) -> None:
         num_nodes_subgraph, num_seqs_subgraph = get_subgraph_data(
             go_term, dataset
         )
-        alt_id = key if key is not go_term.id else ""
+        alt_id = key if key is not go_term.go_id else ""
         namespace_file_map[go_term.namespace].write(
             go_term.go_id
             + "\t"
