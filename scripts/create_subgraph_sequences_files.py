@@ -43,7 +43,7 @@ parser.add_argument(
 parser.add_argument(
     "-g", "--go_ids", required=True, help="Path to file with a list of GO ids"
 )
-parser.add_argument("-v", action="store_true", help="Verbose")
+parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
 dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
@@ -61,7 +61,7 @@ for go_id in go_ids:
             all_annots.extend(annots)
     target_seq_ids = [annot.protein_id for annot in all_annots]
 
-    if len(target_seq_ids) > args.minimum_seqs:
+    if len(target_seq_ids) < args.minimum_seqs:
         if args.verbose:
             print(
                 f"Not enough subgraph sequences for {go_id}: {len(target_seq_ids)}"
@@ -76,7 +76,7 @@ for go_id in go_ids:
             all_annots.extend(annots)
     non_target_seq_ids = [annot.protein_id for annot in all_annots]
 
-    if len(non_target_seq_ids) > args.minimum_seqs:
+    if len(non_target_seq_ids) < args.minimum_seqs:
         if args.verbose:
             print(
                 f"Not enough inverse-subgraph sequences for {go_id}: {len(non_target_seq_ids)}"
