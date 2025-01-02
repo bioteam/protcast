@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
+from keras.utils import to_categorical
 from protcast.model.feature_vector import get_ifeatpro_features
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score

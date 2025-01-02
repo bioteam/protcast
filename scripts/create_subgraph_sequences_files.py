@@ -32,7 +32,7 @@ python scripts/create_subgraph_sequences_files.py \
 """
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-n", "--num_seqs", default=500, help="Number of sequences"
+    "-m", "--minimum_seqs", default=500, help="Minumum number of sequences"
 )
 parser.add_argument(
     "-p",
@@ -61,6 +61,13 @@ for go_id in go_ids:
             all_annots.extend(annots)
     target_seq_ids = [annot.protein_id for annot in all_annots]
 
+    if len(target_seq_ids) > args.minimum_seqs:
+        if args.verbose:
+            print(
+                f"Not enough subgraph sequences for {go_id}: {len(target_seq_ids)}"
+            )
+        continue
+
     go_terms = dataset.get_terms(dataset.get_inverse_subgraph(go_id))
     all_annots = list()
     for go_term in go_terms:
@@ -69,9 +76,15 @@ for go_id in go_ids:
             all_annots.extend(annots)
     non_target_seq_ids = [annot.protein_id for annot in all_annots]
 
-    random_non_target_seq_ids = [
-        random.choice(non_target_seq_ids) for x in range(len(target_seq_ids))
-    ]
+    if len(non_target_seq_ids) > args.minimum_seqs:
+        if args.verbose:
+            print(
+                f"Not enough inverse-subgraph sequences for {go_id}: {len(non_target_seq_ids)}"
+            )
+        continue
+
+    target_seq_ids = random.sample(target_seq_ids, args.minimum_seqs)
+    non_target_seq_ids = random.sample(non_target_seq_ids, args.minimum_seqs)
 
     go_term = dataset.get_term(go_id)
 
@@ -82,7 +95,7 @@ for go_id in go_ids:
             )
 
     with open(f"{go_id}_inv_subgraph.fa", "w") as non_target_seq_file:
-        for id in random_non_target_seq_ids:
+        for id in non_target_seq_ids:
             non_target_seq_file.write(
                 f">{id} Not in {go_id} subgraph\n{dataset.proteins[id].sequence}\n"
             )

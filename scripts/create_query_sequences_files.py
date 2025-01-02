@@ -7,9 +7,9 @@ file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
-from protcast.preprocessing.protcast_dataset import (
+from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,
-)  # noqa: E402
+)
 
 
 def main():
