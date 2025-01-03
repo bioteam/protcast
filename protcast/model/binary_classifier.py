@@ -291,7 +291,7 @@ class BinaryClassifier:
             "Algorithm\tType\tSensitivity\tSpecificity\tF1 score\tElapsed time\tVector length\n"
         )
         summary_fh.write(
-            f"{self.algorithm}\t{type}\t{sens}\t{spec}\t{calculate_f1_score(y_true, y_pred)}\t{int(time.time() - self.start_time)}\t{self.vector_length}"
+            f"{self.algorithm}\t{self.name}\t{sens}\t{spec}\t{calculate_f1_score(y_true, y_pred)}\t{int(time.time() - self.start_time)}\t{self.vector_length}"
         )
 
     @typechecked
