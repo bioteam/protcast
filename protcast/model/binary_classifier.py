@@ -266,7 +266,8 @@ class BinaryClassifier:
         """test_model"""
         y_true = list()
         y_pred = list()
-        f = open(f"{self.name}_{self.algorithm}.tsv", "w")
+        scores_fh = open(f"{self.name}_{self.algorithm}_scores.tsv", "w")
+        summary_fh = open(f"{self.name}_{self.algorithm}_summary.tsv", "w")
         for i, r in self.val_dataframe.iterrows():
             # Pre-process the sample you want a prediction from
             if r["target"] == 1.0:
@@ -284,14 +285,14 @@ class BinaryClassifier:
                 y_pred.append(1)
             else:
                 y_pred.append(0)
-            f.write(f"{type}\t{self.all_ids[i]}\t{prob}\n")
+            scores_fh.write(f"{type}\t{self.all_ids[i]}\t{prob}\n")
         sens, spec = calculate_sensitivity_specificity(y_true, y_pred)
-        f.write(f"Sensitivity\t{sens}\tSpecificity\t{spec}\n")
-        f.write(f"F1 score\t{calculate_f1_score(y_true, y_pred)}\n")
-        f.write(
-            f"Elapsed time\t{int(time.time() - self.start_time)} seconds\n"
+        summary_fh.write(
+            "Algorithm\tType\tSensitivity\tSpecificity\tF1 score\tElapsed time\tVector length\n"
         )
-        f.write(f"Vector length\t{self.vector_length}")
+        summary_fh.write(
+            f"{self.algorithm}\t{type}\t{sens}\t{spec}\t{calculate_f1_score(y_true, y_pred)}\t{int(time.time() - self.start_time)}\t{self.vector_length}"
+        )
 
     @typechecked
     def dataframe_to_tfdataset(
