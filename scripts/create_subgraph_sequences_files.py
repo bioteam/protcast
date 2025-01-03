@@ -60,6 +60,7 @@ for go_id in go_ids:
         if annots:
             all_annots.extend(annots)
     target_seq_ids = [annot.protein_id for annot in all_annots]
+    target_seq_ids = set(target_seq_ids)
 
     if len(target_seq_ids) < args.minimum_seqs:
         if args.verbose:
@@ -75,6 +76,7 @@ for go_id in go_ids:
         if annots:
             all_annots.extend(annots)
     non_target_seq_ids = [annot.protein_id for annot in all_annots]
+    non_target_seq_ids = set(non_target_seq_ids)
 
     if len(non_target_seq_ids) < args.minimum_seqs:
         if args.verbose:
@@ -83,20 +85,22 @@ for go_id in go_ids:
             )
         continue
 
-    target_seq_ids = random.sample(target_seq_ids, args.minimum_seqs)
-    non_target_seq_ids = random.sample(non_target_seq_ids, args.minimum_seqs)
+    min_target_seq_ids = random.sample(target_seq_ids, args.minimum_seqs)
+    min_non_target_seq_ids = random.sample(
+        non_target_seq_ids, args.minimum_seqs
+    )
 
     go_term = dataset.get_term(go_id)
     name = go_term.name.replace(" ", "_")
 
     with open(f"{go_id}_subgraph.fa", "w") as target_seq_file:
-        for id in target_seq_ids:
+        for id in min_target_seq_ids:
             target_seq_file.write(
                 f">{id} {go_id} {go_term.name}\n{dataset.proteins[id].sequence}\n"
             )
 
     with open(f"{go_id}_inv_subgraph.fa", "w") as non_target_seq_file:
-        for id in non_target_seq_ids:
+        for id in min_non_target_seq_ids:
             non_target_seq_file.write(
                 f">{id} Not in {go_id} {name} subgraph\n{dataset.proteins[id].sequence}\n"
             )
