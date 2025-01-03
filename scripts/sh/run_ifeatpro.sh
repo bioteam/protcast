@@ -21,7 +21,7 @@ FAMILY='gpcrs'
 
 for alg in "${ALGORITHMS[@]}"; do
    if [ -s ${FAMILY}_${alg}.tsv ]; then
-      next
+      continue
    fi
    start_time=$(date +%s)
    python3 scripts/binary_classify.py -n $FAMILY -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta -a "$alg"

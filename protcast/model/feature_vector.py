@@ -68,21 +68,26 @@ def get_ifeatpro_features(alg, seqs):
     if alg not in algs:
         sys.exit(f"Algorithm {alg} not part of ifeatpro")
 
-    tmpdir = tempfile.TemporaryDirectory()
-    tmpfasta = tempfile.NamedTemporaryFile()
     ids = list()
     features = list()
-    # Write fasta file
-    with open(tmpfasta.name, "w") as f:
-        for pid, seq in seqs.items():
+
+    for pid, seq in seqs.items():
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpfasta = tempfile.NamedTemporaryFile()
+        # Write fasta file
+        with open(tmpfasta.name, "w") as f:
             f.write(">" + pid + "\n" + str(seq.seq) + "\n")
 
-    get_feature(tmpfasta.name, alg, tmpdir.name)
-    with open(os.path.join(tmpdir.name, alg + ".csv")) as f:
-        for line in f.readlines():
-            arr = line.rstrip().split(",")
-            # Skip the first column which contains the id
-            vals = [float(x) for x in arr[1:]]
-            features.append(vals)
-            ids.append(arr[0])
+        try:
+            get_feature(tmpfasta.name, alg, tmpdir.name)
+            with open(os.path.join(tmpdir.name, alg + ".csv")) as f:
+                for line in f.readlines():
+                    arr = line.rstrip().split(",")
+                    # Skip the first column which contains the id
+                    vals = [float(x) for x in arr[1:]]
+                    features.append(vals)
+                    ids.append(arr[0])
+        except Exception as e:
+            print(f"Error: {e}")
+
     return features, ids

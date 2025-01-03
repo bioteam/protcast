@@ -22,7 +22,6 @@ dependencies = [
     "pandas",
     "grpcio",
     "tensorflow",
-    "tensorrt",
     "tensorboard",
     "keras",
     "py-spy",
