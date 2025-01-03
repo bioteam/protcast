@@ -17,12 +17,12 @@ pip3 install .
 
 ALGORITHMS=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad dde dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber)
 
-for alg in "${ALGORITHMS[@]}"; do
-   for seqfile in GO*subgraph.fa; do
-      go_id=$(echo $seqfile | cut -d '_' -f1)
-      if [ -s ${go_id}_${alg}.tsv ]; then
+for ALG in "${ALGORITHMS[@]}"; do
+   for SEQFILE in GO*subgraph.fa; do
+      GO_ID=$(echo $SEQFILE | cut -d '_' -f1)
+      if [ -s ${GO_ID}_${ALG}_summary.tsv ]; then
          continue
       fi
-      python3 ../scripts/binary_classify.py -n $go_id -t ${go_id}_subgraph.fa -nt ${go_id}_inv_subgraph.fa -a $alg
+      python3 ../scripts/binary_classify.py -n $GO_ID -t ${GO_ID}_subgraph.fa -nt ${GO_ID}_inv_subgraph.fa -a $ALG
    done
 done
