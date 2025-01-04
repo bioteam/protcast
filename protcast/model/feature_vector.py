@@ -78,6 +78,8 @@ def get_ifeatpro_features(alg, seqs):
         with open(tmpfasta.name, "w") as f:
             f.write(">" + pid + "\n" + str(seq.seq) + "\n")
 
+        # The try is necessary in case the input sequence is too
+        # short for a given algorithm
         try:
             get_feature(tmpfasta.name, alg, tmpdir.name)
             with open(os.path.join(tmpdir.name, alg + ".csv")) as f:
