@@ -32,7 +32,7 @@ python scripts/create_subgraph_sequences_files.py \
 """
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-m", "--minimum_seqs", default=500, help="Minumum number of sequences"
+    "-m", "--minimum_seqs", default=500, help="Minumum number of sequences", type=int
 )
 parser.add_argument(
     "-p",
