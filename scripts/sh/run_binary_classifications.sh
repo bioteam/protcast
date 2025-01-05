@@ -7,7 +7,7 @@
 #SBATCH -e run_binary_classifications.err
 #SBATCH -n 20
 
-$1=LEVEL
+LEVEL=$1
 cd ${HOME}/git/ProtCast/
 
 source ${HOME}/.bash_profile
@@ -19,7 +19,7 @@ conda activate pytorch
 ALGORITHMS=(aac apaac cksaagp cksaap ctdc ctdd ctdt ctriad dde dpc gaac gdpc geary gtpc ksctriad moran nmbroto paac qsorder socnumber)
 
 for ALG in "${ALGORITHMS[@]}"; do
-   for SEQFILE in $LEVEL/GO*subgraph.fa; do
+   for SEQFILE in $LEVEL/GO*inv_subgraph.fa; do
       GO_ID=$(basename $SEQFILE | cut -d '_' -f1)
       if [ -s $LEVEL/${GO_ID}_${ALG}_summary.tsv ]; then
          continue
