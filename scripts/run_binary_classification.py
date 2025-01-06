@@ -19,19 +19,37 @@ if __name__ == "__main__":
     python scripts/binary_classify.py \
     -t gpcr-sequences.fasta \
     -nt non-gpcr-sequences.fasta \
+    -s
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t","--target", required=True, help="Path to target sequences")
-    parser.add_argument("-nt","--non_target", required=True, help="Path to non-target sequences")
-    parser.add_argument("-a", "--algorithm", default="ctriad", help="Feature vector algorithm")
+    parser.add_argument(
+        "-t", "--target", required=True, help="Path to target sequences"
+    )
+    parser.add_argument(
+        "-nt",
+        "--non_target",
+        required=True,
+        help="Path to non-target sequences",
+    )
+    parser.add_argument(
+        "-a", "--algorithm", default="ctriad", help="Feature vector algorithm"
+    )
     parser.add_argument("-n", "--name", default="test", help="Name")
-    parser.add_argument("-v", action="store_true", help="Verbose")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Verbose", type=bool
+    )
+    parser.add_argument(
+        "-s", "--save", action="store_true", help="Save model", type=bool
+    )
     args = parser.parse_args()
 
     target_seqs = SeqIO.to_dict(SeqIO.parse(args.target, "fasta"))
     non_target_seqs = SeqIO.to_dict(SeqIO.parse(args.non_target, "fasta"))
 
-    classifier = BinaryClassifier(args.name, target_seqs, non_target_seqs, args.algorithm)
+    classifier = BinaryClassifier(
+        args.name, target_seqs, non_target_seqs, args.algorithm
+    )
     classifier.run()
     classifier.test_model()
-    classifier.save_model()
+    if args.save:
+        classifier.save_model()
