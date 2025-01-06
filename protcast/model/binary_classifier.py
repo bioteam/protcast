@@ -356,7 +356,6 @@ class BinaryClassifier:
     def load_model(self, model_path: Path) -> None:
         """load_model
 
-
         Parameters
         ----------
         model_path : Path
