@@ -36,10 +36,10 @@ if __name__ == "__main__":
     )
     parser.add_argument("-n", "--name", default="test", help="Name")
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose", type=bool
+        "-v", "--verbose", action="store_true", help="Verbose"
     )
     parser.add_argument(
-        "-s", "--save", action="store_true", help="Save model", type=bool
+        "-s", "--save", action="store_true", help="Save model"
     )
     args = parser.parse_args()
 
