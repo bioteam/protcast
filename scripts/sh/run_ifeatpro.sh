@@ -24,7 +24,7 @@ for alg in "${ALGORITHMS[@]}"; do
       continue
    fi
    start_time=$(date +%s)
-   python3 scripts/binary_classify.py -n $FAMILY -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta -a "$alg"
+   python3 scripts/run_binary_classification.py -n $FAMILY -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta -a "$alg"
    end_time=$(date +%s)
    elapsed=$((end_time - start_time))
    echo "Elapsed clock time (${alg}): $elapsed seconds"

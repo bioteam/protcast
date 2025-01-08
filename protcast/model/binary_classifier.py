@@ -3,11 +3,15 @@ import os
 import tensorflow as tf
 import keras
 import pandas as pd
+import sys
 import time
 from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
-from protcast.model.feature_vector import get_ifeatpro_features
+from protcast.model.feature_vector import (
+    get_ifeatpro_features,
+    get_ifeatureomega_features,
+)
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score
 
@@ -45,10 +49,13 @@ class BinaryClassifier:
     @typechecked
     def __init__(
         self,
-        name: str,
         target_seqs: dict,
         non_target_seqs: dict,
         algorithm: str,
+        feature_creator: str,
+        name: str,
+        verbose: bool,
+        save: bool,
         optimizer: str = "adam",
         loss: str = "binary_crossentropy",
         metrics: list = ["accuracy"],
@@ -62,14 +69,20 @@ class BinaryClassifier:
 
         Parameters
         ----------
-        name : str
-            _description_
         target_seqs : dict
             _description_
         non_target_seqs : dict
             _description_
         algorithm : str
             _description_
+        feature_creator: str
+            Software package that creates the features
+        name : str
+            Name or id of sequence family
+        verbose : Boolean
+            Verbose or not
+        save : Boolean
+            Save model (*keras) file or not
         vector_length: int
             Length of feature vector
         optimizer : str, optional
@@ -91,10 +104,14 @@ class BinaryClassifier:
         training_model: keras.src.engine.functional.Functional
             Trained model
         """
-        self.name = name
         self.target_seqs = target_seqs
         self.non_target_seqs = non_target_seqs
         self.algorithm = algorithm
+        self.feature_creator = feature_creator
+        self.name = name
+        self.verbose = verbose
+        self.save = save
+        # Not supplied by script
         self.optimizer = optimizer
         self.loss = loss
         self.metrics = metrics
@@ -116,14 +133,28 @@ class BinaryClassifier:
 
     @typechecked
     def get_feature_vectors(self) -> None:
-        """get_feature_vector"""
-        # Get feature vectors for all proteins as a list of lists
-        self.target_features, target_ids = get_ifeatpro_features(
-            self.algorithm, self.target_seqs
-        )
-        self.non_target_features, non_target_ids = get_ifeatpro_features(
-            self.algorithm, self.non_target_seqs
-        )
+        """get_feature_vector
+        Get feature vectors for all proteins as a list of lists
+        """
+        if self.feature_creator == "ifeatpro":
+            self.target_features, target_ids = get_ifeatpro_features(
+                self.algorithm, self.target_seqs
+            )
+            self.non_target_features, non_target_ids = get_ifeatpro_features(
+                self.algorithm, self.non_target_seqs
+            )
+        elif self.feature_creator == "iFeatureOmega":
+            self.target_features, target_ids = get_ifeatureomega_features(
+                self.algorithm, self.target_seqs
+            )
+            self.non_target_features, non_target_ids = (
+                get_ifeatureomega_features(
+                    self.algorithm, self.non_target_seqs
+                )
+            )
+        else:
+            sys.exit(f"Unknown feature creator: {self.feature_creator}")
+
         self.all_ids = target_ids + non_target_ids
         self.vector_length = len(self.target_features[0])
 
@@ -350,7 +381,8 @@ class BinaryClassifier:
     @typechecked
     def save_model(self) -> None:
         """save_model"""
-        self.training_model.save(f"{self.name}_{self.algorithm}.keras")
+        if self.save:
+            self.training_model.save(f"{self.name}_{self.algorithm}.keras")
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
