@@ -34,22 +34,30 @@ if __name__ == "__main__":
     parser.add_argument(
         "-a", "--algorithm", default="ctriad", help="Feature vector algorithm"
     )
-    parser.add_argument("-n", "--name", default="test", help="Name")
     parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Verbose", type=bool
+        "-f",
+        "--feature_creator",
+        default="iFeatureOmega",
+        choices=["iFeatureOmega", "ifeatpro"],
+        help="Feature vector creator",
     )
-    parser.add_argument(
-        "-s", "--save", action="store_true", help="Save model", type=bool
-    )
+    parser.add_argument("-n", "--name", required=True, help="Name")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
+    parser.add_argument("-s", "--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
     target_seqs = SeqIO.to_dict(SeqIO.parse(args.target, "fasta"))
     non_target_seqs = SeqIO.to_dict(SeqIO.parse(args.non_target, "fasta"))
 
     classifier = BinaryClassifier(
-        args.name, target_seqs, non_target_seqs, args.algorithm
+        target_seqs,
+        non_target_seqs,
+        args.algorithm,
+        args.feature_creator,
+        args.name,
+        args.verbose,
+        args.save,
     )
     classifier.run()
     classifier.test_model()
-    if args.save:
-        classifier.save_model()
+    classifier.save_model()
