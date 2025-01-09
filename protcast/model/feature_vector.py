@@ -269,25 +269,25 @@ def get_ifeatureomega_features(alg, seqs):
     ids = list()
     features = list()
 
-    tmpfasta = tempfile.NamedTemporaryFile()
-    # Create multi-fasta file from input sequences
-    with open(tmpfasta.name, "w") as f:
-        for pid, seq in seqs.items():
+    for pid, seq in seqs.items():
+        tmpfasta = tempfile.NamedTemporaryFile()
+        # Create multi-fasta file from input sequences
+        with open(tmpfasta.name, "w") as f:
             f.write(">" + pid + "\n" + str(seq.seq) + "\n")
-
-    # The try is necessary in case the input sequence is too
-    # short for a given algorithm
-    try:
-        proteins = iFeatureOmegaCLI.iProtein(tmpfasta.name)
-        proteins.get_descriptor(alg)
-    except Exception as e:
-        print(f"Error: {e}")
-    # proteins.encodings is a dataframe, which is a dict of
-    # pandas.core.series.Series objects. A pandas.core.series.Series is a one-dimensional
-    # labeled array of values, similar to an array but with labeled elements. The labels
-    # in these Series are the column names, like "AAC_A", "AAC_B".
-    for pid, vals in proteins.encodings.iterrows():
-        ids.append(pid)
-        features.append(vals.tolist())
+        # The try is necessary in case the input sequence is too
+        # short for a given algorithm
+        try:
+            protein = iFeatureOmegaCLI.iProtein(tmpfasta.name)
+            protein.get_descriptor(alg)
+        except Exception as e:
+            print(f"Error running {alg} on {pid} sequence: {e}")
+            continue
+        # proteins.encodings is a dataframe, which is a dict of
+        # pandas.core.series.Series objects. A pandas.core.series.Series is a one-dimensional
+        # labeled array of values, similar to an array but with labeled elements. The labels
+        # in these Series are the column names, like "AAC_A", "AAC_B".
+        for pid, vals in protein.encodings.iterrows():
+            ids.append(pid)
+            features.append(vals.tolist())
 
     return features, ids
