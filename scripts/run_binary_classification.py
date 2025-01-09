@@ -10,16 +10,16 @@ sys.path.append(str(package_root_directory))
 from protcast.model.binary_classifier import BinaryClassifier  # noqa: E402
 
 if __name__ == "__main__":
-    """"binary_classify.py
+    """"run_binary_classification.py
     This script uses Keras and Keras FeatureSpace to classify sequences.
     Provide a *fasta file with some group of related sequences ("target")
     and a second *fasta file with unrelated or control sequences ("non-target").
     Example:
 
-    python scripts/binary_classify.py \
-    -t gpcr-sequences.fasta \
-    -nt non-gpcr-sequences.fasta \
-    -s
+    python3 scripts/run_binary_classification.py \
+    -t test/data/uniprotkb_gpcrs.fasta \
+    -nt test/data/uniprotkb_non-gpcrs.fasta \
+    -n gpcr -a qsorder -f ifeatpro -s
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
