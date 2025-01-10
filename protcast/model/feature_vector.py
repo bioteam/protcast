@@ -290,4 +290,6 @@ def get_ifeatureomega_features(alg, seqs):
             ids.append(pid)
             features.append(vals.tolist())
 
+    lens = [len(vec) for vec in features]
+    print(f"{alg} feature vector length: {set(lens)}")
     return features, ids

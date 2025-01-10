@@ -13,7 +13,10 @@ age	sex	cp	trestbps	chol	fbs	restecg	thalach	exang	oldpeak	slope	ca	thal	target
 67	1	4	120	229	0	2	129	1	2.6	2	2	reversible	0
 ....
 """
-file_url = "http://storage.googleapis.com/download.tensorflow.org/data/heart.csv"
+file_url = (
+    "http://storage.googleapis.com/download.tensorflow.org/data/heart.csv"
+)
+
 
 def dataframe_to_dataset(dataframe):
     dataframe = dataframe.copy()
@@ -134,14 +137,9 @@ output = keras.layers.Dense(1, activation="sigmoid")(x)
 # dict_inputs = feature_space.get_inputs()
 # inference_model = keras.Model(inputs=dict_inputs, outputs=predictions)
 
-training_model = keras.Model(
-    inputs=encoded_features, 
-    outputs=output
-)
+training_model = keras.Model(inputs=encoded_features, outputs=output)
 training_model.compile(
-    optimizer="adam", 
-    loss="binary_crossentropy", 
-    metrics=["accuracy"]
+    optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"]
 )
 
 # Here's a pipeline model that will be trained and called seperately
