@@ -21,7 +21,7 @@ dependencies = [
     "goatools",
     "pandas",
     "grpcio",
-    "tensorflow",
+    "tensorflow>=2.18",
     "tensorboard",
     "keras",
     "py-spy",

@@ -99,10 +99,9 @@ def get_ifeatpro_features(alg, seqs):
 def get_ifeatureomega_features(alg, seqs):
     """get_ifeatureomega_features
     Returns a list of arrays or "feature vectors" using iFeatureOmega.
-    The algorithms are:
+    The 49 algorithms are:
 
     AAC
-    EAAC
     CKSAAP_type_1
     CKSAAP_type_2
     DPC_type_1
@@ -110,29 +109,12 @@ def get_ifeatureomega_features(alg, seqs):
     DDE
     TPC_type_1
     TPC_type_2
-    binary
-    binary_6bit
-    binary_5bit_type_1
-    binary_5bit_type_2
-    binary_3bit_type_1
-    binary_3bit_type_2
-    binary_3bit_type_3
-    binary_3bit_type_4
-    binary_3bit_type_5
-    binary_3bit_type_6
-    binary_3bit_type_7
-    AESNN3
     GAAC
-    EGAAC
     CKSAAGP_type_1
     CKSAAGP_type_2
     GDPC_type_1
     GDPC_type_2
     GTPC_type_1
-    GTPC_type_2
-    AAIndex
-    ZScale
-    BLOSUM62
     NMBroto
     Moran
     Geary
@@ -145,11 +127,6 @@ def get_ifeatureomega_features(alg, seqs):
     QSOrder
     PAAC
     APAAC
-    OPF_10bit
-    OPF_10bit_type_1
-    OPF_7bit_type_1
-    OPF_7bit_type_2
-    OPF_7bit_type_3
     ASDC
     DistancePair
     AC
@@ -166,7 +143,6 @@ def get_ifeatureomega_features(alg, seqs):
     PseKRAAC_type_6C
     PseKRAAC_type_7
     PseKRAAC_type_8
-    PseKRAAC_type_9
     PseKRAAC_type_10
     PseKRAAC_type_11
     PseKRAAC_type_12
@@ -174,7 +150,6 @@ def get_ifeatureomega_features(alg, seqs):
     PseKRAAC_type_14
     PseKRAAC_type_15
     PseKRAAC_type_16
-    KNN
 
     Parameters
     ----------
@@ -189,7 +164,6 @@ def get_ifeatureomega_features(alg, seqs):
     """
     algs = [
         "AAC",
-        "EAAC",
         "CKSAAP_type_1",
         "CKSAAP_type_2",
         "DPC_type_1",
@@ -197,29 +171,12 @@ def get_ifeatureomega_features(alg, seqs):
         "DDE",
         "TPC_type_1",
         "TPC_type_2",
-        "binary",
-        "binary_6bit",
-        "binary_5bit_type_1",
-        "binary_5bit_type_2",
-        "binary_3bit_type_1",
-        "binary_3bit_type_2",
-        "binary_3bit_type_3",
-        "binary_3bit_type_4",
-        "binary_3bit_type_5",
-        "binary_3bit_type_6",
-        "binary_3bit_type_7",
-        "AESNN3",
         "GAAC",
-        "EGAAC",
         "CKSAAGP_type_1",
         "CKSAAGP_type_2",
         "GDPC_type_1",
         "GDPC_type_2",
         "GTPC_type_1",
-        "GTPC_type_2",
-        "AAIndex",
-        "ZScale",
-        "BLOSUM62",
         "NMBroto",
         "Moran",
         "Geary",
@@ -232,11 +189,6 @@ def get_ifeatureomega_features(alg, seqs):
         "QSOrder",
         "PAAC",
         "APAAC",
-        "OPF_10bit",
-        "OPF_10bit_type_1",
-        "OPF_7bit_type_1",
-        "OPF_7bit_type_2",
-        "OPF_7bit_type_3",
         "ASDC",
         "DistancePair",
         "AC",
@@ -253,7 +205,6 @@ def get_ifeatureomega_features(alg, seqs):
         "PseKRAAC_type_6C",
         "PseKRAAC_type_7",
         "PseKRAAC_type_8",
-        "PseKRAAC_type_9",
         "PseKRAAC_type_10",
         "PseKRAAC_type_11",
         "PseKRAAC_type_12",
@@ -261,7 +212,6 @@ def get_ifeatureomega_features(alg, seqs):
         "PseKRAAC_type_14",
         "PseKRAAC_type_15",
         "PseKRAAC_type_16",
-        "KNN",
     ]
     if alg not in algs:
         sys.exit(f"Algorithm '{alg}' is not part of iFeatureOmegaCLI")

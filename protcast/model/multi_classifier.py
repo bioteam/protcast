@@ -51,7 +51,7 @@ class MultiClassifier:
         non_target_seqs: dict,
         algorithm: str,
         optimizer: str = "adam",
-        loss: str = "binary_crossentropy",
+        loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
         epochs: int = 20,
         fraction: float = 0.2,
@@ -130,8 +130,9 @@ class MultiClassifier:
 
     @typechecked
     def make_featurespace(self) -> None:
-        """make_featurespace"""
-        # Set up the size and type (float) of the FeatureSpace object and get the column names
+        """make_featurespace
+        Set up the size and type (float) of the FeatureSpace object and get the column names
+        """
         features = dict()
         for count in range(len(self.target_features[0])):
             features[str(count)] = FeatureSpace.float_normalized()
@@ -161,6 +162,7 @@ class MultiClassifier:
         self.val_dataframe = all_dataframe.sample(
             frac=self.fraction, random_state=1337
         )
+        # The index holds the row names, don't need them for training
         self.train_dataframe = all_dataframe.drop(self.val_dataframe.index)
         train_tfds = self.dataframe_to_tfdataset(self.train_dataframe)
         val_tfds = self.dataframe_to_tfdataset(self.val_dataframe)
@@ -421,12 +423,51 @@ fs = FeatureSpace(
         keras.layers.Dense(32, activation='relu'),
         keras.layers.Dense(num_classes, activation='softmax')  # Multi-class output
     ]),
-    loss='categorical_crossentropy',
-    metrics=['accuracy']
+    loss='categorical_crossentropy', # done
+    metrics=['accuracy'] # done
 )
 
 fs.fit(X_train, y_train)
 y_pred = fs.predict(X_test)
 
+
+"""
+
+
+""""
+Here's an example of how you can do this:
+
+import numpy as np
+from keras.utils import to_categorical
+
+# Assume this is your list of GO IDs
+go_ids = ['GO:12234', 'GO:56789', 'GO:12234', 'GO:98765', 'GO:56789']
+
+# Step 1: Create a mapping from GO IDs to integer labels
+unique_go_ids = list(set(go_ids))
+go_to_int = {go_id: i for i, go_id in enumerate(unique_go_ids)}
+
+# Step 2: Convert GO IDs to integer labels
+int_labels = [go_to_int[go_id] for go_id in go_ids]
+
+# Step 3: Use to_categorical
+categorical_labels = to_categorical(int_labels)
+
+print("Original GO IDs:", go_ids)
+print("Integer labels:", int_labels)
+print("Categorical labels:\n", categorical_labels)
+
+# To reverse the process (if needed):
+int_to_go = {i: go_id for go_id, i in go_to_int.items()}
+This script does the following:
+
+Creates a dictionary go_to_int that maps each unique GO ID to a unique integer.
+Uses this dictionary to convert the list of GO IDs to a list of integers.
+Applies to_categorical to the list of integers.
+The categorical_labels output will be a 2D numpy array where each row corresponds to a GO ID, and each column represents a unique category. The value 1 in each row indicates the category for that GO ID.
+
+Remember to save the go_to_int dictionary (or its inverse int_to_go) if you need to map the categorical data back to GO IDs later, or if you need to encode new data in the same way.
+
+Also, note that to_categorical assumes that your integer labels start from 0 and are contiguous. If your integer labels don't meet these conditions, you might need to adjust them or use a different encoding method.
 
 """
