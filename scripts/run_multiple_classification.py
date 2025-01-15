@@ -1,30 +1,40 @@
 import sys
 import argparse
+from collections import defaultdict
 from pathlib import Path
-from Bio import SeqIO
 
 file = Path(__file__).resolve()
 package_root_directory = file.parents[1]
 sys.path.append(str(package_root_directory))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
+from protcast.preprocessing.protcast_dataset import (  # noqa: E402
+    load_serialized_file,
+)
 
 if __name__ == "__main__":
     """"run_multiple_classification.py
-    This script uses Keras and Keras FeatureSpace to classify sequences.
-    Provide a *fasta file with sequences.
-    Example:
+    This script uses TensorFlow and Keras FeatureSpace to classify sequences.
+    Provide a text file with GO ids, the subgraph sequences will be used
+    for training and testing. Example:
 
     python3 scripts/run_multiple_classification.py \
-    -s test/data/uniprotkb_gpcrs.fasta \
-    -n gpcr -a qsorder -f ifeatpro -s
+    -g test/data/go-terms.txt \
+    -p ProtcastDataset.bin \
+    -a qsorder -f ifeatpro -s
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-s", "--sequence_file", required=True, help="Path to sequence file"
+        "-g", "--go_ids_file", required=True, help="Path to GO ids file"
     )
     parser.add_argument(
         "-a", "--algorithm", default="ctriad", help="Feature vector algorithm"
+    )
+    parser.add_argument(
+        "-p",
+        "--protcast_dataset",
+        required=True,
+        help="Path to ProtCast dataset",
     )
     parser.add_argument(
         "-f",
@@ -33,21 +43,30 @@ if __name__ == "__main__":
         choices=["iFeatureOmega", "ifeatpro"],
         help="Feature vector creator",
     )
-    parser.add_argument("-n", "--name", required=True, help="Name")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
     parser.add_argument("-s", "--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
-    target_seqs = SeqIO.to_dict(SeqIO.parse(args.target, "fasta"))
-    non_target_seqs = SeqIO.to_dict(SeqIO.parse(args.non_target, "fasta"))
+    go_ids = [
+        line.strip() for line in open(args.go_ids_file, "r") if "GO:" in line
+    ]
+    dataset = load_serialized_file(args.protcast_dataset)
+    proteins = defaultdict(dict)
+
+    # Primary keys are GO ids, secondary keys are protein ids, values are sequences
+    for go_id in go_ids:
+        subgraph_ids = dataset.get_subgraph(go_id)
+        for subid in subgraph_ids:
+            go_term = dataset.get_term(subid)
+            seqs = go_term.get_all_sequences()
+            proteins[go_id].update(seqs)
 
     classifier = MultiClassifier(
-        args.sequence_file,
         args.algorithm,
         args.feature_creator,
-        args.name,
         args.verbose,
         args.save,
+        proteins,
     )
     classifier.run()
     classifier.test_model()

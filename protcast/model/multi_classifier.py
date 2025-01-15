@@ -8,8 +8,8 @@ import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
-from keras.utils import FeatureSpace
-from keras.utils import to_categorical
+from keras.utils import FeatureSpace  # type: ignore
+from keras.utils import to_categorical  # type: ignore
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
     get_ifeatureomega_features,
@@ -51,11 +51,11 @@ class MultiClassifier:
     @typechecked
     def __init__(
         self,
-        name: str,
-        target_seqs: dict,
-        non_target_seqs: dict,
         algorithm: str,
         feature_creator: str,
+        verbose: bool,
+        save: bool,
+        proteins: dict,
         optimizer: str = "adam",
         loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
@@ -69,16 +69,16 @@ class MultiClassifier:
 
         Parameters
         ----------
-        name : str
-            _description_
-        target_seqs : dict
-            _description_
-        non_target_seqs : dict
-            _description_
         algorithm : str
             _description_
         feature_creator: str
-            Package that creates the feature vectors`
+            Package that creates the feature vectors
+        verbose: bool
+            Verbosity
+        save: bool
+            Save the model, or not
+        proteins: dict(dict)
+            Primary key: GO id, secondary key: protein id, value: sequence
         vector_length: int
             Length of feature vector
         optimizer : str, optional
@@ -100,11 +100,11 @@ class MultiClassifier:
         training_model: keras.src.engine.functional.Functional
             Trained model
         """
-        self.name = name
-        self.target_seqs = target_seqs
-        self.non_target_seqs = non_target_seqs
         self.algorithm = algorithm
         self.feature_creator = feature_creator
+        self.verbose = verbose
+        self.save = save
+        self.proteins = proteins
         self.optimizer = optimizer
         self.loss = loss
         self.metrics = metrics
@@ -128,19 +128,20 @@ class MultiClassifier:
     def get_feature_vectors(self) -> None:
         """get_feature_vector"""
         # Get feature vectors for all proteins as a list of lists
-        self.target_features, target_ids = get_ifeatpro_features(
+        self.target_features, target_pids = get_ifeatpro_features(
             self.algorithm, self.target_seqs
         )
-        self.non_target_features, non_target_ids = get_ifeatpro_features(
+        self.non_target_features, non_target_pids = get_ifeatpro_features(
             self.algorithm, self.non_target_seqs
         )
-        self.all_ids = target_ids + non_target_ids
+        self.all_ids = target_pids + non_target_pids
         self.vector_length = len(self.target_features[0])
 
     @typechecked
     def make_featurespace(self) -> None:
         """make_featurespace
-        Set up the size and type (float) of the FeatureSpace object and get the column names
+        Set up the size and type (float) of the FeatureSpace object and add the
+        column names starting with 1.
         """
         features = dict()
         for count in range(len(self.target_features[0])):

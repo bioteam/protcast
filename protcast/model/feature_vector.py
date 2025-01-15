@@ -98,8 +98,8 @@ def get_ifeatpro_features(alg, seqs):
 
 def get_ifeatureomega_features(alg, seqs):
     """get_ifeatureomega_features
-    Returns a list of arrays or "feature vectors" using iFeatureOmega.
-    The 49 algorithms are:
+    Returns a list of arrays or "feature vectors" using iFeatureOmega and a list
+    of protein ids. The 49 algorithms are:
 
     AAC
     CKSAAP_type_1
@@ -160,7 +160,7 @@ def get_ifeatureomega_features(alg, seqs):
 
     Returns
     -------
-    List of lists of floats
+    List of lists of floats and a list of protein ids
     """
     algs = [
         "AAC",
@@ -216,7 +216,7 @@ def get_ifeatureomega_features(alg, seqs):
     if alg not in algs:
         sys.exit(f"Algorithm '{alg}' is not part of iFeatureOmegaCLI")
 
-    ids = list()
+    pids = list()
     features = list()
 
     for pid, seq in seqs.items():
@@ -237,9 +237,9 @@ def get_ifeatureomega_features(alg, seqs):
         # labeled array of values, similar to an array but with labeled elements. The labels
         # in these Series are the column names, like "AAC_A", "AAC_B".
         for pid, vals in protein.encodings.iterrows():
-            ids.append(pid)
+            pids.append(pid)
             features.append(vals.tolist())
 
     lens = [len(vec) for vec in features]
     print(f"{alg} feature vector length: {set(lens)}")
-    return features, ids
+    return features, pids
