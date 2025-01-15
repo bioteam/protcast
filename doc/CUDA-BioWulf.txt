@@ -1,0 +1,62 @@
+------------------------------------------------------------------------------------------------------------------------------------
+  CUDA at NIH BioWulf:
+------------------------------------------------------------------------------------------------------------------------------------
+     Versions:
+        CUDA/10.2
+        CUDA/11.0
+        CUDA/11.2
+        CUDA/11.3
+        CUDA/11.4
+        CUDA/11.8
+        CUDA/12.1
+
+------------------------------------------------------------------------------------------------------------------------------------
+  CUDA-compat:
+------------------------------------------------------------------------------------------------------------------------------------
+     Versions:
+        CUDA-compat/12.1.0
+        CUDA-compat/12.6
+
+
+CUDA 12.1 Module Configuration ("module show CUDA/12.1" on BioWulf):
+
+whatis("Name        => CUDA Toolkit")
+whatis("Version     => 12.1.0")
+whatis("Category    => Development Tools")
+whatis("Description => Nvidia's parallel computing platform and programming model")
+whatis("URL         => http://http.download.nvidia.com/cuda-toolkit/")
+prepend_path("PATH","/usr/local/CUDA/12.1.0/bin")
+prepend_path("CUDA_HOME","/usr/local/CUDA/12.1.0")
+prepend_path("CUDA_PATH","/usr/local/CUDA/12.1.0")
+prepend_path("LD_LIBRARY_PATH","/usr/local/CUDA/12.1.0/lib64")
+prepend_path("LD_LIBRARY_PATH","/usr/local/CUDA/12.1.0/nvvm/lib64")
+prepend_path("LD_LIBRARY_PATH","/usr/local/CUDA/12.1.0/extras/CUPTI/lib64")
+prepend_path("LD_LIBRARY_PATH","/usr/local/CUDA/12.1.0/targets/x86_64-linux/lib"
+prepend_path("LIBRARY_PATH","/usr/local/CUDA/12.1.0/lib64")
+prepend_path("LIBRARY_PATH","/usr/local/CUDA/12.1.0/lib64/stubs")
+prepend_path("LIBRARY_PATH","/usr/local/CUDA/12.1.0/nvvm/lib64")
+prepend_path("LIBRARY_PATH","/usr/local/CUDA/12.1.0/extras/CUPTI/lib64")
+prepend_path("LD_RUN_PATH","/usr/local/CUDA/12.1.0/lib64")
+prepend_path("LD_RUN_PATH","/usr/local/CUDA/12.1.0/nvvm/lib64")
+prepend_path("LD_RUN_PATH","/usr/local/CUDA/12.1.0/extras/CUPTI/lib64")
+prepend_path("CPATH","/usr/local/CUDA/12.1.0/include")
+prepend_path("PKG_CONFIG_PATH","/usr/local/CUDA/12.1.0/pkconfig")
+prepend_path("MANPATH","/usr/local/CUDA/12.1.0/doc/man")
+prepend_path("CUDA_SAMPLES","/usr/local/CUDA/samples/NVIDIA_CUDA-12.1_Samples")
+
+
+System Python and Tensorflow:
+
+Tensorflow version 2.8
+Python 3.9.15
+
+
+What CUDA libraries need to be installed in order to do Deep Learning:
+
+CUDA Toolkit: This is the base requirement.
+
+cuDNN (CUDA Deep Neural Network library): This is a GPU-accelerated library of primitives for deep neural networks. It's crucial for TensorFlow's GPU operations.
+    
+CUPTI (CUDA Profiling Tools Interface): This is included in the CUDA Toolkit, but make sure it's in your PATH.
+    
+TensorRT: This is NVIDIA's deep learning inference optimizer and runtime that can be used to improve latency and throughput for inference.

@@ -3,12 +3,17 @@ import os
 import tensorflow as tf
 import keras
 import pandas as pd
+import pickle
+import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
 from keras.utils import to_categorical
-from protcast.model.feature_vector import get_ifeatpro_features
+from protcast.model.feature_vector import (
+    get_ifeatpro_features,
+    get_ifeatureomega_features,
+)
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score
 
@@ -50,6 +55,7 @@ class MultiClassifier:
         target_seqs: dict,
         non_target_seqs: dict,
         algorithm: str,
+        feature_creator: str,
         optimizer: str = "adam",
         loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
@@ -71,6 +77,8 @@ class MultiClassifier:
             _description_
         algorithm : str
             _description_
+        feature_creator: str
+            Package that creates the feature vectors`
         vector_length: int
             Length of feature vector
         optimizer : str, optional
@@ -96,6 +104,7 @@ class MultiClassifier:
         self.target_seqs = target_seqs
         self.non_target_seqs = non_target_seqs
         self.algorithm = algorithm
+        self.feature_creator = feature_creator
         self.optimizer = optimizer
         self.loss = loss
         self.metrics = metrics
@@ -434,40 +443,98 @@ y_pred = fs.predict(X_test)
 """
 
 
-""""
-Here's an example of how you can do this:
+class GOEncoder:
+    """GOEncoder
 
-import numpy as np
-from keras.utils import to_categorical
+    # Example usage:
+    go_encoder = GOEncoder()
 
-# Assume this is your list of GO IDs
-go_ids = ['GO:12234', 'GO:56789', 'GO:12234', 'GO:98765', 'GO:56789']
+    # Fit the encoder
+    go_ids = ['GO:1224', 'GO:5678', 'GO:9101', 'GO:1224', 'GO:5678']
+    go_encoder.fit(go_ids)
 
-# Step 1: Create a mapping from GO IDs to integer labels
-unique_go_ids = list(set(go_ids))
-go_to_int = {go_id: i for i, go_id in enumerate(unique_go_ids)}
+    # Encode GO IDs
+    encoded = go_encoder.encode(['GO:1224', 'GO:5678', 'GO:9101'])
+    print("Encoded:")
+    print(encoded)
 
-# Step 2: Convert GO IDs to integer labels
-int_labels = [go_to_int[go_id] for go_id in go_ids]
+    # Save the encoder
+    go_encoder.save('go_encoder.pkl')
 
-# Step 3: Use to_categorical
-categorical_labels = to_categorical(int_labels)
+    # Load the encoder
+    loaded_encoder = GOEncoder.load('go_encoder.pkl')
 
-print("Original GO IDs:", go_ids)
-print("Integer labels:", int_labels)
-print("Categorical labels:\n", categorical_labels)
+    # Decode using the loaded encoder
+    decoded = loaded_encoder.decode(encoded)
+    print("Decoded (using loaded encoder):")
+    print(decoded)
 
-# To reverse the process (if needed):
-int_to_go = {i: go_id for go_id, i in go_to_int.items()}
-This script does the following:
+    # Decode probabilities
+    probabilities = np.array([[0.1, 0.7, 0.2], [0.3, 0.3, 0.4]])
+    top_go_ids = loaded_encoder.decode_probabilities(probabilities, top_k=2)
+    print("Top 2 GO IDs with probabilities (using loaded encoder):")
+    for go_probs in top_go_ids:
+        print(go_probs)
+    """
 
-Creates a dictionary go_to_int that maps each unique GO ID to a unique integer.
-Uses this dictionary to convert the list of GO IDs to a list of integers.
-Applies to_categorical to the list of integers.
-The categorical_labels output will be a 2D numpy array where each row corresponds to a GO ID, and each column represents a unique category. The value 1 in each row indicates the category for that GO ID.
+    def __init__(self):
+        self.go_to_int = {}
+        self.int_to_go = {}
+        self.num_categories = 0
 
-Remember to save the go_to_int dictionary (or its inverse int_to_go) if you need to map the categorical data back to GO IDs later, or if you need to encode new data in the same way.
+    def fit(self, go_ids):
+        """Fit the encoder to a list of GO IDs."""
+        unique_go_ids = sorted(set(go_ids))
+        self.go_to_int = {go: i for i, go in enumerate(unique_go_ids)}
+        self.int_to_go = {i: go for go, i in self.go_to_int.items()}
+        self.num_categories = len(unique_go_ids)
 
-Also, note that to_categorical assumes that your integer labels start from 0 and are contiguous. If your integer labels don't meet these conditions, you might need to adjust them or use a different encoding method.
+    def encode(self, go_ids):
+        """Encode a list of GO IDs to categorical."""
+        if not self.go_to_int:
+            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+        integer_encoded = [self.go_to_int[go] for go in go_ids]
+        return to_categorical(integer_encoded, num_classes=self.num_categories)
 
-"""
+    def decode(self, categorical):
+        """Decode categorical back to GO IDs."""
+        if not self.int_to_go:
+            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+        integer_encoded = np.argmax(categorical, axis=1)
+        return [self.int_to_go[i] for i in integer_encoded]
+
+    def decode_probabilities(self, probabilities, top_k=1):
+        """Decode probability distributions to top k GO IDs with their probabilities."""
+        if not self.int_to_go:
+            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+        top_indices = np.argsort(probabilities, axis=1)[:, -top_k:]
+        result = []
+        for i, indices in enumerate(top_indices):
+            go_probs = [
+                (self.int_to_go[idx], probabilities[i, idx]) for idx in indices
+            ]
+            result.append(sorted(go_probs, key=lambda x: x[1], reverse=True))
+        return result
+
+    def save(self, filename):
+        """Serialize the GOEncoder to a file."""
+        with open(filename, "wb") as f:
+            pickle.dump(
+                {
+                    "go_to_int": self.go_to_int,
+                    "int_to_go": self.int_to_go,
+                    "num_categories": self.num_categories,
+                },
+                f,
+            )
+
+    @classmethod
+    def load(cls, filename):
+        """Deserialize a GOEncoder from a file."""
+        with open(filename, "rb") as f:
+            data = pickle.load(f)
+        encoder = cls()
+        encoder.go_to_int = data["go_to_int"]
+        encoder.int_to_go = data["int_to_go"]
+        encoder.num_categories = data["num_categories"]
+        return encoder

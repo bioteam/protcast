@@ -12,24 +12,16 @@ from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 if __name__ == "__main__":
     """"run_multiple_classification.py
     This script uses Keras and Keras FeatureSpace to classify sequences.
-    Provide a *fasta file with some group of related sequences ("target")
-    and a second *fasta file with unrelated or control sequences ("non-target").
+    Provide a *fasta file with sequences.
     Example:
 
     python3 scripts/run_multiple_classification.py \
-    -t test/data/uniprotkb_gpcrs.fasta \
-    -nt test/data/uniprotkb_non-gpcrs.fasta \
+    -s test/data/uniprotkb_gpcrs.fasta \
     -n gpcr -a qsorder -f ifeatpro -s
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-t", "--target", required=True, help="Path to target sequences"
-    )
-    parser.add_argument(
-        "-nt",
-        "--non_target",
-        required=True,
-        help="Path to non-target sequences",
+        "-s", "--sequence_file", required=True, help="Path to sequence file"
     )
     parser.add_argument(
         "-a", "--algorithm", default="ctriad", help="Feature vector algorithm"
@@ -50,8 +42,7 @@ if __name__ == "__main__":
     non_target_seqs = SeqIO.to_dict(SeqIO.parse(args.non_target, "fasta"))
 
     classifier = MultiClassifier(
-        target_seqs,
-        non_target_seqs,
+        args.sequence_file,
         args.algorithm,
         args.feature_creator,
         args.name,
