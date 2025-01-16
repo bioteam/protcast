@@ -8,8 +8,7 @@ from keras.utils import FeatureSpace
 from Bio import SeqIO
 
 file = Path(__file__).resolve()
-package_root_directory = file.parents[1]
-sys.path.append(str(package_root_directory))
+sys.path.append(str(file.parents[1]))
 
 from protcast.model.feature_vector import get_ifeatpro_features  # noqa: E402
 
@@ -38,12 +37,18 @@ def prediction_preprocessing(sample_dict):
     return preprocessed_sample_ds
 
 
-gpcr_seqs = SeqIO.to_dict(SeqIO.parse("test/data/uniprotkb_gpcrs.fasta", "fasta"))
-non_gpcr_seqs = SeqIO.to_dict(SeqIO.parse("test/data/uniprotkb_non-gpcrs.fasta", "fasta"))
+gpcr_seqs = SeqIO.to_dict(
+    SeqIO.parse("test/data/uniprotkb_gpcrs.fasta", "fasta")
+)
+non_gpcr_seqs = SeqIO.to_dict(
+    SeqIO.parse("test/data/uniprotkb_non-gpcrs.fasta", "fasta")
+)
 
 # Get feature vectors for all proteins as a list of lists
 gpcr_features, gpcr_ids = get_ifeatpro_features("ctriad", gpcr_seqs)
-non_gpcr_features, non_gpcr_ids = get_ifeatpro_features("ctriad", non_gpcr_seqs)
+non_gpcr_features, non_gpcr_ids = get_ifeatpro_features(
+    "ctriad", non_gpcr_seqs
+)
 
 # Set up the size and type (float) in the FeatureSpace object and get the column names
 features = dict()
@@ -74,7 +79,7 @@ val_ds = val_ds.batch(32)
 # The function adapt() that adapts the Featurespace to the training data only works on
 # datasets dicts of feature values so we have to make a version of the dataset with the labels stripped
 train_ds_with_no_labels = train_ds.map(lambda x, _: x)
-#train_ds_with_no_labels = [x for x, _ in train_ds]
+# train_ds_with_no_labels = [x for x, _ in train_ds]
 
 # adapt() is kind of magical. During this time the FeatureSpace will:
 # Index the set of possible values for the categorical features, compute mean and variance to aid with
@@ -115,9 +120,7 @@ training_model = keras.Model(
     outputs=output,
 )
 training_model.compile(
-    optimizer="adam", 
-    loss="binary_crossentropy", 
-    metrics=["accuracy"]
+    optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"]
 )
 # Here's a pipeline model that will be trained and called seperately
 training_model.fit(

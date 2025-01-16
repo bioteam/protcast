@@ -3,12 +3,19 @@ import os
 import tensorflow as tf
 import keras
 import pandas as pd
+import pickle
+import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
-from keras.utils import FeatureSpace
-from keras.utils import to_categorical
-from protcast.model.feature_vector import get_ifeatpro_features
+from keras.utils import FeatureSpace, to_categorical  # type: ignore
+from keras.models import Sequential  # type: ignore
+from keras.layers import IntegerLookup, Normalization, Dense  # type: ignore
+
+from protcast.model.feature_vector import (
+    get_ifeatpro_features,
+    get_ifeatureomega_features,
+)
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score
 
@@ -46,65 +53,76 @@ class MultiClassifier:
     @typechecked
     def __init__(
         self,
-        name: str,
-        target_seqs: dict,
-        non_target_seqs: dict,
         algorithm: str,
+        feature_creator: str,
+        verbose: bool,
+        save: bool,
+        proteins: dict,
         optimizer: str = "adam",
-        loss: str = "binary_crossentropy",
+        loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
         epochs: int = 20,
+        batch_size: int = 32,
         fraction: float = 0.2,
         neurons: int = 32,
         dropout: float = 0.5,
+        activation: str = "softmax",
         pred_threshold: float = 75.0,
     ) -> None:
         """__init__
 
         Parameters
         ----------
-        name : str
-            _description_
-        target_seqs : dict
-            _description_
-        non_target_seqs : dict
-            _description_
         algorithm : str
             _description_
+        feature_creator: str
+            Package that creates the feature vectors
+        verbose: bool
+            Verbosity
+        save: bool
+            Save the model, or not
+        proteins: dict(dict)
+            Primary key: GO id, secondary key: protein id, value: sequence
         vector_length: int
             Length of feature vector
-        optimizer : str, optional
-            _description_, by default "adam"
-        loss : str, optional
-            _description_, by default "binary_crossentropy"
-        metrics : list, optional
-            _description_, by default ["accuracy"]
-        epochs : int, optional
-            _description_, by default 20
-        fraction : float, optional
-            _description_, by default 0.2
-        neurons : int, optional
-            _description_, by default 32
-        dropout : float, optional
-            _description_, by default 0.5
-        pred_threshold : float, optional
+        optimizer : str
+            Optional, by default "adam"
+        loss : str
+            Optional, by default "categorical_crossentropy"
+        metrics : list
+            Optional, by default ["accuracy"]
+        epochs : int
+            By default 20
+        fraction : float
+            By default 0.2
+        neurons : int
+            By default 32
+        dropout : float
+            By default 0.5
+        pred_threshold : float
             Probability threshold for classification, by default 80.0
         training_model: keras.src.engine.functional.Functional
             Trained model
         """
-        self.name = name
-        self.target_seqs = target_seqs
-        self.non_target_seqs = non_target_seqs
         self.algorithm = algorithm
+        self.feature_creator = feature_creator
+        self.verbose = verbose
+        self.save = save
+        self.proteins = proteins
         self.optimizer = optimizer
         self.loss = loss
         self.metrics = metrics
         self.epochs = epochs
+        self.batch_size = batch_size
+        self.activation = activation
         self.fraction = fraction
         self.neurons = neurons
         self.dropout = dropout
         self.pred_threshold = pred_threshold
-        self.column_names = list()
+        self.go_ids = list()
+        self.pids = list()
+        self.features = list()
+        self.go_encoder = GOEncoder()
 
     @typechecked
     def run(self) -> None:
@@ -117,21 +135,31 @@ class MultiClassifier:
 
     @typechecked
     def get_feature_vectors(self) -> None:
-        """get_feature_vector"""
-        # Get feature vectors for all proteins as a list of lists
-        self.target_features, target_ids = get_ifeatpro_features(
-            self.algorithm, self.target_seqs
-        )
-        self.non_target_features, non_target_ids = get_ifeatpro_features(
-            self.algorithm, self.non_target_seqs
-        )
-        self.all_ids = target_ids + non_target_ids
-        self.vector_length = len(self.target_features[0])
+        """get_feature_vectors
+        Get feature vectors for all proteins as a list of lists,
+        protein ids as a list of lists, and GO ids as a
+        list
+        """
+        for go_id in self.proteins.keys():
+            if self.feature_creator == "ifeatpro":
+                features, pids = get_ifeatpro_features(
+                    self.algorithm, self.pids[go_id]
+                )
+            elif self.feature_creator == "iFeatureOmega":
+                features, pids = get_ifeatureomega_features(
+                    self.algorithm, self.pids[go_id]
+                )
+            self.features.append(features)
+            self.pids.append(pids)
+            self.go_ids.append(go_id)
+        self.vector_length = len(self.features[0][0])
 
     @typechecked
     def make_featurespace(self) -> None:
-        """make_featurespace"""
-        # Set up the size and type (float) of the FeatureSpace object and get the column names
+        """make_featurespace
+        Set up the size and type (float) of the FeatureSpace object and add the
+        column names starting with 1
+
         features = dict()
         for count in range(len(self.target_features[0])):
             features[str(count)] = FeatureSpace.float_normalized()
@@ -145,6 +173,64 @@ class MultiClassifier:
         self.target_features = [x + [1] for x in self.target_features]
         self.non_target_features = [x + [0] for x in self.non_target_features]
         self.all_features = self.target_features + self.non_target_features
+        """
+        # Flatten the nested lists
+        X = np.array([item for sublist in self.features for item in sublist])
+        all_pids = [item for sublist in self.ids for item in sublist]
+        y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
+
+        self.go_encoder.fit(self.go_ids)
+        y_encoded = self.go_encoder.encode(y)
+        y_categorical = to_categorical(y_encoded)
+
+        # Create the FeatureSpace object with dynamic feature count
+        feature_dict = {
+            "pid": IntegerLookup(vocabulary=all_pids),
+        }
+        feature_dict.update(
+            {
+                f"feature_{i}": Normalization()
+                for i in range(self.vector_length)
+            }
+        )
+
+        feature_space = FeatureSpace(
+            features=feature_dict,
+            crosses=[],  # Add crosses if needed
+        )
+
+        # Prepare the input data for FeatureSpace
+        input_data = {
+            "pid": np.array(all_pids),
+        }
+        input_data.update(
+            {f"feature_{i}": X[:, i] for i in range(self.vector_length)}
+        )
+
+        feature_space.adapt(input_data)
+        model = Sequential(
+            [
+                feature_space,
+                Dense(64, activation="relu"),
+                Dense(32, activation="relu"),
+                Dense(len(self.go_ids), activation=self.activation),
+            ]
+        )
+
+        # Compile the model
+        model.compile(
+            optimizer=self.optimizer,
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+
+        # Train the model
+        model.fit(
+            input_data,
+            y_categorical,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+        )
 
     @typechecked
     def prepare_data(self) -> tuple:
@@ -161,6 +247,7 @@ class MultiClassifier:
         self.val_dataframe = all_dataframe.sample(
             frac=self.fraction, random_state=1337
         )
+        # The index holds the row names, don't need them for training
         self.train_dataframe = all_dataframe.drop(self.val_dataframe.index)
         train_tfds = self.dataframe_to_tfdataset(self.train_dataframe)
         val_tfds = self.dataframe_to_tfdataset(self.val_dataframe)
@@ -421,8 +508,8 @@ fs = FeatureSpace(
         keras.layers.Dense(32, activation='relu'),
         keras.layers.Dense(num_classes, activation='softmax')  # Multi-class output
     ]),
-    loss='categorical_crossentropy',
-    metrics=['accuracy']
+    loss='categorical_crossentropy', # done
+    metrics=['accuracy'] # done
 )
 
 fs.fit(X_train, y_train)
@@ -430,3 +517,100 @@ y_pred = fs.predict(X_test)
 
 
 """
+
+
+class GOEncoder:
+    """GOEncoder
+
+    # Example usage:
+    go_encoder = GOEncoder()
+
+    # Fit the encoder
+    go_ids = ['GO:1224', 'GO:5678', 'GO:9101', 'GO:1224', 'GO:5678']
+    go_encoder.fit(go_ids)
+
+    # Encode GO IDs
+    encoded = go_encoder.encode(['GO:1224', 'GO:5678', 'GO:9101'])
+    print("Encoded:")
+    print(encoded)
+
+    # Save the encoder
+    go_encoder.save('go_encoder.pkl')
+
+    # Load the encoder
+    loaded_encoder = GOEncoder.load('go_encoder.pkl')
+
+    # Decode using the loaded encoder
+    decoded = loaded_encoder.decode(encoded)
+    print("Decoded (using loaded encoder):")
+    print(decoded)
+
+    # Decode probabilities
+    probabilities = np.array([[0.1, 0.7, 0.2], [0.3, 0.3, 0.4]])
+    top_go_ids = loaded_encoder.decode_probabilities(probabilities, top_k=2)
+    print("Top 2 GO IDs with probabilities (using loaded encoder):")
+    for go_probs in top_go_ids:
+        print(go_probs)
+    """
+
+    def __init__(self):
+        self.go_to_int = {}
+        self.int_to_go = {}
+        self.num_categories = 0
+
+    def fit(self, go_ids):
+        """Fit the encoder to a list of GO IDs."""
+        unique_go_ids = sorted(set(go_ids))
+        self.go_to_int = {go: i for i, go in enumerate(unique_go_ids)}
+        self.int_to_go = {i: go for go, i in self.go_to_int.items()}
+        self.num_categories = len(unique_go_ids)
+
+    def encode(self, go_ids):
+        """Encode a list of GO IDs to categorical."""
+        if not self.go_to_int:
+            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+        integer_encoded = [self.go_to_int[go] for go in go_ids]
+        return to_categorical(integer_encoded, num_classes=self.num_categories)
+
+    def decode(self, categorical):
+        """Decode categorical back to GO IDs."""
+        if not self.int_to_go:
+            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+        integer_encoded = np.argmax(categorical, axis=1)
+        return [self.int_to_go[i] for i in integer_encoded]
+
+    def decode_probabilities(self, probabilities, top_k=1):
+        """Decode probability distributions to top k GO IDs with their probabilities."""
+        if not self.int_to_go:
+            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+        top_indices = np.argsort(probabilities, axis=1)[:, -top_k:]
+        result = []
+        for i, indices in enumerate(top_indices):
+            go_probs = [
+                (self.int_to_go[idx], probabilities[i, idx]) for idx in indices
+            ]
+            result.append(sorted(go_probs, key=lambda x: x[1], reverse=True))
+        return result
+
+    def save(self, filename):
+        """Serialize the GOEncoder to a file."""
+        with open(filename, "wb") as f:
+            pickle.dump(
+                {
+                    "go_to_int": self.go_to_int,
+                    "int_to_go": self.int_to_go,
+                    "num_categories": self.num_categories,
+                },
+                f,
+            )
+
+    @classmethod
+    def load(cls, filename):
+        """Deserialize a GOEncoder from a file."""
+        with open(filename, "rb") as f:
+            data = pickle.load(f)
+        encoder = cls()
+        encoder.go_to_int = data["go_to_int"]
+        encoder.int_to_go = data["int_to_go"]
+        encoder.num_categories = data["num_categories"]
+        return encoder

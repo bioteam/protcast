@@ -3,8 +3,7 @@ from pathlib import Path
 import sys
 
 file = Path(__file__).resolve()
-package_root_directory = file.parents[1]
-sys.path.append(str(package_root_directory))
+sys.path.append(str(file.parents[1]))
 
 from protcast.preprocessing.parse_swissprot import (  # noqa: E402
     parse_swissprot,

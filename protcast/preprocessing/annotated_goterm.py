@@ -163,6 +163,6 @@ class AnnotatedGOTerm:
         """
         if len(self.annotations) > 0:
             return {
-                p.id: p.sequence
-                for p in [annot.protein for annot in self.annotations]
+                protein.id: protein.sequence
+                for protein in [annot.protein for annot in self.annotations]
             }
