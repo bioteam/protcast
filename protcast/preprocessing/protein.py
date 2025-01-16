@@ -97,7 +97,7 @@ class Protein:
                 return True
         return False
 
-    def get_annotation(self, go_id: str) -> Annotation | None:
+    def get_annotation(self, go_id: str):
         """get_annotation
         Get an Annotation from a Protein given a GO term id
 
