@@ -61,7 +61,7 @@ if __name__ == "__main__":
             pids = dataset.get_term(subid).get_all_pids()
             if pids:
                 seqs = {
-                    pid: dataset.proteins[pid].sequence
+                    pid: dataset.proteins[pid]
                     for pid in pids
                     if pid in dataset.proteins
                 }
