@@ -69,8 +69,6 @@ class ProtCastDataset:
         Return list of subgraph GO ids given a GO id
     is_in_subgraph: boolean
         Return true if first GO id is in the subgraph of second GO id
-    get_sequences: list
-        Return list of sequences given a list of GO ids
     remove_protein: str
         Remove Protein and accession
     to_obo:
@@ -550,23 +548,3 @@ class ProtCastDataset:
         if predicted_go_id in subgraph:
             return True
         return False
-
-    @typechecked
-    def get_sequences(self, go_ids: list[str]) -> list[str]:
-        """get_sequences
-
-        Parameters
-        ----------
-        go_ids: list[str]
-            List of GO ids
-
-        Returns
-        -------
-        all_seqs: list[str]
-            List of protein sequences
-        """
-        all_seqs = list()
-        for go_id in go_ids:
-            seqs = go_id.get_all_sequences(go_id)
-            all_seqs.extend(seqs)
-        return all_seqs
