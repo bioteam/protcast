@@ -114,8 +114,7 @@ class AnnotatedGOTerm:
                 return True
         return False
 
-    @typechecked
-    def get_annotation(self, go_id: str) -> Annotation | None:
+    def get_annotation(self, go_id: str):
         """get_annotation
         Get an Annotation from an AnnotatedGOterm given a GO id
 
@@ -132,8 +131,7 @@ class AnnotatedGOTerm:
             if annot.go_id == go_id:
                 return annot
 
-    @typechecked
-    def get_all_annotations(self) -> list[Annotation] | None:
+    def get_all_annotations(self):
         """get_all_annotations
         Get all Annotations for a AnnotatedGOterm
 
@@ -148,8 +146,7 @@ class AnnotatedGOTerm:
         if len(self.annotations) > 0:
             return self.annotations
 
-    @typechecked
-    def get_all_sequences(self) -> dict[str, str] | None:
+    def get_all_sequences(self):
         """get_all_sequences
         Get all sequences for all Proteins for an AnnotatedGOterm
 
