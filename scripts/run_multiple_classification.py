@@ -59,12 +59,13 @@ if __name__ == "__main__":
         subgraph_go_ids = dataset.get_subgraph(go_id)
         for subid in subgraph_go_ids:
             pids = dataset.get_term(subid).get_all_pids()
-            seqs = {
-                pid: dataset.proteins[pid].sequence
-                for pid in pids
-                if pid in dataset.proteins
-            }
-            proteins[go_id].update(seqs)
+            if pids:
+                seqs = {
+                    pid: dataset.proteins[pid].sequence
+                    for pid in pids
+                    if pid in dataset.proteins
+                }
+                proteins[go_id].update(seqs)
 
     classifier = MultiClassifier(
         args.algorithm,
