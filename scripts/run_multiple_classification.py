@@ -56,9 +56,14 @@ if __name__ == "__main__":
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
     proteins = defaultdict(dict)
     for go_id in go_ids:
-        subgraph_ids = dataset.get_subgraph(go_id)
-        for subid in subgraph_ids:
-            seqs = dataset.get_term(subid).get_all_sequences()
+        subgraph_go_ids = dataset.get_subgraph(go_id)
+        for subid in subgraph_go_ids:
+            pids = dataset.get_term(subid).get_all_pids()
+            seqs = {
+                pid: dataset.proteins[pid]
+                for pid in pids
+                if pid in dataset.proteins
+            }
             proteins[go_id].update(seqs)
 
     classifier = MultiClassifier(

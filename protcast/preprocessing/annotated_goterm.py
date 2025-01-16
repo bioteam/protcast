@@ -146,9 +146,9 @@ class AnnotatedGOTerm:
         if len(self.annotations) > 0:
             return self.annotations
 
-    def get_all_sequences(self):
-        """get_all_sequences
-        Get all sequences for all Proteins for an AnnotatedGOterm
+    def get_all_pids(self):
+        """get_all_pids
+        Get all protein ids for an AnnotatedGOterm
 
         Parameters
         ----------
@@ -156,10 +156,7 @@ class AnnotatedGOTerm:
 
         Returns
         -------
-        Dict of protein ids and protein sequences
+        List of protein ids
         """
         if len(self.annotations) > 0:
-            return {
-                protein.id: protein.sequence
-                for protein in [annot.protein for annot in self.annotations]
-            }
+            return [annot.protein_id for annot in self.annotations]
