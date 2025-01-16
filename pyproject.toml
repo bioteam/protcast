@@ -7,11 +7,11 @@ name = "ProtCast"
 version = "0.0.1"
 description = "Protein function prediction based on sequence"
 authors = [{ name = "Wisdom Akpan", email = "wisdom@bioteam.net" },{ name = "Brian Osborne", email = "briano@bioteam.net" }, {name = "Bruno Alvisio", email = "contact@bioteam.net"}]
-requires-python = ">=3.10.0"
+requires-python = ">=3.9.2"
 dependencies = [
     "plotly",
     "kaleido",
-    "numpy",
+    "numpy<2",
     "numba",
     "typeguard",
     "scikit-learn",
@@ -21,11 +21,12 @@ dependencies = [
     "goatools",
     "pandas",
     "grpcio",
-    "tensorflow",
+    "tensorflow>=2.16.1",
+    "keras>=3.0",
     "tensorboard",
-    "keras",
     "py-spy",
-    "virtualenv"
+    "virtualenv",
+    "urllib3==1.26.5"
 ]
 
 [tool.setuptools]
