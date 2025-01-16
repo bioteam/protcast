@@ -8,7 +8,7 @@ sys.path.append(str(file.parents[1]))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
-    load_serialized_file,
+    ProtCastDataset,
 )
 
 if __name__ == "__main__":
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
-    dataset = load_serialized_file(args.protcast_dataset)
+    dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
 
     go_ids = [
         line.strip()
