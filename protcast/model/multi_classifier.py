@@ -8,8 +8,10 @@ import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
-from keras.utils import FeatureSpace  # type: ignore
-from keras.utils import to_categorical  # type: ignore
+from keras.utils import FeatureSpace, to_categorical  # type: ignore
+from keras.models import Sequential  # type: ignore
+from keras.layers import IntegerLookup, Normalization, Dense  # type: ignore
+
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
     get_ifeatureomega_features,
@@ -60,9 +62,11 @@ class MultiClassifier:
         loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
         epochs: int = 20,
+        batch_size: int = 32,
         fraction: float = 0.2,
         neurons: int = 32,
         dropout: float = 0.5,
+        activation: str = "softmax",
         pred_threshold: float = 75.0,
     ) -> None:
         """__init__
@@ -81,21 +85,21 @@ class MultiClassifier:
             Primary key: GO id, secondary key: protein id, value: sequence
         vector_length: int
             Length of feature vector
-        optimizer : str, optional
-            _description_, by default "adam"
-        loss : str, optional
-            _description_, by default "binary_crossentropy"
-        metrics : list, optional
-            _description_, by default ["accuracy"]
-        epochs : int, optional
-            _description_, by default 20
-        fraction : float, optional
-            _description_, by default 0.2
-        neurons : int, optional
-            _description_, by default 32
-        dropout : float, optional
-            _description_, by default 0.5
-        pred_threshold : float, optional
+        optimizer : str
+            Optional, by default "adam"
+        loss : str
+            Optional, by default "categorical_crossentropy"
+        metrics : list
+            Optional, by default ["accuracy"]
+        epochs : int
+            By default 20
+        fraction : float
+            By default 0.2
+        neurons : int
+            By default 32
+        dropout : float
+            By default 0.5
+        pred_threshold : float
             Probability threshold for classification, by default 80.0
         training_model: keras.src.engine.functional.Functional
             Trained model
@@ -109,11 +113,16 @@ class MultiClassifier:
         self.loss = loss
         self.metrics = metrics
         self.epochs = epochs
+        self.batch_size = batch_size
+        self.activation = activation
         self.fraction = fraction
         self.neurons = neurons
         self.dropout = dropout
         self.pred_threshold = pred_threshold
-        self.column_names = list()
+        self.go_ids = list()
+        self.pids = list()
+        self.features = list()
+        self.go_encoder = GOEncoder()
 
     @typechecked
     def run(self) -> None:
@@ -126,23 +135,31 @@ class MultiClassifier:
 
     @typechecked
     def get_feature_vectors(self) -> None:
-        """get_feature_vector"""
-        # Get feature vectors for all proteins as a list of lists
-        self.target_features, target_pids = get_ifeatpro_features(
-            self.algorithm, self.target_seqs
-        )
-        self.non_target_features, non_target_pids = get_ifeatpro_features(
-            self.algorithm, self.non_target_seqs
-        )
-        self.all_ids = target_pids + non_target_pids
-        self.vector_length = len(self.target_features[0])
+        """get_feature_vectors
+        Get feature vectors for all proteins as a list of lists,
+        protein ids as a list of lists, and GO ids as a
+        list
+        """
+        for go_id in self.proteins.keys():
+            if self.feature_creator == "ifeatpro":
+                features, pids = get_ifeatpro_features(
+                    self.algorithm, self.pids[go_id]
+                )
+            elif self.feature_creator == "iFeatureOmega":
+                features, pids = get_ifeatureomega_features(
+                    self.algorithm, self.pids[go_id]
+                )
+            self.features.append(features)
+            self.pids.append(pids)
+            self.go_ids.append(go_id)
+        self.vector_length = len(self.features[0][0])
 
     @typechecked
     def make_featurespace(self) -> None:
         """make_featurespace
         Set up the size and type (float) of the FeatureSpace object and add the
-        column names starting with 1.
-        """
+        column names starting with 1
+
         features = dict()
         for count in range(len(self.target_features[0])):
             features[str(count)] = FeatureSpace.float_normalized()
@@ -156,6 +173,64 @@ class MultiClassifier:
         self.target_features = [x + [1] for x in self.target_features]
         self.non_target_features = [x + [0] for x in self.non_target_features]
         self.all_features = self.target_features + self.non_target_features
+        """
+        # Flatten the nested lists
+        X = np.array([item for sublist in self.features for item in sublist])
+        all_pids = [item for sublist in self.ids for item in sublist]
+        y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
+
+        self.go_encoder.fit(self.go_ids)
+        y_encoded = self.go_encoder.encode(y)
+        y_categorical = to_categorical(y_encoded)
+
+        # Create the FeatureSpace object with dynamic feature count
+        feature_dict = {
+            "pid": IntegerLookup(vocabulary=all_pids),
+        }
+        feature_dict.update(
+            {
+                f"feature_{i}": Normalization()
+                for i in range(self.vector_length)
+            }
+        )
+
+        feature_space = FeatureSpace(
+            features=feature_dict,
+            crosses=[],  # Add crosses if needed
+        )
+
+        # Prepare the input data for FeatureSpace
+        input_data = {
+            "pid": np.array(all_pids),
+        }
+        input_data.update(
+            {f"feature_{i}": X[:, i] for i in range(self.vector_length)}
+        )
+
+        feature_space.adapt(input_data)
+        model = Sequential(
+            [
+                feature_space,
+                Dense(64, activation="relu"),
+                Dense(32, activation="relu"),
+                Dense(len(self.go_ids), activation=self.activation),
+            ]
+        )
+
+        # Compile the model
+        model.compile(
+            optimizer=self.optimizer,
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
+
+        # Train the model
+        model.fit(
+            input_data,
+            y_categorical,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+        )
 
     @typechecked
     def prepare_data(self) -> tuple:
