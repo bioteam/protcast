@@ -97,7 +97,6 @@ class Protein:
                 return True
         return False
 
-    @typechecked
     def get_annotation(self, go_id: str) -> Annotation | None:
         """get_annotation
         Get an Annotation from a Protein given a GO term id
@@ -170,4 +169,6 @@ class Protein:
         -------
         List of Annotations
         """
-        return [x for x in self.get_all_annotations() if x.evidence_code == "IEA"]
+        return [
+            x for x in self.get_all_annotations() if x.evidence_code == "IEA"
+        ]
