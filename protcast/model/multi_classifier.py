@@ -133,18 +133,18 @@ class MultiClassifier:
     @typechecked
     def get_feature_vectors(self) -> None:
         """get_feature_vectors
-        Get feature vectors for all proteins as a list of lists,
+        Create feature vectors and create vectors as a list of lists,
         protein ids as a list of lists, and GO ids as a
         list
         """
         for go_id in self.proteins.keys():
             if self.feature_creator == "ifeatpro":
                 features, pids = get_ifeatpro_features(
-                    self.algorithm, self.pids[go_id]
+                    self.algorithm, self.proteins[go_id]
                 )
             elif self.feature_creator == "iFeatureOmega":
                 features, pids = get_ifeatureomega_features(
-                    self.algorithm, self.pids[go_id]
+                    self.algorithm, self.proteins[go_id]
                 )
             self.features.append(features)
             self.pids.append(pids)
