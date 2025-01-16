@@ -38,8 +38,8 @@ class AnnotatedGOTerm:
         Returns Annotation given a GO id
     get_all_annotations:
         Returns all Annotations for an AnnotatedGOTerm
-    get_all_sequences: dict
-        Returns all sequences for all Annotations for an AnnotatedGOTerm
+    get_all_pids: list
+        Returns all protein ids for all Annotations for an AnnotatedGOTerm
     """
 
     def __init__(self, goatools_go_term) -> None:
