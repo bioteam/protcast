@@ -4,8 +4,7 @@ import random
 from pathlib import Path
 
 file = Path(__file__).resolve()
-package_root_directory = file.parents[1]
-sys.path.append(str(package_root_directory))
+sys.path.append(str(file.parents[1]))
 
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,
@@ -32,7 +31,11 @@ python scripts/create_subgraph_sequences_files.py \
 """
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-m", "--minimum_seqs", default=500, help="Minumum number of sequences", type=int
+    "-m",
+    "--minimum_seqs",
+    default=500,
+    help="Minumum number of sequences",
+    type=int,
 )
 parser.add_argument(
     "-p",

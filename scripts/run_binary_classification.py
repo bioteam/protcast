@@ -4,8 +4,7 @@ from pathlib import Path
 from Bio import SeqIO
 
 file = Path(__file__).resolve()
-package_root_directory = file.parents[1]
-sys.path.append(str(package_root_directory))
+sys.path.append(str(file.parents[1]))
 
 from protcast.model.binary_classifier import BinaryClassifier  # noqa: E402
 

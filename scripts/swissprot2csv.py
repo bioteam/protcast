@@ -5,11 +5,12 @@ import pickle
 from pathlib import Path
 
 file = Path(__file__).resolve()
-package_root_directory = file.parents[1]
-sys.path.append(str(package_root_directory))
+sys.path.append(str(file.parents[1]))
 
 from protcast.preprocessing.annotated_godag import Ontology  # noqa: E402
-from protcast.preprocessing.parse_swissprot import parse_swissprot  # noqa: E402
+from protcast.preprocessing.parse_swissprot import (  # noqa: E402
+    parse_swissprot,
+)
 
 
 def main():

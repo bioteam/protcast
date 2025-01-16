@@ -4,8 +4,7 @@ from collections import defaultdict
 from pathlib import Path
 
 file = Path(__file__).resolve()
-package_root_directory = file.parents[1]
-sys.path.append(str(package_root_directory))
+sys.path.append(str(file.parents[1]))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
@@ -47,18 +46,19 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
-    go_ids = [
-        line.strip() for line in open(args.go_ids_file, "r") if "GO:" in line
-    ]
     dataset = load_serialized_file(args.protcast_dataset)
-    proteins = defaultdict(dict)
 
+    go_ids = [
+        line.strip()
+        for line in open(args.go_ids_file, "r")
+        if line.startswith("GO:")
+    ]
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
+    proteins = defaultdict(dict)
     for go_id in go_ids:
         subgraph_ids = dataset.get_subgraph(go_id)
         for subid in subgraph_ids:
-            go_term = dataset.get_term(subid)
-            seqs = go_term.get_all_sequences()
+            seqs = dataset.get_term(subid).get_all_sequences()
             proteins[go_id].update(seqs)
 
     classifier = MultiClassifier(
