@@ -174,7 +174,7 @@ class MultiClassifier:
         # Flatten the features
         X = np.array([item for sublist in self.features for item in sublist])
         # Flatten the pids
-        all_pids = [item for sublist in self.ids for item in sublist]
+        all_pids = [item for sublist in self.pids for item in sublist]
         # Collect and categorize the feaures
         y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
 
