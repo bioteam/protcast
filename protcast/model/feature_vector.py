@@ -76,8 +76,10 @@ def get_ifeatpro_features(alg, seqs):
         tmpdir = tempfile.TemporaryDirectory()
         tmpfasta = tempfile.NamedTemporaryFile()
         # Write fasta file
+        if type(seq) is not str:
+            seq = str(seq.seq)
         with open(tmpfasta.name, "w") as f:
-            f.write(">" + pid + "\n" + str(seq.seq) + "\n")
+            f.write(">" + pid + "\n" + seq + "\n")
 
         # The try is necessary in case the input sequence is too
         # short for a given algorithm
@@ -98,8 +100,8 @@ def get_ifeatpro_features(alg, seqs):
 
 def get_ifeatureomega_features(alg, seqs):
     """get_ifeatureomega_features
-    Returns a list of arrays or "feature vectors" using iFeatureOmega and a list
-    of protein ids. The 49 algorithms are:
+    Returns a list of arrays or "feature vectors" using iFeatureOmega and a dict
+    of protein ids and protein sequences. The 49 algorithms are:
 
     AAC
     CKSAAP_type_1
@@ -223,7 +225,7 @@ def get_ifeatureomega_features(alg, seqs):
         tmpfasta = tempfile.NamedTemporaryFile()
         # Create multi-fasta file from input sequences
         with open(tmpfasta.name, "w") as f:
-            f.write(">" + pid + "\n" + str(seq.seq) + "\n")
+            f.write(">" + pid + "\n" + seq + "\n")
         # The try is necessary in case the input sequence is too
         # short for a given algorithm
         try:
