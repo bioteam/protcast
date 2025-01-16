@@ -395,8 +395,7 @@ class ProtCastDataset:
                     obo_file.write("xref: " + protein_id + "\n")
                 obo_file.write("\n")
 
-    @typechecked
-    def get_term(self, go_id: str) -> AnnotatedGOTerm | None:
+    def get_term(self, go_id: str):
         """get_term
         Get AnnotatedGOterm given an id
 
@@ -411,8 +410,7 @@ class ProtCastDataset:
         """
         return self.annotated_dag.go_terms_map.get(go_id)
 
-    @typechecked
-    def get_terms(self, go_ids: list) -> list[AnnotatedGOTerm] | None:
+    def get_terms(self, go_ids: list):
         """get_terms
         Get AnnotatedGOterms given a list of ids
 
