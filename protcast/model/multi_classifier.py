@@ -37,8 +37,6 @@ class MultiClassifier:
         Initialize
     make_featurespace:
         ...
-    prepare_data:
-        ...
     make_model:
         ...
     test_model:
@@ -130,8 +128,7 @@ class MultiClassifier:
         self.start_time = time.time()
         self.get_feature_vectors()
         self.make_featurespace()
-        train_tfdataset, val_tfdataset = self.prepare_data()
-        self.make_model(train_tfdataset, val_tfdataset)
+        self.make_model()
 
     @typechecked
     def get_feature_vectors(self) -> None:
@@ -174,14 +171,16 @@ class MultiClassifier:
         self.non_target_features = [x + [0] for x in self.non_target_features]
         self.all_features = self.target_features + self.non_target_features
         """
-        # Flatten the nested lists
+        # Flatten the features
         X = np.array([item for sublist in self.features for item in sublist])
+        # Flatten the pids
         all_pids = [item for sublist in self.ids for item in sublist]
+        # Collect and categorize the feaures
         y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
 
         self.go_encoder.fit(self.go_ids)
         y_encoded = self.go_encoder.encode(y)
-        y_categorical = to_categorical(y_encoded)
+        self.y_categorical = to_categorical(y_encoded)
 
         # Create the FeatureSpace object with dynamic feature count
         feature_dict = {
@@ -194,23 +193,29 @@ class MultiClassifier:
             }
         )
 
-        feature_space = FeatureSpace(
+        self.feature_space = FeatureSpace(
             features=feature_dict,
             crosses=[],  # Add crosses if needed
         )
 
         # Prepare the input data for FeatureSpace
-        input_data = {
+        self.input_data = {
             "pid": np.array(all_pids),
         }
-        input_data.update(
+        self.input_data.update(
             {f"feature_{i}": X[:, i] for i in range(self.vector_length)}
         )
 
-        feature_space.adapt(input_data)
-        model = Sequential(
+        self.feature_space.adapt(self.input_data)
+
+    def make_model(self):
+        """make_model
+        (Pdb) classifier.training_model.summary()
+
+        """
+        self.model = Sequential(
             [
-                feature_space,
+                self.feature_space,
                 Dense(64, activation="relu"),
                 Dense(32, activation="relu"),
                 Dense(len(self.go_ids), activation=self.activation),
@@ -218,29 +223,41 @@ class MultiClassifier:
         )
 
         # Compile the model
-        model.compile(
+        self.model.compile(
             optimizer=self.optimizer,
-            loss="categorical_crossentropy",
-            metrics=["accuracy"],
+            loss=self.loss,
+            metrics=self.metrics,
         )
 
         # Train the model
-        model.fit(
-            input_data,
-            y_categorical,
+        self.model.fit(
+            self.input_data,
+            self.y_categorical,
             epochs=self.epochs,
             batch_size=self.batch_size,
         )
 
     @typechecked
-    def prepare_data(self) -> tuple:
-        """prepare_data
+    def save_model(self) -> None:
+        """save_model"""
+        self.training_model.save(f"{self.name}_{self.algorithm}.keras")
 
-        Returns
-        -------
-        tuple
+    @typechecked
+    def load_model(self, model_path: Path) -> None:
+        """load_model
 
+        Parameters
+        ----------
+        model_path : Path
+            Path to saved model
         """
+        self.training_model = keras.models.load_model(model_path)
+
+
+"""
+
+    @typechecked
+    def prepare_data(self) -> tuple:
         all_dataframe = pd.DataFrame(
             self.all_features, columns=self.column_names
         )
@@ -287,33 +304,6 @@ class MultiClassifier:
     def make_model(
         self, train_tfds: tf.data.Dataset, val_tfds: tf.data.Dataset
     ) -> None:
-        """make_model
-
-        (Pdb) classifier.training_model.summary()
-        Model: "model_1"
-        _________________________________________________________________
-        Layer (type)                Output Shape              Param #
-        =================================================================
-        input_2 (InputLayer)        [(None, 343)]             0
-
-        dense_2 (Dense)             (None, 32)                11008
-
-        dropout_1 (Dropout)         (None, 32)                0
-
-        dense_3 (Dense)             (None, 1)                 33
-
-        =================================================================
-        Total params: 11041 (43.13 KB)
-        Trainable params: 11041 (43.13 KB)
-        Non-trainable params: 0 (0.00 Byte)
-
-        Parameters
-        ----------
-        train_tfds : tf.data.Dataset
-            _description_
-        val_tfds : tf.data.Dataset
-            _description_
-        """
         # The first layer is the encoded features as a KerasTensor
         encoded_features = self.feature_space.get_encoded_features()
         # Create a dense layer with 32 neurons and apply the ReLU activation function for non-linearity.
@@ -351,7 +341,6 @@ class MultiClassifier:
 
     @typechecked
     def test_model(self) -> None:
-        """test_model"""
         y_true = list()
         y_pred = list()
         f = open(f"{self.name}_{self.algorithm}.tsv", "w")
@@ -385,18 +374,6 @@ class MultiClassifier:
     def dataframe_to_tfdataset(
         self, dataframe: pd.DataFrame
     ) -> tf.data.Dataset:
-        """dataframe_to_tfdataset
-
-        Parameters
-        ----------
-        dataframe : pd.DataFrame
-            _description_
-
-        Returns
-        -------
-        tf.data.Dataset
-            _description_
-        """
         # The original dataframe passed to method is unchanged
         dataframe = dataframe.copy()
         labels = dataframe.pop("target")
@@ -408,17 +385,6 @@ class MultiClassifier:
     def sample_preprocessing(
         self, sample: pd.core.series.Series
     ) -> tf.data.Dataset:
-        """sample_preprocessing
-
-        Parameters
-        ----------
-        sample : pd.core.series.Series
-
-        Returns
-        -------
-        tf.data.Dataset
-            _description_
-        """
         # Convert pandas Series into dataframe
         sample_frame = pd.DataFrame([sample])
         # Convert datafrane into Tensorflow Datasest with stub target
@@ -434,22 +400,7 @@ class MultiClassifier:
         )
         return processed_sample_tfds
 
-    @typechecked
-    def save_model(self) -> None:
-        """save_model"""
-        self.training_model.save(f"{self.name}_{self.algorithm}.keras")
-
-    @typechecked
-    def load_model(self, model_path: Path) -> None:
-        """load_model
-
-        Parameters
-        ----------
-        model_path : Path
-            Path to saved model
-        """
-        self.training_model = keras.models.load_model(model_path)
-
+"""
 
 """ 
 1. One-Hot Encoding (OHE): This is a common preprocessing step that converts your categorical features into numerical representations.
@@ -514,8 +465,6 @@ fs = FeatureSpace(
 
 fs.fit(X_train, y_train)
 y_pred = fs.predict(X_test)
-
-
 """
 
 
