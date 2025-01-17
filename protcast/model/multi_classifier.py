@@ -13,6 +13,9 @@ from typeguard import typechecked
 from keras.models import Sequential  # type: ignore
 from keras.layers import Normalization, Dense  # type: ignore
 from keras import layers, models
+from sklearn.model_selection import train_test_split
+from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
+
 
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -156,20 +159,7 @@ class MultiClassifier:
 
     @typechecked
     def prepare_data(self) -> None:
-        """prepare_data
-        Set up the size and type (float) of the FeatureSpace object and add the
-        column names starting with 1
-
-        features = dict()
-        for count in range(len(self.target_features[0])):
-            features[str(count)] = FeatureSpace.float_normalized()
-            self.column_names.append(str(count))
-        self.feature_space = FeatureSpace(features=features)
-
-        # Add "target" column name
-        self.column_names.append("target")
-
-        """
+        """prepare_data"""
         total_samples = sum(len(feature_set) for feature_set in self.features)
         X = np.zeros((total_samples, self.vector_length))
 
@@ -196,6 +186,15 @@ class MultiClassifier:
             print(f"Shape of self.y: {self.y.shape}")
 
     def build_model(self):
+        """build_model
+
+        The model architecture is a simple feed-forward neural network.
+        The final layer uses num_classes for the number of units, ensuring it matches the number of GO ids.
+        We're using 'softmax' activation in the final layer, which is appropriate for multi-class classification.
+        The model is compiled with 'categorical_crossentropy' loss, which is suitable for multi-class problems with mutually exclusive classes.
+        We're using 'accuracy' as a metric, but you might want to consider additional metrics like F1-score or area under the ROC curve, depending on your specific requirements.
+
+        """
         # X.shape[1] = self.vector_length, X.shape[0] = total number of samples across GO ids.
         input_shape = (self.X.shape[1],)
 
@@ -218,59 +217,65 @@ class MultiClassifier:
 
         self.model = model
 
-    def train_model(self):
-        self.model.fit(
-            self.X,
-            self.y_categorical,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-            validation_split=0.2,
+    """
+    More flexible:
+
+    def build_model(self, hidden_layers=[(128, 0.5), (64, 0.3)], optimizer='adam'):
+        input_shape = (self.X.shape[1],)
+        num_classes = len(self.go_ids)
+
+        model = models.Sequential()
+        model.add(layers.Input(shape=input_shape))
+
+        for units, dropout_rate in hidden_layers:
+            model.add(layers.Dense(units, activation='relu'))
+            model.add(layers.Dropout(dropout_rate))
+
+        model.add(layers.Dense(num_classes, activation='softmax'))
+
+        model.compile(
+            optimizer=optimizer,
+            loss='categorical_crossentropy',
+            metrics=['accuracy']
         )
 
-        """
-        # Create the FeatureSpace dynamically
-        feature_columns = {
-            f"feature_{i}": X[:, i] for i in range(self.vector_length)
-        }
-        self.feature_space = FeatureSpace(
-            features=feature_columns,
-            crosses=None,
-            output_mode="concat",
-        )
-        # Apply normalization after creating FeatureSpace
-        normalized_features = tf.keras.layers.Normalization()(
-            self.feature_space(feature_columns)
-        )
-        self.feature_space.adapt(X)
+        self.model = model
+        return model
 
+    """
 
-    def make_model(self):
-       
-        self.model = Sequential(
-            [
-                self.feature_space,
-                Dense(64, activation="relu"),
-                Dense(32, activation="relu"),
-                Dense(len(self.go_ids), activation=self.activation),
-            ]
+    def train_model(
+        self, epochs=100, batch_size=32, validation_split=0.2, patience=10
+    ):
+        # Split the data into training and validation sets
+        X_train, X_val, y_train, y_val = train_test_split(
+            self.X, self.y, test_size=validation_split, stratify=self.y
         )
 
-        # Compile the model
-        self.model.compile(
-            optimizer=self.optimizer,
-            loss=self.loss,
-            metrics=self.metrics,
+        # Define callbacks
+        early_stopping = EarlyStopping(
+            monitor="val_loss", patience=patience, restore_best_weights=True
+        )
+
+        model_checkpoint = ModelCheckpoint(
+            "best_model.h5", monitor="val_loss", save_best_only=True
         )
 
         # Train the model
-        self.model.fit(
-            self.input_data,
-            self.y_categorical,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
+        history = self.model.fit(
+            X_train,
+            y_train,
+            epochs=epochs,
+            batch_size=batch_size,
+            validation_data=(X_val, y_val),
+            callbacks=[early_stopping, model_checkpoint],
+            verbose=1,
         )
 
-"""
+        # Load the best model
+        self.model.load_weights("best_model.h5")
+
+        return history
 
     @typechecked
     def save_model(self) -> None:
@@ -290,73 +295,6 @@ class MultiClassifier:
 
 
 """
-
-    @typechecked
-    def prepare_data(self) -> tuple:
-        all_dataframe = pd.DataFrame(
-            self.all_features, columns=self.column_names
-        )
-        self.val_dataframe = all_dataframe.sample(
-            frac=self.fraction, random_state=1337
-        )
-        # The index holds the row names, don't need them for training
-        self.train_dataframe = all_dataframe.drop(self.val_dataframe.index)
-        train_tfds = self.dataframe_to_tfdataset(self.train_dataframe)
-        val_tfds = self.dataframe_to_tfdataset(self.val_dataframe)
-
-        # why batched into 32?
-        train_tfds = train_tfds.batch(32)
-        val_tfds = val_tfds.batch(32)
-
-        # The function adapt() that adapts the Featurespace to the training data only works on
-        # datasets dicts of feature values so we have to make a version of the dataset with the labels stripped
-        train_tfds_no_labels = train_tfds.map(lambda x, _: x)
-        # train_ds_with_no_labels = [x for x, _ in train_ds]
-
-        # adapt() is kind of magical. During this time the FeatureSpace will:
-        # Index the set of possible values for the categorical features, compute mean and variance to aid with
-        # normalizing the numerical features plus compute the value boundaries for the different bins for
-        # numerical features to discretize.
-        self.feature_space.adapt(train_tfds_no_labels)
-
-        # Attempt at asynch preprocessing not sure if CLAB hardware is optimized for this yet though
-        # Running it as part of the tf.data pipeline instead of the model itself
-        processed_train_tfds = train_tfds.map(
-            lambda x, y: (self.feature_space(x), y),
-            num_parallel_calls=tf.data.AUTOTUNE,
-        )
-        processed_train_tfds = processed_train_tfds.prefetch(tf.data.AUTOTUNE)
-
-        processed_val_tfds = val_tfds.map(
-            lambda x, y: (self.feature_space(x), y),
-            num_parallel_calls=tf.data.AUTOTUNE,
-        )
-        processed_val_tfds = processed_val_tfds.prefetch(tf.data.AUTOTUNE)
-
-        return processed_train_tfds, processed_val_tfds
-
-    @typechecked
-    def make_model(
-        self, train_tfds: tf.data.Dataset, val_tfds: tf.data.Dataset
-    ) -> None:
-        # The first layer is the encoded features as a KerasTensor
-        encoded_features = self.feature_space.get_encoded_features()
-        # Create a dense layer with 32 neurons and apply the ReLU activation function for non-linearity.
-        kt = keras.layers.Dense(self.neurons, activation="relu")(
-            encoded_features
-        )
-        # Apply a dropout layer with a rate of 0.5 to the input data represented by kt.
-        # Dropout() is a regularization technique commonly used to prevent overfitting.
-        kt = keras.layers.Dropout(self.dropout)(kt)
-        # Create a dense layer with a single neuron and apply the sigmoid activation function
-        # which outputs 0 or 1. This is a common approach for the output layer in binary classification.
-        ktoutput = keras.layers.Dense(1, activation="sigmoid")(kt)
-        # Create a keras.src.engine.functional.Functional object
-        self.training_model = keras.Model(
-            inputs=encoded_features,
-            outputs=ktoutput,
-        )
-        #
         self.training_model.compile(
             optimizer=self.optimizer, loss=self.loss, metrics=self.metrics
         )
@@ -405,101 +343,6 @@ class MultiClassifier:
         )
         f.write(f"Vector length\t{self.vector_length}")
 
-    @typechecked
-    def dataframe_to_tfdataset(
-        self, dataframe: pd.DataFrame
-    ) -> tf.data.Dataset:
-        # The original dataframe passed to method is unchanged
-        dataframe = dataframe.copy()
-        labels = dataframe.pop("target")
-        tfds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
-        tfds = tfds.shuffle(buffer_size=len(dataframe))
-        return tfds
-
-    @typechecked
-    def sample_preprocessing(
-        self, sample: pd.core.series.Series
-    ) -> tf.data.Dataset:
-        # Convert pandas Series into dataframe
-        sample_frame = pd.DataFrame([sample])
-        # Convert datafrane into Tensorflow Datasest with stub target
-        sample_tfds = tf.data.Dataset.from_tensor_slices(
-            (dict(sample_frame), [0])
-        )
-        # Batch of 1 since there's only 1 sample
-        sample_tfds = sample_tfds.batch(1)
-        # Pre-process the dataset using the FeatureSpace map
-        processed_sample_tfds = sample_tfds.map(
-            lambda x, y: (self.feature_space(x), y),
-            num_parallel_calls=tf.data.AUTOTUNE,
-        )
-        return processed_sample_tfds
-
-"""
-
-""" 
-1. One-Hot Encoding (OHE): This is a common preprocessing step that converts your categorical features into numerical representations.
-
-from keras.utils import to_categorical
-
-# Suppose you have a feature 'animal' with categories ['cat', 'dog', 'human']
-
-X = pd.DataFrame({'animal': ['cat', 'dog', 'cat', 'dog']})
-
-X_onehot = to_categorical(X['animal'])
-print(X_onehot)
-Output:
-
-array([[1., 0., 0.],
-       [0., 1., 0.],
-       [1., 0., 0.],
-       [0., 1., 0.]])
-
-2. Embeddings: This is a more modern and efficient technique to represent categorical features in numerical form.
-
-from keras.layers import Embedding
-
-# Define your embedding layer with a specified vocabulary size (e.g., number of categories)
-embedding_layer = Embedding(input_dim=3, output_dim=10)
-
-# Process your input data using the embedding layer
-X_embedded = embedding_layer(X_onehot)
-
-3. Multi-Class Classification: Now that you've converted your categorical features into numerical representations, you can train a Keras model for multi-class classification.
-
-from keras.models import Sequential
-
-# Define your model architecture
-model = Sequential()
-model.add(embedding_layer)  # Use the embedding layer to process input data
-model.add(Dense(64, activation='relu'))  # Hidden layer with ReLU activation
-model.add(Dense(3, activation='softmax'))  # Output layer with softmax activation for multi-class classification
-
-# Compile your model
-model.compile(loss='categorical_crossentropy', optimizer='adam')
-
-# Train your model on your dataset
-model.fit(X_embedded, Y_onehot, epochs=10)        
-
-"""
-"""
-from tensorflow import keras
-from keras_feature_space import FeatureSpace
-
-# Assuming 'X_train', 'y_train', 'X_test', 'y_test' are your data
-
-fs = FeatureSpace(
-    model=keras.Sequential([
-        keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
-        keras.layers.Dense(32, activation='relu'),
-        keras.layers.Dense(num_classes, activation='softmax')  # Multi-class output
-    ]),
-    loss='categorical_crossentropy', # done
-    metrics=['accuracy'] # done
-)
-
-fs.fit(X_train, y_train)
-y_pred = fs.predict(X_test)
 """
 
 
