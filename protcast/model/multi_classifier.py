@@ -178,7 +178,9 @@ class MultiClassifier:
         self.go_encoder.fit(self.go_ids)
         y_encoded = self.go_encoder.encode(y)
         # Used in the train() step
-        self.y_categorical = keras.utils.to_categorical(y_encoded)
+        self.y_categorical = keras.utils.to_categorical(
+            y_encoded, num_classes=len(self.go_ids)
+        )
 
         # Create a single Input layer for the entire feature vector
         self.input_layer = layers.Input(
