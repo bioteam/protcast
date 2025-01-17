@@ -170,16 +170,8 @@ class MultiClassifier:
         self.column_names.append("target")
 
         """
-        # First, let's determine the number of samples and feature length
-        # First, let's determine the total number of samples and feature length
-        num_go_ids = len(self.go_ids)
         total_samples = sum(len(feature_set) for feature_set in self.features)
-        feature_length = len(
-            self.features[0][0]
-        )  # Assuming all feature vectors have the same length
-
-        # Create X with the correct shape
-        X = np.zeros((total_samples, feature_length))
+        X = np.zeros((total_samples, self.vector_length))
 
         # Create y (labels)
         y = np.zeros(total_samples, dtype=int)
@@ -193,10 +185,11 @@ class MultiClassifier:
             start_idx = end_idx
 
         # Convert y to categorical
-        y_cat = keras.utils.to_categorical(y, num_classes=num_go_ids)
-
+        y_categorical = keras.utils.to_categorical(
+            y, num_classes=len(self.go_ids)
+        )
         self.X = X
-        self.y = y_cat
+        self.y = y_categorical
 
         if self.verbose:
             print(f"Shape of self.X: {self.X.shape}")
@@ -212,7 +205,7 @@ class MultiClassifier:
        
         """
         outputs = layers.TimeDistributed(
-            layers.Dense(3, activation="softmax")
+            layers.Dense(len(self.go_ids), activation="softmax")
         )(x)
 
         self.model = keras.Model(inputs=self.input_layer, outputs=outputs)
