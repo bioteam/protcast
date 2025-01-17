@@ -8,9 +8,11 @@ import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
-from keras.utils import FeatureSpace, to_categorical  # type: ignore
+
+# from keras.utils import FeatureSpace, to_categorical  # type: ignore
 from keras.models import Sequential  # type: ignore
 from keras.layers import Normalization, Dense  # type: ignore
+from keras import layers
 
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -174,8 +176,30 @@ class MultiClassifier:
 
         self.go_encoder.fit(self.go_ids)
         y_encoded = self.go_encoder.encode(y)
-        self.y_categorical = to_categorical(y_encoded)
+        self.y_categorical = keras.utils.to_categorical(y_encoded)
 
+        # Create a single Input layer for the entire feature vector
+        input_layer = layers.Input(
+            shape=(self.vector_length,), name="feature_input"
+        )
+
+        # Apply normalization
+        normalized = layers.Normalization()(input_layer)
+
+        # This will be the input layer for your subsequent model
+        self.feature_layer = normalized
+
+        # Store the input layer for later use when creating the model
+        self.input_layer = input_layer
+
+        # You can now use self.feature_layer as the input to your model
+        # For example:
+        # x = layers.Dense(64, activation="relu")(self.feature_layer)
+        # ...
+
+        # Important: Adapt the normalization layer to your data
+        self.feature_layer.layers[0].adapt(X)
+        """
         # Create the FeatureSpace dynamically
         feature_columns = {
             f"feature_{i}": X[:, i] for i in range(self.vector_length)
@@ -190,6 +214,7 @@ class MultiClassifier:
             self.feature_space(feature_columns)
         )
         self.feature_space.adapt(X)
+        """
 
     def make_model(self):
         """make_model
