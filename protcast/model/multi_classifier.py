@@ -10,7 +10,7 @@ from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace, to_categorical  # type: ignore
 from keras.models import Sequential  # type: ignore
-from keras.layers import IntegerLookup, Normalization, Dense  # type: ignore
+from keras.layers import Normalization, Dense  # type: ignore
 
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -166,15 +166,9 @@ class MultiClassifier:
         # Add "target" column name
         self.column_names.append("target")
 
-        # Add target values of 0 or 1 to data
-        self.target_features = [x + [1] for x in self.target_features]
-        self.non_target_features = [x + [0] for x in self.non_target_features]
-        self.all_features = self.target_features + self.non_target_features
         """
         # Flatten the features
         X = np.array([item for sublist in self.features for item in sublist])
-        # Flatten the pids
-        all_pids = [item for sublist in self.pids for item in sublist]
         # Collect and categorize the feaures
         y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
 
@@ -182,31 +176,17 @@ class MultiClassifier:
         y_encoded = self.go_encoder.encode(y)
         self.y_categorical = to_categorical(y_encoded)
 
-        # Create the FeatureSpace object with dynamic feature count
-        feature_dict = {
-            "pid": IntegerLookup(vocabulary=all_pids),
-        }
-        feature_dict.update(
-            {
+        # Create the FeatureSpace dynamically
+        self.feature_space = FeatureSpace(
+            features={
                 f"feature_{i}": Normalization()
                 for i in range(self.vector_length)
-            }
+            },
+            crosses=None,
+            output_mode="concat",
         )
 
-        self.feature_space = FeatureSpace(
-            features=feature_dict,
-            crosses=[],  # Add crosses if needed
-        )
-
-        # Prepare the input data for FeatureSpace
-        self.input_data = {
-            "pid": np.array(all_pids),
-        }
-        self.input_data.update(
-            {f"feature_{i}": X[:, i] for i in range(self.vector_length)}
-        )
-
-        self.feature_space.adapt(self.input_data)
+        self.feature_space.adapt(X)
 
     def make_model(self):
         """make_model
@@ -240,7 +220,7 @@ class MultiClassifier:
     @typechecked
     def save_model(self) -> None:
         """save_model"""
-        self.training_model.save(f"{self.name}_{self.algorithm}.keras")
+        self.model.save(f"{self.name}_{self.algorithm}.keras")
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
@@ -248,10 +228,10 @@ class MultiClassifier:
 
         Parameters
         ----------
-        model_path : Path
+        model_path: Path
             Path to saved model
         """
-        self.training_model = keras.models.load_model(model_path)
+        self.model = keras.models.load_model(model_path)
 
 
 """
