@@ -197,18 +197,18 @@ class MultiClassifier:
         # Store X and y_categorical for later use in training
         self.X = X
 
-    def make_model(self):
+    def build_model(self):
         # Define your model architecture
         x = layers.Dense(64, activation="relu")(self.feature_layer)
         x = layers.Dense(32, activation="relu")(x)
-        outputs = layers.Dense(
-            self.y_categorical.shape[1], activation=self.activation
-        )(x)
+        outputs = layers.Dense(len(self.go_ids), activation="softmax")(x)
 
         self.model = keras.Model(inputs=self.input_layer, outputs=outputs)
 
         self.model.compile(
-            optimizer=self.optimizer, loss=self.loss, metrics=self.metrics
+            optimizer="adam",
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
         )
 
     def train_model(self):
