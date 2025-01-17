@@ -12,7 +12,7 @@ from typeguard import typechecked
 # from keras.utils import FeatureSpace, to_categorical  # type: ignore
 from keras.models import Sequential  # type: ignore
 from keras.layers import Normalization, Dense  # type: ignore
-from keras import layers
+from keras import layers, models
 
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -196,25 +196,27 @@ class MultiClassifier:
             print(f"Shape of self.y: {self.y.shape}")
 
     def build_model(self):
-        """build_model"""
-        x = layers.TimeDistributed(layers.Dense(64, activation="relu"))(
-            self.feature_layer
+        # X.shape[1] = self.vector_length, X.shape[0] = total number of samples across GO ids.
+        input_shape = (self.X.shape[1],)
+
+        model = models.Sequential(
+            [
+                layers.Input(shape=input_shape),
+                layers.Dense(128, activation="relu"),
+                layers.Dropout(0.5),
+                layers.Dense(64, activation="relu"),
+                layers.Dropout(0.3),
+                layers.Dense(len(self.go_ids), activation="softmax"),
+            ]
         )
-        x = layers.TimeDistributed(layers.Dense(32, activation="relu"))(x)
-        """
-       
-        """
-        outputs = layers.TimeDistributed(
-            layers.Dense(len(self.go_ids), activation="softmax")
-        )(x)
 
-        self.model = keras.Model(inputs=self.input_layer, outputs=outputs)
-
-        self.model.compile(
+        model.compile(
             optimizer="adam",
             loss="categorical_crossentropy",
             metrics=["accuracy"],
         )
+
+        self.model = model
 
     def train_model(self):
         self.model.fit(
