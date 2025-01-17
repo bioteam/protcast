@@ -178,8 +178,11 @@ class MultiClassifier:
         self.go_encoder.fit(self.go_ids)
         y_encoded = self.go_encoder.encode(y)
         # Used in the train() step
-        self.y_categorical = keras.utils.to_categorical(
+        y_cat = keras.utils.to_categorical(
             y_encoded, num_classes=len(self.go_ids)
+        )
+        self.y_categorical = y_cat.reshape(
+            len(self.features), -1, len(self.go_ids)
         )
 
         # Create a single Input layer for the entire feature vector
@@ -196,14 +199,32 @@ class MultiClassifier:
         # Apply normalization in the model
         self.feature_layer = self.norm_layer(self.input_layer)
 
-        # Store X and y_categorical for later use in training
-        self.X = X
+        # Reshape X to match y_categorical
+        self.X = X.reshape(len(self.features), -1, 100)
 
     def build_model(self):
-        # Define your model architecture
-        x = layers.Dense(64, activation="relu")(self.feature_layer)
-        x = layers.Dense(32, activation="relu")(x)
-        outputs = layers.Dense(len(self.go_ids), activation="softmax")(x)
+        """build_model
+
+        The TimeDistributed layer suggests that this prediction is made for each time step
+        or segment of the input sequence. The softmax activation ensures that the probabilities
+        for these three classes sum to 1 for each GO term at each time step.
+        """
+        x = layers.TimeDistributed(layers.Dense(64, activation="relu"))(
+            self.feature_layer
+        )
+        x = layers.TimeDistributed(layers.Dense(32, activation="relu"))(x)
+        """
+        The number 3 here represents the number of classes for each individual GO term prediction. 
+        This suggests that the model is using a ternary classification approach for each GO term, 
+        rather than a binary classification. Here's what these three classes likely represent:
+
+        Positive association (the protein is associated with this GO term)
+        Negative association (the protein is not associated with this GO term)
+        Unknown or uncertain association
+        """
+        outputs = layers.TimeDistributed(
+            layers.Dense(3, activation="softmax")
+        )(x)
 
         self.model = keras.Model(inputs=self.input_layer, outputs=outputs)
 
