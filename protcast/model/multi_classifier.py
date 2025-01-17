@@ -176,6 +176,7 @@ class MultiClassifier:
 
         self.go_encoder.fit(self.go_ids)
         y_encoded = self.go_encoder.encode(y)
+        # Used in the train() step
         self.y_categorical = keras.utils.to_categorical(y_encoded)
 
         # Create a single Input layer for the entire feature vector
@@ -527,7 +528,9 @@ class GOEncoder:
         if not self.go_to_int:
             raise ValueError("Encoder has not been fit to any GO IDs yet.")
         integer_encoded = [self.go_to_int[go] for go in go_ids]
-        return to_categorical(integer_encoded, num_classes=self.num_categories)
+        return keras.utils.to_categorical(
+            integer_encoded, num_classes=self.num_categories
+        )
 
     def decode(self, categorical):
         """Decode categorical back to GO IDs."""
