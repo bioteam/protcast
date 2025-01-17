@@ -167,9 +167,9 @@ class MultiClassifier:
         self.column_names.append("target")
 
         """
-        # Flatten the features
+        # Flatten the feature vectors
         X = np.array([item for sublist in self.features for item in sublist])
-        # Collect and categorize the feaures
+        # Stores the category (GO id) for each feature vector
         y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
 
         self.go_encoder.fit(self.go_ids)
@@ -177,15 +177,18 @@ class MultiClassifier:
         self.y_categorical = to_categorical(y_encoded)
 
         # Create the FeatureSpace dynamically
+        feature_columns = {
+            f"feature_{i}": X[:, i] for i in range(self.vector_length)
+        }
         self.feature_space = FeatureSpace(
-            features={
-                f"feature_{i}": Normalization()
-                for i in range(self.vector_length)
-            },
+            features=feature_columns,
             crosses=None,
             output_mode="concat",
         )
-
+        # Apply normalization after creating FeatureSpace
+        normalized_features = tf.keras.layers.Normalization()(
+            self.feature_space(feature_columns)
+        )
         self.feature_space.adapt(X)
 
     def make_model(self):
