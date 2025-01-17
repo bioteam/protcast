@@ -180,26 +180,22 @@ class MultiClassifier:
         self.y_categorical = keras.utils.to_categorical(y_encoded)
 
         # Create a single Input layer for the entire feature vector
-        input_layer = layers.Input(
+        self.input_layer = layers.Input(
             shape=(self.vector_length,), name="feature_input"
         )
 
-        # Apply normalization
-        normalized = layers.Normalization()(input_layer)
+        # Create a Normalization layer
+        self.norm_layer = layers.Normalization()
 
-        # This will be the input layer for your subsequent model
-        self.feature_layer = normalized
+        # Adapt the normalization layer to your data
+        self.norm_layer.adapt(X)
 
-        # Store the input layer for later use when creating the model
-        self.input_layer = input_layer
+        # Apply normalization in the model
+        self.feature_layer = self.norm_layer(self.input_layer)
 
-        # You can now use self.feature_layer as the input to your model
-        # For example:
-        # x = layers.Dense(64, activation="relu")(self.feature_layer)
-        # ...
+        # Store X and y_categorical for later use in training
+        self.X = X
 
-        # Important: Adapt the normalization layer to your data
-        self.feature_layer.layers[0].adapt(X)
         """
         # Create the FeatureSpace dynamically
         feature_columns = {
