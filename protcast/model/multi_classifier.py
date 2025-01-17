@@ -130,7 +130,7 @@ class MultiClassifier:
         self.start_time = time.time()
         self.get_feature_vectors()
         self.prepare_data()
-        self.make_model()
+        self.build_model()
         self.train_model()
 
     @typechecked
