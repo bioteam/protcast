@@ -171,37 +171,36 @@ class MultiClassifier:
 
         """
         # First, let's determine the number of samples and feature length
+        # First, let's determine the total number of samples and feature length
         num_go_ids = len(self.go_ids)
-        num_samples = max(len(feature_set) for feature_set in self.features)
+        total_samples = sum(len(feature_set) for feature_set in self.features)
         feature_length = len(
             self.features[0][0]
         )  # Assuming all feature vectors have the same length
 
-        # Create X with the correct shape, initialized with zeros
-        X = np.zeros((num_go_ids, num_samples, feature_length))
-
-        # Fill X with the actual data
-        for i, feature_set in enumerate(self.features):
-            X[i, : len(feature_set)] = feature_set
+        # Create X with the correct shape
+        X = np.zeros((total_samples, feature_length))
 
         # Create y (labels)
-        y = np.array(
-            [
-                i * np.ones(len(feature_set))
-                for i, feature_set in enumerate(self.features)
-            ]
-        )
-        y = y.flatten()
+        y = np.zeros(total_samples, dtype=int)
+
+        # Fill X and y with the actual data
+        start_idx = 0
+        for i, feature_set in enumerate(self.features):
+            end_idx = start_idx + len(feature_set)
+            X[start_idx:end_idx] = feature_set
+            y[start_idx:end_idx] = i
+            start_idx = end_idx
 
         # Convert y to categorical
         y_cat = keras.utils.to_categorical(y, num_classes=num_go_ids)
 
-        # Reshape X to 2D for model input
-        self.X = X.reshape(-1, feature_length)
+        self.X = X
         self.y = y_cat
 
-        print(f"Shape of self.X: {self.X.shape}")
-        print(f"Shape of self.y: {self.y.shape}")
+        if self.verbose:
+            print(f"Shape of self.X: {self.X.shape}")
+            print(f"Shape of self.y: {self.y.shape}")
 
     def build_model(self):
         """build_model"""
