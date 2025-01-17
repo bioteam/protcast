@@ -170,57 +170,47 @@ class MultiClassifier:
         self.column_names.append("target")
 
         """
-        # Flatten the feature vectors
-        X = np.array([item for sublist in self.features for item in sublist])
-        # Stores the category (GO id) for each feature vector
-        y = np.repeat(self.go_ids, [len(sublist) for sublist in self.features])
+        # First, let's determine the number of samples and feature length
+        num_go_ids = len(self.go_ids)
+        num_samples = max(len(feature_set) for feature_set in self.features)
+        feature_length = len(
+            self.features[0][0]
+        )  # Assuming all feature vectors have the same length
 
-        self.go_encoder.fit(self.go_ids)
-        y_encoded = self.go_encoder.encode(y)
-        # Used in the train() step
-        y_cat = keras.utils.to_categorical(
-            y_encoded, num_classes=len(self.go_ids)
+        # Create X with the correct shape, initialized with zeros
+        X = np.zeros((num_go_ids, num_samples, feature_length))
+
+        # Fill X with the actual data
+        for i, feature_set in enumerate(self.features):
+            X[i, : len(feature_set)] = feature_set
+
+        # Create y (labels)
+        y = np.array(
+            [
+                i * np.ones(len(feature_set))
+                for i, feature_set in enumerate(self.features)
+            ]
         )
-        self.y_categorical = y_cat.reshape(
-            len(self.features), -1, len(self.go_ids)
-        )
+        y = y.flatten()
 
-        # Create a single Input layer for the entire feature vector
-        self.input_layer = layers.Input(
-            shape=(self.vector_length,), name="feature_input"
-        )
+        # Convert y to categorical
+        y_cat = keras.utils.to_categorical(y, num_classes=num_go_ids)
 
-        # Create a Normalization layer
-        self.norm_layer = layers.Normalization()
+        # Reshape X to 2D for model input
+        self.X = X.reshape(-1, feature_length)
+        self.y = y_cat
 
-        # Adapt the normalization layer to your data
-        self.norm_layer.adapt(X)
-
-        # Apply normalization in the model
-        self.feature_layer = self.norm_layer(self.input_layer)
-
-        # Reshape X to match y_categorical
-        self.X = X.reshape(len(self.features), -1, 100)
+        print(f"Shape of self.X: {self.X.shape}")
+        print(f"Shape of self.y: {self.y.shape}")
 
     def build_model(self):
-        """build_model
-
-        The TimeDistributed layer suggests that this prediction is made for each time step
-        or segment of the input sequence. The softmax activation ensures that the probabilities
-        for these three classes sum to 1 for each GO term at each time step.
-        """
+        """build_model"""
         x = layers.TimeDistributed(layers.Dense(64, activation="relu"))(
             self.feature_layer
         )
         x = layers.TimeDistributed(layers.Dense(32, activation="relu"))(x)
         """
-        The number 3 here represents the number of classes for each individual GO term prediction. 
-        This suggests that the model is using a ternary classification approach for each GO term, 
-        rather than a binary classification. Here's what these three classes likely represent:
-
-        Positive association (the protein is associated with this GO term)
-        Negative association (the protein is not associated with this GO term)
-        Unknown or uncertain association
+       
         """
         outputs = layers.TimeDistributed(
             layers.Dense(3, activation="softmax")
