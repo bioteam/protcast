@@ -129,8 +129,9 @@ class MultiClassifier:
         """run"""
         self.start_time = time.time()
         self.get_feature_vectors()
-        self.make_featurespace()
+        self.prepare_data()
         self.make_model()
+        self.train_model()
 
     @typechecked
     def get_feature_vectors(self) -> None:
@@ -154,8 +155,8 @@ class MultiClassifier:
         self.vector_length = len(self.features[0][0])
 
     @typechecked
-    def make_featurespace(self) -> None:
-        """make_featurespace
+    def prepare_data(self) -> None:
+        """prepare_data
         Set up the size and type (float) of the FeatureSpace object and add the
         column names starting with 1
 
@@ -196,6 +197,29 @@ class MultiClassifier:
         # Store X and y_categorical for later use in training
         self.X = X
 
+    def make_model(self):
+        # Define your model architecture
+        x = layers.Dense(64, activation="relu")(self.feature_layer)
+        x = layers.Dense(32, activation="relu")(x)
+        outputs = layers.Dense(
+            self.y_categorical.shape[1], activation=self.activation
+        )(x)
+
+        self.model = keras.Model(inputs=self.input_layer, outputs=outputs)
+
+        self.model.compile(
+            optimizer=self.optimizer, loss=self.loss, metrics=self.metrics
+        )
+
+    def train_model(self):
+        self.model.fit(
+            self.X,
+            self.y_categorical,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            validation_split=0.2,
+        )
+
         """
         # Create the FeatureSpace dynamically
         feature_columns = {
@@ -211,13 +235,10 @@ class MultiClassifier:
             self.feature_space(feature_columns)
         )
         self.feature_space.adapt(X)
-        """
+
 
     def make_model(self):
-        """make_model
-        (Pdb) classifier.training_model.summary()
-
-        """
+       
         self.model = Sequential(
             [
                 self.feature_space,
@@ -241,6 +262,8 @@ class MultiClassifier:
             epochs=self.epochs,
             batch_size=self.batch_size,
         )
+
+"""
 
     @typechecked
     def save_model(self) -> None:
