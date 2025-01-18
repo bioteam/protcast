@@ -1,21 +1,13 @@
-from datetime import datetime
 import os
-import tensorflow as tf
 import keras
-import pandas as pd
 import pickle
 import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
-
-# from keras.utils import FeatureSpace, to_categorical  # type: ignore
-from keras.models import Sequential  # type: ignore
-from keras.layers import Normalization, Dense  # type: ignore
 from keras import layers, models
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
-
 
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -126,6 +118,7 @@ class MultiClassifier:
         self.validation_split = validation_split
         self.pred_threshold = pred_threshold
         self.patience = patience
+        self.timestamp = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())
         self.go_ids = list()
         self.pids = list()
         self.features = list()
@@ -301,7 +294,7 @@ class MultiClassifier:
     @typechecked
     def save_model(self) -> None:
         """save_model"""
-        self.model.save(f"{self.name}_{self.algorithm}.keras")
+        self.model.save(f"{self.timestamp}_{self.algorithm}.keras")
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
