@@ -274,9 +274,9 @@ class MultiClassifier:
             restore_best_weights=True,
         )
         model_checkpoint = ModelCheckpoint(
-            f"{time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())}_{self.algorithm}.keras", 
-            monitor="val_loss", 
-            save_best_only=True
+            f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}.keras",
+            monitor="val_loss",
+            save_best_only=True,
         )
         # Train the model
         history = self.model.fit(
