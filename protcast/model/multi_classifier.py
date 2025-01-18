@@ -386,7 +386,10 @@ class GOEncoder:
         self.num_categories = 0
 
     def fit(self, go_ids):
-        """Fit the encoder to a list of GO IDs."""
+        """fit
+        Fit the encoder to a list of GO IDs.
+        enumerate() creates the integers in *go_to_int*
+        """
         unique_go_ids = sorted(set(go_ids))
         self.go_to_int = {go: i for i, go in enumerate(unique_go_ids)}
         self.int_to_go = {i: go for go, i in self.go_to_int.items()}
@@ -395,7 +398,7 @@ class GOEncoder:
     def encode(self, go_ids):
         """Encode a list of GO IDs to categorical."""
         if not self.go_to_int:
-            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+            raise ValueError("Encoder has not been fit to any GO IDs.")
         integer_encoded = [self.go_to_int[go] for go in go_ids]
         return keras.utils.to_categorical(
             integer_encoded, num_classes=self.num_categories
@@ -404,14 +407,14 @@ class GOEncoder:
     def decode(self, categorical):
         """Decode categorical back to GO IDs."""
         if not self.int_to_go:
-            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+            raise ValueError("Encoder has not been fit to any GO IDs.")
         integer_encoded = np.argmax(categorical, axis=1)
         return [self.int_to_go[i] for i in integer_encoded]
 
     def decode_probabilities(self, probabilities, top_k=1):
         """Decode probability distributions to top k GO IDs with their probabilities."""
         if not self.int_to_go:
-            raise ValueError("Encoder has not been fit to any GO IDs yet.")
+            raise ValueError("Encoder has not been fit to any GO IDs.")
         top_indices = np.argsort(probabilities, axis=1)[:, -top_k:]
         result = []
         for i, indices in enumerate(top_indices):
