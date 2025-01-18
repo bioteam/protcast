@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import argparse
 from collections import defaultdict
@@ -24,11 +25,10 @@ if __name__ == "__main__":
     -a qsorder -f ifeatpro -s
     """
     parser = argparse.ArgumentParser()
+    parser.add_argument("-g", "--go_ids_file", help="Path to GO ids file")
+    parser.add_argument("-s", "--seq_file", help="Path to Fasta file")
     parser.add_argument(
-        "-g", "--go_ids_file", required=True, help="Path to GO ids file"
-    )
-    parser.add_argument(
-        "-a", "--algorithm", default="ctriad", help="Feature vector algorithm"
+        "-a", "--algorithm", default="qsorder", help="Feature vector algorithm"
     )
     parser.add_argument(
         "-p",
@@ -38,20 +38,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "-f",
         "--feature_creator",
-        default="iFeatureOmega",
+        default="ifeatpro",
         choices=["iFeatureOmega", "ifeatpro"],
         help="Feature vector creator",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
-    parser.add_argument("-s", "--save", action="store_true", help="Save model")
+    parser.add_argument("--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
     proteins = defaultdict(dict)
 
-    if os.path.exists(args.go_ids_file) and os.path.exists(
-        args.protcast_dataset
-    ):
+    # GO id subgraph sequences are collected from a ProtCastDataset
+    if args.go_ids_file is not None and args.protcast_dataset is not None:
         dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
         go_ids = [
             line.strip()
@@ -69,6 +68,16 @@ if __name__ == "__main__":
                         if pid in dataset.proteins
                     }
                     proteins[go_id].update(seqs)
+    # Sequences are collected from a fasta file where the description contains a GO id
+    elif args.seq_file is not None:
+        from Bio import SeqIO
+
+        for seq in SeqIO.parse(args.seq_file, "fasta"):
+            go_id = re.search("GO:\d+", seq.description)[0]
+            if go_id is not None:
+                proteins[go_id][seq.id] = str(seq.seq)
+    else:
+        sys.exit("No input files")
 
     classifier = MultiClassifier(
         args.algorithm,

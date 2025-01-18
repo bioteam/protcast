@@ -32,17 +32,21 @@ class MultiClassifier:
     -------
     init:
         Initialize
-    make_featurespace:
+    get_features_vectors:
         ...
-    make_model:
+    prepare_data:
         ...
-    test_model:
+    build_model:
+        ...
+    train_model:
+        ...
+    test_modeL:
         Test model against validation set, save results
-        to a *tsv file.
+        to a *tsv file
     save_model:
         Save Keras model to file
     load_model:
-        Load model from a file
+        Class method to load model from a file
     """
 
     @typechecked
@@ -61,7 +65,6 @@ class MultiClassifier:
         fraction: float = 0.2,
         neurons: int = 32,
         dropout: float = 0.5,
-        activation: str = "softmax",
         pred_threshold: float = 75.0,
         validation_split: float = 0.2,
         patience: int = 10,
@@ -71,7 +74,7 @@ class MultiClassifier:
         Parameters
         ----------
         algorithm : str
-            _description_
+            Name of algorithm creating the feature vector
         feature_creator: str
             Package that creates the feature vectors
         verbose: bool
@@ -98,7 +101,7 @@ class MultiClassifier:
             By default 0.5
         pred_threshold : float
             Probability threshold for classification, by default 80.0
-        training_model: keras.src.engine.functional.Functional
+        training_model:
             Trained model
         """
         self.algorithm = algorithm
@@ -111,7 +114,6 @@ class MultiClassifier:
         self.metrics = metrics
         self.epochs = epochs
         self.batch_size = batch_size
-        self.activation = activation
         self.fraction = fraction
         self.neurons = neurons
         self.dropout = dropout
@@ -157,25 +159,21 @@ class MultiClassifier:
     def prepare_data(self) -> None:
         """prepare_data"""
         total_samples = sum(len(feature_set) for feature_set in self.features)
-        X = np.zeros((total_samples, self.vector_length))
+        self.X = np.zeros((total_samples, self.vector_length))
 
         # Create y (labels)
         y = np.zeros(total_samples, dtype=int)
 
-        # Fill X and y with the actual data
+        # Need to account for different number of proteins for different GO ids
         start_idx = 0
-        for i, feature_set in enumerate(self.features):
-            end_idx = start_idx + len(feature_set)
-            X[start_idx:end_idx] = feature_set
+        for i, go_set in enumerate(self.features):
+            end_idx = start_idx + len(go_set)
+            self.X[start_idx:end_idx] = go_set
             y[start_idx:end_idx] = i
             start_idx = end_idx
 
         # Convert y to categorical
-        y_categorical = keras.utils.to_categorical(
-            y, num_classes=len(self.go_ids)
-        )
-        self.X = X
-        self.y = y_categorical
+        self.y = keras.utils.to_categorical(y, num_classes=len(self.go_ids))
 
         if self.verbose:
             print(f"Shape of self.X: {self.X.shape}")
@@ -274,7 +272,7 @@ class MultiClassifier:
             restore_best_weights=True,
         )
         model_checkpoint = ModelCheckpoint(
-            f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}.keras",
+            "best_model.h5",
             monitor="val_loss",
             save_best_only=True,
         )
@@ -295,9 +293,7 @@ class MultiClassifier:
     @typechecked
     def save_model(self) -> None:
         """save_model"""
-        self.model.save(
-            f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}.keras"
-        )
+        self.model.save(self.get_name())
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
@@ -309,6 +305,10 @@ class MultiClassifier:
             Path to saved model
         """
         self.model = keras.models.load_model(model_path)
+
+    @typechecked
+    def get_name(self) -> str:
+        return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}.keras"
 
 
 """
