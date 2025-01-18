@@ -1,3 +1,4 @@
+import os
 import sys
 import argparse
 from collections import defaultdict
@@ -48,7 +49,9 @@ if __name__ == "__main__":
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
     proteins = defaultdict(dict)
 
-    if Path.is_file(args.go_ids_file) and Path.is_file(args.protcast_dataset):
+    if os.path.exists(args.go_ids_file) and os.path.exists(
+        args.protcast_dataset
+    ):
         dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
         go_ids = [
             line.strip()
