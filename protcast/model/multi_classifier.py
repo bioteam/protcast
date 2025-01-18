@@ -64,13 +64,15 @@ class MultiClassifier:
         optimizer: str = "adam",
         loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
-        epochs: int = 20,
+        epochs: int = 100,
         batch_size: int = 32,
         fraction: float = 0.2,
         neurons: int = 32,
         dropout: float = 0.5,
         activation: str = "softmax",
         pred_threshold: float = 75.0,
+        validation_split: float = 0.2,
+        patience: int = 10,
     ) -> None:
         """__init__
 
@@ -121,7 +123,9 @@ class MultiClassifier:
         self.fraction = fraction
         self.neurons = neurons
         self.dropout = dropout
+        self.validation_split = validation_split
         self.pred_threshold = pred_threshold
+        self.patience = patience
         self.go_ids = list()
         self.pids = list()
         self.features = list()
@@ -198,6 +202,28 @@ class MultiClassifier:
         # X.shape[1] = self.vector_length, X.shape[0] = total number of samples across GO ids.
         input_shape = (self.X.shape[1],)
 
+        """
+        Both relu and softmax activations can be used in a multi-classification model. 
+        This is a common and effective approach in neural network architectures. 
+
+        ReLU (Rectified Linear Unit) Activation:
+
+        Used in hidden layers of the network.
+        Formula: f(x) = max(0, x)
+        Advantages:
+        - Helps with the vanishing gradient problem.
+        - Allows for sparse activation (some neurons can be completely off).
+        - Computationally efficient.
+
+        Softmax Activation:
+
+        Used in the output layer for multi-class classification.
+        Converts the raw output scores into probabilities that sum to 1.
+        Formula: softmax(x_i) = exp(x_i) / sum(exp(x_j)) for j in all classes
+        Advantages:
+        - Provides a probability distribution over all classes.
+        - Suitable for mutually exclusive classes.
+        """
         model = models.Sequential(
             [
                 layers.Input(shape=input_shape),
@@ -210,9 +236,9 @@ class MultiClassifier:
         )
 
         model.compile(
-            optimizer="adam",
-            loss="categorical_crossentropy",
-            metrics=["accuracy"],
+            optimizer=self.optimizer,
+            loss=self.loss,
+            metrics=self.metrics,
         )
 
         self.model = model
@@ -244,37 +270,32 @@ class MultiClassifier:
 
     """
 
-    def train_model(
-        self, epochs=100, batch_size=32, validation_split=0.2, patience=10
-    ):
+    def train_model(self):
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
-            self.X, self.y, test_size=validation_split, stratify=self.y
+            self.X, self.y, test_size=self.validation_split, stratify=self.y
         )
-
         # Define callbacks
         early_stopping = EarlyStopping(
-            monitor="val_loss", patience=patience, restore_best_weights=True
+            monitor="val_loss",
+            patience=self.patience,
+            restore_best_weights=True,
         )
-
         model_checkpoint = ModelCheckpoint(
             "best_model.h5", monitor="val_loss", save_best_only=True
         )
-
         # Train the model
         history = self.model.fit(
             X_train,
             y_train,
-            epochs=epochs,
-            batch_size=batch_size,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
             validation_data=(X_val, y_val),
             callbacks=[early_stopping, model_checkpoint],
             verbose=1,
         )
-
         # Load the best model
         self.model.load_weights("best_model.h5")
-
         return history
 
     @typechecked
@@ -295,10 +316,6 @@ class MultiClassifier:
 
 
 """
-        self.training_model.compile(
-            optimizer=self.optimizer, loss=self.loss, metrics=self.metrics
-        )
-
         # Profiler callback
         log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(

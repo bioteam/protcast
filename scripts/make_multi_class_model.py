@@ -12,12 +12,12 @@ from protcast.preprocessing.protcast_dataset import (  # noqa: E402
 )
 
 if __name__ == "__main__":
-    """"run_multiple_classification.py
+    """"make_multi_class_model.py
     This script uses TensorFlow and Keras FeatureSpace to classify sequences.
     Provide a text file with GO ids, the subgraph sequences will be used
     for training and testing. Example:
 
-    python3 scripts/run_multiple_classification.py \
+    python3 scripts/make_multi_class_model.py \
     -g test/data/go-terms.txt \
     -p ProtcastDataset.bin \
     -a qsorder -f ifeatpro -s
@@ -32,7 +32,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p",
         "--protcast_dataset",
-        required=True,
         help="Path to ProtCast dataset",
     )
     parser.add_argument(
@@ -46,26 +45,27 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
-    dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
-
-    go_ids = [
-        line.strip()
-        for line in open(args.go_ids_file, "r")
-        if line.startswith("GO:")
-    ]
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
     proteins = defaultdict(dict)
-    for go_id in go_ids:
-        subgraph_go_ids = dataset.get_subgraph(go_id)
-        for subid in subgraph_go_ids:
-            pids = dataset.get_term(subid).get_all_pids()
-            if pids:
-                seqs = {
-                    pid: dataset.proteins[pid].sequence
-                    for pid in pids
-                    if pid in dataset.proteins
-                }
-                proteins[go_id].update(seqs)
+
+    if Path.is_file(args.go_ids_file) and Path.is_file(args.protcast_dataset):
+        dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
+        go_ids = [
+            line.strip()
+            for line in open(args.go_ids_file, "r")
+            if line.startswith("GO:")
+        ]
+        for go_id in go_ids:
+            subgraph_go_ids = dataset.get_subgraph(go_id)
+            for subid in subgraph_go_ids:
+                pids = dataset.get_term(subid).get_all_pids()
+                if pids:
+                    seqs = {
+                        pid: dataset.proteins[pid].sequence
+                        for pid in pids
+                        if pid in dataset.proteins
+                    }
+                    proteins[go_id].update(seqs)
 
     classifier = MultiClassifier(
         args.algorithm,
@@ -75,5 +75,4 @@ if __name__ == "__main__":
         proteins,
     )
     classifier.run()
-    classifier.test_model()
     classifier.save_model()
