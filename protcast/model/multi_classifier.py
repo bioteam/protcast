@@ -118,7 +118,6 @@ class MultiClassifier:
         self.validation_split = validation_split
         self.pred_threshold = pred_threshold
         self.patience = patience
-        self.timestamp = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())
         self.go_ids = list()
         self.pids = list()
         self.features = list()
@@ -275,7 +274,9 @@ class MultiClassifier:
             restore_best_weights=True,
         )
         model_checkpoint = ModelCheckpoint(
-            "best_model.h5", monitor="val_loss", save_best_only=True
+            f"{time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())}_{self.algorithm}.keras", 
+            monitor="val_loss", 
+            save_best_only=True
         )
         # Train the model
         history = self.model.fit(
