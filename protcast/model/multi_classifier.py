@@ -295,7 +295,9 @@ class MultiClassifier:
     @typechecked
     def save_model(self) -> None:
         """save_model"""
-        self.model.save(f"{self.timestamp}_{self.algorithm}.keras")
+        self.model.save(
+            f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}.keras"
+        )
 
     @typechecked
     def load_model(self, model_path: Path) -> None:
