@@ -163,20 +163,20 @@ class MultiClassifier:
         X = np.zeros((num_samples, self.vector_length))
         y = np.zeros(num_samples, dtype=int)
 
-        self.go_encoder = GOEncoder()
-        self.go_encoder.fit(self.go_ids)
+        go_encoder = GOEncoder()
+        go_encoder.fit(self.go_ids)
 
         # Need to account for different number of proteins for different GO ids
         start_idx = 0
         for i, (go_id, go_set) in enumerate(zip(self.go_ids, self.features)):
             end_idx = start_idx + len(go_set)
             X[start_idx:end_idx] = go_set
-            y[start_idx:end_idx] = self.go_encoder.encode(go_id)
+            y[start_idx:end_idx] = go_encoder.encode(go_id)
             start_idx = end_idx
 
-        # Convert y to categorical
         self.X = X
-        self.y = self.go_encoder.to_categorical(y)
+        # Convert integers into a binary class matrix
+        self.y = keras.utils.to_categorical(y, num_classes=len(self.go_ids))
 
         if self.verbose:
             print(f"Shape of self.X: {self.X.shape}")
@@ -187,6 +187,7 @@ class MultiClassifier:
         
         Vector length: 100, number of proteins (samples): 305, number of GO ids (classes): 3
         """
+        go_encoder.save()
 
     def build_model(self):
         """build_model
@@ -275,15 +276,26 @@ class MultiClassifier:
         # Define callbacks
         early_stopping = EarlyStopping(
             monitor="val_loss",
+            # The minimum change in the monitored quantity to qualify as an improvement
+            min_delta=0.001,
+            # Number of epochs with no improvement after which training will be stopped
             patience=self.patience,
             restore_best_weights=True,
         )
-        model_checkpoint = ModelCheckpoint(
-            "best_model.h5",
+        # val_loss measures the error on the validation set
+        loss_checkpoint = ModelCheckpoint(
+            f"{self.get_name()}.h5",
             monitor="val_loss",
             save_best_only=True,
+            mode="min",
         )
-        # Profiler callback
+        # acc_checkpoint = ModelCheckpoint(
+        #     "best_model_accuracy.h5",
+        #     monitor="val_accuracy",
+        #     mode="max",
+        #     save_best_only=True,
+        #     verbose=1,
+        # )
         log_dir = "logs/fit/" + time.strftime(
             "%m-%d-%Y-%H-%M-%S", time.localtime()
         )
@@ -297,17 +309,20 @@ class MultiClassifier:
             epochs=self.epochs,
             batch_size=self.batch_size,
             validation_data=(X_val, y_val),
-            callbacks=[early_stopping, model_checkpoint, tensorboard_callback],
+            callbacks=[
+                early_stopping,
+                loss_checkpoint,
+                tensorboard_callback,
+            ],
             verbose=1,
         )
-        # Load the best model
-        self.model.load_weights("best_model.h5")
+
         return history
 
     @typechecked
     def save_model(self) -> None:
         """save_model"""
-        self.model.save(self.get_name())
+        self.model.save(f"{self.get_name()}.keras")
 
     @classmethod
     def load_model(
@@ -325,7 +340,7 @@ class MultiClassifier:
 
     @typechecked
     def get_name(self) -> str:
-        return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}.keras"
+        return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}"
 
 
 """
@@ -380,7 +395,7 @@ class GOEncoder:
     print(encoded)
 
     # Save the encoder
-    go_encoder.save('go_encoder.pkl')
+    go_encoder.save()
 
     # Load the encoder
     loaded_encoder = GOEncoder.load('go_encoder.pkl')
@@ -399,14 +414,13 @@ class GOEncoder:
     """
 
     def __init__(self):
-        self.go_to_int = {}
-        self.int_to_go = {}
+        self.go_to_int = dict()
+        self.int_to_go = dict()
         self.num_categories = 0
 
     def fit(self, go_ids):
         """fit
-        Fit the encoder to a list of GO IDs.
-        enumerate() creates the integers in *go_to_int*
+        Map the list of GO IDs to a list of integers, and integers to GO ids.
         """
         unique_go_ids = sorted(set(go_ids))
         self.go_to_int = {go: i for i, go in enumerate(unique_go_ids)}
@@ -414,16 +428,13 @@ class GOEncoder:
         self.num_categories = len(unique_go_ids)
 
     def encode(self, go_id):
-        """Encode a GO IDs to a category."""
+        """Encode a GO ID to a category number"""
         if not self.go_to_int:
             raise ValueError("Encoder has not been fit to any GO IDs.")
         return self.go_to_int[go_id]
 
-    def to_categorical(self, y):
-        return keras.utils.to_categorical(y, num_classes=self.num_categories)
-
     def decode(self, categorical):
-        """Decode categorical back to GO IDs."""
+        """Decode categories back to GO IDs."""
         if not self.int_to_go:
             raise ValueError("Encoder has not been fit to any GO IDs.")
         integer_encoded = np.argmax(categorical, axis=1)
@@ -442,8 +453,9 @@ class GOEncoder:
             result.append(sorted(go_probs, key=lambda x: x[1], reverse=True))
         return result
 
-    def save(self, filename):
+    def save(self):
         """Serialize the GOEncoder to a file."""
+        filename = f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_GOEncoder.pickle"
         with open(filename, "wb") as f:
             pickle.dump(
                 {

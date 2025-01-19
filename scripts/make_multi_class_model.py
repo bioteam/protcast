@@ -85,4 +85,5 @@ if __name__ == "__main__":
         proteins,
     )
     classifier.run()
-    classifier.save_model()
+    # Not necessary with the checkpoints in place
+    # classifier.save_model()
