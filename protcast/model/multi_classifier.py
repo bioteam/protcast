@@ -5,6 +5,7 @@ import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
+import tensorflow as tf
 from keras import layers, models
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
@@ -123,7 +124,7 @@ class MultiClassifier:
         self.go_ids = list()
         self.pids = list()
         self.features = list()
-        self.go_encoder = GOEncoder()
+        # self.go_encoder = GOEncoder()
 
     @typechecked
     def run(self) -> None:
@@ -158,33 +159,39 @@ class MultiClassifier:
     @typechecked
     def prepare_data(self) -> None:
         """prepare_data"""
-        total_samples = sum(len(feature_set) for feature_set in self.features)
-        self.X = np.zeros((total_samples, self.vector_length))
+        num_samples = sum(len(go_set) for go_set in self.features)
+        X = np.zeros((num_samples, self.vector_length))
+        y = np.zeros(num_samples, dtype=int)
 
-        # Create y (labels)
-        y = np.zeros(total_samples, dtype=int)
+        self.go_encoder = GOEncoder()
+        self.go_encoder.fit(self.go_ids)
 
         # Need to account for different number of proteins for different GO ids
         start_idx = 0
-        for i, go_set in enumerate(self.features):
+        for i, (go_id, go_set) in enumerate(zip(self.go_ids, self.features)):
             end_idx = start_idx + len(go_set)
-            self.X[start_idx:end_idx] = go_set
-            y[start_idx:end_idx] = i
+            X[start_idx:end_idx] = go_set
+            y[start_idx:end_idx] = self.go_encoder.encode(go_id)
             start_idx = end_idx
 
         # Convert y to categorical
-        self.y = keras.utils.to_categorical(y, num_classes=len(self.go_ids))
+        self.X = X
+        self.y = self.go_encoder.to_categorical(y)
 
         if self.verbose:
             print(f"Shape of self.X: {self.X.shape}")
             print(f"Shape of self.y: {self.y.shape}")
+        """
+        Shape of self.X: (305, 100)
+        Shape of self.y: (305, 3)
+        
+        Vector length: 100, number of proteins (samples): 305, number of GO ids (classes): 3
+        """
 
     def build_model(self):
         """build_model
 
-        The model architecture is a simple feed-forward neural network.
         The final layer uses num_classes for the number of units, ensuring it matches the number of GO ids.
-        We're using 'softmax' activation in the final layer, which is appropriate for multi-class classification.
         The model is compiled with 'categorical_crossentropy' loss, which is suitable for multi-class problems with mutually exclusive classes.
         We're using 'accuracy' as a metric, but you might want to consider additional metrics like F1-score or area under the ROC curve, depending on your specific requirements.
 
@@ -276,6 +283,13 @@ class MultiClassifier:
             monitor="val_loss",
             save_best_only=True,
         )
+        # Profiler callback
+        log_dir = "logs/fit/" + time.strftime(
+            "%m-%d-%Y-%H-%M-%S", time.localtime()
+        )
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(
+            log_dir=log_dir, histogram_freq=1
+        )
         # Train the model
         history = self.model.fit(
             X_train,
@@ -283,7 +297,7 @@ class MultiClassifier:
             epochs=self.epochs,
             batch_size=self.batch_size,
             validation_data=(X_val, y_val),
-            callbacks=[early_stopping, model_checkpoint],
+            callbacks=[early_stopping, model_checkpoint, tensorboard_callback],
             verbose=1,
         )
         # Load the best model
@@ -295,8 +309,10 @@ class MultiClassifier:
         """save_model"""
         self.model.save(self.get_name())
 
-    @typechecked
-    def load_model(self, model_path: Path) -> None:
+    @classmethod
+    def load_model(
+        cls, model_path: Path
+    ) -> keras.src.models.sequential.Sequential:
         """load_model
 
         Parameters
@@ -304,7 +320,8 @@ class MultiClassifier:
         model_path: Path
             Path to saved model
         """
-        self.model = keras.models.load_model(model_path)
+        model = keras.models.load_model(model_path)
+        return model
 
     @typechecked
     def get_name(self) -> str:
@@ -312,18 +329,6 @@ class MultiClassifier:
 
 
 """
-        # Profiler callback
-        log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(
-            log_dir=log_dir, histogram_freq=1
-        )
-
-        self.training_model.fit(
-            train_tfds,
-            epochs=self.epochs,
-            validation_data=val_tfds,
-            callbacks=[tensorboard_callback],
-        )
 
     @typechecked
     def test_model(self) -> None:
@@ -408,14 +413,14 @@ class GOEncoder:
         self.int_to_go = {i: go for go, i in self.go_to_int.items()}
         self.num_categories = len(unique_go_ids)
 
-    def encode(self, go_ids):
-        """Encode a list of GO IDs to categorical."""
+    def encode(self, go_id):
+        """Encode a GO IDs to a category."""
         if not self.go_to_int:
             raise ValueError("Encoder has not been fit to any GO IDs.")
-        integer_encoded = [self.go_to_int[go] for go in go_ids]
-        return keras.utils.to_categorical(
-            integer_encoded, num_classes=self.num_categories
-        )
+        return self.go_to_int[go_id]
+
+    def to_categorical(self, y):
+        return keras.utils.to_categorical(y, num_classes=self.num_categories)
 
     def decode(self, categorical):
         """Decode categorical back to GO IDs."""

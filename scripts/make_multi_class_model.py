@@ -1,4 +1,3 @@
-import os
 import re
 import sys
 import argparse
@@ -15,9 +14,8 @@ from protcast.preprocessing.protcast_dataset import (  # noqa: E402
 
 if __name__ == "__main__":
     """"make_multi_class_model.py
-    This script uses TensorFlow and Keras FeatureSpace to classify sequences.
-    Provide a text file with GO ids, the subgraph sequences will be used
-    for training and testing. Example:
+    Provide a Fasta file, or a text file with GO ids and a ProtCastDataset file. 
+    Example:
 
     python3 scripts/make_multi_class_model.py \
     -g test/data/go-terms.txt \
@@ -77,7 +75,7 @@ if __name__ == "__main__":
             if go_id is not None:
                 proteins[go_id][seq.id] = str(seq.seq)
     else:
-        sys.exit("No input files")
+        sys.exit("Need input files")
 
     classifier = MultiClassifier(
         args.algorithm,
