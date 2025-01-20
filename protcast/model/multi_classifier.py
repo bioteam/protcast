@@ -416,22 +416,15 @@ class GOEncoder:
         """Serialize the GOEncoder to a file."""
         filename = f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_GOEncoder.pickle"
         with open(filename, "wb") as f:
-            pickle.dump(
-                {
-                    "go_to_int": self.go_to_int,
-                    "int_to_go": self.int_to_go,
-                    "num_categories": self.num_categories,
-                },
-                f,
-            )
+            pickle.dump(self, f)
 
     @classmethod
     def load(cls, filename):
         """Deserialize a GOEncoder from a file."""
         with open(filename, "rb") as f:
-            data = pickle.load(f)
-        encoder = cls()
-        encoder.go_to_int = data["go_to_int"]
-        encoder.int_to_go = data["int_to_go"]
-        encoder.num_categories = data["num_categories"]
+            encoder = pickle.load(f)
+        # encoder = cls()
+        # encoder.go_to_int = data["go_to_int"]
+        # encoder.int_to_go = data["int_to_go"]
+        # encoder.num_categories = data["num_categories"]
         return encoder
