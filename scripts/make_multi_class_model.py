@@ -1,11 +1,10 @@
 import re
 import sys
+import os
 import argparse
 from collections import defaultdict
-from pathlib import Path
 
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
@@ -41,7 +40,6 @@ if __name__ == "__main__":
         help="Feature vector creator",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
-    parser.add_argument("--save", action="store_true", help="Save model")
     args = parser.parse_args()
 
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
@@ -81,7 +79,6 @@ if __name__ == "__main__":
         args.algorithm,
         args.feature_creator,
         args.verbose,
-        args.save,
         proteins,
     )
     classifier.run()

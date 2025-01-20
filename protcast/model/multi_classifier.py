@@ -56,14 +56,12 @@ class MultiClassifier:
         algorithm: str,
         feature_creator: str,
         verbose: bool,
-        save: bool,
         proteins: dict,
         optimizer: str = "adam",
         loss: str = "categorical_crossentropy",
         metrics: list = ["accuracy"],
         epochs: int = 100,
         batch_size: int = 32,
-        fraction: float = 0.2,
         neurons: int = 32,
         dropout: float = 0.5,
         pred_threshold: float = 75.0,
@@ -80,22 +78,18 @@ class MultiClassifier:
             Package that creates the feature vectors
         verbose: bool
             Verbosity
-        save: bool
-            Save the model, or not
         proteins: dict(dict)
             Primary key: GO id, secondary key: protein id, value: sequence
         vector_length: int
             Length of feature vector
         optimizer : str
-            Optional, by default "adam"
+            Default "adam"
         loss : str
-            Optional, by default "categorical_crossentropy"
+            Default "categorical_crossentropy"
         metrics : list
-            Optional, by default ["accuracy"]
+            Default ["accuracy"]
         epochs : int
             By default 20
-        fraction : float
-            By default 0.2
         neurons : int
             By default 32
         dropout : float
@@ -108,14 +102,12 @@ class MultiClassifier:
         self.algorithm = algorithm
         self.feature_creator = feature_creator
         self.verbose = verbose
-        self.save = save
         self.proteins = proteins
         self.optimizer = optimizer
         self.loss = loss
         self.metrics = metrics
         self.epochs = epochs
         self.batch_size = batch_size
-        self.fraction = fraction
         self.neurons = neurons
         self.dropout = dropout
         self.validation_split = validation_split
@@ -124,7 +116,6 @@ class MultiClassifier:
         self.go_ids = list()
         self.pids = list()
         self.features = list()
-        # self.go_encoder = GOEncoder()
 
     @typechecked
     def run(self) -> None:
@@ -138,8 +129,8 @@ class MultiClassifier:
     @typechecked
     def get_feature_vectors(self) -> None:
         """get_feature_vectors
-        Create feature vectors and create vectors as a list of lists,
-        protein ids as a list of lists, and GO ids as a
+        Create feature vectors and get vectors as a list of lists (per GO id),
+        protein ids as a list of lists (per GO id), and GO ids as a
         list
         """
         for go_id in self.proteins.keys():
@@ -175,7 +166,7 @@ class MultiClassifier:
             start_idx = end_idx
 
         self.X = X
-        # Convert integers into a binary class matrix
+        # Convert integers into a binary matrix
         self.y = keras.utils.to_categorical(y, num_classes=len(self.go_ids))
 
         if self.verbose:
@@ -194,7 +185,7 @@ class MultiClassifier:
 
         The final layer uses num_classes for the number of units, ensuring it matches the number of GO ids.
         The model is compiled with 'categorical_crossentropy' loss, which is suitable for multi-class problems with mutually exclusive classes.
-        We're using 'accuracy' as a metric, but you might want to consider additional metrics like F1-score or area under the ROC curve, depending on your specific requirements.
+        We're using 'accuracy' as a metric, but consider metrics like F1-score or area under the ROC curve.
 
         """
         # X.shape[1] = self.vector_length, X.shape[0] = total number of samples across GO ids.
@@ -241,33 +232,6 @@ class MultiClassifier:
 
         self.model = model
 
-    """
-    More flexible:
-
-    def build_model(self, hidden_layers=[(128, 0.5), (64, 0.3)], optimizer='adam'):
-        input_shape = (self.X.shape[1],)
-        num_classes = len(self.go_ids)
-
-        model = models.Sequential()
-        model.add(layers.Input(shape=input_shape))
-
-        for units, dropout_rate in hidden_layers:
-            model.add(layers.Dense(units, activation='relu'))
-            model.add(layers.Dropout(dropout_rate))
-
-        model.add(layers.Dense(num_classes, activation='softmax'))
-
-        model.compile(
-            optimizer=optimizer,
-            loss='categorical_crossentropy',
-            metrics=['accuracy']
-        )
-
-        self.model = model
-        return model
-
-    """
-
     def train_model(self):
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
@@ -284,7 +248,8 @@ class MultiClassifier:
         )
         # val_loss measures the error on the validation set
         loss_checkpoint = ModelCheckpoint(
-            f"{self.get_name()}.h5",
+            filepath=f"{self.get_name()}.h5",
+            # "best_model.h5",
             monitor="val_loss",
             save_best_only=True,
             mode="min",
@@ -384,15 +349,11 @@ class GOEncoder:
 
     # Example usage:
     go_encoder = GOEncoder()
-
-    # Fit the encoder
     go_ids = ['GO:1224', 'GO:5678', 'GO:9101', 'GO:1224', 'GO:5678']
     go_encoder.fit(go_ids)
 
     # Encode GO IDs
-    encoded = go_encoder.encode(['GO:1224', 'GO:5678', 'GO:9101'])
-    print("Encoded:")
-    print(encoded)
+    encoded = go_encoder.encode('GO:1224')
 
     # Save the encoder
     go_encoder.save()
@@ -409,8 +370,6 @@ class GOEncoder:
     probabilities = np.array([[0.1, 0.7, 0.2], [0.3, 0.3, 0.4]])
     top_go_ids = loaded_encoder.decode_probabilities(probabilities, top_k=2)
     print("Top 2 GO IDs with probabilities (using loaded encoder):")
-    for go_probs in top_go_ids:
-        print(go_probs)
     """
 
     def __init__(self):
