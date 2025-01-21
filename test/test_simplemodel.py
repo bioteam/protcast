@@ -1,11 +1,10 @@
 import unittest
 import numpy as np
 from tensorflow.keras.utils import to_categorical
-from pathlib import Path
+import os
 import sys
 
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 # Why is this not importing? Also note objects imported in test_training straight up didn't inherit anything why?
 # from protcast.model.simple_model import MyModel  # noqa: E402

@@ -1,8 +1,7 @@
 import sys
-from pathlib import Path
+import os
 
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.utils.blast_to_go import BlastToGo  # noqa: E402
 

@@ -7,8 +7,7 @@ from pathlib import Path
 from keras.utils import FeatureSpace
 from Bio import SeqIO
 
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.feature_vector import get_ifeatpro_features  # noqa: E402
 

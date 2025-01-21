@@ -1,9 +1,8 @@
 import argparse
-from pathlib import Path
+import os
 import sys
 
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.preprocessing.parse_swissprot import (  # noqa: E402
     parse_swissprot,

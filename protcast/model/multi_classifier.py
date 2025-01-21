@@ -423,8 +423,4 @@ class GOEncoder:
         """Deserialize a GOEncoder from a file."""
         with open(filename, "rb") as f:
             encoder = pickle.load(f)
-        # encoder = cls()
-        # encoder.go_to_int = data["go_to_int"]
-        # encoder.int_to_go = data["int_to_go"]
-        # encoder.num_categories = data["num_categories"]
         return encoder

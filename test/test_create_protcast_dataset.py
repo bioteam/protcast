@@ -3,8 +3,7 @@ import os
 import sys
 from pathlib import Path
 
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,
