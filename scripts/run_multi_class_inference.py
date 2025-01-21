@@ -4,6 +4,7 @@ import os
 import argparse
 import numpy as np
 from pathlib import Path
+from sklearn.metrics import f1_score
 from Bio import SeqIO
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -56,6 +57,9 @@ def get_feature_vector(seq):
         return get_ifeatureomega_features(algorithm, seq)
 
 
+# Collect data for F1 score calculation
+true = list()
+pred = list()
 print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
     fv = get_feature_vector({seq.id: str(seq.seq)})
@@ -65,9 +69,25 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
     # The feature vector is a 1D array, but the model expects a 2D array where the first dimension
     # is the batch size (None means it can be any number), and the second dimension is the length
     # of the feature vector. -1 in the reshape() tells numpy to infer the second dimension.
-    X = np.array(fv[0][0]).reshape(1, -1)
-    result = model.predict(X)
-    tup = go_encoder.decode_probabilities(result, top_k=1)[0][0]
+    X_test = np.array(fv[0][0]).reshape(1, -1)
+    y_pred_ps = model.predict(X_test)
+    pred_tup = go_encoder.decode_probabilities(y_pred_ps, top_k=1)[0][0]
+    # Get actual GO and name from the sequence description
     actual_go_id = re.search(r"(GO:\d+)", seq.description)[1]
     actual_go_name = re.search(r"GO:\d+ (.+) MF", seq.description)[1].strip()
-    print(f"{seq.id}\t{actual_go_id}\t{tup[0]}\t{tup[1]}\t{actual_go_name}")
+    print(
+        f"{seq.id}\t{actual_go_id}\t{pred_tup[0]}\t{pred_tup[1]}\t{actual_go_name}"
+    )
+    true.append(go_encoder.encode(actual_go_id))
+    pred.append(go_encoder.encode(pred_tup[0]))
+
+y_true = np.array(true)
+y_pred = np.array(pred)
+# Calculate F1 score (weighted average, there is also "micro" and "macro")
+f1_weighted = f1_score(y_true, y_pred, average="weighted")
+# Calculate F1 score for each class
+f1_per_class = f1_score(y_true, y_pred, average=None)
+print(f"Weighted F1 score: {f1_weighted:.4f}")
+print("F1 scores per class:")
+for i, f1 in enumerate(f1_per_class):
+    print(f"  Class {go_encoder.decode(i)}: {f1:.4f}")

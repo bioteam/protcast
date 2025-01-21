@@ -396,6 +396,9 @@ class GOEncoder:
         """Decode categories back to GO IDs."""
         if not self.int_to_go:
             raise ValueError("Encoder has not been fit to any GO IDs.")
+        # Handle single integer
+        if isinstance(categorical, (int, np.integer)):
+            return self.int_to_go.get(categorical, None)
         integer_encoded = np.argmax(categorical, axis=1)
         return [self.int_to_go[i] for i in integer_encoded]
 
