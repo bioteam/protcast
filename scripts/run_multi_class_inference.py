@@ -3,7 +3,6 @@ import sys
 import os
 import argparse
 import numpy as np
-import pickle
 from pathlib import Path
 from Bio import SeqIO
 from protcast.model.feature_vector import (
@@ -66,9 +65,9 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
     # The feature vector is a 1D array, but the model expects a 2D array where the first dimension
     # is the batch size (None means it can be any number), and the second dimension is the length
     # of the feature vector. -1 in the reshape() tells numpy to infer the second dimension.
-    actual_go_id = re.search(r"(GO:\d+)", seq.description)[1]
-    name = re.search(r"GO:\d+ (.+) MF", seq.description)[1].strip()
     X = np.array(fv[0][0]).reshape(1, -1)
     result = model.predict(X)
     tup = go_encoder.decode_probabilities(result, top_k=1)[0][0]
-    print(f"{seq.id}\t{actual_go_id}\t{tup[0]}\t{tup[1]}\t{name}")
+    actual_go_id = re.search(r"(GO:\d+)", seq.description)[1]
+    actual_go_name = re.search(r"GO:\d+ (.+) MF", seq.description)[1].strip()
+    print(f"{seq.id}\t{actual_go_id}\t{tup[0]}\t{tup[1]}\t{actual_go_name}")
