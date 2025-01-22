@@ -3,6 +3,7 @@ import sys
 import tempfile
 import iFeatureOmegaCLI
 from ifeatpro.features import get_feature
+from Bio.SeqIO import SeqRecord
 
 
 def get_ifeatpro_features(alg, seqs):
@@ -76,7 +77,7 @@ def get_ifeatpro_features(alg, seqs):
         tmpdir = tempfile.TemporaryDirectory()
         tmpfasta = tempfile.NamedTemporaryFile()
         # Write fasta file
-        if isinstance(seq, (SeqRecord)):  # noqa: F821
+        if isinstance(seq, (SeqRecord)):
             seq = str(seq.seq)
         with open(tmpfasta.name, "w") as f:
             f.write(">" + pid + "\n" + seq + "\n")
@@ -224,7 +225,7 @@ def get_ifeatureomega_features(alg, seqs):
     for pid, seq in seqs.items():
         tmpfasta = tempfile.NamedTemporaryFile()
         # Create multi-fasta file from input sequences
-        if isinstance(seq, (SeqRecord)):  # noqa: F821
+        if isinstance(seq, (SeqRecord)):
             seq = str(seq.seq)
         with open(tmpfasta.name, "w") as f:
             f.write(">" + pid + "\n" + seq + "\n")
