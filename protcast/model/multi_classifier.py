@@ -14,8 +14,9 @@ from protcast.model.feature_vector import (
     get_ifeatpro_features,
     get_ifeatureomega_features,
 )
-from protcast.model.stats.utils import calculate_sensitivity_specificity
-from protcast.model.stats.utils import calculate_f1_score
+
+# from protcast.model.stats.utils import calculate_sensitivity_specificity
+# from protcast.model.stats.utils import calculate_f1_score
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -23,7 +24,8 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 @typechecked
 class MultiClassifier:
     """MultiClassifier
-    This class ....
+    This class uses feature vectors to train and test a multi-class classifier.
+    It uses the Keras Sequential API.
 
     Attributes
     ----------
@@ -33,21 +35,22 @@ class MultiClassifier:
     -------
     init:
         Initialize
+    run:
+      Run the methdds that create the model and train it
     get_features_vectors:
-        ...
+        Get feature vectors using ifeatpro or iFeatureOmega
     prepare_data:
-        ...
+        Encode the GO ids and make numpy data structures
     build_model:
-        ...
+        Define the model layers and parameters
     train_model:
-        ...
-    test_modeL:
-        Test model against validation set, save results
-        to a *tsv file
+        Add data to model and train
     save_model:
-        Save Keras model to file
+        Save Keras model to *hf file
     load_model:
         Class method to load model from a file
+    get_name:
+        Make a model name with timestamp
     """
 
     @typechecked
@@ -96,8 +99,6 @@ class MultiClassifier:
             By default 0.5
         pred_threshold : float
             Probability threshold for classification, by default 80.0
-        training_model:
-            Trained model
         """
         self.algorithm = algorithm
         self.feature_creator = feature_creator
@@ -308,42 +309,6 @@ class MultiClassifier:
         return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}"
 
 
-"""
-
-    @typechecked
-    def test_model(self) -> None:
-        y_true = list()
-        y_pred = list()
-        f = open(f"{self.name}_{self.algorithm}.tsv", "w")
-        for i, r in self.val_dataframe.iterrows():
-            # Pre-process the sample you want a prediction from
-            if r["target"] == 1.0:
-                type = self.name
-                y_true.append(1)
-            else:
-                type = f"non-{self.name}"
-                y_true.append(0)
-            del r["target"]
-            sample_tfds = self.sample_preprocessing(r)
-            # Get a prediction
-            predictions = self.training_model.predict(sample_tfds)
-            prob = float(100 * predictions[0][0])
-            if prob >= self.pred_threshold:
-                y_pred.append(1)
-            else:
-                y_pred.append(0)
-            f.write(f"{type}\t{self.all_ids[i]}\t{prob}\n")
-        sens, spec = calculate_sensitivity_specificity(y_true, y_pred)
-        f.write(f"Sensitivity\t{sens}\tSpecificity\t{spec}\n")
-        f.write(f"F1 score\t{calculate_f1_score(y_true, y_pred)}\n")
-        f.write(
-            f"Elapsed time\t{int(time.time() - self.start_time)} seconds\n"
-        )
-        f.write(f"Vector length\t{self.vector_length}")
-
-"""
-
-
 class GOEncoder:
     """GOEncoder
 
@@ -375,7 +340,7 @@ class GOEncoder:
     def __init__(self):
         self.go_to_int = dict()
         self.int_to_go = dict()
-        self.num_categories = 0
+        self.num_classes = 0
 
     def fit(self, go_ids):
         """fit
@@ -384,7 +349,7 @@ class GOEncoder:
         unique_go_ids = sorted(set(go_ids))
         self.go_to_int = {go: i for i, go in enumerate(unique_go_ids)}
         self.int_to_go = {i: go for go, i in self.go_to_int.items()}
-        self.num_categories = len(unique_go_ids)
+        self.num_classes = len(unique_go_ids)
 
     def encode(self, go_id):
         """Encode a GO ID to a category number"""
@@ -399,8 +364,9 @@ class GOEncoder:
         # Handle single integer
         if isinstance(categorical, (int, np.integer)):
             return self.int_to_go.get(categorical, None)
-        integer_encoded = np.argmax(categorical, axis=1)
-        return [self.int_to_go[i] for i in integer_encoded]
+        else:
+            integer_encoded = np.argmax(categorical, axis=1)
+            return [self.int_to_go[i] for i in integer_encoded]
 
     def decode_probabilities(self, probabilities, top_k=1):
         """Decode probability distributions to top k GO IDs with their probabilities."""
