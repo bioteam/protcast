@@ -60,6 +60,7 @@ def get_feature_vector(seq):
 # Collect data for F1 score calculation
 true = list()
 pred = list()
+names = dict()
 print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
     fv = get_feature_vector({seq.id: str(seq.seq)})
@@ -75,6 +76,7 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
     # Get actual GO and name from the sequence description
     actual_go_id = re.search(r"(GO:\d+)", seq.description)[1]
     actual_go_name = re.search(r"GO:\d+ (.+) MF", seq.description)[1].strip()
+    names[actual_go_id] = actual_go_name
     print(
         f"{seq.id}\t{actual_go_id}\t{pred_tup[0]}\t{pred_tup[1]}\t{actual_go_name}"
     )
@@ -87,7 +89,8 @@ y_pred = np.array(pred)
 f1_weighted = f1_score(y_true, y_pred, average="weighted")
 # Calculate F1 score for each class
 f1_per_class = f1_score(y_true, y_pred, average=None)
-print(f"Weighted F1 score: {f1_weighted:.4f}")
-print("F1 scores per class:")
+print(f"Weighted F1 score\t{f1_weighted:.4f}")
+print("F1 scores per class")
 for i, f1 in enumerate(f1_per_class):
-    print(f"  Class {go_encoder.decode(i)}: {f1:.4f}")
+    go_id = go_encoder.decode(i)
+    print(f"{go_id}\t{names[go_id]}\t{f1:.4f}")
