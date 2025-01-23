@@ -14,12 +14,19 @@ from protcast.preprocessing.protcast_dataset import (  # noqa: E402
 if __name__ == "__main__":
     """"make_multi_class_model.py
     Provide a Fasta file, or a text file with GO ids and a ProtCastDataset file. 
-    Example:
+    Example to use a ProtCastDataset:
 
     python3 scripts/make_multi_class_model.py \
     -g test/data/go-terms.txt \
     -p ProtcastDataset.bin \
     -a qsorder -f ifeatpro -s
+
+    or to use a sequence (Fasta) file:
+
+    python3 scripts/make_multi_class_model.py \
+    -s test/data/random-level-4.fa \
+    -v
+
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--go_ids_file", help="Path to GO ids file")
