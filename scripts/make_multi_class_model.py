@@ -21,7 +21,7 @@ if __name__ == "__main__":
     -p ProtcastDataset.bin \
     -a qsorder -f ifeatpro -s
 
-    or to use a sequence (Fasta) file:
+    Or use a sequence (Fasta) file:
 
     python3 scripts/make_multi_class_model.py \
     -s test/data/random-level-4.fa \
