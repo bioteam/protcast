@@ -5,11 +5,11 @@ import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
-from tensorflow.keras.utils import to_categorical  # type: ignore
-import tensorflow as tf
 from keras import layers, models
-from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
+from tensorflow.keras.utils import to_categorical  # type: ignore
+from tensorflow.keras.callbacks import TensorBoard  # type: ignore
+from sklearn.model_selection import train_test_split
 
 from protcast.model.feature_vector import (
     get_ifeatpro_features,
@@ -266,9 +266,7 @@ class MultiClassifier:
         log_dir = "logs/fit/" + time.strftime(
             "%m-%d-%Y-%H-%M-%S", time.localtime()
         )
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(
-            log_dir=log_dir, histogram_freq=1
-        )
+        tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
         # Train the model
         history = self.model.fit(
             X_train,
