@@ -291,9 +291,7 @@ class MultiClassifier:
         self.model.save(f"{self.get_name()}.keras")
 
     @classmethod
-    def load_model(
-        cls, model_path: Path
-    ) -> keras.src.models.sequential.Sequential:
+    def load_model(cls, model_path: Path) -> keras.models.Sequential:
         """load_model
 
         Parameters
