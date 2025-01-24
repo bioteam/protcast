@@ -5,6 +5,33 @@ Gene Ontology Annotation files and use feature vector representations of the pro
 predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins.
 This code uses Keras and its FeatureSpace package for structured (tabular) data classification.
 
+## Installation
+
+### iFeatureOmega-CLI Package
+
+This code uses a fork of the iFeatureOmega-CLI package to create feature vectors from protein sequence.
+
+1.Clone the `bosborne` fork of iFeatureOmega-CLI:
+
+```shell
+git clone https://github.com/bosborne/iFeatureOmega-CLI
+```
+
+2.Install the library from the local directory:
+
+```shell
+cd iFeatureOmega-CLI
+pip3 install .
+```
+
+### Install ProtCast
+
+```shell
+git clone https://github.com/bioteam/ProtCast
+cd ProtCast
+pip3 install .
+```
+
 ## Building the ProtCastDataset
 
 A ProtCastDataset combines protein sequences and GO annotations from multiple input files. A typical
@@ -80,9 +107,7 @@ database file and returns the proteins, the GO terms that are not found in
 Swissprot, and the protein accessions. For example:
 
 ```shell
-python3 preprocessing/parse_swissprot.py \
-  data/ontology/go.obo \
-  data/uniprot/uniprot_sprot.dat
+python3 preprocessing/parse_swissprot.py data/ontology/go.obo data/uniprot/uniprot_sprot.dat
 ```
 
 ## Classes
@@ -250,40 +275,15 @@ Download the 4 input files necessary to build a ProtCastDataset:
 3.Load the relevant modules
 
 ```shell
-    module load all/TensorFlow/2.15.1-Python-3.10 
-    module load all/CUDA   
+module load all/TensorFlow/2.15.1-Python-3.10 
+module load all/CUDA   
 ```
 
 4.Run the script that fits your model.
    eg. to profile the model in binary_classifier.py you'd run
 
-   `python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py`
+```py
+python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py
+```
 
 ### Python Profiling
-
-## Environment
-
-### imblearn Package
-
-This code uses the MLSMOTE algorithm which is currently not part of the
-latest release of the `imblearn` library. Thus, in order to use MLSMOTE it is
-necessary to install it from a custom branch. To install follow these steps:
-
-1.Clone the `balvisio` fork of imblearn:
-
-```shell
-git clone git@github.com:balvisio/imbalanced-learn.git
-```
-
-2.Checkout the `ba/MLSMOTE` branch:
-
-```shell
-cd imbalanced-learn/
-git checkout ba/MLSMOTE
-```
-
-3.Install the library from local
-
-```shell
-python3 -m pip install .
-```
