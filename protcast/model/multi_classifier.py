@@ -5,6 +5,7 @@ import numpy as np
 import time
 from pathlib import Path
 from typeguard import typechecked
+from tensorflow.keras.utils import to_categorical  # type: ignore
 import tensorflow as tf
 from keras import layers, models
 from sklearn.model_selection import train_test_split
@@ -168,7 +169,7 @@ class MultiClassifier:
 
         self.X = X
         # Convert integers into a binary matrix
-        self.y = keras.utils.to_categorical(y, num_classes=len(self.go_ids))
+        self.y = to_categorical(y, num_classes=len(self.go_ids))
 
         if self.verbose:
             print(f"Shape of self.X: {self.X.shape}")
