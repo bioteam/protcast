@@ -157,7 +157,7 @@ def get_ifeatureomega_features(alg, seqs):
     Parameters
     ----------
     alg: str
-        Algorithm name, e.g. 'KNN'
+        Algorithm name, e.g. 'ACC'
     seqs: dict
         Key is protein id, value is protein sequence
 
@@ -217,7 +217,7 @@ def get_ifeatureomega_features(alg, seqs):
         "PseKRAAC_type_16",
     ]
     if alg not in algs:
-        sys.exit(f"Algorithm '{alg}' is not part of iFeatureOmegaCLI")
+        sys.exit(f"Algorithm '{alg}' is not part of iFeatureOmega")
 
     pids = list()
     features = list()

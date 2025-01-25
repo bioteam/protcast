@@ -40,6 +40,7 @@ parser.add_argument(
     "-f",
     "--feature_creator",
     default="ifeatpro",
+    choices=["ifeatpro", "iFeatureOmega"],
     help="Feature creator package",
 )
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
