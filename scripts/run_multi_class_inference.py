@@ -6,15 +6,12 @@ import numpy as np
 from pathlib import Path
 from sklearn.metrics import f1_score
 from Bio import SeqIO
-from protcast.model.feature_vector import (
-    get_ifeatpro_features,
-    get_ifeatureomega_features,
-)
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.model.multi_classifier import GOEncoder  # noqa: E402
+from protcast.model.feature_vector import FeatureVector
 
 """"run_multi_class_inference.py
 Provide the name of a model file and the name of sequence file. 
@@ -47,24 +44,20 @@ parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
 model = MultiClassifier.load_model(Path(args.model_file))
-algorithm = re.search(r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.h5$", args.model_file)[1]
+algorithm = re.search(
+    r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
+)[1]
 go_encoder = GOEncoder.load(args.goencoder_file)
-
-
-def get_feature_vector(seq):
-    if args.feature_creator == "ifeatpro":
-        return get_ifeatpro_features(algorithm, seq)
-    elif args.feature_creator == "ifeatureomega":
-        return get_ifeatureomega_features(algorithm, seq)
-
+fv_factory = FeatureVector(algorithm, args.feature_creator)
 
 # Collect data for F1 score calculation
 true = list()
 pred = list()
 names = dict()
+
 print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
-    fv = get_feature_vector({seq.id: str(seq.seq)})
+    fv = fv_factory.get_feature_vectors({seq.id: str(seq.seq)})
     # A feature vector may not be created if the sequence is too short
     if len(fv[0]) == 0:
         continue
