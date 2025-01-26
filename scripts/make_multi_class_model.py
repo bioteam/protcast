@@ -1,6 +1,7 @@
 import re
 import sys
 import os
+import time
 import argparse
 from collections import defaultdict
 
@@ -49,6 +50,8 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
     args = parser.parse_args()
 
+    start = time.time()
+
     # Primary keys are GO ids, secondary keys are protein ids, values are sequences
     proteins = defaultdict(dict)
 
@@ -91,3 +94,6 @@ if __name__ == "__main__":
     classifier.run()
     # Not necessary with the checkpoints in place
     # classifier.save_model()
+
+end = time.time()
+print(f"Elapsed training time: {round(end - start)}")

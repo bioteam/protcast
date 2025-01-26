@@ -93,4 +93,4 @@ for i, f1 in enumerate(f1_per_class):
     print(f"{go_id}\t{names[go_id]}\t{f1:.4f}")
 
 end = time.time()
-print(f"Elapsed time: {round(end - start)}")
+print(f"Elapsed inference time: {round(end - start)}")
