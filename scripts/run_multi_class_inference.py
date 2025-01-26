@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import argparse
+import time
 import numpy as np
 from pathlib import Path
 from sklearn.metrics import f1_score
@@ -43,6 +44,8 @@ parser.add_argument(
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
+start = time.time()
+
 model = MultiClassifier.load_model(Path(args.model_file))
 algorithm = re.search(
     r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
@@ -82,9 +85,12 @@ y_pred = np.array(pred)
 # Calculate F1 score (weighted average, there is also "micro" and "macro")
 f1_weighted = f1_score(y_true, y_pred, average="weighted")
 # Calculate F1 score for each class
-f1_per_class = f1_score(y_true, y_pred, average=None)
 print(f"Weighted F1 score\t{f1_weighted:.4f}")
 print("F1 scores per class")
+f1_per_class = f1_score(y_true, y_pred, average=None)
 for i, f1 in enumerate(f1_per_class):
     go_id = go_encoder.decode(i)
     print(f"{go_id}\t{names[go_id]}\t{f1:.4f}")
+
+end = time.time()
+print(f"Elapsed time: {round(end - start)}")
