@@ -96,4 +96,4 @@ if __name__ == "__main__":
     # classifier.save_model()
 
 end = time.time()
-print(f"Elapsed training time: {round(end - start)}")
+print(f"Elapsed {args.algorithm} training time: {round(end - start)}")
