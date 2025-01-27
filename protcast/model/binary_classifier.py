@@ -1,18 +1,12 @@
 from datetime import datetime
 import os
 import tensorflow as tf
-
-# import keras
 import pandas as pd
-import sys
 import time
 from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
-from protcast.model.feature_vector import (
-    get_ifeatpro_features,
-    get_ifeatureomega_features,
-)
+from protcast.model.feature_vector import FeatureVector
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score
 
@@ -137,24 +131,15 @@ class BinaryClassifier:
         """get_feature_vector
         Get feature vectors for all proteins as a list of lists
         """
-        if self.feature_creator == "ifeatpro":
-            self.target_features, target_ids = get_ifeatpro_features(
-                self.algorithm, self.target_seqs
-            )
-            self.non_target_features, non_target_ids = get_ifeatpro_features(
-                self.algorithm, self.non_target_seqs
-            )
-        elif self.feature_creator == "iFeatureOmega":
-            self.target_features, target_ids = get_ifeatureomega_features(
-                self.algorithm, self.target_seqs
-            )
-            self.non_target_features, non_target_ids = (
-                get_ifeatureomega_features(
-                    self.algorithm, self.non_target_seqs
-                )
-            )
-        else:
-            sys.exit(f"Unknown feature creator: {self.feature_creator}")
+        fv = FeatureVector(
+            algorithm=self.algorithm, feature_creator=self.feature_creator
+        )
+        self.target_features, target_ids = fv.get_feature_vectors(
+            self.target_seqs
+        )
+        self.non_target_features, non_target_ids = fv.get_feature_vectors(
+            self.target_seqs
+        )
 
         self.all_ids = target_ids + non_target_ids
         self.vector_length = len(self.target_features[0])
