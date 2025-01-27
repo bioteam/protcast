@@ -7,9 +7,10 @@ from Bio.SeqIO import SeqRecord
 
 
 class FeatureVector:
-    def __init__(self, alg, feature_creator):
+    def __init__(self, alg, feature_creator, verbose=False):
         self.alg = alg
         self.feature_creator = feature_creator
+        self.verbose = verbose
 
     def get_feature_vectors(self, seqs):
         if self.feature_creator == "ifeatpro":
@@ -94,7 +95,6 @@ class FeatureVector:
                 seq = str(seq.seq)
             with open(tmpfasta.name, "w") as f:
                 f.write(">" + pid + "\n" + seq + "\n")
-
             # The try is necessary in case the input sequence is too
             # short for a given algorithm
             try:
@@ -117,36 +117,32 @@ class FeatureVector:
         of protein ids and protein sequences. The 49 algorithms are:
 
         AAC
-        CKSAAP_type_1
-        CKSAAP_type_2
-        DPC_type_1
-        DPC_type_2
-        DDE
-        TPC_type_1
-        TPC_type_2
-        GAAC
-        CKSAAGP_type_1
-        CKSAAGP_type_2
-        GDPC_type_1
-        GDPC_type_2
-        GTPC_type_1
-        NMBroto
-        Moran
-        Geary
-        CTDC
-        CTDT
-        CTDD
-        CTriad
-        KSCTriad
-        SOCNumber
-        QSOrder
-        PAAC
+        AC
+        ACC
         APAAC
         ASDC
-        DistancePair
-        AC
         CC
-        ACC
+        CKSAAGP_type_1
+        CKSAAGP_type_2
+        CKSAAP_type_1
+        CKSAAP_type_2
+        CTDC
+        CTDD
+        CTDT
+        CTriad
+        DDE
+        DistancePair
+        DPC_type_1
+        DPC_type_2
+        GAAC
+        GDPC_type_1
+        GDPC_type_2
+        Geary
+        GTPC_type_1
+        KSCTriad
+        Moran
+        NMBroto
+        PAAC
         PseKRAAC_type_1
         PseKRAAC_type_2
         PseKRAAC_type_3A
@@ -165,6 +161,10 @@ class FeatureVector:
         PseKRAAC_type_14
         PseKRAAC_type_15
         PseKRAAC_type_16
+        QSOrder
+        SOCNumber
+        TPC_type_1
+        TPC_type_2
 
         Parameters
         ----------
@@ -179,36 +179,32 @@ class FeatureVector:
         """
         algs = [
             "AAC",
-            "CKSAAP_type_1",
-            "CKSAAP_type_2",
-            "DPC_type_1",
-            "DPC_type_2",
-            "DDE",
-            "TPC_type_1",
-            "TPC_type_2",
-            "GAAC",
-            "CKSAAGP_type_1",
-            "CKSAAGP_type_2",
-            "GDPC_type_1",
-            "GDPC_type_2",
-            "GTPC_type_1",
-            "NMBroto",
-            "Moran",
-            "Geary",
-            "CTDC",
-            "CTDT",
-            "CTDD",
-            "CTriad",
-            "KSCTriad",
-            "SOCNumber",
-            "QSOrder",
-            "PAAC",
+            "AC",
+            "ACC",
             "APAAC",
             "ASDC",
-            "DistancePair",
-            "AC",
             "CC",
-            "ACC",
+            "CKSAAGP_type_1",
+            "CKSAAGP_type_2",
+            "CKSAAP_type_1",
+            "CKSAAP_type_2",
+            "CTDC",
+            "CTDD",
+            "CTDT",
+            "CTriad",
+            "DDE",
+            "DistancePair",
+            "DPC_type_1",
+            "DPC_type_2",
+            "GAAC",
+            "GDPC_type_1",
+            "GDPC_type_2",
+            "Geary",
+            "GTPC_type_1",
+            "KSCTriad",
+            "Moran",
+            "NMBroto",
+            "PAAC",
             "PseKRAAC_type_1",
             "PseKRAAC_type_2",
             "PseKRAAC_type_3A",
@@ -227,9 +223,15 @@ class FeatureVector:
             "PseKRAAC_type_14",
             "PseKRAAC_type_15",
             "PseKRAAC_type_16",
+            "QSOrder",
+            "SOCNumber",
+            "TPC_type_1",
+            "TPC_type_2",
         ]
         if self.alg not in algs:
-            sys.exit(f"Algorithm '{self.alg}' is not part of iFeatureOmega")
+            sys.exit(
+                f"Algorithm '{self.alg}' is not use-able part of iFeatureOmega"
+            )
 
         pids = list()
         features = list()
@@ -246,16 +248,17 @@ class FeatureVector:
             try:
                 protein = iFeatureOmegaCLI.iProtein(tmpfasta.name)
                 protein.get_descriptor(self.alg)
+                # proteins.encodings is a dataframe, which is a dict of
+                # pandas.core.series.Series objects. A pandas.core.series.Series is a one-dimensional
+                # labeled array of values, similar to an array but with labeled elements. The labels
+                # in these Series are the column names, like "AAC_A", "AAC_B".
                 for pid, vals in protein.encodings.iterrows():
                     pids.append(pid)
                     features.append(vals.tolist())
             except Exception as e:
                 print(f"Error running {self.alg} on {pid} sequence: {e}")
-            # proteins.encodings is a dataframe, which is a dict of
-            # pandas.core.series.Series objects. A pandas.core.series.Series is a one-dimensional
-            # labeled array of values, similar to an array but with labeled elements. The labels
-            # in these Series are the column names, like "AAC_A", "AAC_B".
 
-        # lens = [len(vec) for vec in features]
-        # print(f"{alg} feature vector length: {set(lens)}")
+        if self.verbose:
+            lens = [len(vec) for vec in features]
+            print(f"{self.alg} feature vector length: {set(lens)}")
         return features, pids
