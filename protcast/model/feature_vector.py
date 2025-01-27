@@ -1,18 +1,108 @@
 import os
 import sys
 import tempfile
+from typeguard import typechecked
 import iFeatureOmegaCLI
 from ifeatpro.features import get_feature
 from Bio.SeqIO import SeqRecord
 
 
 class FeatureVector:
-    def __init__(self, alg, feature_creator, verbose=False):
-        self.alg = alg
+    def __init__(
+        self, algorithm: str = None, feature_creator: str = None, verbose=False
+    ):
+        self.alg = algorithm
         self.feature_creator = feature_creator
         self.verbose = verbose
+        self.algs = dict()
+        self.algs["ifeatpro"] = [
+            "aac",
+            "apaac",
+            "cksaagp",
+            "cksaap",
+            "ctdc",
+            "ctdd",
+            "ctdt",
+            "ctriad",
+            "dde",
+            "dpc",
+            "gaac",
+            "gdpc",
+            "geary",
+            "gtpc",
+            "ksctriad",
+            "moran",
+            "nmbroto",
+            "paac",
+            "qsorder",
+            "socnumber",
+            "tpc",
+        ]
+        self.algs["iFeatureOmega"] = [
+            "AAC",
+            "AC",
+            "ACC",
+            "APAAC",
+            "ASDC",
+            "CC",
+            "CKSAAGP_type_1",
+            "CKSAAGP_type_2",
+            "CKSAAP_type_1",
+            "CKSAAP_type_2",
+            "CTDC",
+            "CTDD",
+            "CTDT",
+            "CTriad",
+            "DDE",
+            "DistancePair",
+            "DPC_type_1",
+            "DPC_type_2",
+            "GAAC",
+            "GDPC_type_1",
+            "GDPC_type_2",
+            "Geary",
+            "GTPC_type_1",
+            "KSCTriad",
+            "Moran",
+            "NMBroto",
+            "PAAC",
+            "PseKRAAC_type_1",
+            "PseKRAAC_type_2",
+            "PseKRAAC_type_3A",
+            "PseKRAAC_type_3B",
+            "PseKRAAC_type_4",
+            "PseKRAAC_type_5",
+            "PseKRAAC_type_6A",
+            "PseKRAAC_type_6B",
+            "PseKRAAC_type_6C",
+            "PseKRAAC_type_7",
+            "PseKRAAC_type_8",
+            "PseKRAAC_type_10",
+            "PseKRAAC_type_11",
+            "PseKRAAC_type_12",
+            "PseKRAAC_type_13",
+            "PseKRAAC_type_14",
+            "PseKRAAC_type_15",
+            "PseKRAAC_type_16",
+            "QSOrder",
+            "SOCNumber",
+            "TPC_type_1",
+            "TPC_type_2",
+        ]
 
-    def get_feature_vectors(self, seqs):
+    @typechecked
+    def get_feature_vector_names(self, feature_creator: str) -> list:
+        if feature_creator == "ifeatpro":
+            return self.algs["ifeatpro"]
+        elif feature_creator == "iFeatureOmega":
+            return self.algs["iFeatureOmega"]
+        else:
+            sys.exit(f"Unknown feature creator: {self.feature_creator} ")
+
+    @typechecked
+    def get_feature_vectors(self, seqs: dict) -> tuple:
+        if self.alg is None:
+            sys.exit("Algorithm name is required")
         if self.feature_creator == "ifeatpro":
             return self.get_ifeatpro_features(seqs)
         elif self.feature_creator == "iFeatureOmega":
@@ -49,39 +139,14 @@ class FeatureVector:
 
         Parameters
         ----------
-        alg: str
-            Algorithm name, e.g. 'ctriad'
         seqs: dict
             Key is protein id, value is protein sequence
 
         Returns
         -------
-        List of lists of floats
+        List of lists of floats and list of protein ids
         """
-        algs = [
-            "aac",
-            "apaac",
-            "cksaagp",
-            "cksaap",
-            "ctdc",
-            "ctdd",
-            "ctdt",
-            "ctriad",
-            "dde",
-            "dpc",
-            "gaac",
-            "gdpc",
-            "geary",
-            "gtpc",
-            "ksctriad",
-            "moran",
-            "nmbroto",
-            "paac",
-            "qsorder",
-            "socnumber",
-            "tpc",
-        ]
-        if self.alg not in algs:
+        if self.alg not in self.algs["ifeatpro"]:
             sys.exit(f"Algorithm '{self.alg}' is not part of ifeatpro")
 
         ids = list()
@@ -99,6 +164,7 @@ class FeatureVector:
             # short for a given algorithm
             try:
                 get_feature(tmpfasta.name, self.alg, tmpdir.name)
+                # ifeatpro getfeature() creates a CSV file named by algorithm
                 with open(os.path.join(tmpdir.name, self.alg + ".csv")) as f:
                     for line in f.readlines():
                         arr = line.rstrip().split(",")
@@ -168,8 +234,6 @@ class FeatureVector:
 
         Parameters
         ----------
-        alg: str
-            Algorithm name, e.g. 'ACC'
         seqs: dict
             Key is protein id, value is protein sequence
 
@@ -177,58 +241,7 @@ class FeatureVector:
         -------
         List of lists of floats and a list of protein ids
         """
-        algs = [
-            "AAC",
-            "AC",
-            "ACC",
-            "APAAC",
-            "ASDC",
-            "CC",
-            "CKSAAGP_type_1",
-            "CKSAAGP_type_2",
-            "CKSAAP_type_1",
-            "CKSAAP_type_2",
-            "CTDC",
-            "CTDD",
-            "CTDT",
-            "CTriad",
-            "DDE",
-            "DistancePair",
-            "DPC_type_1",
-            "DPC_type_2",
-            "GAAC",
-            "GDPC_type_1",
-            "GDPC_type_2",
-            "Geary",
-            "GTPC_type_1",
-            "KSCTriad",
-            "Moran",
-            "NMBroto",
-            "PAAC",
-            "PseKRAAC_type_1",
-            "PseKRAAC_type_2",
-            "PseKRAAC_type_3A",
-            "PseKRAAC_type_3B",
-            "PseKRAAC_type_4",
-            "PseKRAAC_type_5",
-            "PseKRAAC_type_6A",
-            "PseKRAAC_type_6B",
-            "PseKRAAC_type_6C",
-            "PseKRAAC_type_7",
-            "PseKRAAC_type_8",
-            "PseKRAAC_type_10",
-            "PseKRAAC_type_11",
-            "PseKRAAC_type_12",
-            "PseKRAAC_type_13",
-            "PseKRAAC_type_14",
-            "PseKRAAC_type_15",
-            "PseKRAAC_type_16",
-            "QSOrder",
-            "SOCNumber",
-            "TPC_type_1",
-            "TPC_type_2",
-        ]
-        if self.alg not in algs:
+        if self.alg not in self.algs["iFeatureOmega"]:
             sys.exit(
                 f"Algorithm '{self.alg}' is not use-able part of iFeatureOmega"
             )

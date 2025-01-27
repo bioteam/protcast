@@ -51,7 +51,9 @@ algorithm = re.search(
     r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
 )[1]
 go_encoder = GOEncoder.load(args.goencoder_file)
-fv_factory = FeatureVector(algorithm, args.feature_creator)
+fv_factory = FeatureVector(
+    algorithm=algorithm, feature_creator=args.feature_creator
+)
 
 # Collect data for F1 score calculation
 true = list()

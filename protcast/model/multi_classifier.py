@@ -132,7 +132,9 @@ class MultiClassifier:
         protein ids as a list of lists (per GO id), and GO ids as a
         list
         """
-        fv = FeatureVector(self.algorithm, self.feature_creator)
+        fv = FeatureVector(
+            algorithm=self.algorithm, feature_creator=self.feature_creator
+        )
         for go_id in self.proteins.keys():
             features, pids = fv.get_feature_vectors(self.proteins[go_id])
             self.features.append(features)
