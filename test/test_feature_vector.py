@@ -7,8 +7,21 @@ sys.path.insert(
 
 from protcast.model.feature_vector import FeatureVector  # noqa: E402
 
-fv = FeatureVector()
+seq = {
+    "A12345": "LVTIKIGGQLKEALLDTGADDTVLEDMHLPGKWKPKMIGGIGGFIKVRQYDQILVEICGH"
+    + "KAIGTVLVGPTPVNIIGRNLLTQIGCTLNFEMEKEGKISKIGPENPYNTPIFAIKKKDST"
+    + "KWRKLVDFRELNKRTQDFWEVQLGIPHPAGLKKKKSVTVLDVGDAYFSVPLDEDFRKYTA"
+    + "FTIPSTNNETPGIRYQYNVLPQGWKGSPAIFQSSMTKILEPFRKQNPDIVIYQYMDDLYV"
+    + "GSDLEIGQHRIKVEELRQHLLRWGLTTPDKKHQKEPPFLWMG"
+}
+
+fv = FeatureVector(verbose=True, feature_creator="ifeatpro")
 algs = fv.get_feature_vector_names("ifeatpro")
 assert len(algs) == 21
+for alg in algs:
+    fv.get_feature_vectors(seq, algorithm=alg)
+fv = FeatureVector(verbose=True, feature_creator="iFeatureOmega")
 algs = fv.get_feature_vector_names("iFeatureOmega")
 assert len(algs) == 49
+for alg in algs:
+    fv.get_feature_vectors(seq, algorithm=alg)

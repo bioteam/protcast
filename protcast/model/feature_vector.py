@@ -91,16 +91,24 @@ class FeatureVector:
         ]
 
     @typechecked
-    def get_feature_vector_names(self, feature_creator: str) -> list:
-        if feature_creator == "ifeatpro":
+    def get_feature_vector_names(self, feature_creator: str = None) -> list:
+        if feature_creator:
+            self.feature_creator = feature_creator
+        if self.feature_creator == "ifeatpro":
             return self.algs["ifeatpro"]
-        elif feature_creator == "iFeatureOmega":
+        elif self.feature_creator == "iFeatureOmega":
             return self.algs["iFeatureOmega"]
         else:
             sys.exit(f"Unknown feature creator: {self.feature_creator} ")
 
     @typechecked
-    def get_feature_vectors(self, seqs: dict) -> tuple:
+    def get_feature_vectors(
+        self,
+        seqs: dict,
+        algorithm: str = None,
+    ) -> tuple:
+        if algorithm:
+            self.alg = algorithm
         if self.alg is None:
             sys.exit("Algorithm name is required")
         if self.feature_creator == "ifeatpro":
@@ -174,6 +182,10 @@ class FeatureVector:
                         ids.append(arr[0])
             except Exception as e:
                 print(f"Error running {self.alg} on {pid} sequence: {e}")
+
+        if self.verbose:
+            lens = set([len(vec) for vec in features])
+            print(f"{self.alg} feature vector length: {lens}")
 
         return features, ids
 
@@ -272,6 +284,6 @@ class FeatureVector:
                 print(f"Error running {self.alg} on {pid} sequence: {e}")
 
         if self.verbose:
-            lens = [len(vec) for vec in features]
-            print(f"{self.alg} feature vector length: {set(lens)}")
+            lens = set([len(vec) for vec in features])
+            print(f"{self.alg} feature vector length: {lens}")
         return features, pids
