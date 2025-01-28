@@ -91,7 +91,7 @@ class FeatureVector:
         ]
 
     @typechecked
-    def get_feature_vector_names(self, feature_creator: str = None) -> list:
+    def get_feature_vector_names(self, feature_creator=None) -> list:
         if feature_creator:
             self.feature_creator = feature_creator
         if self.feature_creator == "ifeatpro":
@@ -105,7 +105,7 @@ class FeatureVector:
     def get_feature_vectors(
         self,
         seqs: dict,
-        algorithm: str = None,
+        algorithm=None,
     ) -> tuple:
         if algorithm:
             self.alg = algorithm

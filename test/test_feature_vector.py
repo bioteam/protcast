@@ -16,12 +16,12 @@ seq = {
 }
 
 fv = FeatureVector(verbose=True, feature_creator="ifeatpro")
-algs = fv.get_feature_vector_names("ifeatpro")
+algs = fv.get_feature_vector_names()
 assert len(algs) == 21
 for alg in algs:
     fv.get_feature_vectors(seq, algorithm=alg)
 fv = FeatureVector(verbose=True, feature_creator="iFeatureOmega")
-algs = fv.get_feature_vector_names("iFeatureOmega")
+algs = fv.get_feature_vector_names()
 assert len(algs) == 49
 for alg in algs:
     fv.get_feature_vectors(seq, algorithm=alg)
