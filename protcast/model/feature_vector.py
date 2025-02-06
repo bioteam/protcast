@@ -279,7 +279,7 @@ class FeatureVector:
                     pids.append(pid)
                     features.append(vals.tolist())
                     if self.verbose:
-                        print(f"Feature vector: {self.alg} {pid} {vals}")    
+                        print(f"Feature vector: {self.alg} {pid} {vals}")
             except Exception as e:
                 print(f"Error running {self.alg} on {pid} sequence: {e}")
 
