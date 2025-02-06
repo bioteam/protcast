@@ -133,7 +133,9 @@ class MultiClassifier:
         list
         """
         fv = FeatureVector(
-            algorithm=self.algorithm, feature_creator=self.feature_creator
+            algorithm=self.algorithm,
+            feature_creator=self.feature_creator,
+            verbose=self.verbose,
         )
         for go_id in self.proteins.keys():
             features, pids = fv.get_feature_vectors(self.proteins[go_id])
