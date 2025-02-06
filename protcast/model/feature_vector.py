@@ -8,9 +8,7 @@ from Bio.SeqIO import SeqRecord
 
 
 class FeatureVector:
-    def __init__(
-        self, algorithm: str = None, feature_creator: str = None, verbose=False
-    ):
+    def __init__(self, algorithm=None, feature_creator=None, verbose=False):
         self.alg = algorithm
         self.feature_creator = feature_creator
         self.verbose = verbose
