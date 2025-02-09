@@ -23,8 +23,6 @@ dependencies = [
     "scikit-learn",
     "tqdm",
     "biopython",
-    "ifeatpro",
-    "iFeatureOmegaCLI",
     "goatools",
     "pandas",
     "grpcio",
@@ -34,6 +32,7 @@ dependencies = [
     "py-spy",
     "virtualenv",
     "urllib3==1.26.5",
+    "protein-feature-vectors",
 ]
 
 [tool.setuptools]

@@ -10,7 +10,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from tensorflow.keras.callbacks import TensorBoard  # type: ignore
 from sklearn.model_selection import train_test_split
-from ProteinFeatureVectors import Protein
+from protein_feature_vectors import Calculator
 
 # from protcast.model.stats.utils import calculate_sensitivity_specificity
 # from protcast.model.stats.utils import calculate_f1_score
@@ -54,7 +54,6 @@ class MultiClassifier:
     def __init__(
         self,
         algorithm: str,
-        feature_creator: str,
         verbose: bool,
         proteins: dict,
         optimizer: str = "adam",
@@ -74,8 +73,6 @@ class MultiClassifier:
         ----------
         algorithm : str
             Name of algorithm creating the feature vector
-        feature_creator: str
-            Package that creates the feature vectors
         verbose: bool
             Verbosity
         proteins: dict(dict)
@@ -98,7 +95,6 @@ class MultiClassifier:
             Probability threshold for classification, by default 80.0
         """
         self.algorithm = algorithm
-        self.feature_creator = feature_creator
         self.verbose = verbose
         self.proteins = proteins
         self.optimizer = optimizer
@@ -131,7 +127,7 @@ class MultiClassifier:
         protein ids as a list of lists (per GO id), and GO ids as a
         list
         """
-        fv = Protein()
+        fv = Calculator()
         for go_id in self.proteins.keys():
             fv.get_feature_vectors(self.algorithm, pdict=self.proteins[go_id])
             # encodings is a pandas DataFrame

@@ -2,8 +2,9 @@ import os
 import sys
 import tempfile
 from typeguard import typechecked
-import iFeatureOmegaCLI
-from ifeatpro.features import get_feature
+
+# import iFeatureOmegaCLI
+# from ifeatpro.features import get_feature
 from Bio.SeqIO import SeqRecord
 
 

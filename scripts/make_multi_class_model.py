@@ -33,19 +33,12 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--go_ids_file", help="Path to GO ids file")
     parser.add_argument("-s", "--seq_file", help="Path to Fasta file")
     parser.add_argument(
-        "-a", "--algorithm", default="qsorder", help="Feature vector algorithm"
+        "-a", "--algorithm", default="CTriad", help="Feature vector algorithm"
     )
     parser.add_argument(
         "-p",
         "--protcast_dataset",
         help="Path to ProtCast dataset",
-    )
-    parser.add_argument(
-        "-f",
-        "--feature_creator",
-        default="ifeatpro",
-        choices=["iFeatureOmega", "ifeatpro"],
-        help="Feature vector creator",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
     args = parser.parse_args()
@@ -87,7 +80,6 @@ if __name__ == "__main__":
 
     classifier = MultiClassifier(
         args.algorithm,
-        args.feature_creator,
         args.verbose,
         proteins,
     )
