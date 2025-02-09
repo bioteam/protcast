@@ -134,11 +134,13 @@ class MultiClassifier:
         fv = Protein()
         for go_id in self.proteins.keys():
             fv.get_feature_vectors(self.algorithm, pdict=self.proteins[go_id])
+            # encodings is a pandas DataFrame
             pids = [x[0] for x in fv.encodings.iterrows()]
             self.pids.append(pids)
             vals = [x[1].tolist() for x in fv.encodings.iterrows()]
             self.features.append(vals)
             self.go_ids.append(go_id)
+        # Arbitrary choice, get its length
         self.vector_length = len(self.features[0][0])
 
     @typechecked
