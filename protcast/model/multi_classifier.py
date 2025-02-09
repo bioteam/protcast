@@ -10,8 +10,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from tensorflow.keras.callbacks import TensorBoard  # type: ignore
 from sklearn.model_selection import train_test_split
-
-from protcast.model.feature_vector import FeatureVector
+from ProteinFeatureVectors import Protein
 
 # from protcast.model.stats.utils import calculate_sensitivity_specificity
 # from protcast.model.stats.utils import calculate_f1_score
@@ -132,15 +131,13 @@ class MultiClassifier:
         protein ids as a list of lists (per GO id), and GO ids as a
         list
         """
-        fv = FeatureVector(
-            algorithm=self.algorithm,
-            feature_creator=self.feature_creator,
-            verbose=self.verbose,
-        )
+        fv = Protein()
         for go_id in self.proteins.keys():
-            features, pids = fv.get_feature_vectors(self.proteins[go_id])
-            self.features.append(features)
+            fv.get_feature_vectors(self.algorithm, pdict=self.proteins[go_id])
+            pids = [x[0] for x in fv.encodings.iterrows()]
             self.pids.append(pids)
+            vals = [x[1].tolist() for x in fv.encodings.iterrows()]
+            self.features.append(vals)
             self.go_ids.append(go_id)
         self.vector_length = len(self.features[0][0])
 
