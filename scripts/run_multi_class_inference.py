@@ -44,7 +44,7 @@ algorithm = re.search(
     r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
 )[1]
 go_encoder = GOEncoder.load(args.goencoder_file)
-fv = Calculator()
+fv_factory = Calculator()
 
 # Collect data for F1 score calculation
 true = list()
@@ -53,14 +53,11 @@ names = dict()
 
 print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
-    fv = fv_factory.get_feature_vectors({seq.id: str(seq.seq)})
-    # A feature vector may not be created if the sequence is too short
-    if len(fv[0]) == 0:
-        continue
+    fv_factory.get_feature_vectors(algorithm, pdict={seq.id: str(seq.seq)})
     # The feature vector is a 1D array, but the model expects a 2D array where the first dimension
     # is the batch size (None means it can be any number), and the second dimension is the length
     # of the feature vector. -1 in the reshape() tells numpy to infer the second dimension.
-    X_test = np.array(fv[0][0]).reshape(1, -1)
+    X_test = np.array(fv_factory.encodings[0][0]).reshape(1, -1)
     y_pred_ps = model.predict(X_test)
     pred_tup = go_encoder.decode_probabilities(y_pred_ps, top_k=1)[0][0]
     # Get actual GO and name from the sequence description
