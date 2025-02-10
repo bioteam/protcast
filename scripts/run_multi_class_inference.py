@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.model.multi_classifier import GOEncoder  # noqa: E402
-from protcast.model.feature_vector import FeatureVector
+from protein_feature_vectors import Calculator
 
 """"run_multi_class_inference.py
 Provide the name of a model file and the name of sequence file. 
@@ -34,13 +34,6 @@ parser.add_argument(
 parser.add_argument(
     "-s", "--seq_file", required=True, help="Path to Fasta file"
 )
-parser.add_argument(
-    "-f",
-    "--feature_creator",
-    default="ifeatpro",
-    choices=["ifeatpro", "iFeatureOmega"],
-    help="Feature creator package",
-)
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
@@ -51,9 +44,7 @@ algorithm = re.search(
     r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
 )[1]
 go_encoder = GOEncoder.load(args.goencoder_file)
-fv_factory = FeatureVector(
-    algorithm=algorithm, feature_creator=args.feature_creator
-)
+fv = Calculator()
 
 # Collect data for F1 score calculation
 true = list()
