@@ -7,21 +7,12 @@ This code uses Keras and its FeatureSpace package for structured (tabular) data 
 
 ## Installation
 
-### iFeatureOmega-CLI Package
+Install package to create feature vectors from protein sequence.
 
-This code uses a fork of the iFeatureOmega-CLI package to create feature vectors from protein sequence.
-
-1.Clone the `bosborne` fork of iFeatureOmega-CLI:
-
-```shell
-git clone https://github.com/bosborne/iFeatureOmega-CLI
-```
-
-2.Install the library from the local directory:
-
-```shell
-cd iFeatureOmega-CLI
-pip3 install .
+```sh  
+  git clone git@github.com:bosborne/protein-feature-vectors.git
+  cd protein-feature-vectors
+  pip3 install .
 ```
 
 ### Install ProtCast

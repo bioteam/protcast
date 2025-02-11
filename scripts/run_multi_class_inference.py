@@ -43,8 +43,8 @@ model = MultiClassifier.load_model(Path(args.model_file))
 algorithm = re.search(
     r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
 )[1]
-go_encoder = GOEncoder.load(args.goencoder_file)
-fv_factory = Calculator()
+go_decoder = GOEncoder.load(args.goencoder_file)
+fv_calculator = Calculator()
 
 # Collect data for F1 score calculation
 true = list()
@@ -55,15 +55,27 @@ print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
     seqstr = str(seq.seq).upper()
     # Skip sequences with invalid chars
-    if len(fv_factory.check_for_nonstandard(seqstr)) > 0:
+    if len(fv_calculator.check_for_nonstandard(seqstr)) > 0:
         continue
-    fv_factory.get_feature_vectors(algorithm, pdict={seq.id: seqstr})
-    # The feature vector is a 1D array, but the model expects a 2D array where
+    fv_calculator.get_feature_vectors(algorithm, pdict={seq.id: seqstr})
+    """
+    The feature vector is a 1D array, but the model expects a 2D array where
     # dimension 1 is the number of samples and dimension 2 is the length of
-    # the feature vector. -1 in reshape() tells numpy to infer dimension 2.
-    X_test = np.array(fv_factory.encodings.values[0]).reshape(1, -1)
+    the feature vector. -1 in reshape() tells numpy to infer dimension 2.
+    """
+    X_test = np.array(fv_calculator.encodings.values[0]).reshape(1, -1)
+    """
+    Probability for each class:
+    array([[2.0167906e-08, 1.0642472e-07, 2.1713373e-07, 5.4475471e-08,
+        5.5837597e-07, 4.9242377e-08, 1.5946955e-07, 1.2771345e-05,
+        7.0346204e-08, 9.9994290e-01, 6.5556578e-09, 2.2713012e-07,
+        1.6319204e-06, 8.0122229e-09, 2.5287613e-06, 8.6221941e-10,
+        1.3849089e-07, 1.1159210e-08, 3.9416241e-07, 1.4942275e-08,
+        2.5876445e-05, 5.4921088e-07, 7.5157303e-08, 7.4607419e-06,
+        4.1306234e-06]], dtype=float32)
+    """
     y_pred = model.predict(X_test)
-    pred_tup = go_encoder.decode_probabilities(y_pred, top_k=1)[0][0]
+    pred_tup = go_decoder.decode_probabilities(y_pred, top_k=1)[0][0]
     # Get actual GO and name from the sequence description
     actual_go_id = re.search(r"(GO:\d+)", seq.description)[1]
     actual_go_name = re.search(r"GO:\d+ (.+) MF", seq.description)[1].strip()
@@ -71,8 +83,8 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
     print(
         f"{seq.id}\t{actual_go_id}\t{pred_tup[0]}\t{pred_tup[1]}\t{actual_go_name}"
     )
-    true.append(go_encoder.encode(actual_go_id))
-    pred.append(go_encoder.encode(pred_tup[0]))
+    true.append(go_decoder.encode(actual_go_id))
+    pred.append(go_decoder.encode(pred_tup[0]))
 
 y_true = np.array(true)
 y_pred = np.array(pred)
@@ -83,7 +95,7 @@ print(f"Weighted F1 score\t{f1_weighted:.4f}")
 print("F1 scores per class")
 f1_per_class = f1_score(y_true, y_pred, average=None)
 for i, f1 in enumerate(f1_per_class):
-    go_id = go_encoder.decode(i)
+    go_id = go_decoder.decode(i)
     print(f"{go_id}\t{names[go_id]}\t{f1:.4f}")
 
 end = time.time()
