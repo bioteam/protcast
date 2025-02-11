@@ -54,15 +54,16 @@ names = dict()
 print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
     seqstr = str(seq.seq).upper()
+    # Skip sequences with invalid chars
     if len(fv_factory.check_for_nonstandard(seqstr)) > 0:
         continue
     fv_factory.get_feature_vectors(algorithm, pdict={seq.id: seqstr})
-    # The feature vector is a 1D array, but the model expects a 2D array where the first dimension
-    # is the batch size (None means it can be any number), and the second dimension is the length
-    # of the feature vector. -1 in the reshape() tells numpy to infer the second dimension.
+    # The feature vector is a 1D array, but the model expects a 2D array where
+    # dimension 1 is the number of samples and dimension 2 is the length of
+    # the feature vector. -1 in reshape() tells numpy to infer dimension 2.
     X_test = np.array(fv_factory.encodings.values[0]).reshape(1, -1)
-    y_pred_ps = model.predict(X_test)
-    pred_tup = go_encoder.decode_probabilities(y_pred_ps, top_k=1)[0][0]
+    y_pred = model.predict(X_test)
+    pred_tup = go_encoder.decode_probabilities(y_pred, top_k=1)[0][0]
     # Get actual GO and name from the sequence description
     actual_go_id = re.search(r"(GO:\d+)", seq.description)[1]
     actual_go_name = re.search(r"GO:\d+ (.+) MF", seq.description)[1].strip()
