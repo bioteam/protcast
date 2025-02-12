@@ -314,19 +314,17 @@ class GOEncoder:
     loaded_encoder = GOEncoder.load('go_encoder.pkl')
 
     # Decode using the loaded encoder
-    decoded = loaded_encoder.decode(encoded)
-    print("Decoded (using loaded encoder):")
-    print(decoded)
+    decoded_goid = loaded_encoder.decode(encoded)
 
-    # Decode probabilities
-    probabilities = np.array([[0.1, 0.7, 0.2], [0.3, 0.3, 0.4]])
+    # Decode GO ids based on probabilities
+    probabilities = np.array([[0.1, 0.7, 0.2], [0.3, 0.3, 0.4]], [0.2, 0.2, 0.4]])
     top_go_ids = loaded_encoder.decode_probabilities(probabilities, top_k=2)
-    print("Top 2 GO IDs with probabilities (using loaded encoder):")
+    print(f"Top 2 GO IDs with probabilities: {top_go_ids}")
     """
 
     def __init__(self):
-        self.go_to_int = dict()
-        self.int_to_go = dict()
+        self.go_to_int = None
+        self.int_to_go = None
         self.num_classes = 0
 
     def fit(self, go_ids):
@@ -341,13 +339,13 @@ class GOEncoder:
     def encode(self, go_id):
         """Encode a GO ID to a category number"""
         if not self.go_to_int:
-            raise ValueError("Encoder has not been fit to any GO IDs.")
+            raise ValueError("GOEncoder has not been fit to any GO IDs.")
         return self.go_to_int[go_id]
 
     def decode(self, categorical):
         """Decode categories back to GO IDs."""
         if not self.int_to_go:
-            raise ValueError("Encoder has not been fit to any GO IDs.")
+            raise ValueError("GOEncoder has not been fit to any GO IDs.")
         # Handle single integer
         if isinstance(categorical, (int, np.integer)):
             return self.int_to_go.get(categorical, None)
@@ -358,7 +356,9 @@ class GOEncoder:
     def decode_probabilities(self, probabilities, top_k=1):
         """Decode probability distributions to top k GO IDs with their probabilities."""
         if not self.int_to_go:
-            raise ValueError("Encoder has not been fit to any GO IDs.")
+            raise ValueError("GOEncoder has not been fit to any GO IDs.")
+        # 2D array slicing: Select all rows with ':' then
+        # select the last top_k elements of each row
         top_indices = np.argsort(probabilities, axis=1)[:, -top_k:]
         result = []
         for i, indices in enumerate(top_indices):

@@ -65,7 +65,7 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
     """
     X_test = np.array(fv_calculator.encodings.values[0]).reshape(1, -1)
     """
-    Probability for each class:
+    y_pred - probability for each class for 1 sample:
     array([[2.0167906e-08, 1.0642472e-07, 2.1713373e-07, 5.4475471e-08,
         5.5837597e-07, 4.9242377e-08, 1.5946955e-07, 1.2771345e-05,
         7.0346204e-08, 9.9994290e-01, 6.5556578e-09, 2.2713012e-07,
@@ -88,7 +88,7 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
 
 y_true = np.array(true)
 y_pred = np.array(pred)
-# Calculate F1 score (weighted average, there is also "micro" and "macro")
+# Calculate F1 score ("weighted average", there is also "micro" and "macro")
 f1_weighted = f1_score(y_true, y_pred, average="weighted")
 # Calculate F1 score for each class
 print(f"Weighted F1 score\t{f1_weighted:.4f}")
