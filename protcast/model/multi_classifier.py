@@ -305,16 +305,16 @@ class GOEncoder:
     go_encoder.fit(go_ids)
 
     # Encode GO IDs
-    encoded = go_encoder.encode('GO:1224')
+    num = go_encoder.encode('GO:1224')
 
     # Save the encoder
     go_encoder.save()
 
     # Load the encoder
-    loaded_encoder = GOEncoder.load('go_encoder.pkl')
+    loaded_encoder = GOEncoder.load('go_encoder.pickle')
 
     # Decode using the loaded encoder
-    decoded_goid = loaded_encoder.decode(encoded)
+    go_id = loaded_encoder.decode(num)
 
     # Decode GO ids based on probabilities
     probabilities = np.array([[0.1, 0.7, 0.2], [0.3, 0.3, 0.4]], [0.2, 0.2, 0.4]])
