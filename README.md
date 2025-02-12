@@ -3,19 +3,21 @@
 Extract protein sequences and associated Gene Ontology (GO) annotations from UniProt, TrEMBL and
 Gene Ontology Annotation files and use feature vector representations of the protein sequences to
 predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins.
-This code uses Keras and its FeatureSpace package for structured (tabular) data classification.
+This code uses TensorFlow for structured (tabular) data classification.
 
 ## Installation
 
-Install package to create feature vectors from protein sequence.
+### Install *protein-feature-vectors*
 
-```sh  
-  git clone git@github.com:bosborne/protein-feature-vectors.git
-  cd protein-feature-vectors
-  pip3 install .
+[protein-feature-vectors](https://github.com/bosborne/protein-feature-vectors) creates the feature vectors.
+
+```shell
+git clone git@github.com:bosborne/protein-feature-vectors.git
+cd protein-feature-vectors
+pip3 install .
 ```
 
-### Install ProtCast
+### Install *ProtCast*
 
 ```shell
 git clone https://github.com/bioteam/ProtCast
@@ -250,17 +252,17 @@ Download the 4 input files necessary to build a ProtCastDataset:
 
 2.Add a tensorboard callback to the model fitting step to profile your TensorFlow model
 
-```py
-          # Profiler callback in binary_classifier.py
-          log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-          tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+```python
+# Profiler callback in binary_classifier.py
+log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
           
-          self.training_model.fit(
+self.training_model.fit(
               train_tfds,
               epochs=self.epochs,
               validation_data=val_tfds,
               callbacks=[tensorboard_callback]
-          )
+)
 ```
 
 3.Load the relevant modules
@@ -273,7 +275,7 @@ module load all/CUDA
 4.Run the script that fits your model.
    eg. to profile the model in binary_classifier.py you'd run
 
-```py
+```shell
 python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py
 ```
 
