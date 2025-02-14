@@ -12,9 +12,6 @@ from tensorflow.keras.callbacks import TensorBoard  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
 
-# from protcast.model.stats.utils import calculate_sensitivity_specificity
-# from protcast.model.stats.utils import calculate_f1_score
-
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 
@@ -127,8 +124,10 @@ class MultiClassifier:
         protein ids as a list of lists (per GO id), and GO ids as a
         list
         """
-        fv = Calculator()
+        fv = Calculator(verbose=self.verbose)
         for go_id in self.proteins.keys():
+            if self.verbose:
+                print(f"GO id: {go_id}")
             fv.get_feature_vectors(self.algorithm, pdict=self.proteins[go_id])
             # encodings is a pandas DataFrame
             pids = [x[0] for x in fv.encodings.iterrows()]
@@ -155,7 +154,7 @@ class MultiClassifier:
             end_idx = start_idx + len(go_set)
             X[start_idx:end_idx] = go_set
             y[start_idx:end_idx] = go_encoder.encode(go_id)
-            # start_idx = end_idx
+            start_idx = end_idx
 
         self.X = X
         # Convert integers into a binary matrix
