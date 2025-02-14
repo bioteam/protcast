@@ -155,7 +155,7 @@ class MultiClassifier:
             end_idx = start_idx + len(go_set)
             X[start_idx:end_idx] = go_set
             y[start_idx:end_idx] = go_encoder.encode(go_id)
-            start_idx = end_idx
+            # start_idx = end_idx
 
         self.X = X
         # Convert integers into a binary matrix
