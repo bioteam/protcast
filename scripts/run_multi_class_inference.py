@@ -44,7 +44,7 @@ algorithm = re.search(
     r"\d+-\d+-\d+-\d+-\d+-\d+_(.+)\.keras$", args.model_file
 )[1]
 go_decoder = GOEncoder.load(args.goencoder_file)
-fv_calculator = Calculator()
+fv_calculator = Calculator(verbose=True)
 
 # Collect data for F1 score calculation
 true = list()
@@ -54,10 +54,10 @@ names = dict()
 print("Protein\tActual GO\tPredicted GO\tProbability\tName")
 for seq in SeqIO.parse(args.seq_file, "fasta"):
     seqstr = str(seq.seq).upper()
-    # Skip sequences with invalid chars
-    if len(fv_calculator.check_for_nonstandard(seqstr)) > 0:
-        continue
     fv_calculator.get_feature_vectors(algorithm, pdict={seq.id: seqstr})
+    # No result: sequence is too short or has non-standard aa's
+    if len(fv_calculator.encodings) == 0:
+        continue
     """
     The feature vector is a 1D array, but the model expects a 2D array where
     # dimension 1 is the number of samples and dimension 2 is the length of
