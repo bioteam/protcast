@@ -3,7 +3,6 @@ import sys
 import tensorflow as tf
 import keras
 import pandas as pd
-from pathlib import Path
 from keras.utils import FeatureSpace
 from Bio import SeqIO
 
