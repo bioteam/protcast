@@ -7,7 +7,7 @@ import time
 from pathlib import Path
 from typeguard import typechecked
 from keras.utils import FeatureSpace
-from protcast.model.feature_vector import FeatureVector
+from protein_feature_vectors import Calculator
 from protcast.model.stats.utils import calculate_sensitivity_specificity
 from protcast.model.stats.utils import calculate_f1_score
 
@@ -71,8 +71,6 @@ class BinaryClassifier:
             _description_
         algorithm : str
             _description_
-        feature_creator: str
-            Software package that creates the features
         name : str
             Name or id of sequence family
         verbose : Boolean
@@ -103,7 +101,6 @@ class BinaryClassifier:
         self.target_seqs = target_seqs
         self.non_target_seqs = non_target_seqs
         self.algorithm = algorithm
-        self.feature_creator = feature_creator
         self.name = name
         self.verbose = verbose
         self.save = save
@@ -129,17 +126,15 @@ class BinaryClassifier:
 
     @typechecked
     def get_feature_vectors(self) -> None:
-        """get_feature_vector
+        """get_feature_vectors
         Get feature vectors for all proteins as a list of lists
         """
-        fv = FeatureVector(
-            algorithm=self.algorithm, feature_creator=self.feature_creator
-        )
+        fv = Calculator(verbose=self.verbose)
         self.target_features, target_ids = fv.get_feature_vectors(
-            self.target_seqs
+            self.algorithm, pdict=self.target_seqs
         )
         self.non_target_features, non_target_ids = fv.get_feature_vectors(
-            self.target_seqs
+            self.algorithm, pdict=self.target_seqs
         )
 
         self.all_ids = target_ids + non_target_ids
