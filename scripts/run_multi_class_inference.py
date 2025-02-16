@@ -60,12 +60,12 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
         continue
     """
     The feature vector is a 1D array, but the model expects a 2D array where
-    # dimension 1 is the number of samples and dimension 2 is the length of
+    dimension 1 is the number of samples and dimension 2 is the length of
     the feature vector. -1 in reshape() tells numpy to infer dimension 2.
     """
     X_test = np.array(fv_calculator.encodings.values[0]).reshape(1, -1)
     """
-    y_pred - probability for each class for 1 sample:
+    y_pred - probability for each class for each sample:
     array([[2.0167906e-08, 1.0642472e-07, 2.1713373e-07, 5.4475471e-08,
         5.5837597e-07, 4.9242377e-08, 1.5946955e-07, 1.2771345e-05,
         7.0346204e-08, 9.9994290e-01, 6.5556578e-09, 2.2713012e-07,

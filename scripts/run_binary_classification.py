@@ -18,7 +18,7 @@ if __name__ == "__main__":
     python3 scripts/run_binary_classification.py \
     -t test/data/uniprotkb_gpcrs.fasta \
     -nt test/data/uniprotkb_non-gpcrs.fasta \
-    -n gpcr -a qsorder -f ifeatpro -s
+    -n gpcr -a QSOrder -s
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -31,14 +31,7 @@ if __name__ == "__main__":
         help="Path to non-target sequences",
     )
     parser.add_argument(
-        "-a", "--algorithm", default="ctriad", help="Feature vector algorithm"
-    )
-    parser.add_argument(
-        "-f",
-        "--feature_creator",
-        default="iFeatureOmega",
-        choices=["iFeatureOmega", "ifeatpro"],
-        help="Feature vector creator",
+        "-a", "--algorithm", default="CTriad", help="Feature vector algorithm"
     )
     parser.add_argument("-n", "--name", required=True, help="Name")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
@@ -52,7 +45,6 @@ if __name__ == "__main__":
         target_seqs,
         non_target_seqs,
         args.algorithm,
-        args.feature_creator,
         args.name,
         args.verbose,
         args.save,
