@@ -29,7 +29,7 @@ pip3 install .
 
 A ProtCastDataset combines protein sequences and GO annotations from multiple input files. A typical
 ProtCastDataset has ~0.5M proteins and ~3M GO annotations. The ProtCastDataset is used as input to
-FeatureSpace for processing and subsequent model-building by Keras.
+TensorFlow for processing and subsequent model-building by Keras.
 
 ### Data Sources
 

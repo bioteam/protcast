@@ -8,7 +8,7 @@ from Bio import SeqIO
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
-from protcast.model.feature_vector import get_ifeatpro_features  # noqa: E402
+from protein_feature_vectors import Calculator  # noqa: E402
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -43,9 +43,10 @@ non_gpcr_seqs = SeqIO.to_dict(
 )
 
 # Get feature vectors for all proteins as a list of lists
-gpcr_features, gpcr_ids = get_ifeatpro_features("ctriad", gpcr_seqs)
-non_gpcr_features, non_gpcr_ids = get_ifeatpro_features(
-    "ctriad", non_gpcr_seqs
+fv = Calculator()
+gpcr_features, gpcr_ids = fv.get_feature_vectors("CTRiad", gpcr_seqs)
+non_gpcr_features, non_gpcr_ids = fv.get_feature_vectors(
+    "CTRiad", non_gpcr_seqs
 )
 
 # Set up the size and type (float) in the FeatureSpace object and get the column names
