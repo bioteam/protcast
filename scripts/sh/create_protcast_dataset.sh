@@ -8,7 +8,7 @@
 #SBATCH -N 1
 #SBATCH -n 56
 
-DATE=2024-06-17
+DATE=2025-02-06
 OUTPUT_DIR=$(date +%m-%d-%Y -d now)
 GO_ROOT=https://release.geneontology.org
 UNIPROT_ROOT=https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete
@@ -56,7 +56,7 @@ python3 $HOME/git/ProtCast/scripts/create_protcast_dataset.py \
     -g GO/$DATE/filtered_goa_uniprot_all_noiea.gaf \
     -t UniProt/$DATE/uniprot_trembl.fasta \
     -s UniProt/$DATE/uniprot_sprot-dr-0.9.dat \
-    -O $OUTPUT_DIR
+    -O ProtCastDataset/$OUTPUT_DIR
 
 python3 $HOME/git/ProtCast/scripts/create_dataset_stats.py \
-    -i $OUTPUT_DIR/ProtCastDataset.bin
+    -i ProtCastDataset/$OUTPUT_DIR/ProtCastDataset.bin
