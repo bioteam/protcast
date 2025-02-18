@@ -133,14 +133,6 @@ This class integrates all the classes above. Its attributes include *proteins*,
 (*ontology_path*, *swissprot_path*, *trembl_path*, *gaf_path*), and *output_dir*,
 the location of the serialized ProtCastDataset and log files.
 
-### UML Component Diagrams
-
-The UML diagrams were generated using the online tool: <http://www.plantuml.com/>
-
-The following digram describes the sources:
-
-![Alt text](dataset_generation.png?raw=true)
-
 ## Repo Organization
 
 ├- protcast/ The package directory.
@@ -154,8 +146,6 @@ The following digram describes the sources:
 ### `protcast`
 
 #### `protcast/model`
-
-#### `protcast/model/stats`
 
 #### `protcast/preprocessing`
 
