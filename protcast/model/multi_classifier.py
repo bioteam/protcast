@@ -32,7 +32,7 @@ class MultiClassifier:
     run:
       Run the methdds that create the model and train it
     get_features_vectors:
-        Get feature vectors using ifeatpro or iFeatureOmega
+        Get feature vectors using protein_feature_vectors
     prepare_data:
         Encode the GO ids and make numpy data structures
     build_model:

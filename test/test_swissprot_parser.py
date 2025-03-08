@@ -2,7 +2,9 @@ import argparse
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+)
 
 from protcast.preprocessing.parse_swissprot import (  # noqa: E402
     parse_swissprot,

@@ -6,7 +6,9 @@ import pandas as pd
 from keras.utils import FeatureSpace
 from Bio import SeqIO
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+)
 
 from protein_feature_vectors import Calculator  # noqa: E402
 

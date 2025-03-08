@@ -2,7 +2,9 @@ import sys
 import argparse
 import os
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+)
 
 from protcast.preprocessing.parse_gaf import parse_gaf  # noqa: E402
 

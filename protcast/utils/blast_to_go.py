@@ -1,17 +1,17 @@
 import json
-import logging
 import requests
 from typeguard import typechecked
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 
+
 @typechecked
 class BlastToGo:
     """BlastToGo
     This class takes a protein sequence and performs a Blast search
-    using the NCBI Blast API, returning proteins with at least min_identity 
+    using the NCBI Blast API, returning proteins with at least min_identity
     percent similarity to the query. Those ids are used to query the UniProt
-    API to get records which contain GO term ids. Example: 
+    API to get records which contain GO term ids. Example:
 
     from blast_to_go import BlastToGo
     seq = "MADTFKEIDAQNAWQLVQERQAFLVDVRDIQRFAYSHPQAAFHLTNQSYGEFCQRCDFEDPIVV"
@@ -30,6 +30,8 @@ class BlastToGo:
         Minimum percent sequence identity for hits
     num_alignments: int
         Number of alignments to retrieve
+    verbose: bool
+        Verbosity
 
     Methods
     -------
@@ -50,7 +52,7 @@ class BlastToGo:
         e_value: float = 0.001,
         min_identity: float = 95.0,
         num_alignments: int = 100,
-        verbose: bool = False
+        verbose: bool = False,
     ) -> None:
         """__init__
 
@@ -72,7 +74,7 @@ class BlastToGo:
     def blast_to_go(self, seq: str) -> list[str]:
         """blast_to_go
         Wrapper method for Blast API and Uniprot API queries
-        
+
         Parameters
         ----------
         seq: str
@@ -100,7 +102,8 @@ class BlastToGo:
         List of protein ids
         """
         pids = list()
-        # Run BLAST search using NCBIWWW
+        if self.verbose:
+            print("Run BLAST search using NCBIWWW")
         blast_results = NCBIWWW.qblast(
             self.program,
             self.database,
@@ -109,37 +112,43 @@ class BlastToGo:
             alignments=self.num_alignments,
         )
         blast_record = NCBIXML.read(blast_results)
-
+        if self.verbose:
+            print("Parsing BLAST search results")
         for alignment in blast_record.alignments:
             for hsp in alignment.hsps:
                 percent_identity = float(hsp.identities / len(hsp.query) * 100)
                 # Skip 100% identity, could be the same protein
-                if percent_identity < 100 and percent_identity >= self.min_identity:
+                if (
+                    percent_identity < 100
+                    and percent_identity >= self.min_identity
+                ):
                     # ref|WP_021461111.1|
                     pid = alignment.hit_id.split("|")[1]
                     pids.append(pid)
                     if self.verbose:
-                        logging.debug(f"alignment.hit_id: {pid}")
+                        print(f"alignment.hit_id: {pid}")
         if len(pids) > 0:
             return pids
 
     @typechecked
     def get_go_from_uniprot(self, pids: list[str]) -> list[str]:
         """get_go_from_uniprot
-        Return all GO term ids for a single protein using the UniProt API. 
+        Return all GO term ids for a single protein using the UniProt API.
         The entire record as JSON, for example:
-        
+
         https://rest.uniprot.org/uniprotkb/search?query=WP_021461111
 
         Parameters
         ----------
         pids: list
             List of protein ids
-        
+
         Returns
         -------
         List of GO ids
         """
+        if self.verbose:
+            print("Querying UniProt API")
         for pid in pids:
             response = requests.get(self.uniprot_api, params={"query": pid})
             result = json.loads(response.text)["results"]
@@ -157,10 +166,10 @@ class BlastToGo:
                     if x["database"] == "GO"
                 ]
                 if self.verbose:
-                    logging.debug(
+                    print(
                         f"NCBI BLAST id: {pid} UniProt primary accession: {result[0]['primaryAccession']} GO terms: {go_ids}"
                     )
                 return go_ids
             else:
                 if self.verbose:
-                    logging.debug(f"No match in UniProt for NCBI Blast id {pid}")
+                    print(f"No match in UniProt for NCBI Blast id {pid}")

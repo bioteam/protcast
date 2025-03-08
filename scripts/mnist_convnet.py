@@ -10,9 +10,9 @@ Description: A simple convnet that achieves ~99% test accuracy on MNIST.
 ## Setup
 """
 
-import numpy as np
-from tensorflow import keras
-from tensorflow.keras import layers
+import numpy as np  # noqa: E402
+from tensorflow import keras  # noqa: E402
+from tensorflow.keras import layers  # type: ignore # noqa: E402
 
 """
 ## Prepare the data
