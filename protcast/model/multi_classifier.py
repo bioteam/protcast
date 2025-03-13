@@ -309,9 +309,8 @@ class MultiClassifier:
         self.model.save(f"{self.get_name()}.keras")
 
     def log_model(self) -> None:
-        # Change the working directory to the root of the project
-        print("Before changing directory:", os.getcwd())
-        print("Current working directory:", os.getcwd())
+        # print("Before changing directory:", os.getcwd())
+        # print("Current working directory:", os.getcwd())
         config_path = os.path.join(os.getcwd(), "mlflow_config.json")
 
         # Load the configuration file
