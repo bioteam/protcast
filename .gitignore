@@ -8,4 +8,7 @@ venv/
 build/
 *.keras
 pyproject.toml
+logs/fit/
+mlflow_config.json
 .gitignore
+

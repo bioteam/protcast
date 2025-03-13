@@ -4,6 +4,9 @@ import pickle
 import numpy as np
 import time
 from pathlib import Path
+import mlflow
+import json
+from mlflow.models import infer_signature 
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
@@ -39,6 +42,8 @@ class MultiClassifier:
         Define the model layers and parameters
     train_model:
         Add data to model and train
+    log_model:
+        Log model and it's parameters to MLflow
     save_model:
         Save Keras model to *hf file
     load_model:
@@ -108,6 +113,25 @@ class MultiClassifier:
         self.pids = list()
         self.features = list()
 
+        self.params = {
+            "algorithm": self.algorithm,
+            "verbose": self.verbose,
+            "proteins": self.proteins,
+            "optimizer": self.optimizer,
+            "loss": self.loss,
+            "metrics": self.metrics, 
+            "epochs": self.epochs, 
+            "batch_size": self.batch_size, 
+            "neurons": self.neurons,
+            "dropout": self.dropout, 
+            "validation_split": self.validation_split, 
+            "pred_threshold": self.pred_threshold, 
+            "patience": self.patience, 
+            "go_ids": self.go_ids,
+            "pids": self.pids,
+            "features": self.features,
+        }
+
     @typechecked
     def run(self) -> None:
         """run"""
@@ -116,6 +140,7 @@ class MultiClassifier:
         self.prepare_data()
         self.build_model()
         self.train_model()
+        self.log_model()
 
     @typechecked
     def get_feature_vectors(self) -> None:
@@ -228,6 +253,9 @@ class MultiClassifier:
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y, test_size=self.validation_split, stratify=self.y
         )
+
+        self.X_train = X_train
+
         # Define callbacks
         early_stopping = EarlyStopping(
             monitor="val_loss",
@@ -271,12 +299,59 @@ class MultiClassifier:
             verbose=1,
         )
 
+        self.final_val_loss = history.history['val_loss'][-1]
+
         return history
 
     @typechecked
     def save_model(self) -> None:
         """save_model"""
         self.model.save(f"{self.get_name()}.keras")
+
+    def log_model(self) -> None:
+        # Change the working directory to the root of the project
+        print("Before changing directory:", os.getcwd())
+        print("Current working directory:", os.getcwd())
+        config_path = os.path.join(os.getcwd(), "mlflow_config.json")
+
+        # Load the configuration file
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+
+
+        TRACKING_SERVER_HOST = config['TRACKING_SERVER_HOST']
+        USER = config['USER']
+        EXPERIMENT_NAME = config['EXPERIMENT_NAME']
+
+        # Set our tracking server uri for logging
+        mlflow.set_tracking_uri(f"http://{TRACKING_SERVER_HOST}:5000") 
+
+        # Create a new MLflow Experiment
+        mlflow.set_experiment(EXPERIMENT_NAME)
+
+        # Start an MLflow run
+        with mlflow.start_run():
+            # Log the hyperparameters
+            mlflow.log_params(self.params)
+
+            # Log the loss metric
+            mlflow.log_metric("validation_loss", self.final_val_loss)
+
+            # Set a tag that we can use to remind ourselves what this run was for
+            mlflow.set_tag("Training Info", "Basic Multiclassifier model")
+            mlflow.set_tag("User", USER)
+
+            # Infer the model signature
+            signature = infer_signature(self.X_train, self.model.predict(self.X_train))
+
+            # Log the model
+            model_info = mlflow.sklearn.log_model(
+                sk_model=self.model,
+                artifact_path="multiclass_pfp_model",
+                signature=signature,
+                input_example=self.X_train,
+                registered_model_name="multiclassfier.v0",
+            )
 
     @classmethod
     def load_model(cls, model_path: Path) -> keras.models.Sequential:
