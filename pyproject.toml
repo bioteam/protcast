@@ -16,7 +16,10 @@ requires-python = ">=3.9.2"
 dependencies = [
     "plotly",
     "kaleido",
+    "urllib3==1.26.5",
     "numpy==1.26.4",
+    "tensorflow>=2.8.2",
+    "keras>=2.8.0",
     "h5py",
     "numba",
     "typeguard",
@@ -26,12 +29,9 @@ dependencies = [
     "goatools",
     "pandas",
     "grpcio",
-    "tensorflow>=2.8.2",
-    "keras>=2.8.0",
     "tensorboard",
     "py-spy",
     "virtualenv",
-    "urllib3==1.26.5",
     "protein-feature-vectors",
 ]
 
