@@ -33,6 +33,8 @@ dependencies = [
     "py-spy",
     "virtualenv",
     "protein-feature-vectors",
+    "mlflow",
+    "rdkit",
 ]
 
 [tool.setuptools]
