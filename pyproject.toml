@@ -12,14 +12,14 @@ authors = [
     { name = "Jordan Ramsdell", email = "jramsdell@bioteam.net" },
     { name = "Bruno Alvisio", email = "contact@bioteam.net" },
 ]
-requires-python = ">=3.9.2"
+requires-python = ">=3.9, <3.12"
 dependencies = [
     "plotly",
     "kaleido",
     "urllib3==1.26.5",
     "numpy==1.26.4",
-    "tensorflow>=2.8.2",
-    "keras>=2.8.0",
+    "tensorflow>=2.13",
+    "keras>=2.13",
     "h5py",
     "numba",
     "typeguard",

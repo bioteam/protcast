@@ -1,4 +1,4 @@
-from tensorflow.python.client import device_lib
+from tensorflow.python.client import device_lib  # type: ignore
 
 
 def get_available_gpus():

@@ -270,3 +270,276 @@ python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fas
 ```
 
 ### Python Profiling
+
+## Deep Learning
+
+Understanding Feature Transformation in Neural Networks
+When we say "the model transforms these features through various operations," we're describing how neural networks progressively convert raw input features into increasingly abstract and task-relevant representations through a series of mathematical transformations.
+
+The Transformation Process
+
+1. Linear Transformations
+
+In artificial neural networks, a neuron (also called a node or unit) is the fundamental computational unit that:
+
+Receives multiple input signals
+Applies a mathematical transformation to these inputs
+Produces a single output value
+Anatomical Structure of an Artificial Neuron
+Components
+Inputs: Values received from previous layer neurons or raw features
+Weights: Learnable parameters that determine the importance of each input
+Bias: A learnable offset parameter
+Aggregation Function: Typically a weighted sum of inputs
+Activation Function: Non-linear function applied to the aggregation result
+Output: The signal sent to the next layer
+
+Based on Role
+Input Neuron: Passes input features to the first hidden layer
+Hidden Neuron: Located in middle layers, performs intermediate computations
+Output Neuron: Produces final predictions
+Specialized Neurons
+Convolutional Neuron: Applies filter operations on structured data like images
+LSTM/GRU Cell: Complex neurons with memory capabilities for sequence data
+Attention Unit: Computes relevance weights between different elements
+Pooling Unit: Performs downsampling operations
+
+Practical Significance
+The neuron is the basic building block of neural networks. By combining thousands or millions of these simple units in different architectures (feedforward, convolutional, recurrent, etc.), neural networks can learn complex patterns and perform sophisticated tasks.
+
+The power of neural networks emerges not from the complexity of individual neurons, but from their collective behavior when arranged in layers and trained with optimization algorithms like gradient descent.
+
+A neuron is not merely a method (function) but rather a computational unit with:
+
+State: Contains learnable parameters (weights and bias)
+Behavior: Performs a specific mathematical operation
+Connectivity: Links to other neurons in a network architecture
+
+While we conceptualize individual neurons, modern frameworks optimize by:
+
+Vectorizing Operations: Processing entire layers at once
+Batch Processing: Handling multiple samples simultaneously
+GPU Acceleration: Organizing computations for parallel execution
+This creates a distinction between:
+
+The conceptual neuron (a single computational unit)
+The implemented neuron (part of an optimized layer operation)
+
+Each neuron applies a weighted sum to its inputs:
+
+z = w₁x₁ + w₂x₂ + ... + wₙxₙ + b
+
+Where:
+
+x₁, x₂, ..., xₙ are input features or outputs from previous layers
+w₁, w₂, ..., wₙ are learned weights
+b is a learned bias term
+In Protein Context: This might combine various protein features (hydrophobicity, charge, etc.) with different importance weights.
+
+2. Non-linear Activations
+The weighted sum is passed through a non-linear function:
+
+a = activation_function(z)
+Common activation functions:
+
+ReLU: max(0, z) (keeps positive values, zeros out negatives)
+Sigmoid: 1/(1+e^(-z)) (squashes values between 0 and 1)
+Tanh: (e^z - e^(-z))/(e^z + e^(-z)) (squashes values between -1 and 1)
+
+In Protein Context: This introduces non-linearity, allowing the model to capture complex patterns in protein features.
+
+3. Hierarchical Feature Extraction
+As data flows through multiple layers:
+
+First layers: Capture simple combinations of raw features
+Middle layers: Build intermediate abstractions
+Deep layers: Form high-level concepts relevant to the task
+In Protein Context: Early layers might identify simple amino acid patterns, while deeper layers could recognize functional domains or structural motifs.
+
+Concrete Example with Protein Data
+Let's trace how protein features transform through a simple network:
+
+Input Layer
+Input: [0.7, 0.2, 0.9, 0.1, 0.5]  # Protein features (e.g., hydrophobicity, charge...)
+First Hidden Layer (4 neurons)
+For the first neuron:
+
+z₁₁ = (0.7 × 0.3) + (0.2 × -0.1) + (0.9 × 0.4) + (0.1 × 0.7) + (0.5 × 0.2) + 0.1
+    = 0.21 - 0.02 + 0.36 + 0.07 + 0.1 + 0.1
+    = 0.82
+
+a₁₁ = ReLU(0.82) = 0.82  # Apply activation
+Similarly for other neurons, producing:
+
+First layer output: [0.82, 0.56, 0.0, 0.93]
+Transformation: Raw protein features → Feature combinations
+
+Second Hidden Layer (3 neurons)
+Taking the first layer output as input:
+
+z₂₁ = (0.82 × 0.5) + (0.56 × 0.7) + (0.0 × 0.2) + (0.93 × -0.3) + 0.2
+    = 0.41 + 0.392 + 0.0 - 0.279 + 0.2
+    = 0.723
+
+a₂₁ = ReLU(0.723) = 0.723
+Calculating for all neurons:
+
+Second layer output: [0.723, 1.104, 0.0]
+Transformation: Feature combinations → Higher-level patterns
+
+Output Layer (1 neuron for binary classification)
+z₃₁ = (0.723 × 0.8) + (1.104 × 0.6) + (0.0 × 0.3) + 0.1
+    = 0.5784 + 0.6624 + 0.0 + 0.1
+    = 1.3408
+
+a₃₁ = Sigmoid(1.3408) = 0.7925  # Probability of having the GO term
+Transformation: Higher-level patterns → Classification probability
+
+What's Actually Happening Biologically
+These mathematical transformations are detecting meaningful biological patterns:
+
+First Layer: May identify basic physicochemical patterns (e.g., hydrophobic regions, charged clusters)
+
+Middle Layers: Could recognize sequence motifs, secondary structure elements, or binding sites
+
+Deep Layers: Might capture complex functional domains, interaction sites, or structural configurations relevant to the GO function
+
+Output Layer: Integrates these detected patterns to predict whether the protein performs the specific function defined by the GO term
+
+Through this progressive transformation process, the network converts raw protein features into increasingly sophisticated representations that ultimately enable accurate GO term prediction.
+
+What Determines the Number of Neurons in a Layer
+The number of neurons in a layer is one of the most important architectural decisions in neural network design, influenced by multiple factors:
+
+Key Determining Factors
+
+1. Problem Complexity
+More Complex Problems → More Neurons
+Tasks with intricate patterns require more representation capacity
+Higher-dimensional data typically needs more neurons to process
+Subtle differences between classes may require more neurons to distinguish
+2. Input/Output Dimensionality
+Input Layer: Typically matches the number of input features
+Output Layer: Determined by the task type:
+Classification: Typically one neuron per class (or a single neuron for binary classification)
+Regression: Usually matches the dimension of the target variable(s)
+Generation: Depends on the output structure required
+3. Available Training Data
+More Data → Can Support More Neurons
+Larger datasets can train more complex models without overfitting
+Limited data requires more conservative neuron counts
+Rule of thumb: Number of training samples should exceed number of parameters
+4. Computational Constraints
+Limited Resources → Fewer Neurons
+Training time increases with more neurons
+Memory requirements scale with layer size
+Inference speed constraints may limit neuron count
+
+How Neuron Weights Change During Training
+Yes, Weights Change Throughout Training
+The core principle of neural network training is the systematic adjustment of weights (and biases) to minimize prediction errors. This is the fundamental learning process.
+
+Weight Update Mechanism
+
+1. Initial State
+Random Initialization: Weights typically start with small random values
+
+# Common initialization in code
+
+weights = np.random.normal(0, 0.01, size=(input_size, output_size))
+Purpose: Random initialization breaks symmetry and enables diverse feature detection
+2. Forward Pass
+Input data passes through the network
+Current weights determine the prediction
+Error (loss) is calculated between prediction and actual target
+3. Backward Pass (Backpropagation)
+Gradient Calculation: The system calculates how much each weight contributed to the error
+Chain Rule Application: Error gradients flow backward through the network
+Result: Each weight receives a gradient indicating how it should change
+4. Weight Update
+Update Rule: Weights are adjusted in the direction that reduces error
+new_weight = current_weight - learning_rate * gradient
+Learning Rate: Controls the size of weight updates (typically 0.001-0.01)
+Visual Example of Weight Evolution
+Consider a single neuron with two inputs tracking its weights during training:
+
+Epoch 0: weights = [0.08, -0.12]  (random initialization)
+Epoch 10: weights = [0.21, -0.19]  (early adjustments)
+Epoch 50: weights = [0.45, -0.37]  (significant changes)
+Epoch 100: weights = [0.52, -0.41]  (refinement)
+Epoch 200: weights = [0.53, -0.42]  (stabilization)
+Characteristics of Weight Changes
+
+1. Learning Phases
+Early Training: Large, rapid weight changes
+Middle Training: Moderate, focused adjustments
+Late Training: Small, fine-tuning refinements
+Convergence: Minimal changes as weights stabilize
+2. Layer-Specific Patterns
+Early Layers: Typically learn faster and stabilize earlier
+Deep Layers: Often take longer to converge
+Output Layer: Can show more volatile changes
+3. Weight Magnitude Evolution
+Many weights grow from small random values to larger magnitudes
+Some weights may approach zero (especially with regularization)
+Certain critical weights might become very large (detecting key features)
+Factors Affecting Weight Changes
+1. Learning Rate
+High Learning Rate: Larger, more rapid weight updates (risk of instability)
+Low Learning Rate: Smaller, more stable updates (risk of slow convergence)
+Learning Rate Schedules: Strategically reducing learning rate over time
+2. Optimizer Choice
+SGD: Simple updates proportional to the gradient
+Adam/RMSprop: Adaptive updates based on historical gradient information
+Momentum-based: Incorporates previous update directions
+3. Regularization
+L1/L2 Regularization: Adds penalties that push weights toward zero
+Dropout: Temporarily disables neurons, affecting weight update patterns
+Batch Normalization: Changes the dynamics of weight updates
+Code Example: Visualizing Weight Changes
+
+```py
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+
+# Create a simple model
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(4, activation='relu', input_shape=(2,)),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+# Compile model
+model.compile(optimizer='adam', loss='binary_crossentropy')
+
+# Function to extract weights
+def get_weights(model):
+    return [layer.get_weights()[0].flatten() for layer in model.layers if len(layer.get_weights()) > 0]
+
+# Track weights during training
+weight_history = []
+initial_weights = get_weights(model)
+
+# Custom callback to record weights
+class WeightRecorder(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        if epoch % 5 == 0:  # Record every 5 epochs
+            weight_history.append(get_weights(model))
+
+# Train model with callback
+model.fit(X_train, y_train, epochs=100, callbacks=[WeightRecorder()], verbose=0)
+
+# Plot weight evolution
+plt.figure(figsize=(10, 6))
+for i, layer_weights in enumerate(zip(*weight_history)):
+    weights_array = np.array(layer_weights)
+    for j in range(weights_array.shape[1]):
+        plt.plot(weights_array[:, j], label=f'Layer {i+1}, Weight {j+1}')
+
+plt.xlabel('Epoch (×5)')
+plt.ylabel('Weight Value')
+plt.title('Evolution of Neural Network Weights During Training')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
