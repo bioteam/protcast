@@ -267,7 +267,7 @@ class MultiClassifier:
         )
         # val_loss measures the error on the validation set
         loss_checkpoint = ModelCheckpoint(
-            filepath=f"{self.get_name()}.keras",
+            filepath=f"{self.get_name()}",
             # "best_model.h5",
             monitor="val_loss",
             save_best_only=True,
