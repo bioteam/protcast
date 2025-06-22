@@ -15,8 +15,8 @@ from protcast.preprocessing.protcast_dataset import (  # noqa: E402
 
 config_path = os.path.join(os.getcwd(), "mlflow_config.json")
 
-        # Load the configuration file
-with open(config_path, 'r') as f:
+# Load the configuration file
+with open(config_path, "r") as f:
     config = json.load(f)
 
 """"make_multi_class_model.py
@@ -37,6 +37,10 @@ python3 scripts/make_multi_class_model.py \
 parser = argparse.ArgumentParser()
 parser.add_argument("-g", "--go_ids_file", help="Path to GO ids file")
 parser.add_argument("-s", "--seq_file", help="Path to Fasta file")
+parser.add_argument(
+    "--use_tensorboard", action="store_true", help="Use TensorBoard"
+)
+parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
 parser.add_argument(
     "-a", "--algorithm", default="CTriad", help="Feature vector algorithm"
 )
@@ -88,7 +92,7 @@ classifier = MultiClassifier(
     args.algorithm,
     args.verbose,
     proteins,
-    config['OPTIMIZER'],
+    config["OPTIMIZER"],
     config["LOSS"],
     config["METRICS"],
     config["EPOCHS"],
@@ -97,7 +101,9 @@ classifier = MultiClassifier(
     config["DROPOUT"],
     config["PRED_THRESHOLD"],
     config["VALIDATION_SPLIT"],
-    config["PATIENCE"]        
+    config["PATIENCE"],
+    args.use_mlflow,
+    args.use_tensorboard,
 )
 classifier.run()
 # Not necessary with the checkpoints in place

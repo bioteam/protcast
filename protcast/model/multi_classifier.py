@@ -6,12 +6,11 @@ import time
 from pathlib import Path
 import mlflow
 import json
-from mlflow.models import infer_signature 
+from mlflow.models import infer_signature
 from typeguard import typechecked
 from keras import layers, models
-from keras.callbacks import EarlyStopping, ModelCheckpoint  # type: ignore
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
-from tensorflow.keras.callbacks import TensorBoard  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
 
@@ -50,6 +49,10 @@ class MultiClassifier:
         Class method to load model from a file
     get_name:
         Make a model name with timestamp
+    use_mlflow:
+        Use MLFlow
+    use_tensorboard:
+        Use TensorBoard
     """
 
     @typechecked
@@ -68,6 +71,8 @@ class MultiClassifier:
         pred_threshold: float = 75.0,
         validation_split: float = 0.2,
         patience: int = 10,
+        use_mlflow: bool = False,
+        use_tensorboard: bool = False,
     ) -> None:
         """__init__
 
@@ -109,6 +114,8 @@ class MultiClassifier:
         self.validation_split = validation_split
         self.pred_threshold = pred_threshold
         self.patience = patience
+        self.use_mlflow = use_mlflow
+        self.use_tensorboard = use_tensorboard
         self.go_ids = list()
         self.pids = list()
         self.features = list()
@@ -119,14 +126,14 @@ class MultiClassifier:
             "proteins": self.proteins,
             "optimizer": self.optimizer,
             "loss": self.loss,
-            "metrics": self.metrics, 
-            "epochs": self.epochs, 
-            "batch_size": self.batch_size, 
+            "metrics": self.metrics,
+            "epochs": self.epochs,
+            "batch_size": self.batch_size,
             "neurons": self.neurons,
-            "dropout": self.dropout, 
-            "validation_split": self.validation_split, 
-            "pred_threshold": self.pred_threshold, 
-            "patience": self.patience, 
+            "dropout": self.dropout,
+            "validation_split": self.validation_split,
+            "pred_threshold": self.pred_threshold,
+            "patience": self.patience,
             "go_ids": self.go_ids,
             "pids": self.pids,
             "features": self.features,
@@ -140,7 +147,8 @@ class MultiClassifier:
         self.prepare_data()
         self.build_model()
         self.train_model()
-        self.log_model()
+        if self.use_mlflow:
+            self.log_model()
 
     @typechecked
     def get_feature_vectors(self) -> None:
@@ -199,10 +207,10 @@ class MultiClassifier:
     def build_model(self):
         """build_model
 
-        The final layer uses num_classes for the number of units, ensuring it matches the number of GO ids.
-        The model is compiled with 'categorical_crossentropy' loss, which is suitable for multi-class problems with mutually exclusive classes.
-        We're using 'accuracy' as a metric, but consider metrics like F1-score or area under the ROC curve.
-
+        The final layer uses num_classes for the number of units, ensuring it matches the number
+        of GO ids. The model is compiled with 'categorical_crossentropy' loss, which is suitable for
+        multi-class problems with mutually exclusive classes. We're using 'accuracy' as a metric, but
+        consider metrics like F1-score or area under the ROC curve.
         """
         # X.shape[1] = self.vector_length, X.shape[0] = total number of samples across GO ids.
         input_shape = (self.X.shape[1],)
@@ -256,7 +264,7 @@ class MultiClassifier:
 
         self.X_train = X_train
 
-        # Define callbacks
+        """ Define callbacks """
         early_stopping = EarlyStopping(
             monitor="val_loss",
             # The minimum change in the monitored quantity to qualify as an improvement
@@ -265,25 +273,25 @@ class MultiClassifier:
             patience=self.patience,
             restore_best_weights=True,
         )
-        # val_loss measures the error on the validation set
+        """ 
+        val_loss measures the error on the validation set
+        Could also monitor val_accuracy where mode="max"
+        """
         loss_checkpoint = ModelCheckpoint(
-            filepath=f"{self.get_name()}",
-            # "best_model.h5",
+            filepath=f"{self.get_name()}.keras",
             monitor="val_loss",
             save_best_only=True,
             mode="min",
         )
-        # acc_checkpoint = ModelCheckpoint(
-        #     "best_model_accuracy.h5",
-        #     monitor="val_accuracy",
-        #     mode="max",
-        #     save_best_only=True,
-        #     verbose=1,
-        # )
-        log_dir = "logs/fit/" + time.strftime(
-            "%m-%d-%Y-%H-%M-%S", time.localtime()
-        )
-        tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+        callbacks = [early_stopping, loss_checkpoint]
+        if self.use_tensorboard:
+            log_dir = "logs/fit/" + time.strftime(
+                "%m-%d-%Y-%H-%M-%S", time.localtime()
+            )
+            tensorboard_callback = TensorBoard(
+                log_dir=log_dir, histogram_freq=1
+            )
+            callbacks.append(tensorboard_callback)
         # Train the model
         history = self.model.fit(
             X_train,
@@ -291,15 +299,11 @@ class MultiClassifier:
             epochs=self.epochs,
             batch_size=self.batch_size,
             validation_data=(X_val, y_val),
-            callbacks=[
-                early_stopping,
-                loss_checkpoint,
-                tensorboard_callback,
-            ],
+            callbacks=callbacks,
             verbose=1,
         )
 
-        self.final_val_loss = history.history['val_loss'][-1]
+        self.final_val_loss = history.history["val_loss"][-1]
 
         return history
 
@@ -314,16 +318,15 @@ class MultiClassifier:
         config_path = os.path.join(os.getcwd(), "mlflow_config.json")
 
         # Load the configuration file
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = json.load(f)
 
-
-        TRACKING_SERVER_HOST = config['TRACKING_SERVER_HOST']
-        USER = config['USER']
-        EXPERIMENT_NAME = config['EXPERIMENT_NAME']
+        TRACKING_SERVER_HOST = config["TRACKING_SERVER_HOST"]
+        USER = config["USER"]
+        EXPERIMENT_NAME = config["EXPERIMENT_NAME"]
 
         # Set our tracking server uri for logging
-        mlflow.set_tracking_uri(f"http://{TRACKING_SERVER_HOST}:5000") 
+        mlflow.set_tracking_uri(f"http://{TRACKING_SERVER_HOST}:5000")
 
         # Create a new MLflow Experiment
         mlflow.set_experiment(EXPERIMENT_NAME)
@@ -341,7 +344,9 @@ class MultiClassifier:
             mlflow.set_tag("User", USER)
 
             # Infer the model signature
-            signature = infer_signature(self.X_train, self.model.predict(self.X_train))
+            signature = infer_signature(
+                self.X_train, self.model.predict(self.X_train)
+            )
 
             # Log the model
             model_info = mlflow.sklearn.log_model(
