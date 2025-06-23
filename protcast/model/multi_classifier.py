@@ -204,7 +204,8 @@ class MultiClassifier:
         """
         go_encoder.save()
 
-    def build_model(self):
+    @typechecked
+    def build_model(self) -> None:
         """build_model
 
         The final layer uses num_classes for the number of units, ensuring it matches the number
@@ -256,7 +257,8 @@ class MultiClassifier:
 
         self.model = model
 
-    def train_model(self):
+    @typechecked
+    def train_model(self) -> dict:
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y, test_size=self.validation_split, stratify=self.y
@@ -312,6 +314,7 @@ class MultiClassifier:
         """save_model"""
         self.model.save(f"{self.get_name()}.keras")
 
+    @typechecked
     def log_model(self) -> None:
         # print("Before changing directory:", os.getcwd())
         # print("Current working directory:", os.getcwd())
