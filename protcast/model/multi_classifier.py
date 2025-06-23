@@ -349,7 +349,7 @@ class MultiClassifier:
             )
 
             # Log the model
-            model_info = mlflow.sklearn.log_model(
+            mlflow.sklearn.log_model(
                 sk_model=self.model,
                 artifact_path="multiclass_pfp_model",
                 signature=signature,
