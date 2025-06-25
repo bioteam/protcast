@@ -141,7 +141,9 @@ class MultiClassifier:
 
     @typechecked
     def run(self) -> None:
-        """run"""
+        """run
+        Key methods
+        """
         self.start_time = time.time()
         self.get_feature_vectors()
         self.prepare_data()
@@ -311,7 +313,54 @@ class MultiClassifier:
 
     @typechecked
     def save_model(self) -> None:
-        """save_model"""
+        """save_model
+        Save the trained Keras model to disk.
+
+        This method saves the trained neural network model to a file using Keras'
+        native save format (.keras). The model file includes the architecture,
+        weights, optimizer state, and compilation configuration, allowing for
+        complete model restoration later.
+
+        The saved model filename is automatically generated using a timestamp
+        and the algorithm name to ensure uniqueness and traceability.
+        Parameters
+        ----------
+        None
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        AttributeError
+            If the model has not been built or trained yet (self.model is None).
+        OSError
+            If there are permission issues or insufficient disk space when
+            saving the file.
+
+        Notes
+        -----
+        The model is saved in Keras' native .keras format, which is recommended
+        for new applications. This format preserves:
+        - Model architecture
+        - Model weights
+        - Optimizer state
+        - Compilation configuration
+
+        The filename format is: {timestamp}_{algorithm}.keras
+        where timestamp follows the pattern MM-DD-YYYY-HH-MM-SS.
+
+        Examples
+        --------
+        >>> classifier = MultiClassifier(algorithm="aac", verbose=True, proteins=data)
+        >>> classifier.run()  # Build and train the model
+        >>> classifier.save_model()  # Saves to file like "01-15-2024-14-30-45_aac.keras"
+
+        See Also
+        --------
+        load_model : Class method to load a saved model from disk
+        get_name : Method that generates the filename for the saved model
+        """
         self.model.save(f"{self.get_name()}.keras")
 
     @typechecked
@@ -364,10 +413,44 @@ class MultiClassifier:
     def load_model(cls, model_path: Path) -> keras.models.Sequential:
         """load_model
 
+        Load a Keras model from a file.
+
+        This class method loads a pre-trained Keras model from the specified path.
+        It's designed to work with models saved in Keras' native .keras format,
+        which includes the architecture, weights, optimizer state, and compilation
+        configuration. The loaded model can be used for inference or further training.
+
         Parameters
         ----------
-        model_path: Path
-            Path to saved model
+        model_path : Path
+            A file system path to the saved model file (.keras).
+
+        Returns
+        -------
+        keras.models.Sequential
+            A Keras Sequential model instance loaded from the file.
+            This is ready to use for predictions, evaluation, or further training.
+
+        Examples
+        --------
+        >>> from protcast.model.multi_classifier import MultiClassifier
+
+        # Load an existing model from disk
+        >>> model_path = Path("/path/to/saved_model.keras")
+        >>> loaded_model = MultiClassifier.load_model(model_path)
+
+        Notes
+        -----
+        The expected format for the saved model is .keras, which preserves:
+        - Model architecture
+        - Model weights
+        - Optimizer state
+        - Compilation configuration
+
+        See Also
+        --------
+        save_model : Class method to save a trained Keras model
+        get_name : Method that generates the filename for the saved model
         """
         model = keras.models.load_model(model_path)
         return model
