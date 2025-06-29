@@ -73,4 +73,6 @@ classifier.run()
 # classifier.save_model()
 
 end = time.time()
-print(f"Elapsed {args.algorithm} time: {round(end - start)}s")
+
+if args.verbose:
+    print(f"Elapsed {args.algorithm} time: {round(end - start)}s")
