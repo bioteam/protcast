@@ -230,6 +230,7 @@ class MultiClassifier:
         - Helps with the vanishing gradient problem.
         - Allows for sparse activation (some neurons can be completely off).
         - Computationally efficient.
+        - Learns complex non-linear relationships between protein features and functions.
 
         Softmax Activation:
 
@@ -239,6 +240,20 @@ class MultiClassifier:
         Advantages:
         - Provides a probability distribution over all classes.
         - Suitable for mutually exclusive classes.
+
+        Input (protein features)
+                    ↓
+        Dense(128) + ReLU  ← Non-linear transformation
+                    ↓
+        Dropout(0.5)       ← Regularization
+                    ↓
+        Dense(64) + ReLU   ← More non-linear transformation
+                    ↓
+        Dropout(0.3)       ← More regularization
+                    ↓
+        Dense(GO_classes) + Softmax  ← Probability distribution over GO functions
+                    ↓
+        Output probabilities (sum = 1.0)
         """
         model = models.Sequential(
             [
