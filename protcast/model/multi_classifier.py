@@ -381,9 +381,11 @@ class MultiClassifier:
 
     @typechecked
     def log_model(self) -> None:
-        # print("Before changing directory:", os.getcwd())
-        # print("Current working directory:", os.getcwd())
-        config_path = os.path.join(os.getcwd(), "mlflow_config.json")
+        # Get the full path to this script
+        script_path = Path(__file__).resolve()
+
+        # Go two directories up from the script location
+        config_path = script_path.parent.parent / "mlflow_config.json"
 
         # Load the configuration file
         with open(config_path, "r") as f:
