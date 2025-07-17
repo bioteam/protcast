@@ -21,7 +21,7 @@ script_path = Path(__file__).resolve()
 parent_dir = script_path.parent.parent
 
 # Full path to the config file
-config_path = parent_dir / "config.json"
+config_path = parent_dir / "mlflow_config.json"
 
 # Load the configuration file
 with open(config_path, "r") as f:
