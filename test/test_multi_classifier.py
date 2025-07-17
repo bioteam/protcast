@@ -6,6 +6,7 @@ import json
 import argparse
 from collections import defaultdict
 from Bio import SeqIO
+from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
