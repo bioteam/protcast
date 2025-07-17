@@ -7,10 +7,11 @@ import argparse
 from collections import defaultdict
 from Bio import SeqIO
 from pathlib import Path
-
+import inspect
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
+print("MultiClassifier defined in:", inspect.getfile(MultiClassifier))
 
 # config_path = os.path.join(os.getcwd(), "mlflow_config.json")
 

@@ -9,6 +9,7 @@ import json
 from mlflow.models import infer_signature
 from typeguard import typechecked
 from keras import layers, models
+from keras.callbacks import History
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
@@ -275,7 +276,7 @@ class MultiClassifier:
         self.model = model
 
     @typechecked
-    def train_model(self) -> dict:
+    def train_model(self) -> History:
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y, test_size=self.validation_split, stratify=self.y
