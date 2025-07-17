@@ -13,9 +13,19 @@ from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 
 config_path = os.path.join(os.getcwd(), "mlflow_config.json")
 
+# path to the current script
+script_path = Path(__file__).resolve()
+
+# Get the parent directory of the script
+parent_dir = script_path.parent.parent
+
+# Full path to the config file
+config_path = parent_dir / "config.json"
+
 # Load the configuration file
 with open(config_path, "r") as f:
     config = json.load(f)
+
 
 """"test_multi_classifier.py
 python3 scripts/test_multi_classifier.py \
