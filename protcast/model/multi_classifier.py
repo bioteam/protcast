@@ -381,13 +381,25 @@ class MultiClassifier:
 
     @typechecked
     def log_model(self) -> None:
-        # Get the full path to this script
-        script_path = Path(__file__).resolve()
+        # Try environment variable first
+        config_path = os.environ.get("MLFLOW_CONFIG_PATH")
+        if config_path is not None and Path(config_path).exists():
+            config_path = Path(config_path)
+        else:
+            # Try current working directory
+            cwd_config = Path(os.getcwd()) / "mlflow_config.json"
+            if cwd_config.exists():
+                config_path = cwd_config
+            else:
+                # Fallback: try script directory (for legacy/dev)
+                script_dir = Path(__file__).parent.parent
+                config_path = script_dir / "mlflow_config.json"
+                if not config_path.exists():
+                    raise FileNotFoundError(
+                        "Could not find mlflow_config.json. "
+                        "Set MLFLOW_CONFIG_PATH or place config in the working directory."
+                    )
 
-        # Go two directories up from the script location
-        config_path = script_path.parent.parent / "mlflow_config.json"
-
-        # Load the configuration file
         with open(config_path, "r") as f:
             config = json.load(f)
 
