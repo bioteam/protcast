@@ -35,6 +35,7 @@ dependencies = [
     "protein-feature-vectors",
     "mlflow",
     "rdkit",
+    "boto3"
 ]
 
 [tool.setuptools]

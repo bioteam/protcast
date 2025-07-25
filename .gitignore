@@ -12,4 +12,4 @@ logs/fit/
 mlflow_config.json
 protein-feature-vectors/
 .gitignore
-
+*_GOEncoder.pickle

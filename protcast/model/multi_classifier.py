@@ -381,17 +381,17 @@ class MultiClassifier:
 
     @typechecked
     def log_model(self) -> None:
-        # Try environment variable first
+        import logging
+        from mlflow.models.signature import infer_signature
+
         config_path = os.environ.get("MLFLOW_CONFIG_PATH")
         if config_path is not None and Path(config_path).exists():
             config_path = Path(config_path)
         else:
-            # Try current working directory
             cwd_config = Path(os.getcwd()) / "mlflow_config.json"
             if cwd_config.exists():
                 config_path = cwd_config
             else:
-                # Fallback: try script directory (for legacy/dev)
                 script_dir = Path(__file__).parent.parent
                 config_path = script_dir / "mlflow_config.json"
                 if not config_path.exists():
@@ -403,41 +403,37 @@ class MultiClassifier:
         with open(config_path, "r") as f:
             config = json.load(f)
 
-        TRACKING_SERVER_HOST = config["TRACKING_SERVER_HOST"]
-        USER = config["USER"]
-        EXPERIMENT_NAME = config["EXPERIMENT_NAME"]
+        mlflow.set_tracking_uri(f"http://{config['TRACKING_SERVER_HOST']}:5000")
+        mlflow.set_experiment(config["EXPERIMENT_NAME"])
 
-        # Set our tracking server uri for logging
-        mlflow.set_tracking_uri(f"http://{TRACKING_SERVER_HOST}:5000")
+        try:
+            with mlflow.start_run():
+                # Filter only essential parameters for logging
+                filtered_params = {
+                    k: v for k, v in self.params.items()
+                    if k in ["algorithm", "optimizer", "loss", "epochs", "batch_size", "neurons", "dropout"]
+                }
+                mlflow.log_params(filtered_params)
 
-        # Create a new MLflow Experiment
-        mlflow.set_experiment(EXPERIMENT_NAME)
+                # Log final validation loss only
+                mlflow.log_metric("final_val_loss", self.final_val_loss)
 
-        # Start an MLflow run
-        with mlflow.start_run():
-            # Log the hyperparameters
-            mlflow.log_params(self.params)
+                mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
+                mlflow.set_tag("User", config["USER"])
 
-            # Log the loss metric
-            mlflow.log_metric("validation_loss", self.final_val_loss)
+                # Avoid logging large `input_example`, which can slow things down
+                signature = infer_signature(self.X_train, self.model.predict(self.X_train, verbose=0))
 
-            # Set a tag that we can use to remind ourselves what this run was for
-            mlflow.set_tag("Training Info", "Basic Multiclassifier model")
-            mlflow.set_tag("User", USER)
+                # Log model without large artifacts
+                mlflow.keras.log_model(
+                    self.model,
+                    artifact_path="model",
+                    signature=signature,
+                    registered_model_name="multiclassifier.v0"
+                )
 
-            # Infer the model signature
-            signature = infer_signature(
-                self.X_train, self.model.predict(self.X_train)
-            )
-
-            # Log the model
-            mlflow.sklearn.log_model(
-                sk_model=self.model,
-                artifact_path="multiclass_pfp_model",
-                signature=signature,
-                input_example=self.X_train,
-                registered_model_name="multiclassfier.v0",
-            )
+        except Exception as e:
+            logging.warning(f"MLflow logging failed: {e}")
 
     @classmethod
     def load_model(cls, model_path: Path) -> keras.models.Sequential:
