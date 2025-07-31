@@ -6,16 +6,28 @@ import json
 import argparse
 from collections import defaultdict
 from Bio import SeqIO
-
+from pathlib import Path
+import inspect
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
+print("MultiClassifier defined in:", inspect.getfile(MultiClassifier))
 
-config_path = os.path.join(os.getcwd(), "mlflow_config.json")
+# config_path = os.path.join(os.getcwd(), "mlflow_config.json")
+
+# path to the current script
+script_path = Path(__file__).resolve()
+
+# Get the parent directory of the script
+parent_dir = script_path.parent.parent
+
+# Full path to the config file
+config_path = parent_dir / "mlflow_config.json"
 
 # Load the configuration file
 with open(config_path, "r") as f:
     config = json.load(f)
+
 
 """"test_multi_classifier.py
 python3 scripts/test_multi_classifier.py \
@@ -53,21 +65,21 @@ if args.verbose:
 
 
 classifier = MultiClassifier(
-    args.algorithm,
-    args.verbose,
-    proteins,
-    config["OPTIMIZER"],
-    config["LOSS"],
-    config["METRICS"],
-    config["EPOCHS"],
-    config["BATCH_SIZE"],
-    config["NEURONS"],
-    config["DROPOUT"],
-    config["PRED_THRESHOLD"],
-    config["VALIDATION_SPLIT"],
-    config["PATIENCE"],
-    args.use_mlflow,
-    args.use_tensorboard,
+    algorithm=args.algorithm,
+    verbose=args.verbose,
+    proteins=proteins,
+    optimizer=config["OPTIMIZER"],
+    loss=config["LOSS"],
+    metrics=config["METRICS"],
+    epochs=config["EPOCHS"],
+    batch_size=config["BATCH_SIZE"],
+    neurons=config["NEURONS"],
+    dropout=config["DROPOUT"],
+    pred_threshold=config["PRED_THRESHOLD"],
+    validation_split=config["VALIDATION_SPLIT"],
+    patience=config["PATIENCE"],
+    use_mlflow=args.use_mlflow,
+    use_tensorboard=args.use_tensorboard,
 )
 classifier.run()
 # Not necessary with the checkpoints in place
