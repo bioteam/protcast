@@ -6,7 +6,6 @@ import time
 from pathlib import Path
 import mlflow
 import json
-from mlflow.models import infer_signature
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard  # type: ignore
@@ -120,24 +119,26 @@ class MultiClassifier:
         self.pids = list()
         self.features = list()
 
-        self.params = {
-            "algorithm": self.algorithm,
-            "verbose": self.verbose,
-            "proteins": self.proteins,
-            "optimizer": self.optimizer,
-            "loss": self.loss,
-            "metrics": self.metrics,
-            "epochs": self.epochs,
-            "batch_size": self.batch_size,
-            "neurons": self.neurons,
-            "dropout": self.dropout,
-            "validation_split": self.validation_split,
-            "pred_threshold": self.pred_threshold,
-            "patience": self.patience,
-            "go_ids": self.go_ids,
-            "pids": self.pids,
-            "features": self.features,
-        }
+        # Define the attributes to include in params for MLflow logging
+        param_attributes = [
+            "algorithm",
+            "verbose",
+            "proteins",
+            "optimizer",
+            "loss",
+            "metrics",
+            "epochs",
+            "batch_size",
+            "neurons",
+            "dropout",
+            "validation_split",
+            "pred_threshold",
+            "patience",
+            "go_ids",
+            "pids",
+            "features",
+        ]
+        self.params = {attr: getattr(self, attr) for attr in param_attributes}
 
     @typechecked
     def run(self) -> None:
@@ -165,6 +166,8 @@ class MultiClassifier:
                 print(f"GO id: {go_id}")
             fv.get_feature_vectors(self.algorithm, pdict=self.proteins[go_id])
             # encodings is a pandas DataFrame
+            if fv.encodings is None:
+                raise ValueError(f"No encodings generated for GO id {go_id}.")
             pids = [x[0] for x in fv.encodings.iterrows()]
             self.pids.append(pids)
             vals = [x[1].tolist() for x in fv.encodings.iterrows()]
@@ -274,8 +277,18 @@ class MultiClassifier:
 
         self.model = model
 
-    @typechecked
     def train_model(self) -> dict:
+        """train_model
+
+        Train the Keras model using the prepared data, with early stopping, model checkpointing, and optional TensorBoard logging.
+
+        Splits the data into training and validation sets, sets up callbacks, and fits the model. Stores the final validation loss.
+
+        Returns
+        -------
+        dict
+            The Keras History object containing training and validation loss/metrics per epoch.
+        """
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y, test_size=self.validation_split, stratify=self.y
@@ -283,19 +296,14 @@ class MultiClassifier:
 
         self.X_train = X_train
 
-        """ Define callbacks """
+        # Define callbacks
         early_stopping = EarlyStopping(
             monitor="val_loss",
-            # The minimum change in the monitored quantity to qualify as an improvement
             min_delta=0.001,
-            # Number of epochs with no improvement after which training will be stopped
             patience=self.patience,
             restore_best_weights=True,
         )
-        """ 
-        val_loss measures the error on the validation set
-        Could also monitor val_accuracy where mode="max"
-        """
+        # val_loss measures the error on the validation set
         loss_checkpoint = ModelCheckpoint(
             filepath=f"{self.get_name()}.keras",
             monitor="val_loss",
@@ -319,7 +327,7 @@ class MultiClassifier:
             batch_size=self.batch_size,
             validation_data=(X_val, y_val),
             callbacks=callbacks,
-            verbose=1,
+            verbose="auto",
         )
 
         self.final_val_loss = history.history["val_loss"][-1]
@@ -410,22 +418,16 @@ class MultiClassifier:
             mlflow.set_tag("Training Info", "Basic Multiclassifier model")
             mlflow.set_tag("User", USER)
 
-            # Infer the model signature
-            signature = infer_signature(
-                self.X_train, self.model.predict(self.X_train)
-            )
-
-            # Log the model
-            mlflow.sklearn.log_model(
-                sk_model=self.model,
-                artifact_path="multiclass_pfp_model",
-                signature=signature,
-                input_example=self.X_train,
-                registered_model_name="multiclassfier.v0",
+            # Save the model to a file
+            model_filename = f"{self.get_name()}.keras"
+            self.model.save(model_filename)
+            # Log the model file as an artifact
+            mlflow.log_artifact(
+                model_filename, artifact_path="multiclass_pfp_model"
             )
 
     @classmethod
-    def load_model(cls, model_path: Path) -> keras.models.Sequential:
+    def load_model(cls, model_path: Path) -> keras.models.Model:
         """load_model
 
         Load a Keras model from a file.
@@ -468,10 +470,19 @@ class MultiClassifier:
         get_name : Method that generates the filename for the saved model
         """
         model = keras.models.load_model(model_path)
-        return model
+        return model  # type: ignore[return]
 
     @typechecked
     def get_name(self) -> str:
+        """get_name
+
+        Generate a unique model name using the current timestamp and algorithm name.
+
+        Returns
+        -------
+        str
+            The generated model name in the format MM-DD-YYYY-HH-MM-SS_algorithm
+        """
         return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}"
 
 
@@ -502,6 +513,17 @@ class GOEncoder:
     """
 
     def __init__(self):
+        """Initialize a GOEncoder instance.
+
+        Attributes
+        ----------
+        go_to_int : dict or None
+            Mapping from GO ID (str) to integer label.
+        int_to_go : dict or None
+            Mapping from integer label to GO ID (str).
+        num_classes : int
+            Number of unique GO IDs.
+        """
         self.go_to_int = None
         self.int_to_go = None
         self.num_classes = 0
@@ -527,7 +549,8 @@ class GOEncoder:
             raise ValueError("GOEncoder has not been fit to any GO IDs.")
         # Handle single integer
         if isinstance(categorical, (int, np.integer)):
-            return self.int_to_go.get(categorical, None)
+            key = int(categorical)
+            return self.int_to_go.get(key, None)
         else:
             integer_encoded = np.argmax(categorical, axis=1)
             return [self.int_to_go[i] for i in integer_encoded]
@@ -548,14 +571,36 @@ class GOEncoder:
         return result
 
     def save(self):
-        """Serialize the GOEncoder to a file."""
+        """save
+
+        Serialize the GOEncoder instance to a file using pickle.
+
+        The filename is generated using the current timestamp.
+
+        Returns
+        -------
+        None
+        """
         filename = f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_GOEncoder.pickle"
         with open(filename, "wb") as f:
             pickle.dump(self, f)
 
     @classmethod
     def load(cls, filename):
-        """Deserialize a GOEncoder from a file."""
+        """load
+
+        Deserialize a GOEncoder instance from a pickle file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the pickle file containing the saved encoder.
+
+        Returns
+        -------
+        GOEncoder
+            The loaded GOEncoder instance.
+        """
         with open(filename, "rb") as f:
             encoder = pickle.load(f)
         return encoder

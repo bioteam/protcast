@@ -34,7 +34,8 @@ parser.add_argument(
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
-start = time.time()
+if args.verbose:
+    start = time.time()
 
 # Primary keys are GO ids, secondary keys are protein ids, values are sequences
 proteins = defaultdict(dict)
