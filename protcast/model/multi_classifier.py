@@ -6,10 +6,10 @@ import time
 from pathlib import Path
 import mlflow
 import json
+import sys
 from typeguard import typechecked
 from keras import layers, models
-from keras.callbacks import History
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard  # type: ignore
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
@@ -388,7 +388,7 @@ class MultiClassifier:
 
     @typechecked
     def log_model(self) -> None:
-        import logging
+        # import logging
         from mlflow.models.signature import infer_signature
 
         config_path = os.environ.get("MLFLOW_CONFIG_PATH")
@@ -410,42 +410,60 @@ class MultiClassifier:
         with open(config_path, "r") as f:
             config = json.load(f)
 
-        mlflow.set_tracking_uri(f"http://{config['TRACKING_SERVER_HOST']}:5000")
+        mlflow.set_tracking_uri(
+            f"http://{config['TRACKING_SERVER_HOST']}:5000"
+        )
         mlflow.set_experiment(config["EXPERIMENT_NAME"])
 
         try:
             with mlflow.start_run():
                 # Filter only essential parameters for logging
                 filtered_params = {
-                    k: v for k, v in self.params.items()
-                    if k in ["algorithm", "optimizer", "loss", "epochs", "batch_size", "neurons", "dropout"]
+                    k: v
+                    for k, v in self.params.items()
+                    if k
+                    in [
+                        "algorithm",
+                        "optimizer",
+                        "loss",
+                        "epochs",
+                        "batch_size",
+                        "neurons",
+                        "dropout",
+                    ]
                 }
                 mlflow.log_params(filtered_params)
 
                 # Log final validation loss only
                 mlflow.log_metric("final_val_loss", self.final_val_loss)
 
-                mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
+                mlflow.set_tag(
+                    "Training Info", "MultiClassifier minimal logging"
+                )
                 mlflow.set_tag("User", config["USER"])
 
                 # Avoid logging large `input_example`, which can slow things down
-                signature = infer_signature(self.X_train, self.model.predict(self.X_train, verbose=0))
+                signature = infer_signature(
+                    self.X_train, self.model.predict(self.X_train, verbose=0)
+                )
 
                 # Log model without large artifacts
                 mlflow.keras.log_model(
                     self.model,
                     artifact_path="model",
                     signature=signature,
-                    registered_model_name="multiclassifier.v0"
+                    registered_model_name="multiclassifier.v0",
                 )
+        except Exception as e:
+            sys.exit(f"Error during MLflow logging: {e}")
 
-            # Save the model to a file
-            model_filename = f"{self.get_name()}.keras"
-            self.model.save(model_filename)
-            # Log the model file as an artifact
-            mlflow.log_artifact(
-                model_filename, artifact_path="multiclass_pfp_model"
-            )
+        # Save the model to a file
+        model_filename = f"{self.get_name()}.keras"
+        self.model.save(model_filename)
+        # Log the model file as an artifact
+        mlflow.log_artifact(
+            model_filename, artifact_path="multiclass_pfp_model"
+        )
 
     @classmethod
     def load_model(cls, model_path: Path) -> keras.models.Model:

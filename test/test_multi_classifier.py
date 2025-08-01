@@ -8,9 +8,11 @@ from collections import defaultdict
 from Bio import SeqIO
 from pathlib import Path
 import inspect
+
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
+
 print("MultiClassifier defined in:", inspect.getfile(MultiClassifier))
 
 # config_path = os.path.join(os.getcwd(), "mlflow_config.json")
@@ -46,15 +48,14 @@ parser.add_argument(
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
-if args.verbose:
-    start = time.time()
+start = time.time()
 
 # Primary keys are GO ids, secondary keys are protein ids, values are sequences
 proteins = defaultdict(dict)
 
 # Sequences are collected from a fasta file where the description contains a GO id
 for seq in SeqIO.parse(args.seq_file, "fasta"):
-    go_id = re.search("GO:\d+", seq.description)[0]
+    go_id = re.search("GO:\d+", seq.description)[0]  # type: ignore
     if go_id is not None:
         proteins[go_id][seq.id] = str(seq.seq)
 if args.verbose:
