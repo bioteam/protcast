@@ -1,19 +1,29 @@
 import os
+from typing import Optional
 import keras
 import pickle
 import numpy as np
 import time
 from pathlib import Path
+import dagshub
+dagshub.init(
+    repo_owner='aakpan',
+    repo_name='my-first-repo',
+    mlflow=True  # this sets MLFLOW_TRACKING_URI automatically
+)
 import mlflow
-import json
-import sys
+from protcast.config import ConfigManager
+# Load experiment name from config
+raw_config = ConfigManager.load_config()
+experiment_name = raw_config.get("EXPERIMENT_NAME", "default_experiment")
+mlflow.set_experiment(experiment_name)
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
-
+from protcast.config import ConfigManager, ModelConfig
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 
@@ -22,112 +32,46 @@ class MultiClassifier:
     """MultiClassifier
     This class uses feature vectors to train and test a multi-class classifier.
     It uses the Keras Sequential API.
-
-    Attributes
-    ----------
-
-
-    Methods
-    -------
-    init:
-        Initialize
-    run:
-      Run the methdds that create the model and train it
-    get_features_vectors:
-        Get feature vectors using protein_feature_vectors
-    prepare_data:
-        Encode the GO ids and make numpy data structures
-    build_model:
-        Define the model layers and parameters
-    train_model:
-        Add data to model and train
-    log_model:
-        Log model and it's parameters to MLflow
-    save_model:
-        Save Keras model to *hf file
-    load_model:
-        Class method to load model from a file
-    get_name:
-        Make a model name with timestamp
-    use_mlflow:
-        Use MLFlow
-    use_tensorboard:
-        Use TensorBoard
     """
 
-    @typechecked
     def __init__(
         self,
         algorithm: str,
         verbose: bool,
         proteins: dict,
-        optimizer: str = "adam",
-        loss: str = "categorical_crossentropy",
-        metrics: list = ["accuracy"],
-        epochs: int = 100,
-        batch_size: int = 32,
-        neurons: int = 32,
-        dropout: float = 0.5,
-        pred_threshold: float = 75.0,
-        validation_split: float = 0.2,
-        patience: int = 10,
+        config: 'ModelConfig',
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
     ) -> None:
-        """__init__
-
-        Parameters
-        ----------
-        algorithm : str
-            Name of algorithm creating the feature vector
-        verbose: bool
-            Verbosity
-        proteins: dict(dict)
-            Primary key: GO id, secondary key: protein id, value: sequence
-        vector_length: int
-            Length of feature vector
-        optimizer : str
-            Default "adam"
-        loss : str
-            Default "categorical_crossentropy"
-        metrics : list
-            Default ["accuracy"]
-        epochs : int
-            By default 20
-        neurons : int
-            By default 32
-        dropout : float
-            By default 0.5
-        pred_threshold : float
-            Probability threshold for classification, by default 80.0
-        """
         self.algorithm = algorithm
         self.verbose = verbose
         self.proteins = proteins
-        self.optimizer = optimizer
-        self.loss = loss
-        self.metrics = metrics
-        self.epochs = epochs
-        self.batch_size = batch_size
-        self.neurons = neurons
-        self.dropout = dropout
-        self.validation_split = validation_split
-        self.pred_threshold = pred_threshold
-        self.patience = patience
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
+
+        # Always use config object for hyperparameters
+        self.config = config
+        self.optimizer = config.optimizer
+        self.loss = config.loss
+        self.metrics = config.metrics.copy() if config.metrics else ["accuracy"]
+        self.epochs = config.epochs
+        self.batch_size = config.batch_size
+        self.neurons = config.neurons
+        self.dropout = config.dropout
+        self.validation_split = config.validation_split
+        self.pred_threshold = config.pred_threshold
+        self.patience = config.patience
+
+        # Initialize data structures
         self.go_ids = list()
         self.pids = list()
         self.features = list()
-
-        # Define the attributes to include in params for MLflow logging
         param_attributes = [
             "algorithm",
             "verbose",
-            "proteins",
             "optimizer",
             "loss",
-            "metrics",
+            "metrics", 
             "epochs",
             "batch_size",
             "neurons",
@@ -135,9 +79,6 @@ class MultiClassifier:
             "validation_split",
             "pred_threshold",
             "patience",
-            "go_ids",
-            "pids",
-            "features",
         ]
         self.params = {attr: getattr(self, attr) for attr in param_attributes}
 
@@ -263,9 +204,9 @@ class MultiClassifier:
             [
                 layers.Input(shape=input_shape),
                 layers.Dense(128, activation="relu"),
-                layers.Dropout(0.5),
+                layers.Dropout(self.dropout),  # ✅ Now uses configurable dropout
                 layers.Dense(64, activation="relu"),
-                layers.Dropout(0.3),
+                layers.Dropout(0.3),  # Could make this configurable too
                 layers.Dense(len(self.go_ids), activation="softmax"),
             ]
         )
@@ -279,16 +220,6 @@ class MultiClassifier:
         self.model = model
 
     def train_model(self) -> History:
-        """train_model
-
-        Train the Keras model using the prepared data, with early stopping, model checkpointing, and optional TensorBoard logging.
-        Splits the data into training and validation sets, sets up callbacks, and fits the model. Stores the final validation loss.
-
-        Returns
-        -------
-        dict
-            The Keras History object containing training and validation loss/metrics per epoch.
-        """
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y, test_size=self.validation_split, stratify=self.y
@@ -320,6 +251,9 @@ class MultiClassifier:
             )
             callbacks.append(tensorboard_callback)
         # Train the model
+        # We don't need this nested run AFAIK
+        # if self.use_mlflow:
+        #     mlflow.keras.autolog()
         history = self.model.fit(
             X_train,
             y_train,
@@ -388,81 +322,28 @@ class MultiClassifier:
 
     @typechecked
     def log_model(self) -> None:
-        # import logging
         from mlflow.models.signature import infer_signature
 
-        config_path = os.environ.get("MLFLOW_CONFIG_PATH")
-        if config_path is not None and Path(config_path).exists():
-            config_path = Path(config_path)
-        else:
-            cwd_config = Path(os.getcwd()) / "mlflow_config.json"
-            if cwd_config.exists():
-                config_path = cwd_config
-            else:
-                script_dir = Path(__file__).parent.parent
-                config_path = script_dir / "mlflow_config.json"
-                if not config_path.exists():
-                    raise FileNotFoundError(
-                        "Could not find mlflow_config.json. "
-                        "Set MLFLOW_CONFIG_PATH or place config in the working directory."
-                    )
+        # DagsHub already started the run, so just log
+        print("Active MLflow run:", mlflow.active_run())
 
-        with open(config_path, "r") as f:
-            config = json.load(f)
+        filtered_params = {
+            k: v for k, v in self.params.items()
+            if k in ["algorithm", "optimizer", "loss", "epochs", "batch_size", "neurons", "dropout"]
+        }
+        mlflow.log_params(filtered_params)
+        mlflow.log_metric("final_val_loss", self.final_val_loss)
+        mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
 
-        mlflow.set_tracking_uri(
-            f"http://{config['TRACKING_SERVER_HOST']}:5000"
-        )
-        mlflow.set_experiment(config["EXPERIMENT_NAME"])
+        # Add model signature
+        signature = infer_signature(self.X_train, self.model.predict(self.X_train, verbose=0))
 
-        try:
-            with mlflow.start_run():
-                # Filter only essential parameters for logging
-                filtered_params = {
-                    k: v
-                    for k, v in self.params.items()
-                    if k
-                    in [
-                        "algorithm",
-                        "optimizer",
-                        "loss",
-                        "epochs",
-                        "batch_size",
-                        "neurons",
-                        "dropout",
-                    ]
-                }
-                mlflow.log_params(filtered_params)
-
-                # Log final validation loss only
-                mlflow.log_metric("final_val_loss", self.final_val_loss)
-
-                mlflow.set_tag(
-                    "Training Info", "MultiClassifier minimal logging"
-                )
-                mlflow.set_tag("User", config["USER"])
-
-                # Avoid logging large `input_example`, which can slow things down
-                signature = infer_signature(
-                    self.X_train, self.model.predict(self.X_train, verbose=0)
-                )
-
-                # Log model without large artifacts
-                mlflow.keras.log_model(
-                    self.model,
-                    artifact_path="model",
-                    signature=signature,
-                    registered_model_name="multiclassifier.v0",
-                )
-        except Exception as e:
-            sys.exit(f"Error during MLflow logging: {e}")
-
-        # Save the model to a file
-        model_filename = f"{self.get_name()}.keras"
-        self.model.save(model_filename)
-        # Log the model file as an artifact
-        mlflow.log_artifact(
-            model_filename, artifact_path="multiclass_pfp_model"
+        # Log model
+        mlflow.keras.log_model(
+            self.model,
+            artifact_path="model",
+            signature=signature,
+            registered_model_name="multiclassifier.v0"
         )
 
     @classmethod
@@ -523,6 +404,34 @@ class MultiClassifier:
             The generated model name in the format MM-DD-YYYY-HH-MM-SS_algorithm
         """
         return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}"
+
+    # ✅ New convenience methods for when config module is available
+    @classmethod
+    def from_config_file(
+        cls, 
+        algorithm: str, 
+        verbose: bool, 
+        proteins: dict,
+        config_path: Optional[str] = None,
+        config_overrides: Optional[dict] = None,
+        use_mlflow: bool = False,
+        use_tensorboard: bool = False
+    ) -> 'MultiClassifier':
+        """
+        Create MultiClassifier from a config file.
+        """
+        model_config = ConfigManager.load_model_config(
+            config_path=config_path,
+            overrides=config_overrides
+        )
+        return cls(
+            algorithm=algorithm,
+            verbose=verbose,
+            proteins=proteins,
+            config=model_config,
+            use_mlflow=use_mlflow,
+            use_tensorboard=use_tensorboard
+        )
 
 
 class GOEncoder:

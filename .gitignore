@@ -10,6 +10,7 @@ build/
 pyproject.toml
 logs/fit/
 mlflow_config.json
+config.json
 protein-feature-vectors/
 .gitignore
 *_GOEncoder.pickle
