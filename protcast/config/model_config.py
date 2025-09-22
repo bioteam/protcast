@@ -56,12 +56,3 @@ class ConfigManager:
                 "EXPERIMENT_NAME", "default_experiment"
             ),
         )
-
-    @staticmethod
-    def load_model_config(
-        config_path: Optional[str] = None,
-        overrides: Optional[Dict[str, Any]] = None,
-    ) -> dict:
-        """Load from file with optional overrides."""
-        raw_config = ConfigManager.load_config(config_path)
-        return raw_config, overrides

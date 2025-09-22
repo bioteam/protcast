@@ -113,7 +113,7 @@ end = time.time()
 elapsed_time = round(end - start)
 
 if args.verbose:
-    print(f"\nTraining Summary:")
+    print("\nTraining Summary:")
     print(f"  Algorithm: {args.algorithm}")
     print(f"  Total elapsed time: {elapsed_time}s")
     print(
