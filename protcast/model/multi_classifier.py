@@ -6,24 +6,15 @@ import numpy as np
 import time
 from pathlib import Path
 import dagshub
-dagshub.init(
-    repo_owner='aakpan',
-    repo_name='my-first-repo',
-    mlflow=True  # this sets MLFLOW_TRACKING_URI automatically
-)
 import mlflow
-from protcast.config import ConfigManager
-# Load experiment name from config
-raw_config = ConfigManager.load_config()
-experiment_name = raw_config.get("EXPERIMENT_NAME", "default_experiment")
-mlflow.set_experiment(experiment_name)
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
-from protcast.config import ConfigManager, ModelConfig
+from protcast.config.model_config import ConfigManager
+
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 
@@ -39,7 +30,7 @@ class MultiClassifier:
         algorithm: str,
         verbose: bool,
         proteins: dict,
-        config: 'ModelConfig',
+        config: dict,
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
     ) -> None:
@@ -49,38 +40,21 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
 
-        # Always use config object for hyperparameters
-        self.config = config
-        self.optimizer = config.optimizer
-        self.loss = config.loss
-        self.metrics = config.metrics.copy() if config.metrics else ["accuracy"]
-        self.epochs = config.epochs
-        self.batch_size = config.batch_size
-        self.neurons = config.neurons
-        self.dropout = config.dropout
-        self.validation_split = config.validation_split
-        self.pred_threshold = config.pred_threshold
-        self.patience = config.patience
+        # Set config values as instance attributes
+        for key, value in config.items():
+            setattr(self, key.lower(), value)
 
         # Initialize data structures
         self.go_ids = list()
         self.pids = list()
         self.features = list()
-        param_attributes = [
-            "algorithm",
-            "verbose",
-            "optimizer",
-            "loss",
-            "metrics", 
-            "epochs",
-            "batch_size",
-            "neurons",
-            "dropout",
-            "validation_split",
-            "pred_threshold",
-            "patience",
-        ]
-        self.params = {attr: getattr(self, attr) for attr in param_attributes}
+
+        if self.use_mlflow:
+            dagshub.init(
+                repo_owner="aakpan",
+                repo_name="my-first-repo",
+                mlflow=True,  # this sets MLFLOW_TRACKING_URI automatically
+            )
 
     @typechecked
     def run(self) -> None:
@@ -204,7 +178,9 @@ class MultiClassifier:
             [
                 layers.Input(shape=input_shape),
                 layers.Dense(128, activation="relu"),
-                layers.Dropout(self.dropout),  # ✅ Now uses configurable dropout
+                layers.Dropout(
+                    self.dropout
+                ),  # ✅ Now uses configurable dropout
                 layers.Dense(64, activation="relu"),
                 layers.Dropout(0.3),  # Could make this configurable too
                 layers.Dense(len(self.go_ids), activation="softmax"),
@@ -328,22 +304,34 @@ class MultiClassifier:
         print("Active MLflow run:", mlflow.active_run())
 
         filtered_params = {
-            k: v for k, v in self.params.items()
-            if k in ["algorithm", "optimizer", "loss", "epochs", "batch_size", "neurons", "dropout"]
+            k: v
+            for k, v in self.params.items()
+            if k
+            in [
+                "algorithm",
+                "optimizer",
+                "loss",
+                "epochs",
+                "batch_size",
+                "neurons",
+                "dropout",
+            ]
         }
         mlflow.log_params(filtered_params)
         mlflow.log_metric("final_val_loss", self.final_val_loss)
         mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
 
         # Add model signature
-        signature = infer_signature(self.X_train, self.model.predict(self.X_train, verbose=0))
+        signature = infer_signature(
+            self.X_train, self.model.predict(self.X_train, verbose=0)
+        )
 
         # Log model
         mlflow.keras.log_model(
             self.model,
             artifact_path="model",
             signature=signature,
-            registered_model_name="multiclassifier.v0"
+            registered_model_name="multiclassifier.v0",
         )
 
     @classmethod
@@ -408,21 +396,20 @@ class MultiClassifier:
     # ✅ New convenience methods for when config module is available
     @classmethod
     def from_config_file(
-        cls, 
-        algorithm: str, 
-        verbose: bool, 
+        cls,
+        algorithm: str,
+        verbose: bool,
         proteins: dict,
         config_path: Optional[str] = None,
         config_overrides: Optional[dict] = None,
         use_mlflow: bool = False,
-        use_tensorboard: bool = False
-    ) -> 'MultiClassifier':
+        use_tensorboard: bool = False,
+    ) -> "MultiClassifier":
         """
         Create MultiClassifier from a config file.
         """
         model_config = ConfigManager.load_model_config(
-            config_path=config_path,
-            overrides=config_overrides
+            config_path=config_path, overrides=config_overrides
         )
         return cls(
             algorithm=algorithm,
@@ -430,7 +417,7 @@ class MultiClassifier:
             proteins=proteins,
             config=model_config,
             use_mlflow=use_mlflow,
-            use_tensorboard=use_tensorboard
+            use_tensorboard=use_tensorboard,
         )
 
 

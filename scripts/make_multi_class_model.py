@@ -12,12 +12,10 @@ from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,
 )
+from protcast.config.model_config import ConfigManager  # noqa: E402
 
-config_path = os.path.join(os.getcwd(), "mlflow_config.json")
+config = ConfigManager.load_config()
 
-# Load the configuration file
-with open(config_path, "r") as f:
-    config = json.load(f)
 
 """"make_multi_class_model.py
 Provide a Fasta file, or a text file with GO ids and a ProtCastDataset file. 
@@ -73,16 +71,7 @@ classifier = MultiClassifier(
     args.algorithm,
     args.verbose,
     proteins,
-    config["OPTIMIZER"],
-    config["LOSS"],
-    config["METRICS"],
-    config["EPOCHS"],
-    config["BATCH_SIZE"],
-    config["NEURONS"],
-    config["DROPOUT"],
-    config["PRED_THRESHOLD"],
-    config["VALIDATION_SPLIT"],
-    config["PATIENCE"],
+    config,
     args.use_mlflow,
     args.use_tensorboard,
 )

@@ -17,10 +17,10 @@ dependencies = [
     "plotly",
     "kaleido",
     "urllib3==1.26.5",
-    "numpy==1.26.4",
-    "tensorflow>=2.13",
-    "keras>=2.13",
-    "h5py",
+    "numpy<2.6,>=1.25.2",      # More specific version
+    "tensorflow>=2.8.0",
+    "keras>=2.8.0",
+    "h5py==3.9.0",
     "numba",
     "typeguard",
     "scikit-learn",
@@ -36,7 +36,7 @@ dependencies = [
     "mlflow",
     "rdkit",
     "boto3",
-    "dagshub"
+    "dagshub",
 ]
 
 [tool.setuptools]
