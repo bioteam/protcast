@@ -45,39 +45,6 @@ class ConfigManager:
         with open(path, "r") as f:
             return json.load(f)
 
-    # @staticmethod
-    # def create_model_config(
-    #     raw_config: Dict[str, Any], overrides: Optional[Dict[str, Any]] = None
-    # ) -> dict:
-    #     """Create raw config with optional overrides"""
-    #     config_dict = {}
-
-    #     # Map JSON keys to ModelConfig fields
-    #     key_mapping = {
-    #         "OPTIMIZER": "optimizer",
-    #         "LOSS": "loss",
-    #         "METRICS": "metrics",
-    #         "EPOCHS": "epochs",
-    #         "BATCH_SIZE": "batch_size",
-    #         "NEURONS": "neurons",
-    #         "DROPOUT": "dropout",
-    #         "PRED_THRESHOLD": "pred_threshold",
-    #         "VALIDATION_SPLIT": "validation_split",
-    #         "PATIENCE": "patience",
-    #     }
-
-    #     for json_key, field_name in key_mapping.items():
-    #         if json_key in raw_config:
-    #             config_dict[field_name] = raw_config[json_key]
-
-    #     # Apply overrides
-    #     if overrides:
-    #         for key, value in overrides.items():
-    #             if key in key_mapping.values():
-    #                 config_dict[key] = value
-    #             elif key.upper() in key_mapping:
-    #                 config_dict[key_mapping[key.upper()]] = value
-
     @staticmethod
     def create_experiment_config(
         raw_config: Dict[str, Any],
