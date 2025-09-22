@@ -40,7 +40,7 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
 
-        # Set config values as instance attributes
+        # Set instance attributes to the values from "config.json"
         for key, value in config.items():
             setattr(self, key.lower(), value)
 
@@ -179,7 +179,7 @@ class MultiClassifier:
                 layers.Input(shape=input_shape),
                 layers.Dense(128, activation="relu"),
                 layers.Dropout(
-                    self.dropout
+                    self.dropout  # type: ignore
                 ),  # ✅ Now uses configurable dropout
                 layers.Dense(64, activation="relu"),
                 layers.Dropout(0.3),  # Could make this configurable too
@@ -188,9 +188,9 @@ class MultiClassifier:
         )
 
         model.compile(
-            optimizer=self.optimizer,
-            loss=self.loss,
-            metrics=self.metrics,
+            optimizer=self.optimizer,  # type: ignore
+            loss=self.loss,  # type: ignore
+            metrics=self.metrics,  # type: ignore
         )
 
         self.model = model
@@ -198,7 +198,7 @@ class MultiClassifier:
     def train_model(self) -> History:
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
-            self.X, self.y, test_size=self.validation_split, stratify=self.y
+            self.X, self.y, test_size=self.validation_split, stratify=self.y  # type: ignore
         )
 
         self.X_train = X_train
@@ -206,8 +206,8 @@ class MultiClassifier:
         # Define callbacks
         early_stopping = EarlyStopping(
             monitor="val_loss",
-            min_delta=0.001,
-            patience=self.patience,
+            min_delta=0.001,  # type: ignore
+            patience=self.patience,  # type: ignore
             restore_best_weights=True,
         )
         # val_loss measures the error on the validation set
@@ -233,16 +233,16 @@ class MultiClassifier:
         history = self.model.fit(
             X_train,
             y_train,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
+            epochs=self.epochs,  # type: ignore
+            batch_size=self.batch_size,  # type: ignore
             validation_data=(X_val, y_val),
             callbacks=callbacks,
             verbose="auto",
         )
 
-        self.final_val_loss = history.history["val_loss"][-1]
+        self.final_val_loss = history.history["val_loss"][-1]  # type: ignore
 
-        return history
+        return history  # type: ignore
 
     @typechecked
     def save_model(self) -> None:
@@ -305,7 +305,7 @@ class MultiClassifier:
 
         filtered_params = {
             k: v
-            for k, v in self.params.items()
+            for k, v in self.params.items()  # type: ignore
             if k
             in [
                 "algorithm",
@@ -323,11 +323,11 @@ class MultiClassifier:
 
         # Add model signature
         signature = infer_signature(
-            self.X_train, self.model.predict(self.X_train, verbose=0)
+            self.X_train, self.model.predict(self.X_train, verbose=0)  # type: ignore
         )
 
         # Log model
-        mlflow.keras.log_model(
+        mlflow.keras.log_model(  # type: ignore
             self.model,
             artifact_path="model",
             signature=signature,
@@ -408,7 +408,7 @@ class MultiClassifier:
         """
         Create MultiClassifier from a config file.
         """
-        model_config = ConfigManager.load_model_config(
+        model_config = ConfigManager.load_model_config(  # type: ignore
             config_path=config_path, overrides=config_overrides
         )
         return cls(

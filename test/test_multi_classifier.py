@@ -114,12 +114,12 @@ elapsed_time = round(end - start)
 
 if args.verbose:
     print("\nTraining Summary:")
-    print(f"  Algorithm: {args.algorithm}")
-    print(f"  Total elapsed time: {elapsed_time}s")
+    print(f"\tAlgorithm: {args.algorithm}")
+    print(f"\tTotal elapsed time: {elapsed_time}s")
     print(
-        f"  Final validation loss: {getattr(classifier, 'final_val_loss', 'N/A')}"
+        f"\tFinal validation loss: {getattr(classifier, 'final_val_loss', 'N/A')}"
     )
     if hasattr(classifier, "model"):
-        print(f"  Model parameters: {classifier.model.count_params():,}")
+        print(f"\tModel parameters: {classifier.model.count_params():,}")
 
 print(f"Elapsed {args.algorithm} time: {elapsed_time}s")
