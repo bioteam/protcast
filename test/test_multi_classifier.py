@@ -45,16 +45,6 @@ start = time.time()
 if args.verbose:
     print("MultiClassifier defined in:", inspect.getfile(MultiClassifier))
 
-# Parse config overrides if provided
-if args.config_override:
-    try:
-        config_override = json.loads(args.config_override)
-        if args.verbose:
-            print(f"Config overrides: {json.dumps(config_override, indent=2)}")
-    except json.JSONDecodeError as e:
-        print(f"Error parsing config_override JSON: {e}")
-        sys.exit(1)
-
 # Collect proteins from FASTA
 proteins = defaultdict(dict)
 
@@ -83,6 +73,18 @@ if args.config_path is not None:
         print(f"Using config file: {args.config_path}")
 else:
     config = ConfigManager.load_config()
+
+# Use config overrides if provided
+if args.config_override:
+    try:
+        config_override = json.loads(args.config_override)
+        if args.verbose:
+            print(f"Config overrides: {json.dumps(config_override, indent=2)}")
+        config.update(config_override)
+    except json.JSONDecodeError as e:
+        print(f"Error parsing config_override JSON: {e}")
+        sys.exit(1)
+
 
 classifier = MultiClassifier(
     args.algorithm,
