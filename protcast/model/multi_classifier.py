@@ -40,7 +40,7 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
 
-        # Set instance attributes to the values from "config.json"
+        # Set hyperparameter attributes to the values from "config.json"
         for key, value in config.items():
             setattr(self, key.lower(), value)
 
