@@ -40,6 +40,7 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
 
+        self.params = config
         # Set instance attributes to the values from "config.json"
         for key, value in config.items():
             setattr(self, key.lower(), value)
@@ -55,6 +56,7 @@ class MultiClassifier:
                 repo_name="my-first-repo",
                 mlflow=True,  # this sets MLFLOW_TRACKING_URI automatically
             )
+            mlflow.set_experiment(config.get("EXPERIMENT_NAME", "Default Experiment"))
 
     @typechecked
     def run(self) -> None:
@@ -303,20 +305,22 @@ class MultiClassifier:
         # DagsHub already started the run, so just log
         print("Active MLflow run:", mlflow.active_run())
 
+        params_to_log = [
+            "algorithm",
+            "optimizer",
+            "loss",
+            "epochs",
+            "batch_size",
+            "dropout",
+        ]
+
+
         filtered_params = {
-            k: v
-            for k, v in self.params.items()  # type: ignore
-            if k
-            in [
-                "algorithm",
-                "optimizer",
-                "loss",
-                "epochs",
-                "batch_size",
-                "neurons",
-                "dropout",
-            ]
+            key: value
+            for key, value in self.params.items()
+            if key in params_to_log
         }
+        
         mlflow.log_params(filtered_params)
         mlflow.log_metric("final_val_loss", self.final_val_loss)
         mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
