@@ -333,7 +333,7 @@ class MultiClassifier:
         # Log model
         mlflow.keras.log_model(  # type: ignore
             self.model,
-            name="model",
+            artifact_path="model",
             signature=signature,
         )
 
