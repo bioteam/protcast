@@ -305,23 +305,24 @@ class MultiClassifier:
         # DagsHub already started the run, so just log
         print("Active MLflow run:", mlflow.active_run())
 
-        params_to_log = [
-            "algorithm",
-            "optimizer",
-            "loss",
-            "epochs",
-            "batch_size",
-            "dropout",
-        ]
+        # params_to_log = [
+        #     "algorithm",
+        #     "optimizer",
+        #     "loss",
+        #     "epochs",
+        #     "batch_size",
+        #     "dropout",
+        # ]
 
 
-        filtered_params = {
-            key: value
-            for key, value in self.params.items()
-            if key in params_to_log
-        }
+        # filtered_params = {
+        #     key: value
+        #     for key, value in self.params.items()
+        #     if key in params_to_log
+        # }
         
-        mlflow.log_params(filtered_params)
+        # mlflow.log_params(filtered_params)
+        mlflow.log_params(self.params)
         mlflow.log_metric("final_val_loss", self.final_val_loss)
         mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
 
@@ -335,6 +336,7 @@ class MultiClassifier:
             self.model,
             artifact_path="model",
             signature=signature,
+            registered_model_name="multiclassifier.v0",
         )
 
     @classmethod
