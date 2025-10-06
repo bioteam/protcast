@@ -40,8 +40,8 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
 
-        self.params = config
         # Set instance attributes to the values from "config.json"
+        self.params = config
         for key, value in config.items():
             setattr(self, key.lower(), value)
 
