@@ -24,8 +24,9 @@ This script analyzes GO term subgraphs by depth level in the molecular function 
 It takes:
 - Path to serialized ProtCastDataset file
 - Minimum number of sequences required for analysis
+- Maximum number of sequences used to train a model
 
-For each depth level in the molecular function graph:
+For each depth level in the Molecular Function graph:
     For each GO term at that depth:
       - Get the subgraph of GO terms for the GO term
       - Get the sequences associated with all the GO terms in the subgraph
