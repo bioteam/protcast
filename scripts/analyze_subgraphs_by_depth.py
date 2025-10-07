@@ -107,21 +107,25 @@ def prepare_training_data(
     # Get negative sequences (not in subgraph)
     all_protein_ids = set(dataset.proteins.keys())
     negative_protein_ids = all_protein_ids - set(positive_ids)
-    negative_protein_ids = list(negative_protein_ids)
+    
+    # Filter to only include proteins that have sequences
+    valid_negative_ids = []
+    for pid in negative_protein_ids:
+        if pid in dataset.proteins and dataset.proteins[pid].sequence:
+            valid_negative_ids.append(pid)
 
     # Sample equal number of negative sequences
     random.seed(42)  # For reproducibility
-    if len(negative_protein_ids) >= len(positive_ids):
+    if len(valid_negative_ids) >= len(positive_ids):
         sampled_negative_ids = random.sample(
-            negative_protein_ids, len(positive_ids)
+            valid_negative_ids, len(positive_ids)
         )
     else:
-        sampled_negative_ids = negative_protein_ids
+        sampled_negative_ids = valid_negative_ids
 
     negative_sequences = []
     for pid in sampled_negative_ids:
-        if pid in dataset.proteins and dataset.proteins[pid].sequence:
-            negative_sequences.append(dataset.proteins[pid].sequence)
+        negative_sequences.append(dataset.proteins[pid].sequence)
 
     return positive_sequences, negative_sequences
 
