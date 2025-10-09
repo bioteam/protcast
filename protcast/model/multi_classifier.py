@@ -104,7 +104,7 @@ class MultiClassifier:
         X = np.zeros((num_samples, self.vector_length))
         y = np.zeros(num_samples, dtype=int)
 
-        go_encoder = GOEncoder()
+        go_encoder = GOEncoder(self.id)
         go_encoder.fit(self.go_ids)
 
         # Need to account for different number of proteins for different GO ids
@@ -446,7 +446,7 @@ class GOEncoder:
     """GOEncoder
 
     # Example usage:
-    go_encoder = GOEncoder()
+    go_encoder = GOEncoder('test')
     go_ids = ['GO:1224', 'GO:5678', 'GO:9101', 'GO:1224', 'GO:5678']
     go_encoder.fit(go_ids)
 
@@ -479,6 +479,8 @@ class GOEncoder:
             Mapping from integer label to GO ID (str).
         num_classes : int
             Number of unique GO IDs.
+        id : str
+            Identifier for the GOEncoder instance, used in saving the encoder.
         """
         self.go_to_int = None
         self.int_to_go = None
