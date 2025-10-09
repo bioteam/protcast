@@ -213,6 +213,7 @@ def train_and_evaluate_model(
     test_proteins_dict,
     test_labels,
     config,
+    algorithm,
     go_id,
     verbose=False,
 ):
@@ -234,7 +235,7 @@ def train_and_evaluate_model(
 
     # Train model
     classifier = MultiClassifier(
-        algorithm="AAC",  # Amino Acid Composition
+        algorithm=algorithm,
         verbose=False,  # Reduce verbosity for batch processing
         proteins=train_proteins_dict,
         config=config,
@@ -260,17 +261,28 @@ def train_and_evaluate_model(
     test_classifier.get_feature_vectors()
     test_classifier.prepare_data()
 
+    # Regenerate test labels based on actual samples that made it through feature extraction
+    # test_classifier.y contains the labels for samples that successfully generated features
+    actual_test_labels = np.argmax(test_classifier.y, axis=1)
+
     # Make predictions
     predictions = classifier.model.predict(test_classifier.X)
     predicted_classes = np.argmax(predictions, axis=1)
 
-    # Calculate F1 score
-    f1 = f1_score(test_labels, predicted_classes, average="binary")
+    # Verify matching sample counts
+    if len(actual_test_labels) != len(predicted_classes):
+        print(
+            f"      ERROR: Label count mismatch: {len(actual_test_labels)} vs {len(predicted_classes)}"
+        )
+        return 0.0
+
+    # Calculate F1 score using the actual labels that match the predictions
+    f1 = f1_score(actual_test_labels, predicted_classes, average="binary")
 
     return f1
 
 
-def process_go_term(term, dataset, config, args):
+def process_go_term(term, dataset, config, algorithm, args):
     """Process a single GO term: collect sequences, train model, evaluate.
 
     Args:
@@ -329,6 +341,7 @@ def process_go_term(term, dataset, config, args):
             test_proteins_dict,
             test_labels,
             config,
+            algorithm,
             term.go_id,
             args.verbose,
         )
@@ -430,6 +443,11 @@ def main():
         help="Path to serialized dataset",
     )
     parser.add_argument(
+        "-a",
+        "--algorithm",
+        required=True,
+    )
+    parser.add_argument(
         "-c",
         "--config",
         default="config.json",
@@ -481,7 +499,9 @@ def main():
 
         # Process each GO term at this depth
         for term in terms_at_depth:
-            result = process_go_term(term, dataset, config, args)
+            result = process_go_term(
+                term, dataset, config, args.algorithm, args
+            )
             if result:
                 results.append(result)
 
