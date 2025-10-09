@@ -269,7 +269,16 @@ class MultiClassifier:
                 log_dir=log_dir, histogram_freq=1
             )
             callbacks.append(tensorboard_callback)
-        # Train the model
+        """
+        Training output example:
+
+        Epoch 1/100
+        80/80 ━━━━━━━━━━━━━━━━━━━━ 2s 15ms/step - loss: 0.5234 - accuracy: 0.7156
+
+        Step = Batch (one forward + backward pass through a batch of data)
+        15ms/step = 15 milliseconds per batch
+        80 steps = 80 batches = 1 epoch
+        """
         history = self.model.fit(
             X_train,
             y_train,
