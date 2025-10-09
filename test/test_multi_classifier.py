@@ -85,12 +85,15 @@ if args.config_override:
         print(f"Error parsing config_override JSON: {e}")
         sys.exit(1)
 
+# Generate a unique ID for this test run
+test_id = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())
 
 classifier = MultiClassifier(
     args.algorithm,
     args.verbose,
     proteins,
     config,
+    test_id,
     use_mlflow=args.use_mlflow,
     use_tensorboard=args.use_tensorboard,
 )

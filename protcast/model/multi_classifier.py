@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 import keras
 import pickle
 import numpy as np
@@ -14,7 +13,6 @@ from keras.metrics import F1Score  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
-from protcast.config.model_config import ConfigManager
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -32,6 +30,7 @@ class MultiClassifier:
         verbose: bool,
         proteins: dict,
         config: dict,
+        id: str,
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
     ) -> None:
@@ -40,6 +39,7 @@ class MultiClassifier:
         self.proteins = proteins
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
+        self.id = id
 
         # Set instance attributes to the values from "config.json"
         self.params = config
@@ -128,7 +128,7 @@ class MultiClassifier:
         
         Vector length: 100, number of proteins (samples): 305, number of GO ids (classes): 3
         """
-        go_encoder.save()
+        go_encoder.save(self.id)
 
     @typechecked
     def build_model(self) -> None:
@@ -136,8 +136,7 @@ class MultiClassifier:
 
         The final layer uses num_classes for the number of units, ensuring it matches the number
         of GO ids. The model is compiled with 'categorical_crossentropy' loss, which is suitable for
-        multi-class problems with mutually exclusive classes. We're using 'accuracy' as a metric, but
-        consider metrics like F1-score or area under the ROC curve.
+        multi-class problems with mutually exclusive classes.
         """
         # X.shape[1] = self.vector_length, X.shape[0] = total number of samples across GO ids.
         input_shape = (self.X.shape[1],)
@@ -183,9 +182,7 @@ class MultiClassifier:
             [
                 layers.Input(shape=input_shape),
                 layers.Dense(128, activation="relu"),
-                layers.Dropout(
-                    self.dropout  # type: ignore
-                ),  # Now uses configurable dropout
+                layers.Dropout(self.dropout),  # type: ignore
                 layers.Dense(64, activation="relu"),
                 layers.Dropout(0.3),  # Could make this configurable too
                 layers.Dense(len(self.go_ids), activation="softmax"),
@@ -442,33 +439,7 @@ class MultiClassifier:
         str
             The generated model name in the format MM-DD-YYYY-HH-MM-SS_algorithm
         """
-        return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}"
-
-    @classmethod
-    def from_config_file(
-        cls,
-        algorithm: str,
-        verbose: bool,
-        proteins: dict,
-        config_path: Optional[str] = None,
-        config_overrides: Optional[dict] = None,
-        use_mlflow: bool = False,
-        use_tensorboard: bool = False,
-    ) -> "MultiClassifier":
-        """
-        Create MultiClassifier from a config file.
-        """
-        model_config = ConfigManager.load_model_config(  # type: ignore
-            config_path=config_path, overrides=config_overrides
-        )
-        return cls(
-            algorithm=algorithm,
-            verbose=verbose,
-            proteins=proteins,
-            config=model_config,
-            use_mlflow=use_mlflow,
-            use_tensorboard=use_tensorboard,
-        )
+        return f"{self.id}_{self.algorithm}"
 
 
 class GOEncoder:
@@ -497,7 +468,7 @@ class GOEncoder:
     print(f"Top 2 GO IDs with probabilities: {top_go_ids}")
     """
 
-    def __init__(self):
+    def __init__(self, id):
         """Initialize a GOEncoder instance.
 
         Attributes
@@ -512,6 +483,7 @@ class GOEncoder:
         self.go_to_int = None
         self.int_to_go = None
         self.num_classes = 0
+        self.id = id
 
     def fit(self, go_ids):
         """fit
@@ -566,7 +538,7 @@ class GOEncoder:
         -------
         None
         """
-        filename = f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_GOEncoder.pickle"
+        filename = f"{self.id}_GOEncoder.pickle"
         with open(filename, "wb") as f:
             pickle.dump(self, f)
 

@@ -238,6 +238,7 @@ def train_and_evaluate_model(
         verbose=False,  # Reduce verbosity for batch processing
         proteins=train_proteins_dict,
         config=config,
+        id=go_id,
         use_mlflow=False,
         use_tensorboard=False,
     )
@@ -252,6 +253,7 @@ def train_and_evaluate_model(
         verbose=False,
         proteins=test_proteins_dict,
         config=config,
+        id=go_id,
         use_mlflow=False,
         use_tensorboard=False,
     )

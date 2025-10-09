@@ -65,11 +65,15 @@ for go_id in go_ids:
             }
             proteins[go_id].update(seqs)
 
+# Generate a unique ID for this model run
+model_id = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())
+
 classifier = MultiClassifier(
     args.algorithm,
     args.verbose,
     proteins,
     config,
+    model_id,
     args.use_mlflow,
     args.use_tensorboard,
 )
