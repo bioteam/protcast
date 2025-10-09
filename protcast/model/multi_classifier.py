@@ -10,6 +10,7 @@ import mlflow
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
+from keras.metrics import F1Score  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
 from protein_feature_vectors import Calculator
@@ -184,17 +185,22 @@ class MultiClassifier:
                 layers.Dense(128, activation="relu"),
                 layers.Dropout(
                     self.dropout  # type: ignore
-                ),  # ✅ Now uses configurable dropout
+                ),  # Now uses configurable dropout
                 layers.Dense(64, activation="relu"),
                 layers.Dropout(0.3),  # Could make this configurable too
                 layers.Dense(len(self.go_ids), activation="softmax"),
             ]
         )
 
+        # Build metrics list - include both config metrics and F1Score
+        metrics_list = list(self.metrics) if isinstance(self.metrics, list) else [self.metrics]  # type: ignore
+        # Add F1Score for multi-class classification (macro averaging)
+        metrics_list.append(F1Score(average="macro", name="f1_score"))
+
         model.compile(
             optimizer=self.optimizer,  # type: ignore
             loss=self.loss,  # type: ignore
-            metrics=self.metrics,  # type: ignore
+            metrics=metrics_list,
         )
 
         self.model = model
@@ -207,21 +213,31 @@ class MultiClassifier:
 
         self.X_train = X_train
 
-        # Define callbacks
-        early_stopping = EarlyStopping(
-            monitor="val_loss",
+        # EarlyStopping stops training when a monitored metric has stopped improving
+        # early_stopping = EarlyStopping(
+        #     monitor="val_loss",
+        #     min_delta=0.001,  # type: ignore
+        #     patience=self.patience,  # type: ignore
+        #     restore_best_weights=True,
+        # )
+        # EarlyStopping based on F1 score (higher is better)
+        early_stopping_f1 = EarlyStopping(
+            monitor="val_f1_score",
             min_delta=0.001,  # type: ignore
             patience=self.patience,  # type: ignore
             restore_best_weights=True,
+            mode="max",  # F1 score should be maximized
         )
         # val_loss measures the error on the validation set
+        # ModelCheckpoint saves the model or weights to disk at some interval
+        # and can save the best model based on a monitored metric to use later
         loss_checkpoint = ModelCheckpoint(
             filepath=f"{self.get_name()}.keras",
             monitor="val_loss",
             save_best_only=True,
             mode="min",
         )
-        callbacks = [early_stopping, loss_checkpoint]
+        callbacks = [early_stopping_f1, loss_checkpoint]
         if self.use_tensorboard:
             log_dir = "logs/fit/" + time.strftime(
                 "%m-%d-%Y-%H-%M-%S", time.localtime()
@@ -231,9 +247,6 @@ class MultiClassifier:
             )
             callbacks.append(tensorboard_callback)
         # Train the model
-        # We don't need this nested run AFAIK
-        # if self.use_mlflow:
-        #     mlflow.keras.autolog()
         history = self.model.fit(
             X_train,
             y_train,
@@ -399,7 +412,6 @@ class MultiClassifier:
         """
         return f"{time.strftime('%m-%d-%Y-%H-%M-%S', time.localtime())}_{self.algorithm}"
 
-    # ✅ New convenience methods for when config module is available
     @classmethod
     def from_config_file(
         cls,
