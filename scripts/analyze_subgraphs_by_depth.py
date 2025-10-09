@@ -107,12 +107,14 @@ def prepare_training_data(
     # Get negative sequences (not in subgraph)
     all_protein_ids = set(dataset.proteins.keys())
     negative_protein_ids = all_protein_ids - set(positive_ids)
-    
-    # Filter to only include proteins that have sequences
+
+    # Filter to only include proteins that have valid sequences
     valid_negative_ids = []
     for pid in negative_protein_ids:
-        if pid in dataset.proteins and dataset.proteins[pid].sequence:
-            valid_negative_ids.append(pid)
+        if pid in dataset.proteins:
+            protein = dataset.proteins[pid]
+            if protein.sequence and len(protein.sequence) > 0:
+                valid_negative_ids.append(pid)
 
     # Sample equal number of negative sequences
     random.seed(42)  # For reproducibility
@@ -123,9 +125,26 @@ def prepare_training_data(
     else:
         sampled_negative_ids = valid_negative_ids
 
+    # Collect negative sequences with validation
     negative_sequences = []
     for pid in sampled_negative_ids:
-        negative_sequences.append(dataset.proteins[pid].sequence)
+        seq = dataset.proteins[pid].sequence
+        if seq and len(seq) > 0:
+            negative_sequences.append(seq)
+
+    # Final validation to ensure equal counts
+    if len(positive_sequences) != len(negative_sequences):
+        if verbose:
+            print("      WARNING: Sequence count mismatch!")
+            print(
+                f"      Positive: {len(positive_sequences)}, Negative: {len(negative_sequences)}"
+            )
+        # Adjust to match the smaller count
+        min_count = min(len(positive_sequences), len(negative_sequences))
+        positive_sequences = positive_sequences[:min_count]
+        negative_sequences = negative_sequences[:min_count]
+        if verbose:
+            print(f"      Adjusted both to: {min_count}")
 
     return positive_sequences, negative_sequences
 

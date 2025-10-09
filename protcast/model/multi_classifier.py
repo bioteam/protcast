@@ -211,6 +211,29 @@ class MultiClassifier:
             self.X, self.y, test_size=self.validation_split, stratify=self.y  # type: ignore
         )
 
+        """
+        Metrics that are logged during training:
+
+        f1_score (training F1 score):
+        - Calculated on the training data during each epoch
+        - Uses the data the model is actively learning from
+        - Typically higher because the model is optimizing on this data
+        
+        val_f1_score (validation F1 score)
+        - Calculated on the validation data at the end of each epoch
+        - Uses held-out data the model hasn't trained on (20% of your data based on VALIDATION_SPLIT: 0.2)
+        - Typically lower because the model hasn't seen this data during training
+        -  More important metric - indicates how well the model generalizes to unseen data
+
+        final_val_loss: (validation loss)
+        - Calculated on the validation data at the end of each epoch
+        - Uses held-out data the model hasn't trained on (20% of your data based on VALIDATION_SPLIT: 0.2)
+        - Typically lower because the model hasn't seen this data during training
+        - Important metric for understanding model performance on unseen data
+
+        final_val_loss is logged once after training completes, while f1_score and val_f1_score are logged every epoch.
+        """
+
         self.X_train = X_train
 
         # EarlyStopping stops training when a monitored metric has stopped improving
