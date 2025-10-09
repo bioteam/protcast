@@ -128,7 +128,7 @@ class MultiClassifier:
         
         Vector length: 100, number of proteins (samples): 305, number of GO ids (classes): 3
         """
-        go_encoder.save(self.id)
+        go_encoder.save()
 
     @typechecked
     def build_model(self) -> None:
@@ -482,10 +482,10 @@ class GOEncoder:
         id : str
             Identifier for the GOEncoder instance, used in saving the encoder.
         """
+        self.id = id
         self.go_to_int = None
         self.int_to_go = None
         self.num_classes = 0
-        self.id = id
 
     def fit(self, go_ids):
         """fit
