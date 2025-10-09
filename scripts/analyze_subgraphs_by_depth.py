@@ -248,7 +248,7 @@ def train_and_evaluate_model(
         print(f"      Evaluating model for {go_id}")
 
     test_classifier = MultiClassifier(
-        algorithm="AAC",
+        algorithm=algorithm,  # Use same algorithm as training
         verbose=False,
         proteins=test_proteins_dict,
         config=config,
