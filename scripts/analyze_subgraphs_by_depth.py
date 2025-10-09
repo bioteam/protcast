@@ -158,7 +158,7 @@ def create_classifier_datasets(positive_sequences, negative_sequences, go_id):
         go_id: GO term ID for positive class
 
     Returns:
-        tuple: (train_proteins_dict, test_proteins_dict, test_labels)
+        tuple: (train_proteins_dict, test_proteins_dict)
     """
     # Combine sequences and create labels
     all_sequences = positive_sequences + negative_sequences
@@ -205,13 +205,12 @@ def create_classifier_datasets(positive_sequences, negative_sequences, go_id):
             ] = seq
             test_neg_count += 1
 
-    return train_proteins_dict, test_proteins_dict, test_labels
+    return train_proteins_dict, test_proteins_dict
 
 
 def train_and_evaluate_model(
     train_proteins_dict,
     test_proteins_dict,
-    test_labels,
     config,
     algorithm,
     go_id,
@@ -222,8 +221,8 @@ def train_and_evaluate_model(
     Args:
         train_proteins_dict: Training data for MultiClassifier
         test_proteins_dict: Test data for MultiClassifier
-        test_labels: True labels for test data
         config: Configuration dictionary for MultiClassifier
+        algorithm: Feature vector algorithm to use
         go_id: GO term ID being processed
         verbose: Whether to print progress information
 
@@ -328,10 +327,8 @@ def process_go_term(term, dataset, config, algorithm, args):
         )
 
     # Create datasets for classifier
-    train_proteins_dict, test_proteins_dict, test_labels = (
-        create_classifier_datasets(
-            positive_sequences, negative_sequences, term.go_id
-        )
+    train_proteins_dict, test_proteins_dict = create_classifier_datasets(
+        positive_sequences, negative_sequences, term.go_id
     )
 
     try:
@@ -339,7 +336,6 @@ def process_go_term(term, dataset, config, algorithm, args):
         f1 = train_and_evaluate_model(
             train_proteins_dict,
             test_proteins_dict,
-            test_labels,
             config,
             algorithm,
             term.go_id,
