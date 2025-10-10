@@ -48,7 +48,6 @@ class BinaryClassifier:
         target_seqs: dict,
         non_target_seqs: dict,
         algorithm: str,
-        feature_creator: str,
         name: str,
         verbose: bool,
         save: bool,
@@ -134,7 +133,7 @@ class BinaryClassifier:
             self.algorithm, pdict=self.target_seqs
         )
         self.non_target_features, non_target_ids = fv.get_feature_vectors(
-            self.algorithm, pdict=self.target_seqs
+            self.algorithm, pdict=self.non_target_seqs
         )
 
         self.all_ids = target_ids + non_target_ids
