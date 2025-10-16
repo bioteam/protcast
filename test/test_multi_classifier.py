@@ -112,17 +112,28 @@ except Exception as e:
         traceback.print_exc()
     sys.exit(1)
 
+elapsed_time = round(time.time() - start, 2)
 end = time.time()
-elapsed_time = round(end - start)
+
 
 if args.verbose:
     print("\nTraining Summary:")
     print(f"\tAlgorithm: {args.algorithm}")
-    print(f"\tTotal elapsed time: {elapsed_time}s")
-    print(
-        f"\tFinal validation loss: {getattr(classifier, 'final_val_loss', 'N/A')}"
-    )
+    print(f"\tModel training time: {round(classifier.training_time, 2)}s")
+    print(f"\tMLflow logging time: {round(classifier.logging_time, 2)}s")
+    print(f"\tTotal Elapsed  Script Time{args.algorithm} time: {elapsed_time}s")
+    if hasattr(classifier, "history") and classifier.history.history:
+            history = classifier.history.history
+            
+            # Best validation F1 score and the epoch it occurred at
+            best_val_f1 = max(history["val_f1_score"])
+            best_epoch = history["val_f1_score"].index(best_val_f1) + 1
+            # Total epochs that were actually run
+            epochs_run = len(history["val_f1_score"])
+
+            print(f"\tBest validation F1 Score: {round(best_val_f1, 4)} (at Epoch {best_epoch})")
+            print(f"\tTotal epochs run: {epochs_run} (out of {classifier.epochs})")
     if hasattr(classifier, "model"):
         print(f"\tModel parameters: {classifier.model.count_params():,}")
 
-print(f"Elapsed {args.algorithm} time: {elapsed_time}s")
+
