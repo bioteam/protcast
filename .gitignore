@@ -8,9 +8,9 @@ venv/
 build/
 *.keras
 pyproject.toml
-logs/fit/
-mlflow_config.json
+logs/
 config.json
-protein-feature-vectors/
 .gitignore
 *_GOEncoder.pickle
+pyproject.toml
+multi_classification/
