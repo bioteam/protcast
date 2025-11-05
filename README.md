@@ -17,6 +17,10 @@ cd protein-feature-vectors
 pip3 install .
 ```
 
+### Install `mmseqs`
+
+Binaries can be downloaded at [mmseqs.com](https://dev.mmseqs.com/latest/).
+
 ### Install *ProtCast*
 
 ```shell
@@ -497,6 +501,40 @@ L1/L2 Regularization: Adds penalties that push weights toward zero
 Dropout: Temporarily disables neurons, affecting weight update patterns
 Batch Normalization: Changes the dynamics of weight updates
 Code Example: Visualizing Weight Changes
+
+
+ Feed-forward (also called a forward pass) is the fundamental process of passing input data through
+   the network, layer by layer, until it reaches the output layer and makes a prediction. The data
+  flows in one direction—forward—without any loops.
+
+  1. Role in Inference
+
+  Inference is the process of using a trained model to make a prediction on new, unseen data.
+
+  The entire process of inference is a feed-forward pass.
+
+   1. You provide an input (e.g., an image or text).
+   2. The data flows forward through the network's layers.
+   3. The network produces an output (the prediction).
+
+  That's it. There is no other step. So, Inference = Feed-Forward.
+
+  2. Role in Training
+
+  Training is the process of teaching the model by showing it labeled data and updating its weights.
+
+  The training process for a single batch of data consists of two main steps:
+
+   1. The Feed-Forward Pass: The network takes an input from the training data and performs a forward
+      pass to generate a prediction. This is the exact same mechanism as in inference.
+
+   2. The Backward Pass (Backpropagation): This is what makes it "training."
+       * The model compares its prediction from the forward pass to the correct label and calculates
+         the error (loss).
+       * It then propagates this error signal backward through the network, calculating the gradient
+         (the direction of error change) for every weight.
+       * The optimizer uses these gradients to update the weights, slightly improving the network.
+
 
 ```py
 import matplotlib.pyplot as plt

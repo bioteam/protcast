@@ -17,7 +17,7 @@ dependencies = [
     "plotly",
     "kaleido",
     "urllib3==1.26.5",
-    "numpy<2.6,>=1.25.2",      # More specific version
+    "numpy<2.0,>=1.25.2",      # More specific version
     "tensorflow>=2.8.0",
     "keras>=2.8.0",
     "h5py==3.9.0",
@@ -35,7 +35,6 @@ dependencies = [
     "protein-feature-vectors",
     "mlflow",
     "rdkit",
-    "boto3",
     "dagshub",
 ]
 
