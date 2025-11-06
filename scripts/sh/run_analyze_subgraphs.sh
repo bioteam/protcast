@@ -7,11 +7,10 @@
 #SBATCH -N 2
 #SBATCH -n 32
 
-#DIR=multi-classification
 #NAME=gpu
-CONTAINER=~/tensorflow_2.17.0-gpu.sif
+CONTAINER=${HOME}/tensorflow_2.17.0-gpu.sif
 ALGORITHM=CTriad
-DATASET=/work2/04769/bosborne/frontera/ProtCast/
+DATASET=${WORK}/ProtCast/ProtCastDataset/11-03-2025/ProtCastDataset.bin
 
 source ${HOME}/.bash_profile
 # Only use modules from the container
@@ -20,4 +19,8 @@ module load tacc-apptainer
 
 cd ${HOME}/git/ProtCast/
 
-singularity exec --nv $CONTAINER python3 scripts/analyze_subgraphs.py -v -p $DATASET -a $ALGORITHM
+singularity exec --nv $CONTAINER \
+python3 scripts/analyze_subgraphs_by_depth.py \
+-v \
+-p $DATASET \
+-a $ALGORITHM
