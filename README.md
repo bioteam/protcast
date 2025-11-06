@@ -237,14 +237,45 @@ Download the 4 input files necessary to build a ProtCastDataset:
 ```
 
 #### `create_protcast_dataset.sh`
+## Running Jobs on TACC for Training and Evaluation
+
+1. SSH into your provisioned Frontera account
+
+2. Request a job queue with GPU access, such as rtx or rtx-dev
+   
+  ``` 
+  idev -p rtx-dev -t 00:30:00
+  ```
+  [TACC documenation](https://docs.tacc.utexas.edu/hpc/frontera/#queues) on queues for reference
+
+   
+3. Load TACC's Apptainer module
+  ``` 
+  module load tacc-apptainer
+  ```
+
+4. Git Clone ProtCast and its dependencies
+
+5. Start an interactive shell session inside a Singularity container so that it has access to the cluster's NVIDIA GPUs
+  ```
+  singularity shell --nv tensorflow_2.17.0-gpu.sif
+  ```
+
+6. Run the pip install commands for ProtCast and its dependencies if you haven't yet
+  ```
+  pip3 install .
+  ```
+
+7. Now, whatever test or training scripts you run will have access to GPU acceleration
+   
 
 ## Profiling and Benchmarking
 
 ### Tensorflow Profiling
 
-1.The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as a part of the pyproject.toml
+1. The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as part of the pyproject.toml
 
-2.Add a tensorboard callback to the model fitting step to profile your TensorFlow model
+2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model
 
 ```python
 # Profiler callback in binary_classifier.py
@@ -259,14 +290,14 @@ self.training_model.fit(
 )
 ```
 
-3.Load the relevant modules
+3. Load the relevant modules
 
 ```shell
 module load all/TensorFlow/2.15.1-Python-3.10 
 module load all/CUDA   
 ```
 
-4.Run the script that fits your model.
+4. Run the script that fits your model.
    eg. to profile the model in binary_classifier.py you'd run
 
 ```shell

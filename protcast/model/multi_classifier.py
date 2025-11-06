@@ -6,6 +6,9 @@ import time
 from pathlib import Path
 import dagshub
 import mlflow
+from mlflow.tracking import MlflowClient
+from mlflow.entities import Metric
+from mlflow.models.signature import infer_signature
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
@@ -50,6 +53,9 @@ class MultiClassifier:
         self.go_ids = list()
         self.pids = list()
         self.features = list()
+        
+        self.training_time = 0
+        self.logging_time = 0
 
         if self.use_mlflow:
             dagshub.init(
@@ -266,6 +272,9 @@ class MultiClassifier:
                 log_dir=log_dir, histogram_freq=1
             )
             callbacks.append(tensorboard_callback)
+            
+        # Start timing for training
+        train_start_time = time.time()
         """
         Training output example:
 
@@ -286,7 +295,9 @@ class MultiClassifier:
             verbose="auto",
         )
 
-        self.final_val_loss = history.history["val_loss"][-1]  # type: ignore
+        # End timing and store the duration
+        self.training_time = time.time() - train_start_time
+        self.history = history
 
         return history  # type: ignore
 
@@ -344,43 +355,61 @@ class MultiClassifier:
 
     @typechecked
     def log_model(self) -> None:
-        from mlflow.models.signature import infer_signature
+        # Start timing for logging
+        log_start_time = time.time()
 
-        # DagsHub already started the run, so just log
-        print("Active MLflow run:", mlflow.active_run())
-
-        # params_to_log = [
-        #     "algorithm",
-        #     "optimizer",
-        #     "loss",
-        #     "epochs",
-        #     "batch_size",
-        #     "dropout",
-        # ]
-
-        # filtered_params = {
-        #     key: value
-        #     for key, value in self.params.items()
-        #     if key in params_to_log
-        # }
-
-        # mlflow.log_params(filtered_params)
+        print("\n--- Starting MLflow Logging ---")
+        
         mlflow.log_params(self.params)
-        mlflow.log_metric("final_val_loss", self.final_val_loss)
-        mlflow.set_tag("Training Info", "MultiClassifier minimal logging")
 
-        # Add model signature
+        # --- BATCH LOGGING WITH FEEDBACK ---
+        print("  > Logging metrics in a single batch...", end="", flush=True)
+        client = MlflowClient()
+        run_id = mlflow.active_run().info.run_id
+        metrics_to_log = []
+        num_epochs = len(next(iter(self.history.history.values())))
+
+        for epoch in range(num_epochs):
+            for metric_name, values in self.history.history.items():
+                metrics_to_log.append(
+                    Metric(
+                        key=metric_name,
+                        value=values[epoch],
+                        timestamp=int(time.time() * 1000),
+                        step=epoch
+                    )
+                )
+
+        client.log_batch(run_id=run_id, metrics=metrics_to_log)
+        print(" done.")
+        
+        # --- SIGNATURE INFERENCE WITH FEEDBACK ---
+        print("  > Inferring model signature...", end="", flush=True)
         signature = infer_signature(
-            self.X_train, self.model.predict(self.X_train, verbose=0)  # type: ignore
+            self.X_train, self.model.predict(self.X_train, verbose=0)
         )
+        print(" done.")
 
-        # Log model
-        mlflow.keras.log_model(  # type: ignore
+        # --- MODEL UPLOAD WITH FEEDBACK ---
+        print("  > Uploading model artifact to MLflow...", end="", flush=True)
+        mlflow.keras.log_model(
             self.model,
             artifact_path="model",
             signature=signature,
             registered_model_name="multiclassifier.v0",
         )
+        print(" done.")
+
+        mlflow.set_tag("Training Info", "MultiClassifier full logging")
+        
+        # End timing and store the duration
+        self.logging_time = time.time() - log_start_time
+
+        # Log the final summary timing metrics
+        mlflow.log_metric("training_time_seconds", round(self.training_time, 2))
+        mlflow.log_metric("total_logging_time_seconds", round(self.logging_time, 2))
+        
+        print("--- MLflow Logging Complete ---")
 
     @classmethod
     def load_model(cls, model_path: Path) -> keras.models.Model:
