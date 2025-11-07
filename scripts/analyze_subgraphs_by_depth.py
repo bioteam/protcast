@@ -52,7 +52,7 @@ def collect_subgraph_sequences(dataset, go_term, verbose=False):
     subgraph_go_ids = dataset.get_subgraph(go_term.go_id)
 
     if verbose:
-        print(f"      Subgraph contains {len(subgraph_go_ids)} GO terms")
+        print(f"Subgraph contains {len(subgraph_go_ids)} GO terms")
 
     subgraph_sequences = {}
 
@@ -68,7 +68,7 @@ def collect_subgraph_sequences(dataset, go_term, verbose=False):
                             subgraph_sequences[pid] = protein.sequence
 
     if verbose:
-        print(f"      Found {len(subgraph_sequences)} sequences in subgraph")
+        print(f"Found {len(subgraph_sequences)} sequences in subgraph")
 
     return subgraph_sequences
 
@@ -94,7 +94,7 @@ def prepare_training_data(
     if len(positive_sequences) > max_seqs:
         if verbose:
             print(
-                f"      Limiting to {max_seqs} sequences (from {len(positive_sequences)})"
+                f"Limiting to {max_seqs} sequences (from {len(positive_sequences)})"
             )
         random.seed(42)  # For reproducibility
         # Sample sequences and their corresponding IDs together
@@ -135,16 +135,16 @@ def prepare_training_data(
     # Final validation to ensure equal counts
     if len(positive_sequences) != len(negative_sequences):
         if verbose:
-            print("      WARNING: Sequence count mismatch!")
+            print("WARNING: Sequence count mismatch!")
             print(
-                f"      Positive: {len(positive_sequences)}, Negative: {len(negative_sequences)}"
+                f"Positive: {len(positive_sequences)}, Negative: {len(negative_sequences)}"
             )
         # Adjust to match the smaller count
         min_count = min(len(positive_sequences), len(negative_sequences))
         positive_sequences = positive_sequences[:min_count]
         negative_sequences = negative_sequences[:min_count]
         if verbose:
-            print(f"      Adjusted both to: {min_count}")
+            print(f"Adjusted both to: {min_count}")
 
     return positive_sequences, negative_sequences
 
@@ -230,7 +230,7 @@ def train_and_evaluate_model(
         float: F1 score of the trained model
     """
     if verbose:
-        print(f"      Training model for {go_id}")
+        print(f"Training model for {go_id}")
 
     # Train model
     classifier = MultiClassifier(
@@ -246,7 +246,7 @@ def train_and_evaluate_model(
 
     # Evaluate model
     if verbose:
-        print(f"      Evaluating model for {go_id}")
+        print(f"Evaluating model for {go_id}")
 
     test_classifier = MultiClassifier(
         algorithm=algorithm,  # Use same algorithm as training
@@ -273,7 +273,7 @@ def train_and_evaluate_model(
     # Verify matching sample counts
     if len(actual_test_labels) != len(predicted_classes):
         print(
-            f"      ERROR: Label count mismatch: {len(actual_test_labels)} vs {len(predicted_classes)}"
+            f"ERROR: Label count mismatch: {len(actual_test_labels)} vs {len(predicted_classes)}"
         )
         return 0.0
 
@@ -283,7 +283,7 @@ def train_and_evaluate_model(
     return f1
 
 
-def process_go_term(term, dataset, config, algorithm, args):
+def analyze_go_term(term, dataset, config, algorithm, args):
     """Process a single GO term: collect sequences, train model, evaluate.
 
     Args:
@@ -295,8 +295,14 @@ def process_go_term(term, dataset, config, algorithm, args):
     Returns:
         dict: Results dictionary with metrics, or None if processing failed
     """
+    modelname = f"{term.go_id}_{algorithm}.keras"
+    if Path(modelname).is_file():
+        if args.verbose:
+            print(f"Model {modelname} already exists, skipping...")
+        return None
+
     if args.verbose:
-        print(f"    Processing term: {term.go_id} ({term.name})")
+        print(f"Processing term: {term.go_id} ({term.name})")
 
     # Collect subgraph sequences
     subgraph_sequences = collect_subgraph_sequences(
@@ -307,7 +313,7 @@ def process_go_term(term, dataset, config, algorithm, args):
     if len(subgraph_sequences) < args.minimum_seqs:
         if args.verbose:
             print(
-                f"      Skipping {term.go_id}: only {len(subgraph_sequences)} sequences (minimum: {args.minimum_seqs})"
+                f"Skipping {term.go_id}: only {len(subgraph_sequences)} sequences (minimum: {args.minimum_seqs})"
             )
         return None
 
@@ -318,14 +324,12 @@ def process_go_term(term, dataset, config, algorithm, args):
 
     if len(negative_sequences) < len(positive_sequences) // 2:
         if args.verbose:
-            print(
-                f"      Skipping {term.go_id}: insufficient negative samples"
-            )
+            print(f"Skipping {term.go_id}: insufficient negative samples")
         return None
 
     if args.verbose:
         print(
-            f"      Dataset: {len(positive_sequences)} positive, {len(negative_sequences)} negative"
+            f"Dataset: {len(positive_sequences)} positive, {len(negative_sequences)} negative"
         )
 
     # Create datasets for classifier
@@ -366,56 +370,33 @@ def process_go_term(term, dataset, config, algorithm, args):
                 [seq for seq in test_proteins_dict["GO:negative"]]
             ),
             "f1_score": f1,
+            "algorithm": args.algorithm,
         }
 
         if args.verbose:
-            print(f"      F1 Score: {f1:.4f}")
+            print(f"F1 Score: {f1:.4f}")
 
         return result
 
     except Exception as e:
         if args.verbose:
-            print(f"      Error processing {term.go_id}: {str(e)}")
+            print(f"Error processing {term.go_id}: {str(e)}")
         return None
 
 
-def print_results_summary(results):
-    """Print a formatted summary of all results.
+def write_result(result):
+    """Write a result to TSV.
 
     Args:
-        results: List of result dictionaries
+        result: result dictionary
     """
-    print("\nResults Summary:")
-    print("=" * 80)
-    print(
-        f"{'GO ID':<12} {'Name':<30} {'Depth':<6} {'Subgraph':<9} {'Sequences':<10} {'F1 Score':<10}"
-    )
-    print("-" * 80)
-
-    for result in results:
-        print(
-            f"{result['go_id']:<12} {result['go_name'][:29]:<30} {result['depth']:<6} "
-            f"{result['subgraph_size']:<9} {result['total_sequences']:<10} {result['f1_score']:<10.4f}"
+    filename = f"{result['go_id']}_{result['algorithm']}.tsv"
+    with open(filename, "w") as f:
+        f.write("GO ID\tName\tDepth\tSubgraph\tSequences\tF1 Score\tAlgorithm")
+        f.write(f"{result['go_id']}\t{result['go_name']}\t{result['depth']}\t")
+        f.write(
+            f"{result['subgraph_size']}\t{result['total_sequences']}\t{result['f1_score']}\t{result['algorithm']}"
         )
-
-    print(f"\nProcessed {len(results)} GO terms successfully")
-
-    if results:
-        avg_f1 = sum(r["f1_score"] for r in results) / len(results)
-        print(f"Average F1 Score: {avg_f1:.4f}")
-
-        # Group by depth and show averages
-        print("\nResults by Depth:")
-        depth_results = defaultdict(list)
-        for result in results:
-            depth_results[result["depth"]].append(result["f1_score"])
-
-        for depth in sorted(depth_results.keys()):
-            scores = depth_results[depth]
-            avg_score = sum(scores) / len(scores)
-            print(
-                f"  Depth {depth}: {len(scores)} terms, avg F1 = {avg_score:.4f}"
-            )
 
 
 def main():
@@ -480,10 +461,7 @@ def main():
     if args.verbose:
         print(f"Depth levels found: {sorted(depth_levels.keys())}")
         for depth in sorted(depth_levels.keys()):
-            print(f"  Depth {depth}: {len(depth_levels[depth])} terms")
-
-    # Results storage
-    results = []
+            print(f"Depth {depth}: {len(depth_levels[depth])} terms")
 
     # Iterate through each depth level
     for depth in sorted(depth_levels.keys()):
@@ -493,18 +471,15 @@ def main():
         terms_at_depth = depth_levels[depth]
 
         if args.verbose:
-            print(f"  Processing {len(terms_at_depth)} terms at depth {depth}")
+            print(f"Processing {len(terms_at_depth)} terms at depth {depth}")
 
         # Process each GO term at this depth
         for term in terms_at_depth:
-            result = process_go_term(
+            result = analyze_go_term(
                 term, dataset, config, args.algorithm, args
             )
             if result:
-                results.append(result)
-
-    # Print results summary
-    print_results_summary(results)
+                write_result(result)
 
 
 if __name__ == "__main__":
