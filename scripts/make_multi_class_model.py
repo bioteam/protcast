@@ -1,6 +1,7 @@
 import sys
 import os
 import time
+import random
 import argparse
 from collections import defaultdict
 
@@ -38,6 +39,19 @@ parser.add_argument(
     "--protcast_dataset",
     help="Path to ProtCast dataset",
 )
+parser.add_argument(
+    "-m",
+    "--minimum_seqs",
+    default=500,
+    help="Minimum number of sequences",
+    type=int,
+)
+parser.add_argument(
+    "--max_seqs",
+    default=2000,
+    help="Maximum number of sequences to use for training",
+    type=int,
+)
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
 
@@ -63,7 +77,13 @@ for go_id in go_ids:
                 for pid in pids
                 if pid in dataset.proteins
             }
-            proteins[go_id].update(seqs)
+            if len(seqs) > args.minimum_seqs:
+                num_to_sample = min(args.max_seqs, len(seqs))
+                seqs = dict(random.sample(list(seqs.items()), num_to_sample))
+                proteins[go_id].update(seqs)
+            else:
+                if args.verbose:
+                    print(f"GO id {go_id} skipped: < {len(seqs)} sequences")
 
 # Generate a unique ID for this model run
 model_id = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())

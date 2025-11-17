@@ -373,9 +373,6 @@ def analyze_go_term(term, dataset, config, algorithm, args):
             "algorithm": args.algorithm,
         }
 
-        if args.verbose:
-            print(f"F1 Score: {f1:.4f}")
-
         return result
 
     except Exception as e:
@@ -389,6 +386,8 @@ def write_result(result):
 
     Args:
         result: result dictionary
+    Returns:
+        None
     """
     filename = f"{result['go_id']}_{result['algorithm']}.tsv"
     with open(filename, "w") as f:
