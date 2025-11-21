@@ -3,7 +3,9 @@ import os
 import time
 import random
 import argparse
+import re
 from collections import defaultdict
+
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
@@ -17,13 +19,12 @@ config = ConfigManager.load_config()
 
 
 """"make_multi_class_model.py
-Provide a Fasta file, or a text file with GO ids and a ProtCastDataset file. 
-Example to use a ProtCastDataset:
+Provide a text file with GO ids and a ProtCastDataset file. 
 
 python3 scripts/make_multi_class_model.py \
 -g test/data/go-terms.txt \
 -p ProtcastDataset.bin \
--a qsorder
+-a CTriad
 """
 parser = argparse.ArgumentParser()
 parser.add_argument("-g", "--go_ids_file", help="Path to GO ids file")
@@ -63,9 +64,9 @@ proteins = defaultdict(dict)
 # GO id subgraph sequences are collected from a ProtCastDataset
 dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
 go_ids = [
-    line.strip()
+    match.group(0)
     for line in open(args.go_ids_file, "r")
-    if line.startswith("GO:")
+    if (match := re.search(r"GO:\d+", line))
 ]
 for go_id in go_ids:
     subgraph_go_ids = dataset.get_subgraph(go_id)
@@ -81,19 +82,20 @@ for go_id in go_ids:
                 num_to_sample = min(args.max_seqs, len(seqs))
                 seqs = dict(random.sample(list(seqs.items()), num_to_sample))
                 proteins[go_id].update(seqs)
+                if args.verbose:
+                    print(f"GO id {go_id}: {len(seqs)} sequences collected")
             else:
                 if args.verbose:
                     print(f"GO id {go_id} skipped: < {len(seqs)} sequences")
 
-# Generate a unique ID for this model run
-model_id = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())
+name = os.path.basename(args.go_ids_file).replace(".tsv", "")
 
 classifier = MultiClassifier(
     args.algorithm,
     args.verbose,
     proteins,
     config,
-    model_id,
+    name,
     args.use_mlflow,
     args.use_tensorboard,
 )
