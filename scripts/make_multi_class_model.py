@@ -1,9 +1,11 @@
 import sys
 import os
+from os.path import basename
 import time
 import random
 import argparse
 import re
+import gc
 from collections import defaultdict
 
 
@@ -57,11 +59,36 @@ args = parser.parse_args()
 
 start = time.time()
 
+
+# Add memory usage monitoring
+def get_memory_usage():
+    """Return current memory usage in GB"""
+    try:
+        import psutil
+
+        process = psutil.Process(os.getpid())
+        memory_gb = process.memory_info().rss / 1e9
+        return f"{memory_gb:.2f} GB"
+    except ImportError:
+        return "psutil not installed"
+
+
+if args.verbose:
+    print(f"Starting memory usage: {get_memory_usage()}")
+
 # Primary keys are GO ids, secondary keys are protein ids, values are sequences
 proteins = defaultdict(dict)
 
 # GO id subgraph sequences are collected from a ProtCastDataset
+if args.verbose:
+    print(f"Loading ProtCastDataset from {args.protcast_dataset}")
+
 dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
+
+if args.verbose:
+    print(f"Memory after loading dataset: {get_memory_usage()}")
+    print(f"Reading GO IDs from {args.go_ids_file}")
+
 go_ids = [
     match.group(0)
     for line in open(args.go_ids_file, "r")
@@ -87,7 +114,7 @@ for go_id in go_ids:
                 if args.verbose:
                     print(f"GO id {go_id} skipped: < {len(seqs)} sequences")
 
-name = os.path.basename(args.go_ids_file).replace(".tsv", "")
+name = basename(args.go_ids_file).replace(".tsv", "")
 
 classifier = MultiClassifier(
     args.algorithm,
@@ -102,5 +129,11 @@ classifier.run()
 # Not necessary with the checkpoints in place
 # classifier.save_model()
 
+# Force garbage collection to free memory
+gc.collect()
+
 end = time.time()
 print(f"Elapsed {args.algorithm} time: {round(end - start)}s")
+if args.verbose:
+    print(f"Final memory usage: {get_memory_usage()}")
+print("Done!")

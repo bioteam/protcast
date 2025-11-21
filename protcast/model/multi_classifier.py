@@ -53,7 +53,7 @@ class MultiClassifier:
         self.go_ids = list()
         self.pids = list()
         self.features = list()
-        
+
         self.training_time = 0
         self.logging_time = 0
 
@@ -83,58 +83,114 @@ class MultiClassifier:
     @typechecked
     def get_feature_vectors(self) -> None:
         """get_feature_vectors
-        Create feature vectors and get vectors as a list of lists (per GO id),
-        protein ids as a list of lists (per GO id), and GO ids as a
-        list
+        Memory-efficient implementation to create feature vectors.
+        Processes each GO ID separately and cleans up memory as it goes.
+
+        Returns feature vectors as a list of lists (per GO id),
+        protein ids as a list of lists (per GO id), and GO ids as a list.
         """
         fv = Calculator(verbose=self.verbose)
-        for go_id in self.proteins.keys():
+        go_id_count = len(self.proteins.keys())
+
+        if self.verbose:
+            print(f"Processing feature vectors for {go_id_count} GO terms")
+
+        for i, go_id in enumerate(self.proteins.keys()):
             if self.verbose:
-                print(f"GO id: {go_id}")
+                print(
+                    f"GO id ({i+1}/{go_id_count}): {go_id} - {len(self.proteins[go_id])} proteins"
+                )
+
+            # Process this GO term
             fv.get_feature_vectors(self.algorithm, pdict=self.proteins[go_id])
-            # encodings is a pandas DataFrame
+
+            # Validate encodings
             if fv.encodings is None:
                 raise ValueError(f"No encodings generated for GO id {go_id}.")
+
+            # Extract data from the DataFrame (more memory efficient than DataFrame operations)
             pids = [x[0] for x in fv.encodings.iterrows()]
+            # Use a list comprehension with explicit float32 casting for memory efficiency
+            vals = [
+                x[1].astype(np.float32).tolist()
+                for x in fv.encodings.iterrows()
+            ]
+
+            # Store data
             self.pids.append(pids)
-            vals = [x[1].tolist() for x in fv.encodings.iterrows()]
             self.features.append(vals)
             self.go_ids.append(go_id)
-        # Arbitrary choice, get its length
-        self.vector_length = len(self.features[0][0])
+
+            # Record vector length from the first GO term
+            if i == 0:
+                self.vector_length = len(self.features[0][0])
+                if self.verbose:
+                    print(f"Feature vector length: {self.vector_length}")
+
+            # Force cleanup after each GO term
+            import gc
+
+            gc.collect()
+
+        # Final cleanup
+        del fv
+        gc.collect()
 
     @typechecked
     def prepare_data(self) -> None:
-        """prepare_data"""
-        num_samples = sum(len(go_set) for go_set in self.features)
-        X = np.zeros((num_samples, self.vector_length))
-        y = np.zeros(num_samples, dtype=int)
+        """prepare_data
 
+        Memory-efficient implementation that processes data in batches
+        to avoid large memory allocations.
+        """
+        # Create GO encoder first (needed for all batches)
         go_encoder = GOEncoder(self.id)
         go_encoder.fit(self.go_ids)
+        go_encoder.save()
 
-        # Need to account for different number of proteins for different GO ids
-        start_idx = 0
+        # Calculate total samples for informational purposes
+        num_samples = sum(len(go_set) for go_set in self.features)
+        if self.verbose:
+            print(f"Total samples across all GO terms: {num_samples}")
+            print(f"Vector length per sample: {self.vector_length}")
+            print(f"Number of GO classes: {len(self.go_ids)}")
+
+        # Process each GO term separately
+        X_batches = []
+        y_batches = []
+
         for i, (go_id, go_set) in enumerate(zip(self.go_ids, self.features)):
-            end_idx = start_idx + len(go_set)
-            X[start_idx:end_idx] = go_set
-            y[start_idx:end_idx] = go_encoder.encode(go_id)
-            start_idx = end_idx
+            if self.verbose:
+                print(
+                    f"Processing GO term {i+1}/{len(self.go_ids)}: {go_id} with {len(go_set)} samples"
+                )
 
-        self.X = X
-        # Convert integers into a binary matrix
-        self.y = to_categorical(y, num_classes=len(self.go_ids))
+            # Create batch for current GO term
+            X_batch = np.array(
+                go_set, dtype=np.float32
+            )  # Use float32 instead of float64 to save memory
+            y_integer = go_encoder.encode(go_id)
+            y_batch = np.full(len(go_set), y_integer, dtype=np.int32)
+
+            X_batches.append(X_batch)
+            y_batches.append(y_batch)
+
+        # Concatenate all batches (more memory efficient than pre-allocating a huge array)
+        if self.verbose:
+            print("Combining batches...")
+
+        self.X = np.vstack(X_batches)
+        y_combined = np.concatenate(y_batches)
+
+        # Convert integers into a binary matrix (one-hot encoding)
+        self.y = to_categorical(y_combined, num_classes=len(self.go_ids))
 
         if self.verbose:
-            print(f"Shape of self.X: {self.X.shape}")
-            print(f"Shape of self.y: {self.y.shape}")
-        """
-        Shape of self.X: (305, 100)
-        Shape of self.y: (305, 3)
-        
-        Vector length: 100, number of proteins (samples): 305, number of GO ids (classes): 3
-        """
-        go_encoder.save()
+            print(f"Final shape of self.X: {self.X.shape}")
+            print(f"Final shape of self.y: {self.y.shape}")
+            print(
+                f"Memory usage estimate: {self.X.nbytes / 1e9:.2f} GB + {self.y.nbytes / 1e9:.2f} GB"
+            )
 
     @typechecked
     def build_model(self) -> None:
@@ -209,44 +265,28 @@ class MultiClassifier:
         self.model = model
 
     def train_model(self) -> History:
+        # Memory-efficient training implementation
+        if self.verbose:
+            print("Starting memory-efficient training process...")
+            print(f"Data shapes - X: {self.X.shape}, y: {self.y.shape}")
+
         # Split the data into training and validation sets
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y, test_size=self.validation_split, stratify=self.y  # type: ignore
         )
 
-        """
-        Metrics that are logged during training:
-
-        f1_score (training F1 score):
-        - Calculated on the training data during each epoch
-        - Uses the data the model is actively learning from
-        - Typically higher because the model is optimizing on this data
-        
-        val_f1_score (validation F1 score)
-        - Calculated on the validation data at the end of each epoch
-        - Uses held-out data the model hasn't trained on (20% of your data based on VALIDATION_SPLIT: 0.2)
-        - Typically lower because the model hasn't seen this data during training
-        -  More important metric - indicates how well the model generalizes to unseen data
-
-        final_val_loss: (validation loss)
-        - Calculated on the validation data at the end of each epoch
-        - Uses held-out data the model hasn't trained on (20% of your data based on VALIDATION_SPLIT: 0.2)
-        - Typically lower because the model hasn't seen this data during training
-        - Important metric for understanding model performance on unseen data
-
-        final_val_loss is logged once after training completes, while f1_score and val_f1_score are logged every epoch.
-        """
-
+        # Store training data for inference signature in MLflow
         self.X_train = X_train
 
-        # EarlyStopping stops training when a monitored metric has stopped improving
-        # early_stopping = EarlyStopping(
-        #     monitor="val_loss",
-        #     min_delta=0.001,  # type: ignore
-        #     patience=self.patience,  # type: ignore
-        #     restore_best_weights=True,
-        # )
-        # EarlyStopping based on F1 score (higher is better)
+        if self.verbose:
+            print(
+                f"Training set: {X_train.shape}, Validation set: {X_val.shape}"
+            )
+            print(
+                f"Memory used - Training: {X_train.nbytes / 1e9:.2f} GB, Validation: {X_val.nbytes / 1e9:.2f} GB"
+            )
+
+        # Early stopping callback based on F1 score (higher is better)
         early_stopping_f1 = EarlyStopping(
             monitor="val_f1_score",
             min_delta=0.001,  # type: ignore
@@ -254,16 +294,18 @@ class MultiClassifier:
             restore_best_weights=True,
             mode="max",  # F1 score should be maximized
         )
-        # val_loss measures the error on the validation set
-        # ModelCheckpoint saves the model or weights to disk at some interval
-        # and can save the best model based on a monitored metric to use later
+
+        # Save the best model during training
         loss_checkpoint = ModelCheckpoint(
             filepath=f"{self.get_name()}.keras",
             monitor="val_loss",
             save_best_only=True,
             mode="min",
         )
+
         callbacks = [early_stopping_f1, loss_checkpoint]
+
+        # Add TensorBoard logging if requested
         if self.use_tensorboard:
             log_dir = "logs/fit/" + time.strftime(
                 "%m-%d-%Y-%H-%M-%S", time.localtime()
@@ -272,32 +314,48 @@ class MultiClassifier:
                 log_dir=log_dir, histogram_freq=1
             )
             callbacks.append(tensorboard_callback)
-            
+
         # Start timing for training
         train_start_time = time.time()
-        """
-        Training output example:
 
-        Epoch 1/100
-        80/80 ━━━━━━━━━━━━━━━━━━━━ 2s 15ms/step - loss: 0.5234 - accuracy: 0.7156
+        # Determine optimal batch size based on data size
+        # Use smaller batches for larger datasets to save memory
+        adaptive_batch_size = self.batch_size  # type: ignore
+        if X_train.shape[0] > 10000:  # For very large datasets
+            adaptive_batch_size = min(
+                adaptive_batch_size, 64
+            )  # Use smaller batches for large datasets
+            if self.verbose:
+                print(
+                    f"Large dataset detected, using reduced batch size: {adaptive_batch_size}"
+                )
 
-        Step = Batch (one forward + backward pass through a batch of data)
-        15ms/step = 15 milliseconds per batch
-        80 steps = 80 batches = 1 epoch
-        """
+        # Fit the model with memory-efficient batch size
         history = self.model.fit(
             X_train,
             y_train,
             epochs=self.epochs,  # type: ignore
-            batch_size=self.batch_size,  # type: ignore
+            batch_size=adaptive_batch_size,  # Dynamic batch size based on data size
             validation_data=(X_val, y_val),
             callbacks=callbacks,
             verbose="auto",
+            # New parameters to improve memory efficiency:
+            shuffle=True,  # Shuffle data for better training
+            use_multiprocessing=False,  # Avoid multiprocessing to reduce memory overhead
+            workers=1,  # Single worker to avoid memory duplication
         )
 
         # End timing and store the duration
         self.training_time = time.time() - train_start_time
         self.history = history
+
+        if self.verbose:
+            print(f"Training completed in {self.training_time:.2f} seconds")
+
+        # Help clean up memory after training
+        import gc
+
+        gc.collect()
 
         return history  # type: ignore
 
@@ -359,7 +417,7 @@ class MultiClassifier:
         log_start_time = time.time()
 
         print("\n--- Starting MLflow Logging ---")
-        
+
         mlflow.log_params(self.params)
 
         # --- BATCH LOGGING WITH FEEDBACK ---
@@ -376,13 +434,13 @@ class MultiClassifier:
                         key=metric_name,
                         value=values[epoch],
                         timestamp=int(time.time() * 1000),
-                        step=epoch
+                        step=epoch,
                     )
                 )
 
         client.log_batch(run_id=run_id, metrics=metrics_to_log)
         print(" done.")
-        
+
         # --- SIGNATURE INFERENCE WITH FEEDBACK ---
         print("  > Inferring model signature...", end="", flush=True)
         signature = infer_signature(
@@ -401,14 +459,18 @@ class MultiClassifier:
         print(" done.")
 
         mlflow.set_tag("Training Info", "MultiClassifier full logging")
-        
+
         # End timing and store the duration
         self.logging_time = time.time() - log_start_time
 
         # Log the final summary timing metrics
-        mlflow.log_metric("training_time_seconds", round(self.training_time, 2))
-        mlflow.log_metric("total_logging_time_seconds", round(self.logging_time, 2))
-        
+        mlflow.log_metric(
+            "training_time_seconds", round(self.training_time, 2)
+        )
+        mlflow.log_metric(
+            "total_logging_time_seconds", round(self.logging_time, 2)
+        )
+
         print("--- MLflow Logging Complete ---")
 
     @classmethod
