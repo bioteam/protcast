@@ -391,7 +391,7 @@ def write_result(result):
     """
     filename = f"{result['go_id']}_{result['algorithm']}.tsv"
     with open(filename, "w") as f:
-        f.write("GO ID\tName\tDepth\tSubgraph\tSequences\tF1 Score\tAlgorithm")
+        f.write("GO ID\tName\tDepth\tSubgraph\tSequences\tF1 Score\tAlgorithm\n")
         f.write(f"{result['go_id']}\t{result['go_name']}\t{result['depth']}\t")
         f.write(
             f"{result['subgraph_size']}\t{result['total_sequences']}\t{result['f1_score']}\t{result['algorithm']}"
