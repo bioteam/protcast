@@ -41,14 +41,13 @@ parser.add_argument(
     help="Path to ProtCast dataset",
 )
 parser.add_argument(
-    "-m",
     "--minimum_seqs",
     default=500,
     help="Minimum number of sequences",
     type=int,
 )
 parser.add_argument(
-    "--max_seqs",
+    "--maximum_seqs",
     default=2000,
     help="Maximum number of sequences to use for training",
     type=int,
@@ -79,7 +78,7 @@ for go_id in go_ids:
                 if pid in dataset.proteins
             }
             if len(seqs) > args.minimum_seqs:
-                num_to_sample = min(args.max_seqs, len(seqs))
+                num_to_sample = min(args.maximum_seqs, len(seqs))
                 seqs = dict(random.sample(list(seqs.items()), num_to_sample))
                 proteins[go_id].update(seqs)
                 if args.verbose:
