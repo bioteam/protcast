@@ -76,7 +76,7 @@ def get_memory_usage():
 if args.verbose:
     print(f"Starting memory usage: {get_memory_usage()}")
 
-# Primary keys are GO ids, secondary keys are protein ids, values are sequences
+# Primary keys are GO ids from a given level, secondary keys are subgraph protein ids, values are sequences
 proteins = defaultdict(dict)
 
 # GO id subgraph sequences are collected from a ProtCastDataset
@@ -89,11 +89,12 @@ if args.verbose:
     print(f"Memory after loading dataset: {get_memory_usage()}")
     print(f"Reading GO IDs from {args.go_ids_file}")
 
-go_ids = [
+# Set of GO ids to process
+go_ids = {
     match.group(0)
     for line in open(args.go_ids_file, "r")
     if (match := re.search(r"GO:\d+", line))
-]
+}
 for go_id in go_ids:
     subgraph_go_ids = dataset.get_subgraph(go_id)
     for subid in subgraph_go_ids:
@@ -104,15 +105,26 @@ for go_id in go_ids:
                 for pid in pids
                 if pid in dataset.proteins
             }
-            if len(seqs) > args.minimum_seqs:
-                num_to_sample = min(args.maximum_seqs, len(seqs))
-                seqs = dict(random.sample(list(seqs.items()), num_to_sample))
-                proteins[go_id].update(seqs)
-                if args.verbose:
-                    print(f"GO id {go_id}: {len(seqs)} sequences collected")
-            else:
-                if args.verbose:
-                    print(f"GO id {go_id} skipped: < {len(seqs)} sequences")
+            # Update the proteins dict so GO id has protein keys with sequence values
+            proteins[go_id].update(seqs)
+    if len(proteins[go_id]) > args.minimum_seqs:
+        # If we've collected too many sequences, sample down to the maximum
+        if len(proteins[go_id]) > args.maximum_seqs:
+            num_to_sample = args.maximum_seqs
+            sampled_items = random.sample(
+                list(proteins[go_id].items()), num_to_sample
+            )
+            # Replace the proteins dictionary for this GO ID with the sampled subset
+            proteins[go_id] = dict(sampled_items)
+        if args.verbose:
+            print(
+                f"GO subgraph {go_id}: {len(proteins[go_id])} sequences collected"
+            )
+    else:
+        if args.verbose:
+            print(
+                f"GO subgraph {go_id} skipped: < {args.minimum_seqs} sequences"
+            )
 
 name = basename(args.go_ids_file).replace(".tsv", "")
 
