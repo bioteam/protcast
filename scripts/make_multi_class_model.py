@@ -105,7 +105,7 @@ for go_id in go_ids:
                 for pid in pids
                 if pid in dataset.proteins
             }
-            # Update the proteins dict so GO id has protein keys with sequence values
+            # Update the proteins dict so GO id has protein id keys with sequence values
             proteins[go_id].update(seqs)
     if len(proteins[go_id]) > args.minimum_seqs:
         # If we've collected too many sequences, sample down to the maximum
