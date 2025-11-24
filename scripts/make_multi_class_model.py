@@ -125,6 +125,8 @@ for go_id in go_ids:
             print(
                 f"GO subgraph {go_id} skipped: < {args.minimum_seqs} sequences"
             )
+        # Remove GO IDs with insufficient samples from the proteins dictionary
+        del proteins[go_id]
 
 name = basename(args.go_ids_file).replace(".tsv", "")
 
