@@ -36,6 +36,8 @@ class MultiClassifier:
         id: str,
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
+        input_source: str = "feature_vectors",
+        esm_embeddings: dict = None,
     ) -> None:
         self.algorithm = algorithm
         self.verbose = verbose
@@ -43,6 +45,25 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
         self.id = id
+        self.input_source = (
+            input_source  # "feature_vectors" or "esm_embeddings"
+        )
+        self.esm_embeddings = (
+            esm_embeddings  # Dictionary of protein_id -> embedding
+        )
+
+        # Validate input_source parameter
+        valid_sources = ["feature_vectors", "esm_embeddings"]
+        if input_source not in valid_sources:
+            raise ValueError(
+                f"input_source must be one of {valid_sources}, got '{input_source}'"
+            )
+
+        # Validate that ESM embeddings are provided when needed
+        if input_source == "esm_embeddings" and esm_embeddings is None:
+            raise ValueError(
+                "esm_embeddings dictionary must be provided when input_source is 'esm_embeddings'"
+            )
 
         # Set instance attributes to the values from "config.json"
         self.params = config
@@ -83,11 +104,21 @@ class MultiClassifier:
     @typechecked
     def get_feature_vectors(self) -> None:
         """get_feature_vectors
-        Memory-efficient implementation to create feature vectors.
+        Memory-efficient implementation to create feature vectors or process ESM embeddings.
         Processes each GO ID separately and cleans up memory as it goes.
 
         Returns feature vectors as a list of lists (per GO id),
         protein ids as a list of lists (per GO id), and GO ids as a list.
+        """
+        if self.input_source == "esm_embeddings":
+            self.get_esm_embeddings()
+        else:
+            self.get_traditional_feature_vectors()
+
+    @typechecked
+    def get_traditional_feature_vectors(self) -> None:
+        """get_traditional_feature_vectors
+        Original implementation for traditional feature vectors using Calculator.
         """
         fv = Calculator(verbose=self.verbose)
         go_id_count = len(self.proteins.keys())
@@ -135,6 +166,94 @@ class MultiClassifier:
         # Final cleanup
         del fv
         gc.collect()
+
+    @typechecked
+    def get_esm_embeddings(self) -> None:
+        """get_esm_embeddings
+        Memory-efficient implementation to process ESM embeddings.
+        Processes each GO ID separately and cleans up memory as it goes.
+
+        ESM embeddings should be provided as a dictionary mapping protein_id -> numpy array.
+        """
+        if self.esm_embeddings is None:
+            raise ValueError(
+                "ESM embeddings dictionary must be provided when input_source is 'esm_embeddings'"
+            )
+
+        go_id_count = len(self.proteins.keys())
+
+        if self.verbose:
+            print(f"Processing ESM embeddings for {go_id_count} GO terms")
+            print(
+                f"Total ESM embeddings available: {len(self.esm_embeddings)}"
+            )
+
+        for i, go_id in enumerate(self.proteins.keys()):
+            if self.verbose:
+                print(
+                    f"GO id ({i+1}/{go_id_count}): {go_id} - {len(self.proteins[go_id])} proteins"
+                )
+
+            # Get ESM embeddings for proteins in this GO term
+            pids = []
+            vals = []
+            missing_proteins = []
+
+            for protein_id in self.proteins[go_id]:
+                if protein_id in self.esm_embeddings:
+                    pids.append(protein_id)
+                    # Convert numpy array to list with float32 for consistency
+                    embedding = self.esm_embeddings[protein_id]
+                    if hasattr(embedding, "astype"):
+                        vals.append(embedding.astype(np.float32).tolist())
+                    else:
+                        vals.append([float(x) for x in embedding])
+                else:
+                    missing_proteins.append(protein_id)
+
+            if missing_proteins:
+                if self.verbose:
+                    print(
+                        f"Warning: {len(missing_proteins)} proteins missing ESM embeddings for GO {go_id}"
+                    )
+                    if (
+                        len(missing_proteins) <= 5
+                    ):  # Show first few missing proteins
+                        print(f"Missing proteins: {missing_proteins}")
+
+            if not pids:
+                raise ValueError(
+                    f"No ESM embeddings found for any proteins in GO term {go_id}"
+                )
+
+            # Store data (same format as traditional feature vectors)
+            self.pids.append(pids)
+            self.features.append(vals)
+            self.go_ids.append(go_id)
+
+            # Record vector length from the first GO term
+            if i == 0:
+                self.vector_length = len(self.features[0][0])
+                if self.verbose:
+                    print(f"ESM embedding length: {self.vector_length}")
+
+            # Verify all embeddings have the same length
+            elif len(self.features[i][0]) != self.vector_length:
+                raise ValueError(
+                    f"Inconsistent embedding dimensions: expected {self.vector_length}, "
+                    f"got {len(self.features[i][0])} for GO term {go_id}"
+                )
+
+            # Force cleanup after each GO term
+            import gc
+
+            gc.collect()
+
+        if self.verbose:
+            total_proteins = sum(len(pids) for pids in self.pids)
+            print(
+                f"Successfully processed {total_proteins} proteins with ESM embeddings"
+            )
 
     @typechecked
     def prepare_data(self) -> None:
