@@ -1,7 +1,7 @@
 """
-ProtCast ESM3-C Integration
+ProtCast ESM3 Integration
 
-This script demonstrates how to integrate ESM-3-C embeddings with ProtCast for protein
+This script demonstrates how to integrate ESM embeddings with ProtCast for protein
 function prediction.
 
 ESM-3-C is a contrastive learning variant of the ESM-3 model from Meta AI Research.
@@ -54,7 +54,7 @@ from protcast.preprocessing.protcast_dataset import (  # noqa: E402
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Generate ESM3-C embeddings for proteins in a ProtCastDataset"
+        description="Generate ESM3 embeddings for proteins in a ProtCastDataset"
     )
     parser.add_argument(
         "-p",
@@ -87,22 +87,16 @@ def parse_args():
         help="ESM3 model type to use",
     )
     parser.add_argument(
-        "--min_proteins",
+        "--minimum_seqs",
+        default=500,
+        help="Minimum number of sequences",
         type=int,
-        default=10,
-        help="Minimum number of proteins per GO term",
     )
     parser.add_argument(
-        "--max_proteins",
+        "--maximum_seqs",
+        default=2000,
+        help="Maximum number of sequences to use for training",
         type=int,
-        default=1000,
-        help="Maximum number of proteins per GO term",
-    )
-    parser.add_argument(
-        "--max_seq_length",
-        type=int,
-        default=1024,
-        help="Maximum sequence length to process",
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Verbose output"
@@ -128,7 +122,7 @@ def load_go_ids(go_ids_file):
 
 
 def get_proteins_for_go_terms(
-    dataset, go_ids, min_proteins, max_proteins, verbose=False
+    dataset, go_ids, minimum_seqs, maximum_seqs, verbose=False
 ):
     """
     Get protein sequences for specified GO terms.
@@ -139,9 +133,9 @@ def get_proteins_for_go_terms(
         Dataset containing protein sequences and GO annotations
     go_ids : set
         Set of GO IDs to process
-    min_proteins : int
+    minimum_seqs : int
         Minimum number of proteins per GO term
-    max_proteins : int
+    maximum_seqs : int
         Maximum number of proteins per GO term
     verbose : bool
         Whether to print verbose output
@@ -169,22 +163,22 @@ def get_proteins_for_go_terms(
                         ].sequence
 
         # Check if we have enough proteins for this GO term
-        if len(proteins_by_go[go_id]) < min_proteins:
+        if len(proteins_by_go[go_id]) < minimum_seqs:
             if verbose:
                 print(
-                    f"GO term {go_id} skipped: Only {len(proteins_by_go[go_id])} proteins, minimum {min_proteins} required"
+                    f"GO term {go_id} skipped: Only {len(proteins_by_go[go_id])} proteins, minimum {minimum_seqs} required"
                 )
             del proteins_by_go[go_id]
-        elif len(proteins_by_go[go_id]) > max_proteins:
+        elif len(proteins_by_go[go_id]) > maximum_seqs:
             # Sample down to maximum number of proteins
             import random
 
             protein_items = list(proteins_by_go[go_id].items())
-            sampled_items = random.sample(protein_items, max_proteins)
+            sampled_items = random.sample(protein_items, maximum_seqs)
             proteins_by_go[go_id] = dict(sampled_items)
             if verbose:
                 print(
-                    f"GO term {go_id}: Sampled down from {len(protein_items)} to {max_proteins} proteins"
+                    f"GO term {go_id}: Sampled down from {len(protein_items)} to {maximum_seqs} proteins"
                 )
         else:
             if verbose:
@@ -267,11 +261,11 @@ def process_sequences_in_batches(
         if len(seq) <= max_seq_length
     }
 
-    if len(filtered_sequences) < len(sequences_dict):
-        if verbose:
-            print(
-                f"Filtered out {len(sequences_dict) - len(filtered_sequences)} sequences longer than {max_seq_length}"
-            )
+    # if len(filtered_sequences) < len(sequences_dict):
+    #     if verbose:
+    #         print(
+    #             f"Filtered out {len(sequences_dict) - len(filtered_sequences)} sequences longer than {max_seq_length}"
+    #         )
 
     # Convert dictionary to list of tuples for batch processing
     sequences_list = list(filtered_sequences.items())
@@ -311,6 +305,10 @@ def process_sequences_in_batches(
                 # Average pooling to get a single vector per protein
                 protein_embedding = np.mean(seq_embeddings, axis=0)
                 embeddings_dict[pid] = protein_embedding
+                if verbose:
+                    print(
+                        f"Processed {pid}: sequence length {len(seq)}, embedding shape {protein_embedding.shape}"
+                    )
 
     return embeddings_dict
 
@@ -323,10 +321,12 @@ def main():
 
     # Load GO IDs
     go_ids = load_go_ids(args.go_ids_file)
-    print(f"Loaded {len(go_ids)} GO terms from {args.go_ids_file}")
+    if args.verbose:
+        print(f"Loaded {len(go_ids)} GO terms from {args.go_ids_file}")
 
     # Load ProtCastDataset
-    print(f"Loading ProtCastDataset from {args.protcast_dataset}")
+    if args.verbose:
+        print(f"Loading ProtCastDataset from {args.protcast_dataset}")
     dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
 
     # Get proteins for each GO term
@@ -338,10 +338,12 @@ def main():
         verbose=args.verbose,
     )
 
-    print(f"Found {len(proteins_by_go)} GO terms with sufficient proteins")
+    if args.verbose:
+        print(f"Found {len(proteins_by_go)} GO terms with sufficient proteins")
 
     if not proteins_by_go:
-        print("No GO terms with sufficient proteins found. Exiting.")
+        if args.verbose:
+            print("No GO terms with sufficient proteins found. Exiting.")
         return
 
     # Load ESM model
