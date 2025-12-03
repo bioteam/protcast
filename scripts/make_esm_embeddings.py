@@ -46,10 +46,7 @@ from tqdm import tqdm
 from collections import defaultdict
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-
-from protcast.preprocessing.protcast_dataset import (  # noqa: E402
-    ProtCastDataset,
-)
+from protcast.preprocessing.protcast_dataset import ProtCastDataset
 
 
 def parse_args():
@@ -225,7 +222,6 @@ def process_sequences_in_batches(
     alphabet,
     sequences_dict,
     batch_size,
-    max_seq_length,
     device,
     verbose=False,
 ):
@@ -242,8 +238,6 @@ def process_sequences_in_batches(
         Dictionary mapping protein IDs to sequences
     batch_size : int
         Number of sequences to process at once
-    max_seq_length : int
-        Maximum sequence length to process
     device : torch.device
         Device to use for computation
     verbose : bool
@@ -255,12 +249,11 @@ def process_sequences_in_batches(
         Dictionary mapping protein IDs to ESM embeddings
     """
     # Filter out sequences that are too long
-    filtered_sequences = {
-        pid: seq
-        for pid, seq in sequences_dict.items()
-        if len(seq) <= max_seq_length
-    }
-
+    #filtered_sequences = {
+    #    pid: seq
+    #    for pid, seq in sequences_dict.items()
+    #    if len(seq) <= max_seq_length
+    #}
     # if len(filtered_sequences) < len(sequences_dict):
     #     if verbose:
     #         print(
@@ -268,7 +261,7 @@ def process_sequences_in_batches(
     #         )
 
     # Convert dictionary to list of tuples for batch processing
-    sequences_list = list(filtered_sequences.items())
+    sequences_list = list(sequences_dict.items())
     embeddings_dict = {}
 
     # Create batch converter
@@ -333,8 +326,8 @@ def main():
     proteins_by_go = get_proteins_for_go_terms(
         dataset,
         go_ids,
-        args.min_proteins,
-        args.max_proteins,
+        args.minimum_seqs,
+        args.maximum_seqs,
         verbose=args.verbose,
     )
 
@@ -360,7 +353,6 @@ def main():
             alphabet,
             proteins,
             args.batch_size,
-            args.max_seq_length,
             device,
             verbose=args.verbose,
         )
