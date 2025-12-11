@@ -80,6 +80,12 @@ def parse_args():
         type=int,
     )
     parser.add_argument(
+        "-c",
+        "--combine",
+        action="store_true",
+        help="Combine output files into a single file",
+    )
+    parser.add_argument(
         "-v", "--verbose", action="store_true", help="Verbose output"
     )
     return parser.parse_args()
@@ -353,20 +359,22 @@ def main():
                 f"Saved {len(embeddings)} embeddings for {go_id} to {output_file}"
             )
 
-        # Add to complete dictionary
-        all_embeddings[go_id] = embeddings
+        if args.combine:
+            # Add to complete dictionary
+            all_embeddings[go_id] = embeddings
 
-    # Save combined embeddings
-    combined_output = os.path.join(
-        args.output_dir, f"all_go_terms_{args.model_type}_embeddings.pkl"
-    )
-    with open(combined_output, "wb") as f:
-        pickle.dump(all_embeddings, f)
+    if args.combine:
+        # Save combined embeddings
+        combined_output = os.path.join(
+            args.output_dir, f"all_go_terms_{args.model_type}_embeddings.pkl"
+        )
+        with open(combined_output, "wb") as f:
+            pickle.dump(all_embeddings, f)
 
-    print(
-        f"Saved combined embeddings for {len(all_embeddings)} GO terms to {combined_output}"
-    )
-    print("Done!")
+        print(
+            f"Saved combined embeddings for {len(all_embeddings)} GO terms to {combined_output}"
+        )
+        print("Done!")
 
 
 if __name__ == "__main__":
