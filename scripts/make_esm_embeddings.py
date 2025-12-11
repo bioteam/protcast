@@ -53,7 +53,6 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--output_dir",
-        default="esm3c_embeddings",
         help="Directory to save embeddings",
     )
     parser.add_argument(
@@ -341,6 +340,8 @@ def main():
         )
 
         # Save embeddings for this GO term
+        if args.output_dir is None:
+            args.output_dir = f"{model}_embeddings"
         output_file = os.path.join(
             args.output_dir, f"{go_id.replace(':', '_')}_embeddings.pkl"
         )
