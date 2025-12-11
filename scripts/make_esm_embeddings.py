@@ -1,31 +1,18 @@
 """
 ProtCast ESM3 Integration
 
-This script demonstrates how to integrate ESM embeddings with ProtCast for protein
-function prediction.
-
-ESM-3-C is a contrastive learning variant of the ESM-3 model from Meta AI Research.
-These embeddings can be used to represent proteins in vector space, which can be helpful
+This script demonstrates how to integrate ESM-C (Cambrian) embeddings with ProtCast for protein
+function prediction. These embeddings represent proteins in vector space, which can be helpful
 for predicting protein functions, properties, or other downstream tasks.
 
-Dimensionality of ESM Embeddings
+ESM-C sizes and dimensions:
 
-For ESM-2 Models:
-
-ESM-2 (t33, 650M parameters): 1280 dimensions
-
-Other ESM-2 models also use embedding dimensions that match their model size.
-
-For ESM-3 Models (based on Meta AI documentation):
-
-ESM-3-C (640M parameters): 1280 dimensions
-ESM-3 (650M parameters): 1280 dimensions
-ESM-3 (3B parameters): 2560 dimensions
-ESM-3 (14B parameters): 5120 dimensions
+esm3_c:  2560 dimensions, 2B parameters, 80 layers
+esmc_300m: 960 dimensions, 300M parameters, 30 layers
+esmc_600m: 1152 dimensions, 600M parameters, 36 layers
 
 The embedding dimension increases with model size, allowing larger models to capture more complex protein representations.
 
-Important Notes:
 Per-residue vs. whole-protein embeddings:
 
 For a protein with length L, the per-residue embeddings would have shape (L, D) where D is the embedding dimension
@@ -35,11 +22,9 @@ These embeddings are contextual, meaning each amino acid's representation is inf
 """
 
 import torch
-import esm
-import numpy as np
+import numpy  # noqa: F401
 import argparse
 import os
-from pathlib import Path
 import pickle
 import sys
 from tqdm import tqdm
@@ -79,9 +64,9 @@ def parse_args():
     )
     parser.add_argument(
         "--model_type",
-        default="esm3_c",
-        choices=["esm3_c", "esm3_650m", "esm3_3b", "esm3_14b"],
-        help="ESM3 model type to use",
+        default="esmc_600m",
+        choices=["esm3_c", "esmc_300m", "esmc_600m"],
+        help="ESM-C model type to use (esm3_c defaults to esmc_600m)",
     )
     parser.add_argument(
         "--minimum_seqs",
@@ -186,58 +171,54 @@ def get_proteins_for_go_terms(
     return proteins_by_go
 
 
-def load_esm_model(model_type):
-    """Load an ESM-3 or ESM-C model."""
-    model_mapping = {
-        "esm3_c": "esm3_c_640m_combined",
-        "esm3_650m": "esm3_650m",
-        "esm3_3b": "esm3_3b",
-        "esm3_14b": "esm3_14b",
-    }
-
-    model_name = model_mapping[model_type]
-    print(f"Loading ESM model: {model_name}")
+def load_esm_model(model_name):
+    """Load an ESM-C model using the correct ESM 3.2.1 API."""
+    print(f"Loading ESM-C model type: {model_name}")
 
     try:
-        # Load the model
-        model, alphabet = esm.pretrained.load_model_and_alphabet(model_name)
-        model.eval()
+        from esm.models.esmc import ESMC
+
+        print(f"Loading ESM-C model: {model_name}")
 
         # Use GPU if available
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {device}")
-        model = model.to(device)
 
-        return model, alphabet, device
+        # Load the model
+        model = ESMC.from_pretrained(model_name, device=device)
+        model.eval()
+
+        print("✓ ESM-C model loaded successfully!")
+        print(f"Model parameters: {model_name}")
+
+        return model, None, device  # No alphabet needed for ESM-C
+
     except Exception as e:
-        print(f"Error loading ESM model: {e}")
-        print(
-            "Please make sure you have installed the latest esm package and have internet access."
-        )
+        print(f"Error loading ESM-C model: {e}")
         sys.exit(1)
 
 
 def process_sequences_in_batches(
     model,
-    alphabet,
+    alphabet,  # This will be None for ESM-C
     sequences_dict,
     batch_size,
     device,
     verbose=False,
 ):
     """
-    Process protein sequences in batches to generate ESM embeddings.
+    Process protein sequences using ESM-C API to generate embeddings.
 
     Parameters:
     -----------
-    model : esm.model.ProteinBertModel
-        ESM model to use for embeddings
-    alphabet : esm.data.Alphabet
-        Alphabet for tokenizing sequences
+    model : ESMCInferenceClient
+        ESM-C inference client
+    alphabet : None
+        Not used for ESM-C (kept for compatibility)
     sequences_dict : dict
         Dictionary mapping protein IDs to sequences
     batch_size : int
-        Number of sequences to process at once
+        Number of sequences to process at once (note: ESM-C processes one at a time)
     device : torch.device
         Device to use for computation
     verbose : bool
@@ -246,63 +227,65 @@ def process_sequences_in_batches(
     Returns:
     --------
     embeddings_dict : dict
-        Dictionary mapping protein IDs to ESM embeddings
+        Dictionary mapping protein IDs to ESM-C embeddings
     """
-    # Filter out sequences that are too long
-    #filtered_sequences = {
-    #    pid: seq
-    #    for pid, seq in sequences_dict.items()
-    #    if len(seq) <= max_seq_length
-    #}
-    # if len(filtered_sequences) < len(sequences_dict):
-    #     if verbose:
-    #         print(
-    #             f"Filtered out {len(sequences_dict) - len(filtered_sequences)} sequences longer than {max_seq_length}"
-    #         )
 
-    # Convert dictionary to list of tuples for batch processing
+    from esm.sdk.api import ESMProtein
+
     sequences_list = list(sequences_dict.items())
     embeddings_dict = {}
 
-    # Create batch converter
-    batch_converter = alphabet.get_batch_converter()
+    print(f"Processing {len(sequences_list)} sequences with ESM-C...")
 
-    # Process in batches
-    for i in tqdm(
-        range(0, len(sequences_list), batch_size),
-        desc="Processing batches",
-        disable=not verbose,
+    # ESM-C processes sequences individually
+    for i, (protein_id, sequence) in enumerate(
+        tqdm(sequences_list, desc="Processing proteins", disable=not verbose)
     ):
-        batch = sequences_list[i : i + batch_size]
+        try:
+            # Create ESMProtein object
+            protein = ESMProtein(sequence=sequence)
 
-        # Convert to format expected by the model
-        batch_data = [(pid, seq) for pid, seq in batch]
-        _, _, batch_tokens = batch_converter(batch_data)
-        batch_tokens = batch_tokens.to(device)
-
-        # Generate embeddings
-        with torch.no_grad():
-            results = model(
-                batch_tokens,
-                repr_layers=[model.num_layers],
-                return_contacts=False,
-            )
-            token_embeddings = results["representations"][model.num_layers]
-
-            # Process each sequence in the batch
-            for j, (pid, seq) in enumerate(batch):
-                # Get embeddings for this sequence (excluding special tokens)
-                seq_embeddings = (
-                    token_embeddings[j, 1 : len(seq) + 1, :].cpu().numpy()
+            if verbose:
+                print(
+                    f"Processing {protein_id}: sequence length {len(sequence)}"
                 )
-                # Average pooling to get a single vector per protein
-                protein_embedding = np.mean(seq_embeddings, axis=0)
-                embeddings_dict[pid] = protein_embedding
+
+            # Get embeddings using ESM-C
+            with torch.no_grad():
+                # Encode protein to get tokens
+                protein_tensor = model.encode(protein)
+
+                # Get embeddings through forward pass
+                # Add batch dimension (unsqueeze) for the sequence tokens
+                output = model.forward(
+                    sequence_tokens=protein_tensor.sequence.unsqueeze(0)
+                )
+
+                # Extract embeddings and mean pool over sequence length
+                # Shape: [batch=1, seq_len, embed_dim] -> [embed_dim]
+                sequence_embeddings = output.embeddings.squeeze(
+                    0
+                )  # Remove batch dim
+                protein_embedding = (
+                    sequence_embeddings.mean(dim=0).cpu().numpy()
+                )  # Mean pool
+
+                embeddings_dict[protein_id] = protein_embedding
+
                 if verbose:
                     print(
-                        f"Processed {pid}: sequence length {len(seq)}, embedding shape {protein_embedding.shape}"
+                        f"  ✓ Processed {protein_id}: embedding shape {protein_embedding.shape}"
                     )
 
+        except Exception as e:
+            print(f"❌ Error processing protein {protein_id}: {e}")
+            if verbose:
+                import traceback
+
+                traceback.print_exc()
+            continue
+
+    print(f"✓ Successfully processed {len(embeddings_dict)} proteins")
     return embeddings_dict
 
 
