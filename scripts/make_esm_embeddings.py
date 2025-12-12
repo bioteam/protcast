@@ -374,7 +374,6 @@ def main():
         print(
             f"Saved combined embeddings for {len(all_embeddings)} GO terms to {combined_output}"
         )
-        print("Done!")
 
 
 if __name__ == "__main__":
