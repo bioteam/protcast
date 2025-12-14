@@ -27,6 +27,7 @@ import argparse
 import os
 import pickle
 import sys
+from pathlib import Path
 from tqdm import tqdm
 from collections import defaultdict
 
@@ -52,8 +53,9 @@ def parse_args():
     )
     parser.add_argument(
         "-o",
-        "--output_dir",
-        help="Directory to save embeddings",
+        "--output_file",
+        required=True,
+        help="Path to single pickle file that will store all embeddings",
     )
     parser.add_argument(
         "--batch_size",
@@ -78,12 +80,6 @@ def parse_args():
         default=2000,
         help="Maximum number of sequences to use for training",
         type=int,
-    )
-    parser.add_argument(
-        "-c",
-        "--combine",
-        action="store_true",
-        help="Combine output files into a single file",
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Verbose output"
@@ -297,8 +293,8 @@ def process_sequences_in_batches(
 def main():
     args = parse_args()
 
-    # Create output directory
-    os.makedirs(args.output_dir, exist_ok=True)
+    output_path = Path(args.output_file).resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Load GO IDs
     go_ids = load_go_ids(args.go_ids_file)
@@ -345,35 +341,14 @@ def main():
             verbose=args.verbose,
         )
 
-        # Save embeddings for this GO term
-        if args.output_dir is None:
-            args.output_dir = f"{model}_embeddings"
-        output_file = os.path.join(
-            args.output_dir, f"{go_id.replace(':', '_')}_embeddings.pkl"
-        )
-        with open(output_file, "wb") as f:
-            pickle.dump(embeddings, f)
+        all_embeddings[go_id] = embeddings
 
-        if args.verbose:
-            print(
-                f"Saved {len(embeddings)} embeddings for {go_id} to {output_file}"
-            )
+    with open(output_path, "wb") as f:
+        pickle.dump(all_embeddings, f)
 
-        if args.combine:
-            # Add to complete dictionary
-            all_embeddings[go_id] = embeddings
-
-    if args.combine:
-        # Save combined embeddings
-        combined_output = os.path.join(
-            args.output_dir, f"all_go_terms_{args.model_type}_embeddings.pkl"
-        )
-        with open(combined_output, "wb") as f:
-            pickle.dump(all_embeddings, f)
-
-        print(
-            f"Saved combined embeddings for {len(all_embeddings)} GO terms to {combined_output}"
-        )
+    print(
+        f"Saved embeddings for {len(all_embeddings)} GO terms to {output_path}"
+    )
 
 
 if __name__ == "__main__":
