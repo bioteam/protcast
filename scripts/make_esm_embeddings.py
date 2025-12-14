@@ -266,7 +266,9 @@ def process_sequences_in_batches(
                 # Shape: [batch=1, seq_len, embed_dim] -> [embed_dim]
                 sequence_embeddings = output.embeddings.squeeze(
                     0
-                )  # Remove batch dim
+                ).to(  # Remove batch dim
+                    dtype=torch.float32
+                )  # Convert from bfloat16 before numpy conversion
                 protein_embedding = (
                     sequence_embeddings.mean(dim=0).cpu().numpy()
                 )  # Mean pool
