@@ -166,24 +166,24 @@ def get_proteins_for_go_terms(
     return proteins_by_go
 
 
-def load_esm_model(model_name):
+def load_esm_model(model_name, verbose=False):
     """Load an ESM-C model using the correct ESM 3.2.1 API."""
 
     try:
         from esm.models.esmc import ESMC
 
-        if args.verbose:
+        if verbose:
             print(f"Loading ESM-C model: {model_name}")
 
         # Use GPU if available
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        if args.verbose:
+        if verbose:
             print(f"Using device: {device}")
         # Load the model
         model = ESMC.from_pretrained(model_name, device=device)
         model.eval()
 
-        if args.verbose:
+        if verbose:
             print("✓ ESM-C model loaded successfully!")
             print(f"Model name: {model_name}")
 
@@ -194,7 +194,7 @@ def load_esm_model(model_name):
         sys.exit(1)
 
 
-def get_embeddings_for_term(model, sequences_dict, go_id):
+def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
     """
     Process protein sequences using ESM-C API to generate embeddings.
 
@@ -206,6 +206,8 @@ def get_embeddings_for_term(model, sequences_dict, go_id):
         Dictionary mapping protein IDs to sequences
     go_id : str
         GO term identifier
+    verbose : bool
+        Whether to print verbose output
 
     Returns:
     --------
@@ -218,7 +220,7 @@ def get_embeddings_for_term(model, sequences_dict, go_id):
     sequences_list = list(sequences_dict.items())
     embeddings_dict = {}
 
-    if args.verbose:
+    if verbose:
         print(
             f"Processing {len(sequences_list)} sequences for GO term {go_id}..."
         )
@@ -228,14 +230,14 @@ def get_embeddings_for_term(model, sequences_dict, go_id):
         tqdm(
             sequences_list,
             desc=f"Processing proteins for GO term {go_id}",
-            disable=not args.verbose,
+            disable=not verbose,
         )
     ):
         try:
             # Create ESMProtein object
             protein = ESMProtein(sequence=sequence)
 
-            if args.verbose:
+            if verbose:
                 print(
                     f"Processing {protein_id}: sequence length {len(sequence)}"
                 )
@@ -264,20 +266,20 @@ def get_embeddings_for_term(model, sequences_dict, go_id):
 
                 embeddings_dict[protein_id] = protein_embedding
 
-                if args.verbose:
+                if verbose:
                     print(
                         f"  ✓ Processed {protein_id}: embedding shape {protein_embedding.shape}"
                     )
 
         except Exception as e:
             print(f"❌ Error processing protein {protein_id}: {e}")
-            if args.verbose:
+            if verbose:
                 import traceback
 
                 traceback.print_exc()
             continue
 
-    if args.verbose:
+    if verbose:
         print(
             f"✓ Successfully processed {len(embeddings_dict)} proteins for GO term {go_id}"
         )
@@ -325,7 +327,7 @@ def main():
         return
 
     # Load ESM model
-    model = load_esm_model(args.model_type)
+    model = load_esm_model(args.model_type, args.verbose)
 
     # Process each GO term separately to manage memory
     saved_terms = 0
@@ -334,7 +336,9 @@ def main():
         proteins_by_go.items(), desc="Creating embeddings for GO term"
     ):
         # Get embeddings for all proteins for this GO term
-        embeddings = get_embeddings_for_term(model, proteins, go_id)
+        embeddings = get_embeddings_for_term(
+            model, proteins, go_id, args.verbose
+        )
 
         go_path = output_dir / f"{clean_go_id(go_id)}.pkl"
         with open(go_path, "wb") as f:
