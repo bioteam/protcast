@@ -228,6 +228,29 @@ def get_proteins_for_go_terms(
                     f"GO term {go_id}: Using {len(proteins_by_go[go_id])} proteins"
                 )
 
+    # FINAL CHECK: Verify all collected sequences before returning
+    if verbose:
+        print("\n=== Final sequence validation ===")
+        for go_id, proteins in proteins_by_go.items():
+            seq_lengths = [len(seq) for seq in proteins.values()]
+            max_len = max(seq_lengths) if seq_lengths else 0
+            if max_len > 10000:
+                print(
+                    f"  GO {go_id}: {len(proteins)} proteins, MAX LENGTH: {max_len} !!!"
+                )
+                # Find which protein has the long sequence
+                for pid, seq in proteins.items():
+                    if len(seq) > 10000:
+                        print(
+                            f"    Long sequence: {pid} = {len(seq)} amino acids"
+                        )
+                        break
+            else:
+                print(
+                    f"  GO {go_id}: {len(proteins)} proteins, max length: {max_len}"
+                )
+        print("=== End validation ===")
+
     return proteins_by_go
 
 
