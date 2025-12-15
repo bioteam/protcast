@@ -28,8 +28,8 @@ import os
 import pickle
 import sys
 from pathlib import Path
-from tqdm import tqdm
 from collections import defaultdict
+from esm.models.esmc import ESMC
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
@@ -78,6 +78,12 @@ def parse_args():
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Verbose output"
     )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Overwrite existing embeddings for GO term",
+    )
     return parser.parse_args()
 
 
@@ -124,7 +130,7 @@ def get_proteins_for_go_terms(
     """
     proteins_by_go = defaultdict(dict)
 
-    for go_id in tqdm(go_ids, desc="Processing GO terms", disable=not verbose):
+    for go_id in go_ids:
         # Get subgraph of GO terms (the term and all its descendants)
         subgraph_go_ids = dataset.get_subgraph(go_id)
 
@@ -170,8 +176,6 @@ def load_esm_model(model_name, verbose=False):
     """Load an ESM-C model using the correct ESM 3.2.1 API."""
 
     try:
-        from esm.models.esmc import ESMC
-
         if verbose:
             print(f"Loading ESM-C model: {model_name}")
 
@@ -325,15 +329,23 @@ def main():
     # Process each GO term separately to manage memory
     saved_terms = 0
 
-    for go_id, proteins in tqdm(
-        proteins_by_go.items(), desc="Creating embeddings for GO term"
-    ):
+    for go_id, proteins in proteins_by_go.items():
+        go_path = output_dir / f"{clean_go_id(go_id)}.pkl"
+
+        if go_path.exists() and not args.force:
+            if args.verbose:
+                print(
+                    f"Embeddings for GO term {go_id} already exist at {go_path}, skipping."
+                )
+            continue
+
+        if args.verbose:
+            print(f"Generating embeddings for GO term {go_id}")
         # Get embeddings for all proteins for this GO term
         embeddings = get_embeddings_for_term(
             model, proteins, go_id, args.verbose
         )
 
-        go_path = output_dir / f"{clean_go_id(go_id)}.pkl"
         with open(go_path, "wb") as f:
             pickle.dump(embeddings, f)
 
