@@ -135,9 +135,36 @@ def get_proteins_for_go_terms(
                 # Add protein sequences to the collection for this GO term
                 for pid in pids:
                     if pid in dataset.proteins:
-                        proteins_by_go[go_id][pid] = dataset.proteins[
-                            pid
-                        ].sequence
+                        seq = dataset.proteins[pid].sequence
+                        # DIAGNOSTIC: Check what we're getting from the dataset
+                        if not isinstance(seq, str):
+                            print(
+                                f"\n=== WARNING: Non-string sequence in dataset ==="
+                            )
+                            print(f"  Protein ID: {pid}")
+                            print(f"  GO term: {go_id}")
+                            print(f"  Sequence type: {type(seq)}")
+                            print(f"  Sequence value: {seq}")
+                            print(f"  Protein object: {dataset.proteins[pid]}")
+                            print(
+                                f"  Protein object type: {type(dataset.proteins[pid])}"
+                            )
+                            if hasattr(dataset.proteins[pid], "__dict__"):
+                                print(
+                                    f"  Protein attributes: {dataset.proteins[pid].__dict__}"
+                                )
+                            print(f"=== END WARNING ===")
+                        elif len(seq) > 10000:
+                            print(
+                                f"\n=== WARNING: Very long sequence in dataset ==="
+                            )
+                            print(f"  Protein ID: {pid}")
+                            print(f"  GO term: {go_id}")
+                            print(f"  Sequence length: {len(seq)}")
+                            print(f"  First 100 chars: {seq[:100]}")
+                            print(f"  Last 100 chars: {seq[-100:]}")
+                            print(f"=== END WARNING ===")
+                        proteins_by_go[go_id][pid] = seq
 
         # Check if we have enough proteins for this GO term
         if len(proteins_by_go[go_id]) < minimum_seqs:
@@ -234,12 +261,37 @@ def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
         )
     ):
         try:
+            # DIAGNOSTIC: Check what we actually got from the dataset
+            if len(sequence) > 10000:
+                print(f"\n=== DIAGNOSTIC INFO for {protein_id} ===")
+                print(f"Sequence type: {type(sequence)}")
+                print(f"Sequence length: {len(sequence)}")
+                print(f"First 100 chars: {str(sequence)[:100]}")
+                print(f"Last 100 chars: {str(sequence)[-100:]}")
+                print(f"Is string: {isinstance(sequence, str)}")
+                if hasattr(sequence, "__dict__"):
+                    print(f"Object attributes: {sequence.__dict__}")
+                print(f"=== END DIAGNOSTIC ===")
+                raise ValueError(
+                    f"Sequence too long: {len(sequence)} amino acids"
+                )
+
+            if len(sequence) == 0:
+                print(f"ERROR: Empty sequence for {protein_id}")
+                raise ValueError(f"Empty sequence")
+
+            if not isinstance(sequence, str):
+                print(f"ERROR: Sequence is not a string for {protein_id}")
+                print(f"  Type: {type(sequence)}")
+                print(f"  Value: {sequence}")
+                raise ValueError(f"Sequence is not a string")
+
             # Create ESMProtein object
             protein = ESMProtein(sequence=sequence)
 
             if verbose:
                 print(
-                    f"Processing {protein_id}: sequence length {len(sequence)}"
+                    f"Creating embedding: {protein_id}, sequence length {len(sequence)}"
                 )
 
             # Get embeddings using ESM-C
