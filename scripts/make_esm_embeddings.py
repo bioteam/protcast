@@ -291,7 +291,7 @@ def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
 
             if verbose:
                 print(
-                    f"Creating embedding: {protein_id}, sequence length {len(sequence)}"
+                    f"Creating embedding: {protein_id}, length {len(sequence)} aa"
                 )
 
             # Get embeddings using ESM-C
