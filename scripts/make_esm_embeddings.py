@@ -315,7 +315,9 @@ def main():
     )
 
     if args.verbose:
-        print(f"Found {len(proteins_by_go)} GO terms with sufficient proteins")
+        print(
+            f"Found {len(proteins_by_go)} GO terms with > {args.minimum_seqs} proteins"
+        )
 
     if not proteins_by_go:
         if args.verbose:
