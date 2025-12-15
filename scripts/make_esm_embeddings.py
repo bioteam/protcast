@@ -244,22 +244,15 @@ def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
 
     from esm.sdk.api import ESMProtein
 
-    sequences_list = list(sequences_dict.items())
     embeddings_dict = {}
 
     if verbose:
         print(
-            f"Processing {len(sequences_list)} sequences for GO term {go_id}..."
+            f"Processing {len(sequences_dict)} sequences for GO term {go_id}..."
         )
 
     # ESM-C processes sequences individually
-    for i, (protein_id, sequence) in enumerate(
-        tqdm(
-            sequences_list,
-            desc=f"Processing proteins for GO term {go_id}",
-            disable=not verbose,
-        )
-    ):
+    for protein_id, sequence in sequences_dict.items():
         try:
             # DIAGNOSTIC: Check what we actually got from the dataset
             if len(sequence) > 10000:
