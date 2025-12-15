@@ -53,15 +53,9 @@ def parse_args():
     )
     parser.add_argument(
         "-o",
-        "--output_file",
+        "--output_dir",
         required=True,
-        help="Path to single pickle file that will store all embeddings",
-    )
-    parser.add_argument(
-        "--batch_size",
-        type=int,
-        default=8,
-        help="Batch size for processing sequences",
+        help="Directory where per-GO-term embedding pickles will be written",
     )
     parser.add_argument(
         "--model_type",
@@ -174,39 +168,33 @@ def get_proteins_for_go_terms(
 
 def load_esm_model(model_name):
     """Load an ESM-C model using the correct ESM 3.2.1 API."""
-    print(f"Loading ESM-C model type: {model_name}")
 
     try:
         from esm.models.esmc import ESMC
 
-        print(f"Loading ESM-C model: {model_name}")
+        if args.verbose:
+            print(f"Loading ESM-C model: {model_name}")
 
         # Use GPU if available
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        print(f"Using device: {device}")
-
+        if args.verbose:
+            print(f"Using device: {device}")
         # Load the model
         model = ESMC.from_pretrained(model_name, device=device)
         model.eval()
 
-        print("✓ ESM-C model loaded successfully!")
-        print(f"Model parameters: {model_name}")
+        if args.verbose:
+            print("✓ ESM-C model loaded successfully!")
+            print(f"Model name: {model_name}")
 
-        return model, None, device  # No alphabet needed for ESM-C
+        return model
 
     except Exception as e:
         print(f"Error loading ESM-C model: {e}")
         sys.exit(1)
 
 
-def process_sequences_in_batches(
-    model,
-    alphabet,  # This will be None for ESM-C
-    sequences_dict,
-    batch_size,
-    device,
-    verbose=False,
-):
+def get_embeddings_for_term(model, sequences_dict, go_id):
     """
     Process protein sequences using ESM-C API to generate embeddings.
 
@@ -214,16 +202,10 @@ def process_sequences_in_batches(
     -----------
     model : ESMCInferenceClient
         ESM-C inference client
-    alphabet : None
-        Not used for ESM-C (kept for compatibility)
     sequences_dict : dict
         Dictionary mapping protein IDs to sequences
-    batch_size : int
-        Number of sequences to process at once (note: ESM-C processes one at a time)
-    device : torch.device
-        Device to use for computation
-    verbose : bool
-        Whether to print verbose output
+    go_id : str
+        GO term identifier
 
     Returns:
     --------
@@ -236,17 +218,24 @@ def process_sequences_in_batches(
     sequences_list = list(sequences_dict.items())
     embeddings_dict = {}
 
-    print(f"Processing {len(sequences_list)} sequences with ESM-C...")
+    if args.verbose:
+        print(
+            f"Processing {len(sequences_list)} sequences for GO term {go_id}..."
+        )
 
     # ESM-C processes sequences individually
     for i, (protein_id, sequence) in enumerate(
-        tqdm(sequences_list, desc="Processing proteins", disable=not verbose)
+        tqdm(
+            sequences_list,
+            desc=f"Processing proteins for GO term {go_id}",
+            disable=not args.verbose,
+        )
     ):
         try:
             # Create ESMProtein object
             protein = ESMProtein(sequence=sequence)
 
-            if verbose:
+            if args.verbose:
                 print(
                     f"Processing {protein_id}: sequence length {len(sequence)}"
                 )
@@ -275,28 +264,37 @@ def process_sequences_in_batches(
 
                 embeddings_dict[protein_id] = protein_embedding
 
-                if verbose:
+                if args.verbose:
                     print(
                         f"  ✓ Processed {protein_id}: embedding shape {protein_embedding.shape}"
                     )
 
         except Exception as e:
             print(f"❌ Error processing protein {protein_id}: {e}")
-            if verbose:
+            if args.verbose:
                 import traceback
 
                 traceback.print_exc()
             continue
 
-    print(f"✓ Successfully processed {len(embeddings_dict)} proteins")
+    if args.verbose:
+        print(
+            f"✓ Successfully processed {len(embeddings_dict)} proteins for GO term {go_id}"
+        )
     return embeddings_dict
+
+
+def clean_go_id(go_id):
+    """Return a filesystem-friendly GO term identifier."""
+
+    return go_id.replace(":", "_")
 
 
 def main():
     args = parse_args()
 
-    output_path = Path(args.output_file).resolve()
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir = Path(args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load GO IDs
     go_ids = load_go_ids(args.go_ids_file)
@@ -314,7 +312,6 @@ def main():
         go_ids,
         args.minimum_seqs,
         args.maximum_seqs,
-        verbose=args.verbose,
     )
 
     if args.verbose:
@@ -326,31 +323,27 @@ def main():
         return
 
     # Load ESM model
-    model, alphabet, device = load_esm_model(args.model_type)
+    model = load_esm_model(args.model_type)
 
     # Process each GO term separately to manage memory
-    all_embeddings = {}
+    saved_terms = 0
+
     for go_id, proteins in tqdm(
-        proteins_by_go.items(), desc="Processing GO terms"
+        proteins_by_go.items(), desc="Creating embeddings for GO term"
     ):
         # Get embeddings for all proteins for this GO term
-        embeddings = process_sequences_in_batches(
-            model,
-            alphabet,
-            proteins,
-            args.batch_size,
-            device,
-            verbose=args.verbose,
-        )
+        embeddings = get_embeddings_for_term(model, proteins, go_id)
 
-        all_embeddings[go_id] = embeddings
+        go_path = output_dir / f"{clean_go_id(go_id)}.pkl"
+        with open(go_path, "wb") as f:
+            pickle.dump(embeddings, f)
 
-    with open(output_path, "wb") as f:
-        pickle.dump(all_embeddings, f)
+        saved_terms += 1
 
-    print(
-        f"Saved embeddings for {len(all_embeddings)} GO terms to {output_path}"
-    )
+        if args.verbose:
+            print(f"Saved embeddings for {go_id} to {go_path}")
+
+    print(f"Saved embeddings for {saved_terms} GO terms in {output_dir}")
 
 
 if __name__ == "__main__":
