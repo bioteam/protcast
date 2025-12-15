@@ -135,74 +135,9 @@ def get_proteins_for_go_terms(
                 # Add protein sequences to the collection for this GO term
                 for pid in pids:
                     if pid in dataset.proteins:
-                        seq = dataset.proteins[pid].sequence
-
-                        # DEBUG: Check if protein already exists and sequences are being concatenated
-                        if pid in proteins_by_go[go_id]:
-                            existing_seq = proteins_by_go[go_id][pid]
-                            print(f"\n=== ERROR: Duplicate protein ID ===")
-                            print(f"  Protein ID: {pid}")
-                            print(f"  GO term: {go_id}")
-                            print(
-                                f"  Existing sequence length: {len(existing_seq)}"
-                            )
-                            print(f"  New sequence length: {len(seq)}")
-                            print(
-                                f"  Are they the same? {existing_seq == seq}"
-                            )
-                            print(f"=== END ERROR ===")
-
-                        # DEBUG: Check sequence right after retrieval
-                        if len(seq) > 10000:
-                            print(
-                                f"\n=== ERROR: Long sequence immediately after retrieval ==="
-                            )
-                            print(f"  Protein ID: {pid}")
-                            print(f"  GO term: {go_id}")
-                            print(f"  Sequence length: {len(seq)}")
-                            print(f"  This shouldn't happen!")
-                            print(f"=== END ERROR ===")
-                        # DIAGNOSTIC: Check what we're getting from the dataset
-                        if not isinstance(seq, str):
-                            print(
-                                f"\n=== WARNING: Non-string sequence in dataset ==="
-                            )
-                            print(f"  Protein ID: {pid}")
-                            print(f"  GO term: {go_id}")
-                            print(f"  Sequence type: {type(seq)}")
-                            print(f"  Sequence value: {seq}")
-                            print(f"  Protein object: {dataset.proteins[pid]}")
-                            print(
-                                f"  Protein object type: {type(dataset.proteins[pid])}"
-                            )
-                            if hasattr(dataset.proteins[pid], "__dict__"):
-                                print(
-                                    f"  Protein attributes: {dataset.proteins[pid].__dict__}"
-                                )
-                            print(f"=== END WARNING ===")
-                        elif len(seq) > 10000:
-                            print(
-                                f"\n=== WARNING: Very long sequence in dataset ==="
-                            )
-                            print(f"  Protein ID: {pid}")
-                            print(f"  GO term: {go_id}")
-                            print(f"  Sequence length: {len(seq)}")
-                            print(f"  First 100 chars: {seq[:100]}")
-                            print(f"  Last 100 chars: {seq[-100:]}")
-                            print(f"=== END WARNING ===")
-
-                        proteins_by_go[go_id][pid] = seq
-
-                        # DEBUG: Verify what was actually stored
-                        stored_seq = proteins_by_go[go_id][pid]
-                        if len(stored_seq) != len(seq):
-                            print(
-                                f"\n=== ERROR: Sequence changed after storage ==="
-                            )
-                            print(f"  Protein ID: {pid}")
-                            print(f"  Original length: {len(seq)}")
-                            print(f"  Stored length: {len(stored_seq)}")
-                            print(f"=== END ERROR ===")
+                        proteins_by_go[go_id][pid] = dataset.proteins[
+                            pid
+                        ].sequence
 
         # Check if we have enough proteins for this GO term
         if len(proteins_by_go[go_id]) < minimum_seqs:
@@ -228,30 +163,7 @@ def get_proteins_for_go_terms(
                     f"GO term {go_id}: Using {len(proteins_by_go[go_id])} proteins"
                 )
 
-    # FINAL CHECK: Verify all collected sequences before returning
-    if verbose:
-        print("\n=== Final sequence validation ===")
-        for go_id, proteins in proteins_by_go.items():
-            seq_lengths = [len(seq) for seq in proteins.values()]
-            max_len = max(seq_lengths) if seq_lengths else 0
-            if max_len > 10000:
-                print(
-                    f"  GO {go_id}: {len(proteins)} proteins, MAX LENGTH: {max_len} !!!"
-                )
-                # Find which protein has the long sequence
-                for pid, seq in proteins.items():
-                    if len(seq) > 10000:
-                        print(
-                            f"    Long sequence: {pid} = {len(seq)} amino acids"
-                        )
-                        break
-            else:
-                print(
-                    f"  GO {go_id}: {len(proteins)} proteins, max length: {max_len}"
-                )
-        print("=== End validation ===")
-
-    return proteins_by_go
+        return proteins_by_go
 
 
 def load_esm_model(model_name, verbose=False):
@@ -315,31 +227,6 @@ def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
     # ESM-C processes sequences individually
     for protein_id, sequence in sequences_dict.items():
         try:
-            # DIAGNOSTIC: Check what we actually got from the dataset
-            if len(sequence) > 10000:
-                print(f"\n=== DIAGNOSTIC INFO for {protein_id} ===")
-                print(f"Sequence type: {type(sequence)}")
-                print(f"Sequence length: {len(sequence)}")
-                print(f"First 100 chars: {str(sequence)[:100]}")
-                print(f"Last 100 chars: {str(sequence)[-100:]}")
-                print(f"Is string: {isinstance(sequence, str)}")
-                if hasattr(sequence, "__dict__"):
-                    print(f"Object attributes: {sequence.__dict__}")
-                print(f"=== END DIAGNOSTIC ===")
-                raise ValueError(
-                    f"Sequence too long: {len(sequence)} amino acids"
-                )
-
-            if len(sequence) == 0:
-                print(f"ERROR: Empty sequence for {protein_id}")
-                raise ValueError(f"Empty sequence")
-
-            if not isinstance(sequence, str):
-                print(f"ERROR: Sequence is not a string for {protein_id}")
-                print(f"  Type: {type(sequence)}")
-                print(f"  Value: {sequence}")
-                raise ValueError(f"Sequence is not a string")
-
             # Create ESMProtein object
             protein = ESMProtein(sequence=sequence)
 
