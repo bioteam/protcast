@@ -169,7 +169,7 @@ def get_proteins_for_go_terms(
                     f"GO term {go_id}: Using {len(proteins_by_go[go_id])} proteins"
                 )
 
-        return proteins_by_go
+    return proteins_by_go
 
 
 def load_esm_model(model_name, verbose=False):
