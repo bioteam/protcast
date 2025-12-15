@@ -136,6 +136,32 @@ def get_proteins_for_go_terms(
                 for pid in pids:
                     if pid in dataset.proteins:
                         seq = dataset.proteins[pid].sequence
+
+                        # DEBUG: Check if protein already exists and sequences are being concatenated
+                        if pid in proteins_by_go[go_id]:
+                            existing_seq = proteins_by_go[go_id][pid]
+                            print(f"\n=== ERROR: Duplicate protein ID ===")
+                            print(f"  Protein ID: {pid}")
+                            print(f"  GO term: {go_id}")
+                            print(
+                                f"  Existing sequence length: {len(existing_seq)}"
+                            )
+                            print(f"  New sequence length: {len(seq)}")
+                            print(
+                                f"  Are they the same? {existing_seq == seq}"
+                            )
+                            print(f"=== END ERROR ===")
+
+                        # DEBUG: Check sequence right after retrieval
+                        if len(seq) > 10000:
+                            print(
+                                f"\n=== ERROR: Long sequence immediately after retrieval ==="
+                            )
+                            print(f"  Protein ID: {pid}")
+                            print(f"  GO term: {go_id}")
+                            print(f"  Sequence length: {len(seq)}")
+                            print(f"  This shouldn't happen!")
+                            print(f"=== END ERROR ===")
                         # DIAGNOSTIC: Check what we're getting from the dataset
                         if not isinstance(seq, str):
                             print(
@@ -164,7 +190,19 @@ def get_proteins_for_go_terms(
                             print(f"  First 100 chars: {seq[:100]}")
                             print(f"  Last 100 chars: {seq[-100:]}")
                             print(f"=== END WARNING ===")
+
                         proteins_by_go[go_id][pid] = seq
+
+                        # DEBUG: Verify what was actually stored
+                        stored_seq = proteins_by_go[go_id][pid]
+                        if len(stored_seq) != len(seq):
+                            print(
+                                f"\n=== ERROR: Sequence changed after storage ==="
+                            )
+                            print(f"  Protein ID: {pid}")
+                            print(f"  Original length: {len(seq)}")
+                            print(f"  Stored length: {len(stored_seq)}")
+                            print(f"=== END ERROR ===")
 
         # Check if we have enough proteins for this GO term
         if len(proteins_by_go[go_id]) < minimum_seqs:
