@@ -34,3 +34,12 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["protcast"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "pytest-mock",
+    "responses",
+    "requests",
+]
