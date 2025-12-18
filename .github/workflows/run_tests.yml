@@ -41,8 +41,8 @@ jobs:
           source .venv/bin/activate
           # install pinned requirements if present
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          # If the repo contains the local protein-feature-vectors package, install it first
-          if [ -d protein-feature-vectors ]; then pip install -e ./protein-feature-vectors; fi
+          # If the repo contains the local protein-feature-vectors package, build a wheel and install it
+          if [ -d protein-feature-vectors ]; then mkdir -p wheelhouse; python -m pip wheel ./protein-feature-vectors -w wheelhouse; pip install wheelhouse/*; fi
           # install package the same way you do locally (include dev extras)
           if [ -f pyproject.toml ] || [ -f setup.py ]; then python -m pip install '.[dev]'; fi
 
@@ -83,7 +83,7 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -d protein-feature-vectors ]; then pip install -e ./protein-feature-vectors; fi
+          if [ -d protein-feature-vectors ]; then mkdir -p wheelhouse; python -m pip wheel ./protein-feature-vectors -w wheelhouse; pip install wheelhouse/*; fi
           if [ -f pyproject.toml ] || [ -f setup.py ]; then python -m pip install '.[dev]'; fi
 
       - name: Run integration tests
