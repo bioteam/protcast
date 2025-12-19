@@ -42,4 +42,6 @@ dev = [
     "pytest-mock",
     "responses",
     "requests",
+    # dagshub used by some model utilities (logging). Add to dev extras so CI/test venv has it
+    "dagshub",
 ]
