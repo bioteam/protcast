@@ -14,3 +14,4 @@ config.json
 *_GOEncoder.pickle
 pyproject.toml
 .gitignore
+protein-feature-vectors/

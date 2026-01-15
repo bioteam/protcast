@@ -1,0 +1,96 @@
+name: Run Tests
+
+# Trigger the workflow on push or pull request to the main branch. Also allow manual runs.
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  unit-tests:
+    name: Unit & fast tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Include the local development Python minor used in the workspace (3.9.x)
+        python-version: [ "3.9"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt','**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies (create venv + install package)
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          # create a virtualenv to mimic local workflow
+          python -m venv .venv
+          # install pinned requirements into the venv if present
+          if [ -f requirements.txt ]; then .venv/bin/python -m pip install -r requirements.txt; fi
+          # Ensure the protein-feature-vectors repo is available (clone if missing)
+          if [ ! -d protein-feature-vectors ]; then git clone https://github.com/bioteam/protein-feature-vectors.git; fi
+          # build and install a wheel of the local dependency into the venv
+          if [ -d protein-feature-vectors ]; then mkdir -p wheelhouse; .venv/bin/python -m pip wheel ./protein-feature-vectors -w wheelhouse; .venv/bin/python -m pip install wheelhouse/*; fi
+          # install package the same way you do locally (include dev extras) into the venv
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then .venv/bin/python -m pip install '.[dev]'; fi
+
+      - name: Run unit & fast tests (skip integration)
+        run: |
+          # Skip tests marked with @pytest.mark.integration
+          .venv/bin/python -m pytest test/ -v -m "not integration" --maxfail=1
+        env:
+          PYTHONWARNINGS: default
+
+  integration-tests:
+    name: Integration tests (network)
+    runs-on: ubuntu-latest
+    # Only run integration tests on main branch pushes or when manually triggered.
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    needs: unit-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt','**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # Use the same minor as the local venv to avoid runtime incompatibilities
+          python-version: "3.9"
+
+      - name: Install dependencies (create venv + install package)
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m venv .venv
+          if [ -f requirements.txt ]; then .venv/bin/python -m pip install -r requirements.txt; fi
+          if [ ! -d protein-feature-vectors ]; then git clone https://github.com/bioteam/protein-feature-vectors.git; fi
+          if [ -d protein-feature-vectors ]; then mkdir -p wheelhouse; .venv/bin/python -m pip wheel ./protein-feature-vectors -w wheelhouse; .venv/bin/python -m pip install wheelhouse/*; fi
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then .venv/bin/python -m pip install '.[dev]'; fi
+
+      - name: Run integration tests
+        run: |
+          # Integration tests are expected to be marked with @pytest.mark.integration
+          .venv/bin/python -m pytest test/ -v -m integration --maxfail=1
+        env:
+          PYTHONWARNINGS: default
+

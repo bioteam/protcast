@@ -1,10 +1,13 @@
 from numba import jit, cuda  # noqa: F401
 import numpy as np
+import pytest
 
 # to measure exec time
 from timeit import default_timer as timer
 
 num = 10000000
+
+pytestmark = pytest.mark.integration
 
 
 # normal function to run on cpu
