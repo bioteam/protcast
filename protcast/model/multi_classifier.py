@@ -71,10 +71,12 @@ class MultiClassifier:
                 repo_name="my-first-repo",
                 mlflow=True,  # this sets MLFLOW_TRACKING_URI automatically
             )
-            # Import mlflow lazily so importing this module doesn't require the
-            # heavy mlflow package at module import time. If mlflow isn't
-            # present, warn (when verbose) and continue — unit tests can run
-            # without mlflow available.
+            """
+            Import mlflow lazily so importing this module doesn't require the
+            heavy mlflow package at module import time. If mlflow isn't
+            present, warn (when verbose) and continue — unit tests can run
+            without mlflow available.
+            """
             try:
                 import mlflow  # type: ignore
 
