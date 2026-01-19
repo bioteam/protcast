@@ -4,7 +4,6 @@ import pickle
 import numpy as np
 import time
 from pathlib import Path
-import dagshub
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
@@ -75,6 +74,7 @@ class MultiClassifier:
         self.logging_time = 0
 
         if self.use_mlflow:
+	    import dagshub
             dagshub.init(
                 repo_owner="aakpan",
                 repo_name="my-first-repo",
