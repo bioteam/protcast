@@ -193,7 +193,7 @@ class MultiClassifier:
             for protein_id in self.proteins[go_id]:
                 pids.append(protein_id)
                 # Convert numpy array to list with float32 for consistency
-                embedding = self.proteins[protein_id]
+                embedding = self.proteins[go_id][protein_id]
                 if hasattr(embedding, "astype"):
                     vals.append(embedding.astype(np.float32).tolist())
                 else:
