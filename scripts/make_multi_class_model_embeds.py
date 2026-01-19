@@ -34,7 +34,12 @@ parser.add_argument(
 )
 parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
 parser.add_argument(
-    "--input_source", default="feature_vectors", help="feature_vectors or esm_embeddings"
+    "--input_source",
+    default="feature_vectors",
+    help="feature_vectors or esm_embeddings",
+)
+parser.add_argument(
+    "--algorithm", default="esm", help="feature_vectors or esm_embeddings"
 )
 parser.add_argument(
     "-d",
