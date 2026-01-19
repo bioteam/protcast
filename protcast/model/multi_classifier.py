@@ -5,10 +5,6 @@ import numpy as np
 import time
 from pathlib import Path
 import dagshub
-import mlflow
-from mlflow.tracking import MlflowClient
-from mlflow.entities import Metric
-from mlflow.models.signature import infer_signature
 from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History  # type: ignore
@@ -84,9 +80,19 @@ class MultiClassifier:
                 repo_name="my-first-repo",
                 mlflow=True,  # this sets MLFLOW_TRACKING_URI automatically
             )
-            mlflow.set_experiment(
-                config.get("EXPERIMENT_NAME", "Default Experiment")
-            )
+            # Import mlflow lazily so importing this module doesn't require the
+            # heavy mlflow package at module import time. If mlflow isn't
+            # present, warn (when verbose) and continue — unit tests can run
+            # without mlflow available.
+            try:
+                import mlflow  # type: ignore
+
+                mlflow.set_experiment(
+                    config.get("EXPERIMENT_NAME", "Default Experiment")
+                )
+            except Exception as _:
+                if self.verbose:
+                    print("mlflow not available; skipping experiment setup")
 
     @typechecked
     def run(self) -> None:
@@ -536,6 +542,19 @@ class MultiClassifier:
         log_start_time = time.time()
 
         print("\n--- Starting MLflow Logging ---")
+
+        # Import mlflow and related symbols lazily to avoid requiring mlflow at
+        # module import time. If mlflow isn't available, optionally warn and
+        # skip logging (useful for unit tests and CI).
+        try:
+            import mlflow  # type: ignore
+            from mlflow.tracking import MlflowClient  # type: ignore
+            from mlflow.entities import Metric  # type: ignore
+            from mlflow.models.signature import infer_signature  # type: ignore
+        except Exception as e:
+            if self.verbose:
+                print("mlflow not available; skipping logging:", e)
+            return
 
         mlflow.log_params(self.params)
 
