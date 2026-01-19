@@ -25,7 +25,8 @@ Provide an input directory containing embeddings files and a ProtCastDataset fil
 
 python3 scripts/make_multi_class_model_embeds.py \
 -d mf_go_terms-level-4 \
--p ProtcastDataset.bin
+-p ProtcastDataset.bin \
+--input_source esm_embeddings
 """
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -33,12 +34,17 @@ parser.add_argument(
 )
 parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
 parser.add_argument(
-    "-a", "--algorithm", default="CTriad", help="Feature vector algorithm"
+    "--input_source", default="feature_vectors", help="feature_vectors or esm_embeddings"
 )
 parser.add_argument(
     "-d",
     "--input_dir",
     help="Path to embeddings files",
+)
+parser.add_argument(
+    "-p",
+    "--protcast_dataset",
+    help="Path to ProtCast dataset",
 )
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
