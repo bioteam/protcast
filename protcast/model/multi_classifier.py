@@ -32,7 +32,6 @@ class MultiClassifier:
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
         input_source: str = "feature_vectors",
-        esm_embeddings: dict = None,
     ) -> None:
         self.algorithm = algorithm
         self.verbose = verbose
@@ -43,21 +42,12 @@ class MultiClassifier:
         self.input_source = (
             input_source  # "feature_vectors" or "esm_embeddings"
         )
-        self.esm_embeddings = (
-            esm_embeddings  # Dictionary of protein_id -> embedding
-        )
 
         # Validate input_source parameter
         valid_sources = ["feature_vectors", "esm_embeddings"]
         if input_source not in valid_sources:
             raise ValueError(
                 f"input_source must be one of {valid_sources}, got '{input_source}'"
-            )
-
-        # Validate that ESM embeddings are provided when needed
-        if input_source == "esm_embeddings" and esm_embeddings is None:
-            raise ValueError(
-                "esm_embeddings dictionary must be provided when input_source is 'esm_embeddings'"
             )
 
         # Set instance attributes to the values from "config.json"
@@ -74,7 +64,8 @@ class MultiClassifier:
         self.logging_time = 0
 
         if self.use_mlflow:
-	    import dagshub
+            import dagshub
+
             dagshub.init(
                 repo_owner="aakpan",
                 repo_name="my-first-repo",
@@ -181,18 +172,11 @@ class MultiClassifier:
 
         ESM embeddings should be provided as a dictionary mapping protein_id -> numpy array.
         """
-        if self.esm_embeddings is None:
-            raise ValueError(
-                "ESM embeddings dictionary must be provided when input_source is 'esm_embeddings'"
-            )
 
         go_id_count = len(self.proteins.keys())
 
         if self.verbose:
             print(f"Processing ESM embeddings for {go_id_count} GO terms")
-            print(
-                f"Total ESM embeddings available: {len(self.esm_embeddings)}"
-            )
 
         for i, go_id in enumerate(self.proteins.keys()):
             if self.verbose:
@@ -206,10 +190,10 @@ class MultiClassifier:
             missing_proteins = []
 
             for protein_id in self.proteins[go_id]:
-                if protein_id in self.esm_embeddings:
+                if protein_id in self.proteins:
                     pids.append(protein_id)
                     # Convert numpy array to list with float32 for consistency
-                    embedding = self.esm_embeddings[protein_id]
+                    embedding = self.proteins[protein_id]
                     if hasattr(embedding, "astype"):
                         vals.append(embedding.astype(np.float32).tolist())
                     else:
