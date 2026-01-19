@@ -111,6 +111,7 @@ classifier = MultiClassifier(
     name,
     args.use_mlflow,
     args.use_tensorboard,
+    args.input_source,
 )
 classifier.run()
 # Not necessary with the checkpoints in place
