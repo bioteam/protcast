@@ -9,7 +9,7 @@
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/11-03-2025
-EMBEDDIR=mf_go_terms-level-
+EMBEDDIR=mf_go_terms-level
 
 # Only use local modules for Python 3.11 to match the Python version in the container
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
