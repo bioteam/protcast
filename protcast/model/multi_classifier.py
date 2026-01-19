@@ -189,29 +189,15 @@ class MultiClassifier:
             # Get ESM embeddings for proteins in this GO term
             pids = []
             vals = []
-            missing_proteins = []
 
             for protein_id in self.proteins[go_id]:
-                if protein_id in self.proteins:
-                    pids.append(protein_id)
-                    # Convert numpy array to list with float32 for consistency
-                    embedding = self.proteins[protein_id]
-                    if hasattr(embedding, "astype"):
-                        vals.append(embedding.astype(np.float32).tolist())
-                    else:
-                        vals.append([float(x) for x in embedding])
+                pids.append(protein_id)
+                # Convert numpy array to list with float32 for consistency
+                embedding = self.proteins[protein_id]
+                if hasattr(embedding, "astype"):
+                    vals.append(embedding.astype(np.float32).tolist())
                 else:
-                    missing_proteins.append(protein_id)
-
-            if missing_proteins:
-                if self.verbose:
-                    print(
-                        f"Warning: {len(missing_proteins)} proteins missing ESM embeddings for GO {go_id}"
-                    )
-                    if (
-                        len(missing_proteins) <= 5
-                    ):  # Show first few missing proteins
-                        print(f"Missing proteins: {missing_proteins}")
+                    vals.append([float(x) for x in embedding])
 
             if not pids:
                 raise ValueError(
