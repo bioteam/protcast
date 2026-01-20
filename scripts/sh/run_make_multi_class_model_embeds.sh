@@ -17,7 +17,7 @@ module load tacc-apptainer
 
 cd ${HOME}/git/ProtCast/
 
-for LEVEL in 5 6 7 8 9; do
+for LEVEL in 5 6 7 8; do
     singularity exec --nv $CONTAINER \
     python3 scripts/make_multi_class_model_embeds.py \
     -v \
