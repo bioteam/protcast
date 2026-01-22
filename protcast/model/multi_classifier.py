@@ -560,7 +560,7 @@ class MultiClassifier:
 
         # --- MODEL UPLOAD WITH FEEDBACK ---
         print("  > Uploading model artifact to MLflow...", end="", flush=True)
-        mlflow.keras.log_model(
+        mlflow.keras.log_model(  # type: ignore
             self.model,
             artifact_path="model",
             signature=signature,
