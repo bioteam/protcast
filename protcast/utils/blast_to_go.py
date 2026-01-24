@@ -1,8 +1,7 @@
-import json
-import requests
 from typeguard import typechecked
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
+from protcast.utils.uniprot import UniProt  # noqa: F401
 
 
 @typechecked
@@ -69,7 +68,6 @@ class BlastToGo:
         self.program = program
         self.num_alignments = num_alignments
         self.verbose = verbose
-        self.uniprot_api = "https://rest.uniprot.org/uniprotkb/search"
 
     def blast_to_go(self, seq: str) -> list[str]:
         """blast_to_go
@@ -85,7 +83,7 @@ class BlastToGo:
         List of GO ids
         """
         pids = self.web_blast(seq)
-        go_ids = self.get_go_from_uniprot(pids)
+        go_ids = UniProt(verbose=self.verbose).get_go_from_uniprot(pids)
         return go_ids
 
     @typechecked
@@ -127,49 +125,4 @@ class BlastToGo:
                     pids.append(pid)
                     if self.verbose:
                         print(f"alignment.hit_id: {pid}")
-        if len(pids) > 0:
-            return pids
-
-    @typechecked
-    def get_go_from_uniprot(self, pids: list[str]) -> list[str]:
-        """get_go_from_uniprot
-        Return all GO term ids for a single protein using the UniProt API.
-        The entire record as JSON, for example:
-
-        https://rest.uniprot.org/uniprotkb/search?query=WP_021461111
-
-        Parameters
-        ----------
-        pids: list
-            List of protein ids
-
-        Returns
-        -------
-        List of GO ids
-        """
-        if self.verbose:
-            print("Querying UniProt API")
-        for pid in pids:
-            response = requests.get(self.uniprot_api, params={"query": pid})
-            result = json.loads(response.text)["results"]
-            # If UniProt has the id provided by NCBI Blast
-            if len(result) > 0:
-                """
-                >>> result[0]["uniProtKBCrossReferences"][4]
-                {'database': 'GO', 'id': 'GO:0005737', 'properties':
-                [{'key': 'GoTerm', 'value': 'C:cytoplasm'},
-                {'key': 'GoEvidenceType', 'value': 'IEA:UniProtKB-SubCell'}]}
-                """
-                go_ids = [
-                    x["id"]
-                    for x in result[0]["uniProtKBCrossReferences"]
-                    if x["database"] == "GO"
-                ]
-                if self.verbose:
-                    print(
-                        f"NCBI BLAST id: {pid} UniProt primary accession: {result[0]['primaryAccession']} GO terms: {go_ids}"
-                    )
-                return go_ids
-            else:
-                if self.verbose:
-                    print(f"No match in UniProt for NCBI Blast id {pid}")
+        return pids
