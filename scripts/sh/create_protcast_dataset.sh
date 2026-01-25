@@ -8,7 +8,9 @@
 #SBATCH -N 1
 #SBATCH -n 56
 
-DATE=2025-07-22
+# Create a ProtCastDataSet at TACC, takes about 5 hours
+
+DATE=2025-10-10
 OUTPUT_DIR=$(date +%m-%d-%Y -d now)
 GO_ROOT=https://release.geneontology.org
 UNIPROT_ROOT=https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete
