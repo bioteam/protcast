@@ -136,14 +136,19 @@ def get_proteins_for_go_terms(
 
         # Collect protein IDs and sequences from the subgraph
         for subid in subgraph_go_ids:
-            pids = dataset.get_term(subid).get_all_pids()
-            if pids:
-                # Add protein sequences to the collection for this GO term
-                for pid in pids:
-                    if pid in dataset.proteins:
-                        proteins_by_go[go_id][pid] = dataset.proteins[
-                            pid
-                        ].sequence
+            term = dataset.get_term(subid)
+            if term is not None:
+                pids = term.get_all_pids()
+                if pids:
+                    # Add protein sequences to the collection for this GO term
+                    for pid in pids:
+                        if pid in dataset.proteins:
+                            proteins_by_go[go_id][pid] = dataset.proteins[
+                                pid
+                            ].sequence
+            else:
+                if verbose:
+                    print(f"Warning: GO term {subid} not found in dataset")
 
         # Check if we have enough proteins for this GO term
         if len(proteins_by_go[go_id]) < minimum_seqs:
