@@ -741,7 +741,7 @@ class GOEncoder:
         -------
         None
         """
-        filename = f"{self.id}_GOEncoder.pickle"
+        filename = f"{self.id}_GOEncoder.pkl"
         with open(filename, "wb") as f:
             pickle.dump(self, f)
 
