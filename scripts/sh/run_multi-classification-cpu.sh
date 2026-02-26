@@ -23,9 +23,9 @@ for ALG in "${ALGORITHMS[@]}"; do
       if [ -s $DIR/${ALG}_${NAME}.tsv ]; then
             continue
       fi
-      time python3 scripts/make_multi_class_model.py -v -s test/data/random-level-4.fa -a $ALG
+      time python3 scripts/make_multi_class_model.py -v --use_mlflow -s test/data/random-level-4.fa -a $ALG
       GOENCODER=$(echo *.pickle)
       MODEL=$(echo *.keras)
-      time python3 scripts/run_multi_class_inference.py -v -s test/data/random-level-4.fa -g $GOENCODER -m $MODEL >${ALG}_${NAME}.tsv
+      time python3 scripts/run_multi_class_inference.py -v --use_mlflow -s test/data/random-level-4.fa -g $GOENCODER -m $MODEL >${ALG}_${NAME}.tsv
       mv $MODEL $GOENCODER ${ALG}_${NAME}.tsv ${DIR}
 done

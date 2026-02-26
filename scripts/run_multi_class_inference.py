@@ -5,7 +5,8 @@ import argparse
 import time
 import numpy as np
 from pathlib import Path
-from sklearn.metrics import f1_score
+from collections import Counter
+from sklearn.metrics import f1_score, accuracy_score
 from Bio import SeqIO
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -63,6 +64,11 @@ parser.add_argument(
 )
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
+parser.add_argument(
+    "--obo_file",
+    default=None,
+    help="Path to GO .obo file for DAG-based semantic distance (optional)",
+)
 args = parser.parse_args()
 
 start = time.time()
@@ -74,10 +80,13 @@ algorithm = re.search(
 go_decoder = GOEncoder.load(args.goencoder_file)
 fv_calculator = Calculator(verbose=True)
 
-# Collect data for F1 score calculation
+# Collect data for metric calculation
 true = list()
 pred = list()
+true_go_ids = list()
+pred_go_ids = list()
 names = dict()
+pred_counts = Counter()
 skipped_count = 0
 processed_count = 0
 
@@ -120,6 +129,9 @@ for seq in SeqIO.parse(args.seq_file, "fasta"):
     )
     true.append(go_decoder.encode(actual_go_id))
     pred.append(go_decoder.encode(pred_tup[0]))
+    true_go_ids.append(actual_go_id)
+    pred_go_ids.append(pred_tup[0])
+    pred_counts[pred_tup[0]] += 1
     processed_count += 1
 
 y_true = np.array(true)
@@ -127,13 +139,36 @@ y_pred = np.array(pred)
 # Get overall F1 score ("weighted average", there is also "micro" and "macro")
 f1_weighted = f1_score(y_true, y_pred, average="weighted")
 f1_macro = f1_score(y_true, y_pred, average="macro")
+accuracy = accuracy_score(y_true, y_pred)
 print(f"Weighted F1 score\t{f1_weighted:.4f}")
+print(f"Accuracy\t{accuracy:.4f}")
 # Get F1 score for each class
 print("F1 scores per class")
 f1_per_class = f1_score(y_true, y_pred, average=None)
 for i, f1 in enumerate(f1_per_class):
     go_id = go_decoder.decode(i)
     print(f"{go_id}\t{names[go_id]}\t{f1:.4f}")
+
+# Semantic distance (DAG shortest-path if OBO file provided, else binary)
+if args.obo_file:
+    from protcast.utils.mlflow_utils import SemanticDistance
+
+    if args.verbose:
+        print(f"Loading GO DAG from {args.obo_file} for semantic distance...")
+    sem_dist = SemanticDistance(args.obo_file)
+    distances = sem_dist.batch_distances(true_go_ids, pred_go_ids)
+    # Filter out -1 (unknown terms) for the mean
+    valid_distances = [d for d in distances if d >= 0]
+    mean_semantic_distance = (
+        float(np.mean(valid_distances)) if valid_distances else 0.0
+    )
+    if args.verbose:
+        print(f"Semantic distances computed for {len(valid_distances)}/{len(distances)} pairs")
+else:
+    # Fallback: binary distance (0 = correct, 1 = wrong)
+    distances = [0 if t == p else 1 for t, p in zip(true_go_ids, pred_go_ids)]
+    mean_semantic_distance = float(np.mean(distances)) if distances else 0.0
+print(f"Mean semantic distance\t{mean_semantic_distance:.4f}")
 
 end = time.time()
 inference_time = round(end - start)
@@ -142,30 +177,50 @@ print(f"Elapsed {algorithm} inference time: {inference_time}")
 # --- MLflow logging for inference ---
 if args.use_mlflow:
     config = ConfigManager.load_config()
-    from protcast.utils.mlflow_utils import init_mlflow, log_inference_results
+    from protcast.utils.mlflow_utils import (
+        init_mlflow,
+        log_inference_results,
+        load_run_metadata,
+    )
 
     mlflow = init_mlflow(
         experiment_name=config.get("EXPERIMENT_NAME", "Default Experiment"),
+        repo_owner=config.get("DAGSHUB_REPO_OWNER", "aakpan"),
+        repo_name=config.get("DAGSHUB_REPO_NAME", "my-first-repo"),
         verbose=args.verbose,
     )
     if mlflow is not None:
+        # Build params, including training run link if available
+        params = {
+            "model_file": args.model_file,
+            "goencoder_file": args.goencoder_file,
+            "seq_file": args.seq_file,
+            "algorithm": algorithm,
+            "input_source": "feature_vectors",
+            "num_classes": go_decoder.num_classes,
+        }
+        run_meta = load_run_metadata(args.model_file)
+        if run_meta:
+            params["training_run_id"] = run_meta["training_run_id"]
+
+        # Build metrics
+        metrics = {
+            "f1_weighted": round(f1_weighted, 4),
+            "f1_macro": round(f1_macro, 4),
+            "accuracy": round(accuracy, 4),
+            "mean_semantic_distance": round(mean_semantic_distance, 4),
+            "processed_sequences": processed_count,
+            "skipped_sequences": skipped_count,
+            "inference_time_seconds": inference_time,
+        }
+        # Per-class prediction counts
+        for go_id, count in pred_counts.items():
+            metrics[f"pred_count_{go_id}"] = count
+
         log_inference_results(
             mlflow,
-            params={
-                "model_file": args.model_file,
-                "goencoder_file": args.goencoder_file,
-                "seq_file": args.seq_file,
-                "algorithm": algorithm,
-                "input_source": "feature_vectors",
-                "num_classes": go_decoder.num_classes,
-            },
-            metrics={
-                "f1_weighted": round(f1_weighted, 4),
-                "f1_macro": round(f1_macro, 4),
-                "processed_sequences": processed_count,
-                "skipped_sequences": skipped_count,
-                "inference_time_seconds": inference_time,
-            },
+            params=params,
+            metrics=metrics,
             tags={
                 "Inference Info": "MultiClassifier feature-vector inference",
                 "input_source": "feature_vectors",

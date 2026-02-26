@@ -26,6 +26,7 @@ import numpy as np
 import pickle
 import torch
 from pathlib import Path
+from collections import Counter
 from Bio import SeqIO
 from esm.models.esmc import ESMC
 from esm.sdk.api import ESMProtein
@@ -197,6 +198,7 @@ def main():
     processed_count = 0
     skipped_count = 0
     probabilities = []
+    pred_counts = Counter()
     confidence_counts = {
         "VERY_HIGH": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "VERY_LOW": 0,
     }
@@ -235,6 +237,7 @@ def main():
         confidence = get_confidence_level(pred_tup[1])
         confidence_counts[confidence] += 1
         probabilities.append(pred_tup[1])
+        pred_counts[pred_tup[0]] += 1
 
         print(f"{seq.id}\t{pred_tup[0]}\t{pred_tup[1]:.4f}\t{confidence}")
 
@@ -252,38 +255,54 @@ def main():
     # --- MLflow logging for inference ---
     if args.use_mlflow:
         from protcast.config.model_config import ConfigManager
-        from protcast.utils.mlflow_utils import init_mlflow, log_inference_results
+        from protcast.utils.mlflow_utils import (
+            init_mlflow,
+            log_inference_results,
+            load_run_metadata,
+        )
 
         config = ConfigManager.load_config()
         mlflow = init_mlflow(
             experiment_name=config.get("EXPERIMENT_NAME", "Default Experiment"),
+            repo_owner=config.get("DAGSHUB_REPO_OWNER", "aakpan"),
+            repo_name=config.get("DAGSHUB_REPO_NAME", "my-first-repo"),
             verbose=args.verbose,
         )
         if mlflow is not None:
+            # Build params, including training run link if available
+            params = {
+                "model_file": args.model_file,
+                "goencoder_file": args.goencoder_file,
+                "seq_file": args.seq_file,
+                "esm_model_type": args.model_type,
+                "input_source": "esm_embeddings",
+                "num_classes": go_decoder.num_classes,
+            }
+            run_meta = load_run_metadata(args.model_file)
+            if run_meta:
+                params["training_run_id"] = run_meta["training_run_id"]
+
+            # Build metrics
             metrics = {
                 "processed_sequences": processed_count,
                 "skipped_sequences": skipped_count,
                 "inference_time_seconds": inference_time,
             }
-            # Log confidence distribution
+            # Confidence distribution
             for level, count in confidence_counts.items():
                 metrics[f"confidence_{level.lower()}"] = count
-            # Log mean probability if we have predictions
+            # Mean probability
             if probabilities:
                 metrics["mean_top_probability"] = round(
                     float(np.mean(probabilities)), 4
                 )
+            # Per-class prediction counts
+            for go_id, count in pred_counts.items():
+                metrics[f"pred_count_{go_id}"] = count
 
             log_inference_results(
                 mlflow,
-                params={
-                    "model_file": args.model_file,
-                    "goencoder_file": args.goencoder_file,
-                    "seq_file": args.seq_file,
-                    "esm_model_type": args.model_type,
-                    "input_source": "esm_embeddings",
-                    "num_classes": go_decoder.num_classes,
-                },
+                params=params,
                 metrics=metrics,
                 tags={
                     "Inference Info": "MultiClassifier ESM-embedding inference",

@@ -71,6 +71,8 @@ class MultiClassifier:
                 experiment_name=config.get(
                     "EXPERIMENT_NAME", "Default Experiment"
                 ),
+                repo_owner=config.get("DAGSHUB_REPO_OWNER", "aakpan"),
+                repo_name=config.get("DAGSHUB_REPO_NAME", "my-first-repo"),
                 verbose=self.verbose,
             )
 
@@ -512,6 +514,7 @@ class MultiClassifier:
             from mlflow.tracking import MlflowClient  # type: ignore
             from mlflow.entities import Metric  # type: ignore
             from mlflow.models.signature import infer_signature  # type: ignore
+            from protcast.utils.mlflow_utils import save_run_metadata  # type: ignore
         except Exception as e:
             if self.verbose:
                 print("mlflow sub-imports failed; skipping logging:", e)
@@ -534,15 +537,40 @@ class MultiClassifier:
         mlflow.log_metric("val_samples", val_samples)
         print(" done.")
 
+        # --- LOG PER-CLASS SAMPLE COUNTS ---
+        print("  > Logging per-class sample counts...", end="", flush=True)
+        for i, (go_id, go_set) in enumerate(
+            zip(self.go_ids, self.features)
+        ):
+            mlflow.log_metric(f"samples_{go_id}", len(go_set))
+        print(" done.")
+
+        # --- LOG BEST EPOCH AND FINAL VAL METRICS ---
+        print("  > Logging best epoch metrics...", end="", flush=True)
+        history = self.history.history
+        if "val_f1_score" in history:
+            best_val_f1 = max(history["val_f1_score"])
+            best_epoch = history["val_f1_score"].index(best_val_f1) + 1
+            mlflow.log_metric("best_val_f1_score", round(best_val_f1, 4))
+            mlflow.log_metric("best_epoch", best_epoch)
+        if "val_loss" in history:
+            final_val_loss = min(history["val_loss"])
+            mlflow.log_metric("best_val_loss", round(final_val_loss, 4))
+        if "val_accuracy" in history:
+            best_val_acc = max(history["val_accuracy"])
+            mlflow.log_metric("best_val_accuracy", round(best_val_acc, 4))
+        mlflow.log_metric("epochs_run", len(history.get("loss", [])))
+        print(" done.")
+
         # --- BATCH LOGGING WITH FEEDBACK ---
-        print("  > Logging metrics in a single batch...", end="", flush=True)
+        print("  > Logging epoch metrics in a single batch...", end="", flush=True)
         client = MlflowClient()
         run_id = mlflow.active_run().info.run_id
         metrics_to_log = []
-        num_epochs = len(next(iter(self.history.history.values())))
+        num_epochs = len(next(iter(history.values())))
 
         for epoch in range(num_epochs):
-            for metric_name, values in self.history.history.items():
+            for metric_name, values in history.items():
                 metrics_to_log.append(
                     Metric(
                         key=metric_name,
@@ -555,6 +583,19 @@ class MultiClassifier:
         client.log_batch(run_id=run_id, metrics=metrics_to_log)
         print(" done.")
 
+        # --- LOG GO TERM LIST AS ARTIFACT ---
+        print("  > Logging GO term list artifact...", end="", flush=True)
+        import tempfile
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, prefix="go_terms_"
+        ) as f:
+            for go_id in self.go_ids:
+                f.write(f"{go_id}\n")
+            go_terms_path = f.name
+        mlflow.log_artifact(go_terms_path, artifact_path="metadata")
+        os.remove(go_terms_path)
+        print(" done.")
+
         # --- SIGNATURE INFERENCE WITH FEEDBACK ---
         print("  > Inferring model signature...", end="", flush=True)
         signature = infer_signature(
@@ -563,12 +604,15 @@ class MultiClassifier:
         print(" done.")
 
         # --- MODEL UPLOAD WITH FEEDBACK ---
+        registered_name = self.params.get(
+            "REGISTERED_MODEL_NAME", "multiclassifier.v0"
+        )
         print("  > Uploading model artifact to MLflow...", end="", flush=True)
         mlflow.keras.log_model(  # type: ignore
             self.model,
             artifact_path="model",
             signature=signature,
-            registered_model_name="multiclassifier.v0",
+            registered_model_name=registered_name,
         )
         print(" done.")
 
@@ -584,6 +628,15 @@ class MultiClassifier:
         )
         mlflow.log_metric(
             "total_logging_time_seconds", round(self.logging_time, 2)
+        )
+
+        # --- SAVE RUN METADATA FOR INFERENCE LINKING ---
+        save_run_metadata(
+            model_name=self.get_name(),
+            run_id=run_id,
+            experiment_name=self.params.get(
+                "EXPERIMENT_NAME", "Default Experiment"
+            ),
         )
 
         print("--- MLflow Logging Complete ---")

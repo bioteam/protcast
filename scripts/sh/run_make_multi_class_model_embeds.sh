@@ -21,6 +21,7 @@ for LEVEL in 5 6 7 8; do
     singularity exec --nv $CONTAINER \
     python3 scripts/make_multi_class_model_embeds.py \
     -v \
+    --use_mlflow \
     -p $DATADIR/ProtCastDataset.bin \
     --input_source esm_embeddings \
     -d $DATADIR/$EMBEDDIR-${LEVEL}

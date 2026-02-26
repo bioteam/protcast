@@ -21,6 +21,7 @@ cd ${HOME}/git/ProtCast/
 singularity exec --nv $CONTAINER \
 python3 scripts/make_multi_class_model.py \
 -v \
+--use_mlflow \
 -p $DATASET \
 -a $ALGORITHM \
--g 
+-g
