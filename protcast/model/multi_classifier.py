@@ -63,29 +63,16 @@ class MultiClassifier:
         self.training_time = 0
         self.logging_time = 0
 
+        self._mlflow = None
         if self.use_mlflow:
-            import dagshub
+            from protcast.utils.mlflow_utils import init_mlflow
 
-            dagshub.init(
-                repo_owner="aakpan",
-                repo_name="my-first-repo",
-                mlflow=True,  # this sets MLFLOW_TRACKING_URI automatically
+            self._mlflow = init_mlflow(
+                experiment_name=config.get(
+                    "EXPERIMENT_NAME", "Default Experiment"
+                ),
+                verbose=self.verbose,
             )
-            """
-            Import mlflow lazily so importing this module doesn't require the
-            heavy mlflow package at module import time. If mlflow isn't
-            present, warn (when verbose) and continue — unit tests can run
-            without mlflow available.
-            """
-            try:
-                import mlflow  # type: ignore
-
-                mlflow.set_experiment(
-                    config.get("EXPERIMENT_NAME", "Default Experiment")
-                )
-            except Exception as _:
-                if self.verbose:
-                    print("mlflow not available; skipping experiment setup")
 
     @typechecked
     def run(self) -> None:
@@ -515,20 +502,37 @@ class MultiClassifier:
 
         print("\n--- Starting MLflow Logging ---")
 
-        # Import mlflow and related symbols lazily to avoid requiring mlflow at
-        # module import time. If mlflow isn't available, optionally warn and
-        # skip logging (useful for unit tests and CI).
+        mlflow = self._mlflow
+        if mlflow is None:
+            if self.verbose:
+                print("mlflow not available; skipping logging")
+            return
+
         try:
-            import mlflow  # type: ignore
             from mlflow.tracking import MlflowClient  # type: ignore
             from mlflow.entities import Metric  # type: ignore
             from mlflow.models.signature import infer_signature  # type: ignore
         except Exception as e:
             if self.verbose:
-                print("mlflow not available; skipping logging:", e)
+                print("mlflow sub-imports failed; skipping logging:", e)
             return
 
+        # --- LOG PARAMETERS ---
         mlflow.log_params(self.params)
+
+        # --- LOG DATASET METADATA ---
+        print("  > Logging dataset metadata...", end="", flush=True)
+        total_samples = self.X.shape[0]
+        train_samples = self.X_train.shape[0]
+        val_samples = total_samples - train_samples
+        mlflow.log_param("input_source", self.input_source)
+        mlflow.log_param("algorithm", self.algorithm)
+        mlflow.log_param("num_classes", len(self.go_ids))
+        mlflow.log_param("feature_vector_length", self.vector_length)
+        mlflow.log_metric("total_samples", total_samples)
+        mlflow.log_metric("train_samples", train_samples)
+        mlflow.log_metric("val_samples", val_samples)
+        print(" done.")
 
         # --- BATCH LOGGING WITH FEEDBACK ---
         print("  > Logging metrics in a single batch...", end="", flush=True)
@@ -569,6 +573,7 @@ class MultiClassifier:
         print(" done.")
 
         mlflow.set_tag("Training Info", "MultiClassifier full logging")
+        mlflow.set_tag("input_source", self.input_source)
 
         # End timing and store the duration
         self.logging_time = time.time() - log_start_time

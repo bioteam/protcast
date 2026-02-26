@@ -170,6 +170,7 @@ def main():
         help="ESM-C model type to use for generating embeddings",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
     args = parser.parse_args()
 
     start = time.time()
@@ -195,6 +196,10 @@ def main():
 
     processed_count = 0
     skipped_count = 0
+    probabilities = []
+    confidence_counts = {
+        "VERY_HIGH": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0, "VERY_LOW": 0,
+    }
 
     for seq in SeqIO.parse(args.seq_file, "fasta"):
         seqstr = str(seq.seq).upper()
@@ -228,18 +233,64 @@ def main():
 
         # Get confidence level
         confidence = get_confidence_level(pred_tup[1])
+        confidence_counts[confidence] += 1
+        probabilities.append(pred_tup[1])
 
         print(f"{seq.id}\t{pred_tup[0]}\t{pred_tup[1]:.4f}\t{confidence}")
 
         processed_count += 1
 
     end = time.time()
+    inference_time = round(end - start)
 
     if args.verbose:
         print(f"\n--- Summary ---")
         print(f"Processed: {processed_count} sequences")
         print(f"Skipped: {skipped_count} sequences")
-        print(f"Total time: {round(end - start)}s")
+        print(f"Total time: {inference_time}s")
+
+    # --- MLflow logging for inference ---
+    if args.use_mlflow:
+        from protcast.config.model_config import ConfigManager
+        from protcast.utils.mlflow_utils import init_mlflow, log_inference_results
+
+        config = ConfigManager.load_config()
+        mlflow = init_mlflow(
+            experiment_name=config.get("EXPERIMENT_NAME", "Default Experiment"),
+            verbose=args.verbose,
+        )
+        if mlflow is not None:
+            metrics = {
+                "processed_sequences": processed_count,
+                "skipped_sequences": skipped_count,
+                "inference_time_seconds": inference_time,
+            }
+            # Log confidence distribution
+            for level, count in confidence_counts.items():
+                metrics[f"confidence_{level.lower()}"] = count
+            # Log mean probability if we have predictions
+            if probabilities:
+                metrics["mean_top_probability"] = round(
+                    float(np.mean(probabilities)), 4
+                )
+
+            log_inference_results(
+                mlflow,
+                params={
+                    "model_file": args.model_file,
+                    "goencoder_file": args.goencoder_file,
+                    "seq_file": args.seq_file,
+                    "esm_model_type": args.model_type,
+                    "input_source": "esm_embeddings",
+                    "num_classes": go_decoder.num_classes,
+                },
+                metrics=metrics,
+                tags={
+                    "Inference Info": "MultiClassifier ESM-embedding inference",
+                    "input_source": "esm_embeddings",
+                },
+            )
+            print("MLflow inference logging complete.")
 
 
 if __name__ == "__main__":
