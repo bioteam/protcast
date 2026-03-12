@@ -3,16 +3,19 @@
 #SBATCH --job-name run_multi_classification
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=briano@bioteam.net
-#SBATCH -o run_multi_classification-cpu.out
-#SBATCH -e run_multi_classification-cpu.err
-#SBATCH -n 56
-#SBATCH -N 1
+#SBATCH -o run_multi_classification-gpu.out
+#SBATCH -e run_multi_classification-gpu.err
+#SBATCH -N 2
+#SBATCH -n 32
 
 DIR=multi-classification
-NAME=cpu
+NAME=gpu
+CONTAINER=~/tensorflow_2.17.0-gpu.sif
 
 source ${HOME}/.bash_profile
-#source ${HOME}/tf282/bin/activate
+# Only use modules from the container
+unset PYTHONPATH
+module load tacc-apptainer
 
 cd ${HOME}/git/ProtCast/
 
@@ -23,9 +26,9 @@ for ALG in "${ALGORITHMS[@]}"; do
       if [ -s $DIR/${ALG}_${NAME}.tsv ]; then
          continue
       fi
-      time python3 test/test_multi_classifier.py -v -s test/data/random-level-4_1800.fa -a $ALG
+      singularity exec --nv $CONTAINER python3 test/test_multi_classifier.py -v -s test/data/random-level-4_1800.fa -a $ALG
       GOENCODER=$(echo *.pickle)
       MODEL=$(echo *.keras)
-      time python3 scripts/run_multi_class_inference.py -v -s test/data/random-level-4_200.fa -g $GOENCODER -m $MODEL > $DIR/${ALG}_${NAME}.tsv
-      mv $MODEL $GOENCODER ${DIR}
+      singularity exec --nv $CONTAINER python3 scripts/run_multi_class_inference.py -v -s test/data/random-level-4_200.fa -g $GOENCODER -m $MODEL > $DIR/${ALG}_${NAME}.tsv
+      mv $MODEL $GOENCODER $DIR
 done
