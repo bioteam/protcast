@@ -15,3 +15,8 @@ config.json
 pyproject.toml
 .gitignore
 protein-feature-vectors/
+benchmark_pipepline/data
+benchmark_pipepline/results
+ProtCast_stats
+/.claude
+.claude/settings.local.json
