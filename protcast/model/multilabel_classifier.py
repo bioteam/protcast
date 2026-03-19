@@ -6,12 +6,93 @@ import time
 from pathlib import Path
 from typeguard import typechecked
 from keras import layers, models
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History
+from keras.callbacks import ModelCheckpoint, TensorBoard, History
 from sklearn.model_selection import train_test_split
 
 from protcast.model.stats.utils import calculate_fmax
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
+
+
+class FmaxEarlyStopping(keras.callbacks.Callback):
+    """Early stopping callback that monitors CAFA-style Fmax.
+
+    At the end of each epoch, computes Fmax on the validation set by
+    sweeping thresholds. Stops training when Fmax hasn't improved for
+    `patience` epochs and restores the weights from the best epoch.
+
+    This replaces the standard EarlyStopping(monitor="val_loss") so
+    the model trains directly toward the evaluation metric used in CAFA.
+
+    Parameters
+    ----------
+    X_val : np.ndarray
+        Validation feature matrix.
+    y_val : np.ndarray
+        Validation multi-hot label matrix.
+    patience : int
+        Number of epochs with no Fmax improvement before stopping.
+    min_delta : float
+        Minimum improvement to count as progress.
+    verbose : bool
+        Whether to print Fmax each epoch.
+    """
+
+    def __init__(self, X_val, y_val, patience=10, min_delta=0.001, verbose=False):
+        super().__init__()
+        self.X_val = X_val
+        self.y_val = y_val
+        self.patience = patience
+        self.min_delta = min_delta
+        self._verbose = verbose
+
+        self.best_fmax = 0.0
+        self.best_threshold = 0.5
+        self.best_epoch = 0
+        self.best_weights = None
+        self.wait = 0
+
+    def on_epoch_end(self, epoch, logs=None):
+        logs = logs or {}
+
+        y_pred = self.model.predict(self.X_val, verbose=0)
+        fmax, threshold = calculate_fmax(self.y_val, y_pred)
+
+        # Store in logs so other callbacks/history can see it
+        logs["val_fmax"] = fmax
+        logs["val_fmax_threshold"] = threshold
+
+        if self._verbose:
+            print(f"  val_fmax: {fmax:.4f} (threshold={threshold:.2f})", end="")
+
+        if fmax > self.best_fmax + self.min_delta:
+            self.best_fmax = fmax
+            self.best_threshold = threshold
+            self.best_epoch = epoch
+            self.best_weights = self.model.get_weights()
+            self.wait = 0
+            if self._verbose:
+                print(" *")
+        else:
+            self.wait += 1
+            if self._verbose:
+                print(f" (no improvement, wait={self.wait}/{self.patience})")
+            if self.wait >= self.patience:
+                if self._verbose:
+                    print(
+                        f"Fmax early stopping: best={self.best_fmax:.4f} "
+                        f"at epoch {self.best_epoch + 1}"
+                    )
+                self.model.stop_training = True
+
+    def on_train_end(self, logs=None):
+        if self.best_weights is not None:
+            if self._verbose:
+                print(
+                    f"Restoring weights from epoch {self.best_epoch + 1} "
+                    f"(Fmax={self.best_fmax:.4f}, threshold={self.best_threshold:.2f})"
+                )
+            self.model.set_weights(self.best_weights)
 
 
 @typechecked
@@ -197,7 +278,12 @@ class MultiLabelClassifier:
             print(f"Model parameters: {model.count_params():,}")
 
     def train_model(self) -> History:
-        """Train the model with early stopping based on validation loss."""
+        """Train the model with early stopping based on validation Fmax.
+
+        Uses FmaxEarlyStopping to compute CAFA-style Fmax at the end of
+        each epoch and stop when it plateaus. This trains directly toward
+        the evaluation metric instead of using val_loss as a proxy.
+        """
         if self.verbose:
             print("Starting training...")
             print(f"Data shapes - X: {self.X.shape}, y: {self.y.shape}")
@@ -215,14 +301,16 @@ class MultiLabelClassifier:
         if self.verbose:
             print(f"Train: {X_train.shape[0]}, Val: {X_val.shape[0]}")
 
-        early_stopping = EarlyStopping(
-            monitor="val_loss",
-            min_delta=0.001,
+        # Early stopping on Fmax (the actual CAFA evaluation metric)
+        fmax_callback = FmaxEarlyStopping(
+            X_val=X_val,
+            y_val=y_val,
             patience=self.patience,  # type: ignore
-            restore_best_weights=True,
-            mode="min",
+            min_delta=0.001,
+            verbose=self.verbose,
         )
 
+        # Also checkpoint on val_loss as a safety net
         checkpoint = ModelCheckpoint(
             filepath=f"{self.get_name()}.keras",
             monitor="val_loss",
@@ -230,7 +318,7 @@ class MultiLabelClassifier:
             mode="min",
         )
 
-        callbacks = [early_stopping, checkpoint]
+        callbacks = [fmax_callback, checkpoint]
 
         if self.use_tensorboard:
             log_dir = "logs/fit/" + time.strftime(
@@ -260,14 +348,17 @@ class MultiLabelClassifier:
         self.training_time = time.time() - train_start_time
         self.history = history
 
-        # Compute Fmax on validation set
-        y_val_pred = self.model.predict(X_val, verbose=0)
-        fmax, best_threshold = calculate_fmax(y_val, y_val_pred)
-        self.best_threshold = best_threshold
+        # Best threshold comes from the callback (already restored best weights)
+        self.best_threshold = fmax_callback.best_threshold
+        self.best_fmax = fmax_callback.best_fmax
 
         if self.verbose:
             print(f"Training completed in {self.training_time:.2f}s")
-            print(f"Validation Fmax: {fmax:.4f} (threshold={best_threshold:.2f})")
+            print(
+                f"Best Fmax: {fmax_callback.best_fmax:.4f} "
+                f"(epoch {fmax_callback.best_epoch + 1}, "
+                f"threshold={fmax_callback.best_threshold:.2f})"
+            )
 
         import gc
         gc.collect()
