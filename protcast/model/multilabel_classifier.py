@@ -248,23 +248,27 @@ class MultiLabelClassifier:
     def build_model(self) -> None:
         """Build the multi-label neural network.
 
-        Architecture is similar to MultiClassifier but with:
-        - sigmoid output (independent per-class probabilities)
-        - binary_crossentropy loss
+        Architecture is configurable via the HIDDEN_LAYERS config key,
+        which should be a list of integers specifying the number of units
+        in each hidden Dense layer. Default: [128, 64].
+
+        Each hidden layer uses ReLU activation and is followed by dropout.
+        The output layer uses sigmoid for independent per-class probabilities.
         """
         input_shape = (self.X.shape[1],)
         num_classes = len(self.go_ids)
 
-        model = models.Sequential(
-            [
-                layers.Input(shape=input_shape),
-                layers.Dense(128, activation="relu"),
-                layers.Dropout(self.dropout),  # type: ignore
-                layers.Dense(64, activation="relu"),
-                layers.Dropout(0.3),
-                layers.Dense(num_classes, activation="sigmoid"),
-            ]
-        )
+        # Read hidden layer sizes from config, fall back to [128, 64]
+        hidden_layers = getattr(self, "hidden_layers", [128, 64])
+        dropout_rate = self.dropout  # type: ignore
+
+        layer_list = [layers.Input(shape=input_shape)]
+        for units in hidden_layers:
+            layer_list.append(layers.Dense(units, activation="relu"))
+            layer_list.append(layers.Dropout(dropout_rate))
+        layer_list.append(layers.Dense(num_classes, activation="sigmoid"))
+
+        model = models.Sequential(layer_list)
 
         model.compile(
             optimizer=self.optimizer,  # type: ignore
@@ -275,6 +279,8 @@ class MultiLabelClassifier:
         self.model = model
 
         if self.verbose:
+            print(f"Hidden layers: {hidden_layers}")
+            print(f"Dropout: {dropout_rate}")
             print(f"Model parameters: {model.count_params():,}")
 
     def train_model(self) -> History:
