@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 from sklearn.metrics import (
     f1_score,
@@ -73,7 +75,133 @@ def calculate_f1_score(y_true: list, y_pred: list) -> float:
     return f1_score(y_true, y_pred)
 
 
-"""     
+@typechecked
+def calculate_fmax(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    thresholds: np.ndarray | None = None,
+) -> tuple:
+    """Calculate Fmax — the CAFA-standard evaluation metric.
+
+    Fmax is the maximum protein-centric F1 score across all decision thresholds.
+    At each threshold t, for each protein i:
+      - precision_i(t) = |predicted_i ∩ true_i| / |predicted_i|
+      - recall_i(t)    = |predicted_i ∩ true_i| / |true_i|
+    These are averaged across all proteins, then combined into F1.
+    Fmax = max over t of F1(t).
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground truth multi-hot labels, shape (num_proteins, num_go_terms).
+    y_pred : np.ndarray
+        Predicted probabilities (sigmoid output), same shape as y_true.
+    thresholds : np.ndarray or None
+        Thresholds to evaluate. Defaults to np.arange(0.01, 1.0, 0.01).
+
+    Returns
+    -------
+    tuple
+        (fmax, best_threshold) where fmax is the maximum F1 and
+        best_threshold is the threshold that achieved it.
+    """
+    if thresholds is None:
+        thresholds = np.arange(0.01, 1.0, 0.01)
+
+    best_f1 = 0.0
+    best_t = 0.0
+
+    for t in thresholds:
+        y_pred_binary = (y_pred >= t).astype(np.float32)
+
+        # Per-protein true positives, predicted positives, actual positives
+        tp = (y_pred_binary * y_true).sum(axis=1)
+        pred_pos = y_pred_binary.sum(axis=1)
+        true_pos = y_true.sum(axis=1)
+
+        # Per-protein precision and recall (avoid division by zero)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            precision = np.where(pred_pos > 0, tp / pred_pos, 0.0)
+            recall = np.where(true_pos > 0, tp / true_pos, 0.0)
+
+        # Only average over proteins that have at least one true annotation
+        has_annotations = true_pos > 0
+        if has_annotations.sum() == 0:
+            continue
+
+        avg_precision = np.where(
+            pred_pos > 0, precision, 0.0
+        )[has_annotations].mean()
+        avg_recall = recall[has_annotations].mean()
+
+        if avg_precision + avg_recall > 0:
+            f1 = 2 * avg_precision * avg_recall / (avg_precision + avg_recall)
+        else:
+            f1 = 0.0
+
+        if f1 > best_f1:
+            best_f1 = f1
+            best_t = float(t)
+
+    return best_f1, best_t
+
+
+@typechecked
+def calculate_smin(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    thresholds: np.ndarray | None = None,
+) -> tuple:
+    """Calculate Smin — the minimum semantic distance (CAFA metric).
+
+    Simplified version without IC weights (which require the GO DAG).
+    Each GO term contributes equally.
+
+    Smin = min over t of sqrt(ru(t)^2 + mi(t)^2)
+
+    Where:
+      - ru(t) = avg missed terms per protein (remaining uncertainty)
+      - mi(t) = avg wrong terms per protein (misinformation)
+
+    Parameters
+    ----------
+    y_true : np.ndarray
+        Ground truth multi-hot labels, shape (num_proteins, num_go_terms).
+    y_pred : np.ndarray
+        Predicted probabilities (sigmoid output), same shape as y_true.
+    thresholds : np.ndarray or None
+        Thresholds to evaluate.
+
+    Returns
+    -------
+    tuple
+        (smin, best_threshold)
+    """
+    if thresholds is None:
+        thresholds = np.arange(0.01, 1.0, 0.01)
+
+    best_s = float("inf")
+    best_t = 0.0
+
+    for t in thresholds:
+        y_pred_binary = (y_pred >= t).astype(np.float32)
+
+        tp = (y_pred_binary * y_true).sum(axis=1)
+        fn = y_true.sum(axis=1) - tp     # missed terms
+        fp = y_pred_binary.sum(axis=1) - tp  # wrong terms
+
+        ru = fn.mean()
+        mi = fp.mean()
+        s = np.sqrt(ru**2 + mi**2)
+
+        if s < best_s:
+            best_s = s
+            best_t = float(t)
+
+    return float(best_s), best_t
+
+
+"""
 F1 Score
 
 The F1 score is calculated using the following formula:
