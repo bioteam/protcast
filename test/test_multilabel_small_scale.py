@@ -53,6 +53,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from protcast.model.multilabel_classifier import (
     MultiLabelClassifier,
     GOEncoder,
+    get_confidence_label,
 )
 from protcast.model.stats.utils import calculate_fmax, calculate_smin
 from protcast.config.model_config import ConfigManager
@@ -336,12 +337,18 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("STEP 5: Inference demo (first 5 proteins)")
     print("=" * 60)
+    print(f"Confidence labels calibrated to threshold={classifier.best_threshold:.2f}")
+    t = classifier.best_threshold
+    q = (1.0 - t) / 4.0
+    print(f"  LOW:       {t:.2f} - {t + q:.2f}")
+    print(f"  MEDIUM:    {t + q:.2f} - {t + 2*q:.2f}")
+    print(f"  HIGH:      {t + 2*q:.2f} - {t + 3*q:.2f}")
+    print(f"  VERY_HIGH: {t + 3*q:.2f} - 1.00")
+    print()
 
     go_encoder = classifier.go_encoder
     demo_pids = list(protein_embeddings.keys())[:5]
 
-    print(f"{'Protein':<15} {'True GO terms':<35} {'Predicted GO terms':<35}")
-    print("-" * 85)
     for pid in demo_pids:
         embedding = protein_embeddings[pid].reshape(1, -1)
         y_pred = classifier.model.predict(embedding, verbose=0)[0]
@@ -349,13 +356,16 @@ if __name__ == "__main__":
         predictions = go_encoder.decode_multilabel(
             y_pred, threshold=classifier.best_threshold
         )
-        pred_str = ", ".join(
-            f"{go}({p:.2f})" for go, p in predictions
-        ) or "NONE"
-
         true_str = ", ".join(sorted(protein_go_terms[pid]))
+        print(f"{pid}  (true: {true_str})")
 
-        print(f"{pid:<15} {true_str:<35} {pred_str:<35}")
+        if predictions:
+            for go_id, prob in predictions:
+                conf = get_confidence_label(prob, classifier.best_threshold)
+                print(f"  {go_id}  score={prob:.4f}  {conf}")
+        else:
+            print("  (no predictions above threshold)")
+        print()
 
     # --- Summary ---
     print("\n" + "=" * 60)

@@ -234,6 +234,17 @@ class MultiLabelClassifier:
         self.y = np.array(y_list)
         self.protein_ids = protein_ids
 
+        # Compute per-class positive weights for imbalance handling.
+        # For each GO term, weight = (num_proteins / num_positive) so that
+        # rare terms get higher weight. Capped to avoid extreme values.
+        pos_counts = self.y.sum(axis=0)  # shape: (num_classes,)
+        n_samples = self.y.shape[0]
+        # Avoid division by zero for GO terms with no annotations
+        pos_counts = np.maximum(pos_counts, 1.0)
+        raw_weights = n_samples / pos_counts
+        # Cap at 10x to prevent rare terms from dominating
+        self.class_weights = np.minimum(raw_weights, 10.0).astype(np.float32)
+
         if self.verbose:
             num_annotations = int(self.y.sum())
             avg_labels = num_annotations / len(protein_ids)
@@ -243,6 +254,8 @@ class MultiLabelClassifier:
             print(f"Avg GO terms per protein: {avg_labels:.1f}")
             print(f"Embedding dim: {embedding_dim}")
             print(f"X shape: {self.X.shape}, y shape: {self.y.shape}")
+            min_w, max_w = self.class_weights.min(), self.class_weights.max()
+            print(f"Class weight range: {min_w:.2f} - {max_w:.2f}")
 
     @typechecked
     def build_model(self) -> None:
@@ -270,9 +283,24 @@ class MultiLabelClassifier:
 
         model = models.Sequential(layer_list)
 
+        # Use class-weighted binary crossentropy to handle imbalance.
+        # Rare GO terms get higher weight so the model doesn't ignore them.
+        import tensorflow as tf
+        class_weights_tensor = tf.constant(
+            self.class_weights, dtype=tf.float32
+        )
+
+        def weighted_binary_crossentropy(y_true, y_pred):
+            per_class_bce = -(
+                y_true * tf.math.log(y_pred + 1e-7)
+                + (1 - y_true) * tf.math.log(1 - y_pred + 1e-7)
+            )
+            weighted = per_class_bce * class_weights_tensor
+            return tf.reduce_mean(weighted, axis=-1)
+
         model.compile(
             optimizer=self.optimizer,  # type: ignore
-            loss="binary_crossentropy",
+            loss=weighted_binary_crossentropy,
             metrics=["accuracy"],
         )
 
@@ -515,6 +543,55 @@ class MultiLabelClassifier:
     def get_name(self) -> str:
         """Generate model name using id."""
         return f"{self.id}_multilabel"
+
+
+def get_confidence_label(score, threshold):
+    """Map a sigmoid score to a human-readable confidence label,
+    calibrated to the model's own Fmax-optimized threshold.
+
+    Divides the range [threshold, 1.0] into four equal bands:
+
+        Below threshold  →  not predicted (filtered out by decode_multilabel)
+        Bottom quartile  →  LOW       — just above the decision boundary
+        Second quartile  →  MEDIUM    — moderate confidence
+        Third quartile   →  HIGH      — strong signal
+        Top quartile     →  VERY_HIGH — near-certain prediction
+
+    Parameters
+    ----------
+    score : float
+        Sigmoid output for a single GO term (0.0 to 1.0).
+    threshold : float
+        The Fmax-optimized decision threshold from training.
+
+    Returns
+    -------
+    str
+        One of "VERY_HIGH", "HIGH", "MEDIUM", "LOW", or "BELOW_THRESHOLD".
+
+    Examples
+    --------
+    >>> get_confidence_label(0.53, threshold=0.22)  # range 0.78, quartile=0.195
+    'MEDIUM'
+    >>> get_confidence_label(0.95, threshold=0.22)
+    'VERY_HIGH'
+    >>> get_confidence_label(0.10, threshold=0.22)
+    'BELOW_THRESHOLD'
+    """
+    if score < threshold:
+        return "BELOW_THRESHOLD"
+
+    range_above = 1.0 - threshold
+    quartile = range_above / 4.0
+
+    if score >= threshold + 3 * quartile:
+        return "VERY_HIGH"
+    elif score >= threshold + 2 * quartile:
+        return "HIGH"
+    elif score >= threshold + quartile:
+        return "MEDIUM"
+    else:
+        return "LOW"
 
 
 class GOEncoder:
