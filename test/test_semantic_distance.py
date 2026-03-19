@@ -14,7 +14,11 @@ import re
 from pathlib import Path
 from collections import defaultdict
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+pytestmark = pytest.mark.integration
 
 from protcast.utils.mlflow_utils import SemanticDistance  # noqa: E402
 
