@@ -56,6 +56,12 @@ parser.add_argument(
     help="Path to ProtCast dataset (optional, for metadata)",
 )
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
+parser.add_argument(
+    "--obo_file",
+    type=str,
+    default=None,
+    help="Path to GO OBO file (required when USE_BOX_EMBEDDINGS is True)",
+)
 args = parser.parse_args()
 
 start = time.time()
@@ -124,6 +130,20 @@ if args.verbose:
 
 name = basename(args.input_dir)
 
+# Load GO DAG if box embeddings are enabled
+go_dag = None
+if config.get("USE_BOX_EMBEDDINGS", False):
+    if args.obo_file is None:
+        print("Error: --obo_file is required when USE_BOX_EMBEDDINGS is True")
+        sys.exit(1)
+    from protcast.preprocessing.annotated_godag import AnnotatedGODag
+
+    if args.verbose:
+        print(f"Loading GO DAG from {args.obo_file}")
+    go_dag = AnnotatedGODag(args.obo_file)
+    if args.verbose:
+        print(f"GO DAG loaded: {len(go_dag.go_terms_map)} terms")
+
 classifier = MultiLabelClassifier(
     verbose=args.verbose,
     protein_embeddings=protein_embeddings,
@@ -133,6 +153,7 @@ classifier = MultiLabelClassifier(
     id=name,
     use_mlflow=args.use_mlflow,
     use_tensorboard=args.use_tensorboard,
+    go_dag=go_dag,
 )
 classifier.run()
 

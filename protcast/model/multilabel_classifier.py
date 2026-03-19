@@ -13,6 +13,19 @@ from protcast.model.stats.utils import calculate_fmax
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
+# Optional box embedding imports — only needed when USE_BOX_EMBEDDINGS is True
+try:
+    from protcast.model.box_embeddings import (
+        BoxEmbeddingLayer,
+        build_box_embedding_model,
+        containment_loss,
+    )
+    from protcast.preprocessing.go_dag_edges import extract_dag_edges
+
+    _BOX_AVAILABLE = True
+except ImportError:
+    _BOX_AVAILABLE = False
+
 
 class FmaxEarlyStopping(keras.callbacks.Callback):
     """Early stopping callback that monitors CAFA-style Fmax.
@@ -122,6 +135,7 @@ class MultiLabelClassifier:
         id: str,
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
+        go_dag: object = None,
     ) -> None:
         """
         Parameters
@@ -142,6 +156,9 @@ class MultiLabelClassifier:
             Whether to log to MLflow.
         use_tensorboard : bool
             Whether to log to TensorBoard.
+        go_dag : AnnotatedGODag or None
+            GO DAG for box embedding containment loss. Required when
+            USE_BOX_EMBEDDINGS is True. Ignored for flat model.
         """
         self.verbose = verbose
         self.protein_embeddings = protein_embeddings
@@ -150,6 +167,7 @@ class MultiLabelClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
         self.id = id
+        self.go_dag = go_dag
 
         # Set instance attributes from config
         self.params = config
@@ -261,34 +279,65 @@ class MultiLabelClassifier:
     def build_model(self) -> None:
         """Build the multi-label neural network.
 
-        Architecture is configurable via the HIDDEN_LAYERS config key,
-        which should be a list of integers specifying the number of units
-        in each hidden Dense layer. Default: [128, 64].
+        Two modes controlled by the USE_BOX_EMBEDDINGS config key:
 
-        Each hidden layer uses ReLU activation and is followed by dropout.
-        The output layer uses sigmoid for independent per-class probabilities.
+        **Flat mode** (default):
+            Input → [Dense+Dropout]* → Dense(sigmoid) → scores
+            Standard multi-label with weighted binary crossentropy.
+
+        **Box mode** (USE_BOX_EMBEDDINGS=True):
+            Input → [Dense+Dropout]* → Dense(box_dim) → BoxEmbeddingLayer → scores
+            Adds containment regularization loss to enforce GO DAG hierarchy.
+            Requires a go_dag to be provided at init time.
+
+        Architecture is configurable via HIDDEN_LAYERS (list of ints).
         """
-        input_shape = (self.X.shape[1],)
-        num_classes = len(self.go_ids)
+        import tensorflow as tf
 
-        # Read hidden layer sizes from config, fall back to [128, 64]
+        input_dim = self.X.shape[1]
+        num_classes = len(self.go_ids)
         hidden_layers = getattr(self, "hidden_layers", [128, 64])
         dropout_rate = self.dropout  # type: ignore
+        use_boxes = getattr(self, "use_box_embeddings", False)
 
-        layer_list = [layers.Input(shape=input_shape)]
+        class_weights_tensor = tf.constant(
+            self.class_weights, dtype=tf.float32
+        )
+
+        if use_boxes:
+            self._build_box_model(
+                input_dim, num_classes, hidden_layers, dropout_rate,
+                class_weights_tensor, tf,
+            )
+        else:
+            self._build_flat_model(
+                input_dim, num_classes, hidden_layers, dropout_rate,
+                class_weights_tensor, tf,
+            )
+
+        if self.verbose:
+            mode = "box" if use_boxes else "flat"
+            print(f"Model mode: {mode}")
+            print(f"Hidden layers: {hidden_layers}")
+            print(f"Dropout: {dropout_rate}")
+            print(f"Model parameters: {self.model.count_params():,}")
+            if use_boxes:
+                box_dim = getattr(self, "box_dim", 32)
+                print(f"Box dim: {box_dim}")
+                print(f"DAG edges: {len(self._dag_edges)}")
+
+    def _build_flat_model(
+        self, input_dim, num_classes, hidden_layers, dropout_rate,
+        class_weights_tensor, tf,
+    ):
+        """Build the standard flat sigmoid model."""
+        layer_list = [layers.Input(shape=(input_dim,))]
         for units in hidden_layers:
             layer_list.append(layers.Dense(units, activation="relu"))
             layer_list.append(layers.Dropout(dropout_rate))
         layer_list.append(layers.Dense(num_classes, activation="sigmoid"))
 
         model = models.Sequential(layer_list)
-
-        # Use class-weighted binary crossentropy to handle imbalance.
-        # Rare GO terms get higher weight so the model doesn't ignore them.
-        import tensorflow as tf
-        class_weights_tensor = tf.constant(
-            self.class_weights, dtype=tf.float32
-        )
 
         def weighted_binary_crossentropy(y_true, y_pred):
             per_class_bce = -(
@@ -305,11 +354,75 @@ class MultiLabelClassifier:
         )
 
         self.model = model
+        self._box_layer = None
+        self._dag_edges = np.zeros((0, 2), dtype=np.int32)
 
-        if self.verbose:
-            print(f"Hidden layers: {hidden_layers}")
-            print(f"Dropout: {dropout_rate}")
-            print(f"Model parameters: {model.count_params():,}")
+    def _build_box_model(
+        self, input_dim, num_classes, hidden_layers, dropout_rate,
+        class_weights_tensor, tf,
+    ):
+        """Build the box embedding model with containment loss."""
+        if not _BOX_AVAILABLE:
+            raise ImportError(
+                "Box embedding modules not found. Ensure "
+                "protcast.model.box_embeddings and "
+                "protcast.preprocessing.go_dag_edges are importable."
+            )
+
+        box_dim = getattr(self, "box_dim", 32)
+        temperature = getattr(self, "box_temperature", 10.0)
+        containment_weight = getattr(self, "containment_weight", 0.1)
+
+        model, box_layer = build_box_embedding_model(
+            input_dim=input_dim,
+            num_classes=num_classes,
+            hidden_layers=hidden_layers,
+            dropout_rate=dropout_rate,
+            box_dim=box_dim,
+            temperature=temperature,
+        )
+
+        self._box_layer = box_layer
+
+        # Extract DAG edges for containment loss
+        if self.go_dag is not None:
+            self._dag_edges = extract_dag_edges(
+                self.go_dag, self.go_ids, self.go_encoder
+            )
+        else:
+            self._dag_edges = np.zeros((0, 2), dtype=np.int32)
+
+        dag_edges_tensor = tf.constant(self._dag_edges, dtype=tf.int32)
+        cw = tf.constant(containment_weight, dtype=tf.float32)
+
+        def box_combined_loss(y_true, y_pred):
+            # Weighted BCE (same as flat model)
+            per_class_bce = -(
+                y_true * tf.math.log(y_pred + 1e-7)
+                + (1 - y_true) * tf.math.log(1 - y_pred + 1e-7)
+            )
+            weighted_bce = tf.reduce_mean(
+                per_class_bce * class_weights_tensor, axis=-1
+            )
+
+            # Containment regularization
+            c_loss = containment_loss(box_layer, dag_edges_tensor)
+
+            return weighted_bce + cw * c_loss
+
+        model.compile(
+            optimizer=self.optimizer,  # type: ignore
+            loss=box_combined_loss,
+            metrics=["accuracy"],
+        )
+
+        self.model = model
+
+        if self.verbose and len(self._dag_edges) > 0:
+            print(
+                f"Containment loss: {len(self._dag_edges)} DAG edges, "
+                f"weight={containment_weight}"
+            )
 
     def train_model(self) -> History:
         """Train the model with early stopping based on validation Fmax.
