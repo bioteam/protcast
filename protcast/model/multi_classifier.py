@@ -10,6 +10,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, History
 from keras.metrics import F1Score  # type: ignore
 from tensorflow.keras.utils import to_categorical  # type: ignore
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from protein_feature_vectors import Calculator
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
@@ -32,6 +33,7 @@ class MultiClassifier:
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
         input_source: str = "feature_vectors",
+        feature_algorithms: list | None = None,
     ) -> None:
         self.algorithm = algorithm
         self.verbose = verbose
@@ -39,12 +41,15 @@ class MultiClassifier:
         self.use_mlflow = use_mlflow
         self.use_tensorboard = use_tensorboard
         self.id = id
-        self.input_source = (
-            input_source  # "feature_vectors" or "esm_embeddings"
-        )
+        self.input_source = input_source
+        self.feature_algorithms = feature_algorithms or [
+            "CTriad",
+            "Moran",
+            "CTDD",
+        ]
 
         # Validate input_source parameter
-        valid_sources = ["feature_vectors", "esm_embeddings"]
+        valid_sources = ["feature_vectors", "esm_embeddings", "combined"]
         if input_source not in valid_sources:
             raise ValueError(
                 f"input_source must be one of {valid_sources}, got '{input_source}'"
@@ -86,6 +91,8 @@ class MultiClassifier:
         self.prepare_data()
         self.build_model()
         self.train_model()
+        if self.input_source == "combined":
+            self.save_scalers()
         if self.use_mlflow:
             self.log_model()
 
@@ -98,7 +105,9 @@ class MultiClassifier:
         Returns feature vectors as a list of lists (per GO id),
         protein ids as a list of lists (per GO id), and GO ids as a list.
         """
-        if self.input_source == "esm_embeddings":
+        if self.input_source == "combined":
+            self.get_combined_features()
+        elif self.input_source == "esm_embeddings":
             self.get_esm_embeddings()
         else:
             self.get_traditional_feature_vectors()
@@ -223,6 +232,156 @@ class MultiClassifier:
             )
 
     @typechecked
+    def get_combined_features(self) -> None:
+        """get_combined_features
+        Combine ESM-C embeddings with traditional feature vectors.
+
+        Expects self.proteins to be structured as:
+            {go_id: {protein_id: {"embedding": np.array, "sequence": str}}}
+
+        ESM embeddings and feature vectors are normalized separately using
+        StandardScaler before concatenation, preventing the higher-dimensional
+        ESM embeddings from dominating the feature space.
+        """
+        import gc
+
+        go_id_count = len(self.proteins.keys())
+        fv = Calculator(verbose=self.verbose)
+
+        if self.verbose:
+            print(f"Processing combined features for {go_id_count} GO terms")
+            print(f"Feature algorithms: {self.feature_algorithms}")
+
+        # First pass: collect all embeddings and feature vectors per GO term
+        all_embeddings = []  # list of lists (per GO term)
+        all_fv_vectors = []  # list of lists (per GO term)
+
+        for i, go_id in enumerate(self.proteins.keys()):
+            protein_data = self.proteins[go_id]
+            if self.verbose:
+                print(
+                    f"GO id ({i+1}/{go_id_count}): {go_id} - {len(protein_data)} proteins"
+                )
+
+            pids = []
+            embeddings = []
+            sequences = {}
+
+            for protein_id, data in protein_data.items():
+                pids.append(protein_id)
+                embedding = data["embedding"]
+                if hasattr(embedding, "astype"):
+                    embeddings.append(embedding.astype(np.float32))
+                else:
+                    embeddings.append(np.array(embedding, dtype=np.float32))
+                sequences[protein_id] = data["sequence"]
+
+            if not pids:
+                raise ValueError(
+                    f"No proteins found for GO term {go_id}"
+                )
+
+            # Compute traditional feature vectors for all selected algorithms
+            fv_parts = []
+            for algo in self.feature_algorithms:
+                fv.get_feature_vectors(algo, pdict=sequences)
+                if fv.encodings is None:
+                    raise ValueError(
+                        f"No {algo} encodings generated for GO id {go_id}."
+                    )
+                # Extract values in the same protein order
+                algo_vectors = []
+                for pid in pids:
+                    if pid in fv.encodings.index:
+                        algo_vectors.append(
+                            fv.encodings.loc[pid].values.astype(np.float32)
+                        )
+                    else:
+                        raise ValueError(
+                            f"Protein {pid} not found in {algo} encodings for GO id {go_id}"
+                        )
+                fv_parts.append(np.array(algo_vectors, dtype=np.float32))
+
+            # Concatenate all feature algorithm vectors: [n_proteins, total_fv_dim]
+            fv_combined = np.hstack(fv_parts)
+
+            self.pids.append(pids)
+            self.go_ids.append(go_id)
+            all_embeddings.append(np.array(embeddings, dtype=np.float32))
+            all_fv_vectors.append(fv_combined)
+
+            if i == 0:
+                self.embedding_dim = embeddings[0].shape[0]
+                self.fv_dim = fv_combined.shape[1]
+                if self.verbose:
+                    print(f"ESM embedding dimension: {self.embedding_dim}")
+                    print(f"Feature vector dimension: {self.fv_dim}")
+
+            gc.collect()
+
+        # Stack all data across GO terms for scaler fitting
+        all_emb_array = np.vstack(all_embeddings)
+        all_fv_array = np.vstack(all_fv_vectors)
+
+        # Fit separate scalers for embeddings and feature vectors
+        self.emb_scaler = StandardScaler()
+        self.fv_scaler = StandardScaler()
+        all_emb_scaled = self.emb_scaler.fit_transform(all_emb_array)
+        all_fv_scaled = self.fv_scaler.fit_transform(all_fv_array)
+
+        # Concatenate scaled features
+        all_combined = np.hstack(
+            [all_emb_scaled, all_fv_scaled]
+        ).astype(np.float32)
+
+        if self.verbose:
+            print(
+                f"Combined feature dimension: {all_combined.shape[1]} "
+                f"(ESM: {self.embedding_dim} + FV: {self.fv_dim})"
+            )
+
+        # Redistribute into per-GO-term lists to match expected format
+        offset = 0
+        for i in range(len(self.go_ids)):
+            n = len(self.pids[i])
+            self.features.append(all_combined[offset : offset + n].tolist())
+            offset += n
+
+        self.vector_length = all_combined.shape[1]
+
+        # Clean up
+        del all_emb_array, all_fv_array, all_emb_scaled, all_fv_scaled, all_combined
+        del fv, all_embeddings, all_fv_vectors
+        gc.collect()
+
+        if self.verbose:
+            total_proteins = sum(len(pids) for pids in self.pids)
+            print(
+                f"Successfully processed {total_proteins} proteins with combined features"
+            )
+
+    def save_scalers(self) -> None:
+        """Save the embedding and feature vector scalers for inference."""
+        scalers = {
+            "emb_scaler": self.emb_scaler,
+            "fv_scaler": self.fv_scaler,
+            "feature_algorithms": self.feature_algorithms,
+            "embedding_dim": self.embedding_dim,
+            "fv_dim": self.fv_dim,
+        }
+        filename = f"{self.get_name()}_scalers.pkl"
+        with open(filename, "wb") as f:
+            pickle.dump(scalers, f)
+        if self.verbose:
+            print(f"Scalers saved to {filename}")
+
+    @staticmethod
+    def load_scalers(filename: str) -> dict:
+        """Load scalers from a pickle file for inference."""
+        with open(filename, "rb") as f:
+            return pickle.load(f)
+
+    @typechecked
     def prepare_data(self) -> None:
         """prepare_data
 
@@ -326,12 +485,20 @@ class MultiClassifier:
                     ↓
         Output probabilities (sum = 1.0)
         """
+        # Use wider layers for combined mode due to larger input dimensionality
+        if self.input_source == "combined":
+            dense1_units = 256
+            dense2_units = 128
+        else:
+            dense1_units = 128
+            dense2_units = 64
+
         model = models.Sequential(
             [
                 layers.Input(shape=input_shape),
-                layers.Dense(128, activation="relu"),
+                layers.Dense(dense1_units, activation="relu"),
                 layers.Dropout(self.dropout),  # type: ignore
-                layers.Dense(64, activation="relu"),
+                layers.Dense(dense2_units, activation="relu"),
                 layers.Dropout(0.3),  # Could make this configurable too
                 layers.Dense(len(self.go_ids), activation="softmax"),
             ]

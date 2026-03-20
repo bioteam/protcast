@@ -30,6 +30,7 @@ from collections import Counter
 from Bio import SeqIO
 from esm.models.esmc import ESMC
 from esm.sdk.api import ESMProtein
+from protein_feature_vectors import Calculator
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
@@ -172,7 +173,21 @@ def main():
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
+    parser.add_argument(
+        "--input_source",
+        default="esm_embeddings",
+        choices=["esm_embeddings", "combined"],
+        help="Input source used during training (default: esm_embeddings)",
+    )
+    parser.add_argument(
+        "--scalers_file",
+        default=None,
+        help="Path to scalers pickle file (required for combined mode)",
+    )
     args = parser.parse_args()
+
+    if args.input_source == "combined" and not args.scalers_file:
+        parser.error("--scalers_file is required when using --input_source combined")
 
     start = time.time()
 
@@ -189,6 +204,20 @@ def main():
 
     # Load ESM-C model for generating embeddings
     esm_model = load_esm_model(args.model_type, args.verbose)
+
+    # Load scalers for combined mode
+    scalers = None
+    fv_calc = None
+    if args.input_source == "combined":
+        scalers = MultiClassifier.load_scalers(args.scalers_file)
+        fv_calc = Calculator(verbose=args.verbose)
+        if args.verbose:
+            print(f"Scalers loaded from {args.scalers_file}")
+            print(f"Feature algorithms: {scalers['feature_algorithms']}")
+            print(
+                f"Expected dimensions: ESM={scalers['embedding_dim']}, "
+                f"FV={scalers['fv_dim']}"
+            )
 
     if args.verbose:
         print("\nProcessing sequences...")
@@ -209,7 +238,7 @@ def main():
         # Validate sequence
         if len(seqstr) == 0:
             if args.verbose:
-                print(f"⚠ Skipping {seq.id}: empty sequence")
+                print(f"Skipping {seq.id}: empty sequence")
             skipped_count += 1
             continue
 
@@ -220,12 +249,41 @@ def main():
 
         if embedding is None:
             if args.verbose:
-                print(f"⚠ Skipping {seq.id}: embedding generation failed")
+                print(f"Skipping {seq.id}: embedding generation failed")
             skipped_count += 1
             continue
 
-        # Reshape embedding for model input: [embedding_dim] -> [1, embedding_dim]
-        X_test = embedding.reshape(1, -1).astype(np.float32)
+        if args.input_source == "combined":
+            # Generate feature vectors for this sequence
+            pdict = {seq.id: seqstr}
+            fv_parts = []
+            for algo in scalers["feature_algorithms"]:
+                fv_calc.get_feature_vectors(algo, pdict=pdict)
+                if fv_calc.encodings is None:
+                    if args.verbose:
+                        print(f"Skipping {seq.id}: {algo} encoding failed")
+                    skipped_count += 1
+                    continue
+                fv_parts.append(
+                    fv_calc.encodings.iloc[0].values.astype(np.float32)
+                )
+
+            if len(fv_parts) != len(scalers["feature_algorithms"]):
+                continue  # Skip if any feature algorithm failed
+
+            fv_vector = np.concatenate(fv_parts)
+
+            # Apply saved scalers (transform only, no fitting)
+            emb_scaled = scalers["emb_scaler"].transform(
+                embedding.reshape(1, -1)
+            )
+            fv_scaled = scalers["fv_scaler"].transform(
+                fv_vector.reshape(1, -1)
+            )
+            X_test = np.hstack([emb_scaled, fv_scaled]).astype(np.float32)
+        else:
+            # Reshape embedding for model input: [embedding_dim] -> [1, embedding_dim]
+            X_test = embedding.reshape(1, -1).astype(np.float32)
 
         # Get predictions from the model
         y_pred = model.predict(X_test, verbose="auto")
@@ -275,7 +333,7 @@ def main():
                 "goencoder_file": args.goencoder_file,
                 "seq_file": args.seq_file,
                 "esm_model_type": args.model_type,
-                "input_source": "esm_embeddings",
+                "input_source": args.input_source,
                 "num_classes": go_decoder.num_classes,
             }
             run_meta = load_run_metadata(args.model_file)
@@ -305,8 +363,8 @@ def main():
                 params=params,
                 metrics=metrics,
                 tags={
-                    "Inference Info": "MultiClassifier ESM-embedding inference",
-                    "input_source": "esm_embeddings",
+                    "Inference Info": f"MultiClassifier {args.input_source} inference",
+                    "input_source": args.input_source,
                 },
             )
             print("MLflow inference logging complete.")

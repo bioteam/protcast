@@ -21,12 +21,20 @@ config = ConfigManager.load_config()
 
 
 """"make_multi_class_model_embeds.py
-Provide an input directory containing embeddings files and a ProtCastDataset file. 
+Provide an input directory containing embeddings files and a ProtCastDataset file.
 
 python3 scripts/make_multi_class_model_embeds.py \
 -d mf_go_terms-level-4 \
 -p ProtcastDataset.bin \
 --input_source esm_embeddings
+
+For combined mode (ESM embeddings + traditional feature vectors):
+
+python3 scripts/make_multi_class_model_embeds.py \
+-d mf_go_terms-level-4 \
+-p ProtcastDataset.bin \
+--input_source combined \
+--feature_algorithms CTriad Moran CTDD
 """
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -36,10 +44,16 @@ parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
 parser.add_argument(
     "--input_source",
     default="feature_vectors",
-    help="feature_vectors or esm_embeddings",
+    help="feature_vectors, esm_embeddings, or combined",
 )
 parser.add_argument(
-    "--algorithm", default="esm", help="feature_vectors or esm_embeddings"
+    "--algorithm", default="esm", help="Algorithm name for model naming"
+)
+parser.add_argument(
+    "--feature_algorithms",
+    nargs="+",
+    default=["CTriad", "Moran", "CTDD"],
+    help="Feature vector algorithms to use in combined mode (default: CTriad Moran CTDD)",
 )
 parser.add_argument(
     "-d",
@@ -101,6 +115,27 @@ for filename in os.listdir(args.input_dir):
         p = pickle.load(f)
     proteins[go_id] = p
 
+# For combined mode, pair each embedding with its sequence from the dataset
+if args.input_source == "combined":
+    if args.verbose:
+        print("Combined mode: pairing embeddings with sequences from dataset")
+    combined_proteins = defaultdict(dict)
+    missing_sequences = 0
+    for go_id, pid_embeddings in proteins.items():
+        for pid, embedding in pid_embeddings.items():
+            if pid in dataset.proteins:
+                combined_proteins[go_id][pid] = {
+                    "embedding": embedding,
+                    "sequence": dataset.proteins[pid].sequence,
+                }
+            else:
+                missing_sequences += 1
+                if args.verbose:
+                    print(f"Warning: No sequence found for {pid} in GO term {go_id}")
+    if missing_sequences > 0:
+        print(f"Warning: {missing_sequences} proteins skipped (no sequence in dataset)")
+    proteins = combined_proteins
+
 name = basename(args.input_dir)
 
 classifier = MultiClassifier(
@@ -112,6 +147,7 @@ classifier = MultiClassifier(
     args.use_mlflow,
     args.use_tensorboard,
     args.input_source,
+    feature_algorithms=args.feature_algorithms if args.input_source == "combined" else None,
 )
 classifier.run()
 # Not necessary with the checkpoints in place
