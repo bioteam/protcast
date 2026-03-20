@@ -204,6 +204,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config_path", type=str, help="Path to custom config file"
     )
+    parser.add_argument(
+        "--obo", type=str, default=None,
+        help="Path to GO OBO file (required for box embeddings mode)"
+    )
     args = parser.parse_args()
 
     start = time.time()
@@ -280,24 +284,67 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # --- Step 3: Load config ---
+    # Sensible defaults so the test works even without a valid config.json
+    default_config = {
+        "USER": "test",
+        "EXPERIMENT_NAME": "multilabel_small_scale",
+        "REGISTERED_MODEL_NAME": "multilabel_test.v0",
+        "DAGSHUB_REPO_OWNER": "aakpan",
+        "DAGSHUB_REPO_NAME": "my-first-repo",
+        "OPTIMIZER": "adam",
+        "EPOCHS": 100,
+        "BATCH_SIZE": 32,
+        "HIDDEN_LAYERS": [128, 64],
+        "DROPOUT": 0.5,
+        "VALIDATION_SPLIT": 0.2,
+        "PATIENCE": 10,
+        "USE_BOX_EMBEDDINGS": False,
+        "BOX_DIM": 32,
+        "BOX_TEMPERATURE": 10.0,
+        "CONTAINMENT_WEIGHT": 0.1,
+    }
+
     if args.config_path is not None:
         config = ConfigManager.load_config(args.config_path)
     else:
-        config = ConfigManager.load_config()
+        try:
+            config = ConfigManager.load_config()
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            if args.verbose:
+                print(f"Warning: Could not load config.json ({e}), using defaults")
+            config = {}
+
+    # Merge: defaults ← config file ← command-line overrides
+    merged = {**default_config, **config}
 
     if args.config_override:
         try:
-            config.update(json.loads(args.config_override))
+            merged.update(json.loads(args.config_override))
             if args.verbose:
                 print(f"Config overrides applied: {args.config_override}")
         except json.JSONDecodeError as e:
             print(f"Error parsing config_override: {e}")
             sys.exit(1)
 
+    config = merged
+
     # --- Step 4: Train ---
     print("\n" + "=" * 60)
     print("STEP 3: Training MultiLabelClassifier")
     print("=" * 60)
+
+    # Load GO DAG if box embeddings are enabled and --obo is provided
+    go_dag = None
+    use_boxes = config.get("USE_BOX_EMBEDDINGS", False)
+    if use_boxes:
+        if args.obo is None:
+            print("Error: --obo is required when USE_BOX_EMBEDDINGS is True")
+            sys.exit(1)
+        from protcast.preprocessing.annotated_godag import AnnotatedGODag
+        print(f"Loading GO DAG from {args.obo}...")
+        go_dag = AnnotatedGODag(args.obo)
+        if args.verbose:
+            print(f"GO DAG loaded: {len(go_dag.go_terms_map)} terms")
 
     test_id = time.strftime("%m-%d-%Y-%H-%M-%S", time.localtime())
     classifier = MultiLabelClassifier(
@@ -309,6 +356,7 @@ if __name__ == "__main__":
         id=test_id,
         use_mlflow=args.use_mlflow,
         use_tensorboard=args.use_tensorboard,
+        go_dag=go_dag,
     )
 
     try:
