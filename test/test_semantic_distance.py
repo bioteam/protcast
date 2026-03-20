@@ -25,6 +25,12 @@ from protcast.utils.mlflow_utils import SemanticDistance  # noqa: E402
 OBO_FILE = str(Path(__file__).resolve().parent / "data" / "go-2023-11-15.obo")
 
 
+@pytest.fixture(scope="module")
+def sd():
+    """Create a SemanticDistance instance from the test OBO file."""
+    return SemanticDistance(OBO_FILE)
+
+
 def test_same_term(sd, verbose=False):
     """Distance from a term to itself should be 0."""
     d = sd.shortest_path("GO:0010181", "GO:0010181")
@@ -83,7 +89,7 @@ def test_batch(sd, verbose=False):
         print(f"  PASS  batch_distances = {dists}")
 
 
-def test_with_fasta(sd, seq_file, verbose=False):
+def run_fasta_simulation(sd, seq_file, verbose=False):
     """
     Simulate inference: for each sequence, randomly 'predict' one of the
     GO terms from the file, then compute distances.  This exercises the
@@ -182,6 +188,6 @@ if __name__ == "__main__":
 
     if args.seq_file:
         print("\nRunning FASTA simulation test:")
-        test_with_fasta(sd, args.seq_file, args.verbose)
+        run_fasta_simulation(sd, args.seq_file, args.verbose)
 
     print("\nAll tests passed.")
