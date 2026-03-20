@@ -34,6 +34,7 @@ class MultiClassifier:
         use_tensorboard: bool = False,
         input_source: str = "feature_vectors",
         feature_algorithms: list | None = None,
+        random_state: int | None = None,
     ) -> None:
         self.algorithm = algorithm
         self.verbose = verbose
@@ -42,6 +43,7 @@ class MultiClassifier:
         self.use_tensorboard = use_tensorboard
         self.id = id
         self.input_source = input_source
+        self.random_state = random_state
         self.feature_algorithms = feature_algorithms or [
             "CTriad",
             "Moran",
@@ -524,8 +526,14 @@ class MultiClassifier:
             print(f"Data shapes - X: {self.X.shape}, y: {self.y.shape}")
 
         # Split the data into training and validation sets
+        split_kwargs = dict(
+            test_size=self.validation_split,  # type: ignore
+            stratify=self.y,
+        )
+        if self.random_state is not None:
+            split_kwargs["random_state"] = self.random_state
         X_train, X_val, y_train, y_val = train_test_split(
-            self.X, self.y, test_size=self.validation_split, stratify=self.y  # type: ignore
+            self.X, self.y, **split_kwargs
         )
 
         # Store training data for inference signature in MLflow
