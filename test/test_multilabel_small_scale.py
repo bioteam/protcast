@@ -394,6 +394,25 @@ if __name__ == "__main__":
     print(f"  VERY_HIGH: {t + 3*q:.2f} - 1.00")
     print()
 
+    # Load GO term names/namespaces from OBO file if provided
+    go_metadata = {}
+    NS_SHORT = {"biological_process": "BP", "cellular_component": "CC", "molecular_function": "MF"}
+    if args.obo:
+        try:
+            from goatools.obo_parser import GODag
+            obo_dag = GODag(args.obo, prt=None)
+            for gid, term in obo_dag.items():
+                if not term.is_obsolete:
+                    go_metadata[gid] = {
+                        "name": term.name,
+                        "namespace": NS_SHORT.get(term.namespace, term.namespace),
+                    }
+            if args.verbose:
+                print(f"Loaded {len(go_metadata)} GO term names from {args.obo}\n")
+        except Exception as e:
+            if args.verbose:
+                print(f"Warning: Could not load GO names from OBO: {e}\n")
+
     go_encoder = classifier.go_encoder
     demo_pids = list(protein_embeddings.keys())[:5]
 
@@ -404,13 +423,23 @@ if __name__ == "__main__":
         predictions = go_encoder.decode_multilabel(
             y_pred, threshold=classifier.best_threshold
         )
-        true_str = ", ".join(sorted(protein_go_terms[pid]))
-        print(f"{pid}  (true: {true_str})")
+        true_terms = sorted(protein_go_terms[pid])
+        true_parts = []
+        for gid in true_terms:
+            if gid in go_metadata:
+                true_parts.append(f"{gid} ({go_metadata[gid]['name']})")
+            else:
+                true_parts.append(gid)
+        print(f"{pid}  (true: {', '.join(true_parts)})")
 
         if predictions:
             for go_id, prob in predictions:
                 conf = get_confidence_label(prob, classifier.best_threshold)
-                print(f"  {go_id}  score={prob:.4f}  {conf}")
+                if go_id in go_metadata:
+                    meta = go_metadata[go_id]
+                    print(f"  {go_id}  {meta['name']} [{meta['namespace']}]  score={prob:.4f}  {conf}")
+                else:
+                    print(f"  {go_id}  score={prob:.4f}  {conf}")
         else:
             print("  (no predictions above threshold)")
         print()
