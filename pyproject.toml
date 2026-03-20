@@ -12,6 +12,16 @@ authors = [
     { name = "Jordan Ramsdell", email = "jramsdell@bioteam.net" },
     { name = "Bruno Alvisio", email = "contact@bioteam.net" },
 ]
+keywords = [
+    "bioinformatics",
+    "protein",
+    "molectular-function-prediction",
+    "neural-network",
+]
+classifiers = [
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Intended Audience :: Science/Research",
+]
 requires-python = ">=3.9, <3.12"
 dependencies = [
     "plotly",
