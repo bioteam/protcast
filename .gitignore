@@ -12,6 +12,4 @@ logs/
 config.json
 .gitignore
 *_GOEncoder.pickle
-pyproject.toml
-.gitignore
-protein-feature-vectors/
+.claude/
