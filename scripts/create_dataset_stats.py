@@ -1,10 +1,5 @@
 import argparse
 import logging as log
-from pathlib import Path
-import sys
-
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
 
 from protcast.preprocessing.stats.create_stats_files import (  # noqa: E402
     create_stats_files,

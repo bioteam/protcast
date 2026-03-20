@@ -1,5 +1,4 @@
 import re
-import sys
 import os
 import argparse
 import time
@@ -8,8 +7,6 @@ from pathlib import Path
 from collections import Counter
 from sklearn.metrics import f1_score, accuracy_score
 from Bio import SeqIO
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.model.multi_classifier import GOEncoder  # noqa: E402

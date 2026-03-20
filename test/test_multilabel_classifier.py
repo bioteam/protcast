@@ -1,11 +1,7 @@
 """Tests for MultiLabelClassifier and multi-label evaluation metrics."""
 
-import sys
 import numpy as np
 import pytest
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from protcast.model.multilabel_classifier import MultiLabelClassifier, GOEncoder
 from protcast.model.stats.utils import calculate_fmax, calculate_smin

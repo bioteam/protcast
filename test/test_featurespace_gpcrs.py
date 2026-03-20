@@ -1,14 +1,9 @@
-import os
-import sys
 import tensorflow as tf
 import keras
 import pandas as pd
 from keras.utils import FeatureSpace
 from Bio import SeqIO
 import pytest
-
-# Ensure project root is on path for imports if running from source tree
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 pytestmark = pytest.mark.integration
 

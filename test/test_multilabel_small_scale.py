@@ -39,16 +39,12 @@ Usage:
 
 import re
 import sys
-import os
 import time
 import json
 import argparse
 import numpy as np
-from pathlib import Path
 from collections import defaultdict
 from Bio import SeqIO
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from protcast.model.multilabel_classifier import (
     MultiLabelClassifier,

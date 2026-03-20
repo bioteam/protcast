@@ -3,11 +3,7 @@ import time
 import argparse
 import json
 from collections import defaultdict
-from pathlib import Path
 from Bio import SeqIO
-
-# Add project root to sys.path for protcast imports
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest
 

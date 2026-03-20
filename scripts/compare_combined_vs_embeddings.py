@@ -17,7 +17,6 @@ python3 scripts/compare_combined_vs_embeddings.py \
     -v
 """
 
-import sys
 import os
 import time
 import argparse
@@ -25,8 +24,6 @@ import pickle
 import re
 import gc
 from collections import defaultdict
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402

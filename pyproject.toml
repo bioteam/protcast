@@ -32,8 +32,8 @@ dependencies = [
     "protein-feature-vectors",
 ]
 
-[tool.setuptools]
-packages = ["protcast"]
+[tool.setuptools.packages.find]
+where = ["."]
 
 [project.optional-dependencies]
 dev = [

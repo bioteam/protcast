@@ -6,12 +6,8 @@ import json
 import argparse
 from collections import defaultdict
 from Bio import SeqIO
-from pathlib import Path
 import inspect
 import pytest
-
-# Add project root to sys.path for protcast imports
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 pytestmark = pytest.mark.integration
 

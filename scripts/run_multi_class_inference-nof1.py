@@ -1,13 +1,9 @@
 import re
-import sys
-import os
 import argparse
 import time
 import numpy as np
 from pathlib import Path
 from Bio import SeqIO
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.model.multi_classifier import GOEncoder  # noqa: E402

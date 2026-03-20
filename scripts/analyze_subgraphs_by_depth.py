@@ -1,4 +1,3 @@
-import sys
 import argparse
 import random
 import json
@@ -7,9 +6,6 @@ from collections import defaultdict
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import numpy as np
-
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
 
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,

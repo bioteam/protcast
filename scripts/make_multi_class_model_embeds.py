@@ -1,4 +1,3 @@
-import sys
 import os
 from os.path import basename
 import time
@@ -8,8 +7,6 @@ import re
 import gc
 from collections import defaultdict
 
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402

@@ -29,8 +29,6 @@ import re
 import gc
 from collections import defaultdict
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
-
 from protcast.model.multilabel_classifier import MultiLabelClassifier  # noqa: E402
 from protcast.preprocessing.protcast_dataset import (  # noqa: E402
     ProtCastDataset,

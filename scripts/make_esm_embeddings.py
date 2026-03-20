@@ -24,14 +24,12 @@ These embeddings are contextual, meaning each amino acid's representation is inf
 import torch
 import numpy  # noqa: F401
 import argparse
-import os
 import pickle
 import sys
 from pathlib import Path
 from collections import defaultdict
 from esm.models.esmc import ESMC
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
 
 

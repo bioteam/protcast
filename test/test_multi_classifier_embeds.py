@@ -22,10 +22,6 @@ import json
 import argparse
 import numpy as np
 from collections import defaultdict
-from pathlib import Path
-
-# Add project root to sys.path for protcast imports
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pytest  # noqa: E402
 

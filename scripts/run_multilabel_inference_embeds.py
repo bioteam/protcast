@@ -28,7 +28,6 @@ python3 scripts/run_multilabel_inference_embeds.py \
 """
 
 import sys
-import os
 import argparse
 import time
 import numpy as np
@@ -38,8 +37,6 @@ from collections import Counter
 from Bio import SeqIO
 from esm.models.esmc import ESMC
 from esm.sdk.api import ESMProtein
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 from protcast.model.multilabel_classifier import (  # noqa: E402
     MultiLabelClassifier,

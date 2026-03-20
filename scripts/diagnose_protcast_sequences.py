@@ -3,10 +3,6 @@
 Diagnostic script to investigate sequence lengths in ProtCastDataset
 """
 
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
 
 def main():

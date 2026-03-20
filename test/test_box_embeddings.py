@@ -1,12 +1,8 @@
 """Tests for box embeddings: BoxEmbeddingLayer, containment loss, DAG edges,
 and end-to-end training with the box model path."""
 
-import sys
 import numpy as np
 import pytest
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import tensorflow as tf
 from protcast.model.box_embeddings import (

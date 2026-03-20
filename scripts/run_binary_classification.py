@@ -1,10 +1,5 @@
-import sys
 import argparse
-from pathlib import Path
 from Bio import SeqIO
-
-file = Path(__file__).resolve()
-sys.path.append(str(file.parents[1]))
 
 from protcast.model.binary_classifier import BinaryClassifier  # noqa: E402
 
