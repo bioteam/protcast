@@ -89,8 +89,13 @@ jobs:
 
       - name: Run integration tests
         run: |
-          # Integration tests are expected to be marked with @pytest.mark.integration
-          .venv/bin/python -m pytest test/ -v -m integration --maxfail=1
+          # Only run the integration tests that are meaningful in CI.
+          # Excluded: test_cuda (GPU), test_featurespace_* (deprecated),
+          # test_multi_classifier* (standalone scripts, superseded by multilabel).
+          .venv/bin/python -m pytest \
+            test/test_blast_to_go.py \
+            test/test_semantic_distance.py \
+            -v -m integration --maxfail=1
         env:
           PYTHONWARNINGS: default
 

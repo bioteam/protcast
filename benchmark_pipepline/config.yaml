@@ -1,0 +1,95 @@
+# Configuration file for GO Benchmark Analysis Pipeline
+
+# Input/Output Paths
+paths:
+  # Directory containing raw TSV files from different GO levels
+  raw_data_dir: "data/raw"
+  
+  # Directory for processed/combined data
+  processed_data_dir: "data/processed"
+  
+  # Output directory for all results
+  results_dir: "results"
+  
+  # File pattern to match input TSV files
+  file_pattern: "*.tsv"
+
+# Preprocessing Options
+preprocessing:
+  # Whether to add GO level metadata
+  add_go_level: true
+  
+  # Whether to standardize column names
+  standardize_columns: true
+  
+  # Whether to remove duplicates
+  remove_duplicates: true
+  
+  # Duplicate detection columns (if empty, uses all key columns)
+  duplicate_subset: []
+
+# Analysis Options
+analysis:
+  # Metrics to calculate
+  calculate_balanced_accuracy: true
+  calculate_mcc: true  # Only if TP/TN/FP/FN available
+  calculate_efficiency_metrics: true
+  
+  # Aggregation options
+  aggregate_by_algorithm: true
+  analyze_term_stratification: true
+  calculate_error_correlation: true
+  
+  # Visualization options
+  create_efficiency_frontier: true
+  create_algorithm_comparison: true
+  create_correlation_heatmap: true
+
+# Output Options
+output:
+  # Save enhanced data with calculated metrics
+  save_enhanced_data: true
+  
+  # Generate summary report
+  generate_summary: true
+  
+  # Figure format (png, pdf, svg)
+  figure_format: "png"
+  
+  # Figure DPI
+  figure_dpi: 300
+  
+  # Save intermediate results
+  save_intermediate: false
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+
+# Performance
+performance:
+  # Number of parallel workers (for future parallelization)
+  n_workers: 1
+
+  # Memory limit (MB) - not currently enforced
+  memory_limit: 4096
+
+# Extended Metrics (computed from raw *_scores.tsv files)
+extended_metrics:
+  # Path to ProtCast_stats directory containing level-{2..7}/ folders
+  scores_dir: "../ProtCast_stats"
+
+  # GO ontology files for S_min computation
+  obo_file: "../ProtCast_stats/2025-10-10/go.obo"
+  gaf_file: "../ProtCast_stats/2025-10-10/filtered_goa_uniprot_all_noiea.gaf"
+
+  # GO DAG levels to analyze
+  levels: [2, 3, 4, 5, 6, 7]
+
+  # Bootstrap settings
+  bootstrap_iterations: 1000
+  bootstrap_confidence: 0.95
+
+  # Parallelization for bootstrap
+  n_workers: 4

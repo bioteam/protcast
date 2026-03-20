@@ -21,9 +21,7 @@ import time
 import json
 import argparse
 import numpy as np
-import torch
 from collections import defaultdict
-from Bio import SeqIO
 from pathlib import Path
 
 # Add project root to sys.path for protcast imports
@@ -33,12 +31,10 @@ import pytest  # noqa: E402
 
 pytestmark = pytest.mark.integration
 
-from protcast.model.multi_classifier import MultiClassifier  # noqa: E402
-from protcast.config.model_config import ConfigManager  # noqa: E402
-
 
 def load_esm_model(model_name, verbose=False):
     """Load an ESM-C model."""
+    import torch
     from esm.models.esmc import ESMC
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -55,6 +51,7 @@ def load_esm_model(model_name, verbose=False):
 
 def generate_embedding(esm_model, sequence, protein_id, verbose=False):
     """Generate an ESM-C embedding for a single protein sequence."""
+    import torch
     from esm.sdk.api import ESMProtein
 
     try:
@@ -78,6 +75,11 @@ def generate_embedding(esm_model, sequence, protein_id, verbose=False):
 
 
 if __name__ == "__main__":
+    import torch
+    from Bio import SeqIO
+    from protcast.model.multi_classifier import MultiClassifier
+    from protcast.config.model_config import ConfigManager
+
     parser = argparse.ArgumentParser(
         description="Test MultiClassifier with ESM-C embeddings"
     )

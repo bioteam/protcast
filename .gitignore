@@ -7,9 +7,12 @@ venv/
 .venv/
 build/
 *.keras
-pyproject.toml
 logs/
 config.json
 .gitignore
 *_GOEncoder.pickle
+pyproject.toml
+benchmark_pipepline/
+ProtCast_stats
 .claude/
+.pytest_cache/
