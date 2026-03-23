@@ -8,7 +8,7 @@
 #SBATCH -n 32
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
-DATADIR=${WORK}/ProtCast/ProtCastDataset/11-03-2025
+DATADIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
 SEED=42
 
