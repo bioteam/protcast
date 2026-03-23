@@ -284,24 +284,42 @@ class MultiClassifier:
                 )
 
             # Compute traditional feature vectors for all selected algorithms
-            fv_parts = []
+            # First, find proteins present in all algorithm encodings
+            algo_encodings = {}
             for algo in self.feature_algorithms:
                 fv.get_feature_vectors(algo, pdict=sequences)
                 if fv.encodings is None:
                     raise ValueError(
                         f"No {algo} encodings generated for GO id {go_id}."
                     )
-                # Extract values in the same protein order
-                algo_vectors = []
-                for pid in pids:
-                    if pid in fv.encodings.index:
-                        algo_vectors.append(
-                            fv.encodings.loc[pid].values.astype(np.float32)
-                        )
-                    else:
-                        raise ValueError(
-                            f"Protein {pid} not found in {algo} encodings for GO id {go_id}"
-                        )
+                algo_encodings[algo] = fv.encodings
+
+            # Keep only proteins found in all encodings
+            valid_pids = [
+                pid for pid in pids
+                if all(pid in enc.index for enc in algo_encodings.values())
+            ]
+            skipped = len(pids) - len(valid_pids)
+            if skipped > 0 and self.verbose:
+                print(f"Skipped {skipped} proteins missing from feature encodings")
+
+            if not valid_pids:
+                raise ValueError(
+                    f"No proteins with valid feature vectors for GO id {go_id}"
+                )
+
+            # Filter embeddings to match valid_pids
+            pid_to_idx = {pid: idx for idx, pid in enumerate(pids)}
+            embeddings = [embeddings[pid_to_idx[pid]] for pid in valid_pids]
+            pids = valid_pids
+
+            # Extract values in the same protein order
+            fv_parts = []
+            for algo in self.feature_algorithms:
+                algo_vectors = [
+                    algo_encodings[algo].loc[pid].values.astype(np.float32)
+                    for pid in pids
+                ]
                 fv_parts.append(np.array(algo_vectors, dtype=np.float32))
 
             # Concatenate all feature algorithm vectors: [n_proteins, total_fv_dim]
