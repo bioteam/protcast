@@ -4,8 +4,38 @@ Compare the effectiveness of ESM-C embeddings alone vs. ESM-C embeddings
 combined with traditional feature vectors (CTriad, Moran, CTDD) for
 predicting molecular function (GO term classification).
 
+Two models are trained and compared:
+    - Model A: Uses ESM-C embeddings only
+    - Model B: Uses ESM-C embeddings combined with traditional feature vectors
+
 Both models are trained on the same data with the same train/test split
 (controlled by --seed) so that metrics are directly comparable.
+
+Inputs (not modified):
+    - Pre-computed ESM embeddings (.pkl files) in the -d/--input_dir directory.
+      These are created by make_esm_embeddings.py.
+    - Serialized ProtCastDataset (.bin file) containing protein sequences
+      and GO annotations.
+
+Kept in memory only (not saved to disk):
+    - ESM embeddings loaded from .pkl files
+    - Traditional feature vectors (e.g. CTriad, Moran, CTDD) computed
+      on the fly for each protein in combined mode
+    - Training/validation data arrays
+
+Saved to the output directory (-o/--output_dir, default: comparison_experiment):
+    - {name}_esm_only_esm.keras         Model A trained weights
+    - {name}_combined_esm_combined.keras Model B trained weights
+    - {name}_combined_esm_combined_GOEncoder.pkl  GO term label encoder
+    - {name}_esm_only_esm_GOEncoder.pkl           GO term label encoder
+    - {name}_combined_esm_combined_scalers.pkl    Feature scalers (Model B only)
+    - {name}_comparison_results.json     Summary metrics for both models
+
+    where {name} is the basename of the input embeddings directory.
+
+    If the results JSON already exists, the script loads and prints it
+    without retraining. Model, scaler, and encoder files are not
+    overwritten if they already exist.
 
 Example usage:
 
