@@ -93,6 +93,7 @@ class MultiClassifier:
         self.prepare_data()
         self.build_model()
         self.train_model()
+        self.save_model()
         if self.input_source == "combined":
             self.save_scalers()
         if self.use_mlflow:
@@ -390,6 +391,10 @@ class MultiClassifier:
             "fv_dim": self.fv_dim,
         }
         filename = f"{self.get_name()}_scalers.pkl"
+        if os.path.exists(filename):
+            if self.verbose:
+                print(f"Scalers file {filename} already exists, skipping save")
+            return
         with open(filename, "wb") as f:
             pickle.dump(scalers, f)
         if self.verbose:
@@ -688,7 +693,12 @@ class MultiClassifier:
         load_model : Class method to load a saved model from disk
         get_name : Method that generates the filename for the saved model
         """
-        self.model.save(f"{self.get_name()}.keras")
+        filename = f"{self.get_name()}.keras"
+        if os.path.exists(filename):
+            if self.verbose:
+                print(f"Model file {filename} already exists, skipping save")
+            return
+        self.model.save(filename)
 
     @typechecked
     def log_model(self) -> None:
@@ -993,6 +1003,8 @@ class GOEncoder:
         None
         """
         filename = f"{self.id}_GOEncoder.pkl"
+        if os.path.exists(filename):
+            return
         with open(filename, "wb") as f:
             pickle.dump(self, f)
 

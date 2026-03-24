@@ -12,6 +12,7 @@ Example usage:
 python3 scripts/compare_combined_vs_embeddings.py \
     -d mf_go_terms-level-4 \
     -p ProtcastDataset.bin \
+    -o comparison_experiment \
     --feature_algorithms CTriad Moran CTDD \
     --seed 42 \
     -v
@@ -21,6 +22,7 @@ import os
 import time
 import argparse
 import pickle
+import json
 import re
 import gc
 from collections import defaultdict
@@ -73,6 +75,40 @@ def build_combined_proteins(proteins, dataset, verbose=False):
     return combined
 
 
+def print_results(results):
+    """Print comparison results table."""
+    print("\n" + "=" * 60)
+    print("COMPARISON RESULTS")
+    print("=" * 60)
+    print(f"Random seed: {results['seed']}")
+    print(f"Feature algorithms: {', '.join(results['feature_algorithms'])}")
+    print(f"Input dimensions: ESM={results['esm_dim']}, Combined={results['combined_dim']}")
+    print()
+    print(f"{'Metric':<25} {'ESM Only':>12} {'Combined':>12} {'Diff':>12}")
+    print("-" * 61)
+
+    f1_diff = results["best_f1_b"] - results["best_f1_a"]
+    acc_diff = results["best_acc_b"] - results["best_acc_a"]
+    loss_diff = results["best_loss_b"] - results["best_loss_a"]
+
+    print(f"{'Best val F1 score':<25} {results['best_f1_a']:>12.4f} {results['best_f1_b']:>12.4f} {f1_diff:>+12.4f}")
+    print(f"{'Best val accuracy':<25} {results['best_acc_a']:>12.4f} {results['best_acc_b']:>12.4f} {acc_diff:>+12.4f}")
+    print(f"{'Best val loss':<25} {results['best_loss_a']:>12.4f} {results['best_loss_b']:>12.4f} {loss_diff:>+12.4f}")
+    print(f"{'Epochs trained':<25} {results['epochs_a']:>12d} {results['epochs_b']:>12d}")
+    print(f"{'Training time (s)':<25} {results['training_time_a']:>12.1f} {results['training_time_b']:>12.1f}")
+    print()
+
+    if f1_diff > 0.005:
+        print(f">> Combined mode IMPROVED F1 score by {f1_diff:+.4f}")
+    elif f1_diff < -0.005:
+        print(f">> Combined mode DECREASED F1 score by {f1_diff:+.4f}")
+    else:
+        print(f">> No significant difference in F1 score ({f1_diff:+.4f})")
+
+    print(f"\nTotal elapsed time: {results['elapsed']}s")
+    print("Done!")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Compare ESM embeddings vs combined (ESM + feature vectors)"
@@ -92,12 +128,44 @@ def main():
     parser.add_argument(
         "--seed", type=int, default=42, help="Random seed for train/test split"
     )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        default="comparison_experiment",
+        help="Directory for all output files (default: comparison_experiment)",
+    )
     parser.add_argument("--use_mlflow", action="store_true", help="Use MLFlow")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
     args = parser.parse_args()
 
     config = ConfigManager.load_config()
     start = time.time()
+    name = os.path.basename(args.input_dir)
+
+    # Create output directory and work from there
+    os.makedirs(args.output_dir, exist_ok=True)
+    os.chdir(args.output_dir)
+    results_file = f"{name}_comparison_results.json"
+
+    # Check for existing results
+    if os.path.exists(results_file):
+        with open(results_file, "r") as f:
+            results = json.load(f)
+        print(f"Loaded existing results from {results_file}")
+        print_results(results)
+        return
+
+    # Validate input files exist
+    if not os.path.isdir(args.input_dir):
+        print(f"Error: Embeddings directory not found: {args.input_dir}")
+        return
+    pkl_files = [f for f in os.listdir(args.input_dir) if f.endswith(".pkl")]
+    if not pkl_files:
+        print(f"Error: No .pkl embedding files found in {args.input_dir}")
+        return
+    if not os.path.exists(args.protcast_dataset):
+        print(f"Error: ProtCast dataset not found: {args.protcast_dataset}")
+        return
 
     # Load data
     print("=" * 60)
@@ -106,7 +174,6 @@ def main():
     dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
     proteins = load_embeddings(args.input_dir, args.verbose)
     combined_proteins = build_combined_proteins(proteins, dataset, args.verbose)
-    name = os.path.basename(args.input_dir)
 
     # --- Model A: ESM embeddings only ---
     print("\n" + "=" * 60)
@@ -161,36 +228,29 @@ def main():
 
     # --- Results ---
     elapsed = round(time.time() - start)
-    print("\n" + "=" * 60)
-    print("COMPARISON RESULTS")
-    print("=" * 60)
-    print(f"Random seed: {args.seed}")
-    print(f"Feature algorithms: {', '.join(args.feature_algorithms)}")
-    print(f"Input dimensions: ESM={model_a.vector_length}, Combined={model_b.vector_length}")
-    print()
-    print(f"{'Metric':<25} {'ESM Only':>12} {'Combined':>12} {'Diff':>12}")
-    print("-" * 61)
+    results = {
+        "seed": args.seed,
+        "feature_algorithms": args.feature_algorithms,
+        "esm_dim": model_a.vector_length,
+        "combined_dim": model_b.vector_length,
+        "best_f1_a": best_f1_a,
+        "best_acc_a": best_acc_a,
+        "best_loss_a": best_loss_a,
+        "epochs_a": epochs_a,
+        "training_time_a": model_a.training_time,
+        "best_f1_b": best_f1_b,
+        "best_acc_b": best_acc_b,
+        "best_loss_b": best_loss_b,
+        "epochs_b": epochs_b,
+        "training_time_b": model_b.training_time,
+        "elapsed": elapsed,
+    }
 
-    f1_diff = best_f1_b - best_f1_a
-    acc_diff = best_acc_b - best_acc_a
-    loss_diff = best_loss_b - best_loss_a
+    with open(results_file, "w") as f:
+        json.dump(results, f, indent=2)
+    print(f"\nResults saved to {results_file}")
 
-    print(f"{'Best val F1 score':<25} {best_f1_a:>12.4f} {best_f1_b:>12.4f} {f1_diff:>+12.4f}")
-    print(f"{'Best val accuracy':<25} {best_acc_a:>12.4f} {best_acc_b:>12.4f} {acc_diff:>+12.4f}")
-    print(f"{'Best val loss':<25} {best_loss_a:>12.4f} {best_loss_b:>12.4f} {loss_diff:>+12.4f}")
-    print(f"{'Epochs trained':<25} {epochs_a:>12d} {epochs_b:>12d}")
-    print(f"{'Training time (s)':<25} {model_a.training_time:>12.1f} {model_b.training_time:>12.1f}")
-    print()
-
-    if f1_diff > 0.005:
-        print(f">> Combined mode IMPROVED F1 score by {f1_diff:+.4f}")
-    elif f1_diff < -0.005:
-        print(f">> Combined mode DECREASED F1 score by {f1_diff:+.4f}")
-    else:
-        print(f">> No significant difference in F1 score ({f1_diff:+.4f})")
-
-    print(f"\nTotal elapsed time: {elapsed}s")
-    print("Done!")
+    print_results(results)
 
 
 if __name__ == "__main__":

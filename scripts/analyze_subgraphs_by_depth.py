@@ -20,8 +20,6 @@ This script analyzes GO term subgraphs by depth level in the molecular function 
 It takes:
 - Path to serialized ProtCastDataset file
 - Minimum number of sequences required for analysis
-- Maximum number of sequences used to train a model
-
 For each depth level in the Molecular Function graph:
     For each GO term at that depth:
       - Get the subgraph of GO terms for the GO term
@@ -70,14 +68,13 @@ def collect_subgraph_sequences(dataset, go_term, verbose=False):
 
 
 def prepare_training_data(
-    subgraph_sequences, dataset, max_seqs, verbose=False
+    subgraph_sequences, dataset, verbose=False
 ):
     """Prepare balanced training data from subgraph and negative sequences.
 
     Args:
         subgraph_sequences: dict of protein_id -> sequence for positive samples
         dataset: ProtCastDataset instance
-        max_seqs: Maximum number of sequences to use
         verbose: Whether to print progress information
 
     Returns:
@@ -85,20 +82,6 @@ def prepare_training_data(
     """
     positive_sequences = list(subgraph_sequences.values())
     positive_ids = list(subgraph_sequences.keys())
-
-    # Limit sequences if we have more than max_seqs
-    if len(positive_sequences) > max_seqs:
-        if verbose:
-            print(
-                f"Limiting to {max_seqs} sequences (from {len(positive_sequences)})"
-            )
-        random.seed(42)  # For reproducibility
-        # Sample sequences and their corresponding IDs together
-        combined = list(zip(positive_sequences, positive_ids))
-        sampled_combined = random.sample(combined, max_seqs)
-        positive_sequences, positive_ids = zip(*sampled_combined)
-        positive_sequences = list(positive_sequences)
-        positive_ids = list(positive_ids)
 
     # Get negative sequences (not in subgraph)
     all_protein_ids = set(dataset.proteins.keys())
@@ -315,7 +298,7 @@ def analyze_go_term(term, dataset, config, algorithm, args):
 
     # Prepare training data
     positive_sequences, negative_sequences = prepare_training_data(
-        subgraph_sequences, dataset, args.max_seqs, args.verbose
+        subgraph_sequences, dataset, args.verbose
     )
 
     if len(negative_sequences) < len(positive_sequences) // 2:
@@ -402,12 +385,6 @@ def main():
         "--minimum_seqs",
         default=500,
         help="Minimum number of sequences",
-        type=int,
-    )
-    parser.add_argument(
-        "--max_seqs",
-        default=2000,
-        help="Maximum number of sequences to use for training",
         type=int,
     )
     parser.add_argument(
