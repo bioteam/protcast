@@ -10,6 +10,7 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/11-03-2025
 EMBEDDIR=mf_go_terms-level
+OUTDIR=${1:-comparison_experiment}
 SEED=42
 
 # Only use local modules for Python 3.11 to match the Python version in the container
@@ -27,6 +28,7 @@ for LEVEL in 5 6 7 8; do
     -v \
     -p $DATADIR/ProtCastDataset.bin \
     -d $DATADIR/$EMBEDDIR-${LEVEL} \
+    -o $OUTDIR \
     --feature_algorithms CTriad Moran CTDD \
     --seed $SEED \
     2>&1 | tee compare_level_${LEVEL}.log
