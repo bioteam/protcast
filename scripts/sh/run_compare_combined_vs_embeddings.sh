@@ -10,7 +10,7 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-OUTDIR=${1:-comparison_experiment}
+OUTDIR=${WORK}/ProtCast/comparison_experiment
 SEED=42
 
 # Only use local modules for Python 3.11 to match the Python version in the container
