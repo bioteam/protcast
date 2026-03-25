@@ -14,6 +14,7 @@ import numpy as np  # noqa: E402
 from tensorflow import keras  # noqa: E402
 from tensorflow.keras import layers  # type: ignore # noqa: E402
 
+
 """
 ## Prepare the data
 """
