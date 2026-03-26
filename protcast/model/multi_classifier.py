@@ -88,52 +88,16 @@ class MultiClassifier:
         """run
         Key methods
         """
-        # Skip training if model already exists on disk
-        model_file = f"{self.get_name()}.keras"
-        if os.path.exists(model_file):
-            if self.verbose:
-                print(f"Model {model_file} already exists, skipping training")
-            self.model = keras.models.load_model(model_file)
-            # Load history if available
-            history_file = f"{self.get_name()}_history.json"
-            if os.path.exists(history_file):
-                import json as _json
-                with open(history_file, "r") as f:
-                    saved = _json.load(f)
-                self.history = type("History", (), {"history": saved["history"]})()
-                self.training_time = saved["training_time"]
-                self.vector_length = saved["vector_length"]
-            return
-
         self.start_time = time.time()
         self.get_feature_vectors()
         self.prepare_data()
         self.build_model()
         self.train_model()
         self.save_model()
-        self.save_history()
         if self.input_source == "combined":
             self.save_scalers()
         if self.use_mlflow:
             self.log_model()
-
-    def save_history(self) -> None:
-        """Save training history, timing, and vector length to a JSON file."""
-        import json as _json
-        history_file = f"{self.get_name()}_history.json"
-        if os.path.exists(history_file):
-            if self.verbose:
-                print(f"History file {history_file} already exists, skipping save")
-            return
-        saved = {
-            "history": {k: [float(v) for v in vals] for k, vals in self.history.history.items()},
-            "training_time": self.training_time,
-            "vector_length": self.vector_length,
-        }
-        with open(history_file, "w") as f:
-            _json.dump(saved, f, indent=2)
-        if self.verbose:
-            print(f"History saved to {history_file}")
 
     @typechecked
     def get_feature_vectors(self) -> None:
@@ -427,10 +391,6 @@ class MultiClassifier:
             "fv_dim": self.fv_dim,
         }
         filename = f"{self.get_name()}_scalers.pkl"
-        if os.path.exists(filename):
-            if self.verbose:
-                print(f"Scalers file {filename} already exists, skipping save")
-            return
         with open(filename, "wb") as f:
             pickle.dump(scalers, f)
         if self.verbose:
@@ -1039,8 +999,6 @@ class GOEncoder:
         None
         """
         filename = f"{self.id}_GOEncoder.pkl"
-        if os.path.exists(filename):
-            return
         with open(filename, "wb") as f:
             pickle.dump(self, f)
 
