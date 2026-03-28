@@ -9,6 +9,7 @@
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026
+EMBEDDIR=mf_go_terms-level
 OUTDIR=${WORK}/ProtCast/feature_scan
 LEVEL=8
 SEED=42
@@ -26,7 +27,7 @@ singularity exec --nv $CONTAINER \
 python3 scripts/scan_individual_features.py \
 -v \
 -p $DATADIR/ProtCastDataset.bin \
---level $LEVEL \
+-d $DATADIR/$EMBEDDIR-${LEVEL} \
 -o $OUTDIR \
 --seed $SEED \
 2>&1 | tee scan_level_${LEVEL}.log

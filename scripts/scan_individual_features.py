@@ -22,9 +22,9 @@ Saved to the output directory (-o/--output_dir, default: feature_scan):
 Example usage:
 
 python3 scripts/scan_individual_features.py \\
+    -d mf_go_terms-level-8 \\
     -p ProtcastDataset.bin \\
     -o feature_scan \\
-    --level 8 \\
     --seed 42 \\
     -v
 """
@@ -263,14 +263,10 @@ def main():
         description="Scan all individual feature algorithms combined with ESM embeddings"
     )
     parser.add_argument(
-        "-p", "--protcast_dataset", required=True, help="Path to ProtCast dataset"
+        "-d", "--input_dir", required=True, help="Path to embeddings directory"
     )
     parser.add_argument(
-        "-l",
-        "--level",
-        type=int,
-        default=8,
-        help="GO term hierarchy level (default: 8)",
+        "-p", "--protcast_dataset", required=True, help="Path to ProtCast dataset"
     )
     parser.add_argument(
         "--seed", type=int, default=42, help="Random seed for train/test split"
@@ -292,9 +288,13 @@ def main():
 
     config = ConfigManager.load_config()
     start = time.time()
-    input_dir = f"mf_go_terms-level-{args.level}"
-    name = input_dir
+    input_dir = args.input_dir
+    name = os.path.basename(input_dir)
     algorithms = args.algorithms or ALL_ALGORITHMS
+
+    # Extract level from directory name (e.g. mf_go_terms-level-8 -> 8)
+    level_match = re.search(r"level-(\d+)", name)
+    level = int(level_match.group(1)) if level_match else None
 
     # Create output directory and work from there
     os.makedirs(args.output_dir, exist_ok=True)
@@ -316,7 +316,7 @@ def main():
     else:
         results = {
             "seed": args.seed,
-            "level": args.level,
+            "level": level,
             "esm_dim": None,
             "baseline": None,
             "algorithms": [],
