@@ -136,6 +136,7 @@ class MultiLabelClassifier:
         use_mlflow: bool = False,
         use_tensorboard: bool = False,
         go_dag: object = None,
+        random_state: int = 42,
     ) -> None:
         """
         Parameters
@@ -159,6 +160,8 @@ class MultiLabelClassifier:
         go_dag : AnnotatedGODag or None
             GO DAG for box embedding containment loss. Required when
             USE_BOX_EMBEDDINGS is True. Ignored for flat model.
+        random_state : int
+            Random seed for train/test split. Default 42.
         """
         self.verbose = verbose
         self.protein_embeddings = protein_embeddings
@@ -168,6 +171,7 @@ class MultiLabelClassifier:
         self.use_tensorboard = use_tensorboard
         self.id = id
         self.go_dag = go_dag
+        self.random_state = random_state
 
         # Set instance attributes from config
         self.params = config
@@ -438,7 +442,7 @@ class MultiLabelClassifier:
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y,
             test_size=self.validation_split,  # type: ignore
-            random_state=42,
+            random_state=self.random_state,
         )
 
         self.X_train = X_train

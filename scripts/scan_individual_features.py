@@ -3,6 +3,9 @@
 Test every individual feature vector algorithm from protein-feature-vectors
 combined with ESM-C embeddings, comparing each against an ESM-only baseline.
 
+Uses MultilabelClassifier (sigmoid, multi-label) so that CAFA-standard
+Fmax and Smin metrics can be computed for each algorithm.
+
 For each algorithm, trains a model using ESM embeddings + that single algorithm's
 feature vectors, then compares against ESM-only performance.
 
@@ -36,9 +39,13 @@ import pickle
 import json
 import re
 import gc
+import numpy as np
 from collections import defaultdict
+from sklearn.preprocessing import StandardScaler
+from protein_feature_vectors import Calculator
 
-from protcast.model.multi_classifier import MultiClassifier
+from protcast.model.multilabel_classifier import MultiLabelClassifier
+from protcast.model.stats.utils import calculate_fmax, calculate_smin
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
 from protcast.config.model_config import ConfigManager
 
@@ -103,111 +110,216 @@ ALL_ALGORITHMS = [
 ]
 
 
-def load_embeddings(input_dir, verbose=False):
-    """Load pre-computed ESM embeddings from pickle files."""
-    proteins = defaultdict(dict)
-    for filename in os.listdir(input_dir):
+def load_flat_embeddings(input_dir, verbose=False):
+    """Load pre-computed ESM embeddings into flat protein-centric dicts.
+
+    Returns
+    -------
+    protein_embeddings : dict
+        {protein_id: np.ndarray} mapping each protein to its ESM embedding.
+    protein_go_terms : dict
+        {protein_id: set[str]} mapping each protein to its GO term annotations.
+    go_ids : list[str]
+        Ordered list of GO term IDs found in the embedding files.
+    """
+    protein_embeddings = {}
+    protein_go_terms = defaultdict(set)
+    go_ids = []
+    for filename in sorted(os.listdir(input_dir)):
         if not filename.endswith(".pkl"):
             continue
         match = re.match(r"(GO_\d+)", filename)
         if not match:
             continue
         go_id = match.group(1)
+        go_ids.append(go_id)
         filepath = os.path.join(input_dir, filename)
         with open(filepath, "rb") as f:
-            p = pickle.load(f)
-        proteins[go_id] = p
+            embeddings_dict = pickle.load(f)
+        for pid, embedding in embeddings_dict.items():
+            if pid not in protein_embeddings:
+                protein_embeddings[pid] = embedding
+            protein_go_terms[pid].add(go_id)
     if verbose:
-        total = sum(len(v) for v in proteins.values())
-        print(f"Loaded embeddings for {len(proteins)} GO terms, {total} proteins")
-    return proteins
+        print(f"Loaded {len(protein_embeddings)} proteins, {len(go_ids)} GO terms")
+    return protein_embeddings, dict(protein_go_terms), go_ids
 
 
-def build_combined_proteins(proteins, dataset, verbose=False):
-    """Pair embeddings with sequences from the dataset for combined mode."""
-    combined = defaultdict(dict)
-    missing = 0
-    for go_id, pid_embeddings in proteins.items():
-        for pid, embedding in pid_embeddings.items():
-            if pid in dataset.proteins:
-                combined[go_id][pid] = {
-                    "embedding": embedding,
-                    "sequence": dataset.proteins[pid].sequence,
-                }
-            else:
-                missing += 1
-    if missing > 0:
-        print(f"Warning: {missing} proteins skipped (no sequence in dataset)")
+def build_combined_embeddings(protein_embeddings, dataset, algo, verbose=False):
+    """Compute ESM + single feature algorithm combined vectors.
+
+    For each protein, generates the feature vector for the given algorithm,
+    normalizes ESM embeddings and feature vectors separately with StandardScaler,
+    then concatenates them.
+
+    Parameters
+    ----------
+    protein_embeddings : dict
+        {protein_id: np.ndarray} ESM embeddings.
+    dataset : ProtCastDataset
+        Dataset containing protein sequences.
+    algo : str
+        Feature vector algorithm name (e.g. "CTriad").
+    verbose : bool
+        Print progress.
+
+    Returns
+    -------
+    combined_embeddings : dict
+        {protein_id: np.ndarray} with concatenated normalized ESM + FV.
+    embedding_dim : int
+        Dimension of the ESM embedding component.
+    fv_dim : int
+        Dimension of the feature vector component.
+    """
+    # Collect sequences for proteins that have both embedding and sequence
+    sequences = {}
+    valid_pids = []
+    for pid in protein_embeddings:
+        if pid in dataset.proteins:
+            sequences[pid] = dataset.proteins[pid].sequence
+            valid_pids.append(pid)
+
+    if not valid_pids:
+        raise ValueError("No proteins have both embeddings and sequences")
+
+    # Compute feature vectors
+    calc = Calculator(verbose=verbose)
+    calc.get_feature_vectors(algo, pdict=sequences)
+    if calc.encodings is None:
+        raise ValueError(f"No encodings generated for algorithm {algo}")
+
+    # Keep only proteins present in feature vector encodings
+    final_pids = [pid for pid in valid_pids if pid in calc.encodings.index]
+    if not final_pids:
+        raise ValueError(f"No valid proteins for algorithm {algo}")
+
+    skipped = len(valid_pids) - len(final_pids)
+    if skipped > 0 and verbose:
+        print(f"  Skipped {skipped} proteins missing from {algo} encodings")
+
+    # Build arrays
+    emb_list = [protein_embeddings[pid].astype(np.float32) for pid in final_pids]
+    fv_list = [calc.encodings.loc[pid].values.astype(np.float32) for pid in final_pids]
+
+    emb_array = np.vstack(emb_list)
+    fv_array = np.vstack(fv_list)
+
+    embedding_dim = emb_array.shape[1]
+    fv_dim = fv_array.shape[1]
+
+    # Normalize separately to prevent ESM embeddings from dominating
+    emb_scaler = StandardScaler()
+    fv_scaler = StandardScaler()
+    emb_scaled = emb_scaler.fit_transform(emb_array)
+    fv_scaled = fv_scaler.fit_transform(fv_array)
+
+    # Concatenate
+    combined = np.hstack([emb_scaled, fv_scaled]).astype(np.float32)
+
+    # Build output dict
+    combined_embeddings = {pid: combined[i] for i, pid in enumerate(final_pids)}
+
     if verbose:
-        total = sum(len(v) for v in combined.values())
-        print(f"Combined data: {len(combined)} GO terms, {total} proteins")
-    return combined
+        print(
+            f"  {algo}: {len(final_pids)} proteins, dim={combined.shape[1]} "
+            f"(ESM:{embedding_dim} + FV:{fv_dim})"
+        )
+
+    return combined_embeddings, embedding_dim, fv_dim
 
 
-def train_esm_only(proteins, config, name, seed, verbose=False):
-    """Train ESM-only baseline model."""
-    model = MultiClassifier(
-        algorithm="esm",
+def train_esm_only(protein_embeddings, protein_go_terms, go_ids, config, name, seed, verbose=False):
+    """Train ESM-only baseline using MultiLabelClassifier."""
+    classifier = MultiLabelClassifier(
         verbose=verbose,
-        proteins=proteins,
+        protein_embeddings=protein_embeddings,
+        protein_go_terms=protein_go_terms,
+        go_ids=go_ids,
         config=config,
         id=f"{name}_scan_esm_only",
-        input_source="esm_embeddings",
         random_state=seed,
     )
-    model.run()
-    history = model.history.history
+    classifier.run()
+
+    # Compute CAFA metrics on validation set
+    y_pred = classifier.model.predict(classifier.X_val, verbose=0)
+    fmax, fmax_threshold = calculate_fmax(classifier.y_val, y_pred)
+    smin, smin_threshold = calculate_smin(classifier.y_val, y_pred)
+
     result = {
         "algorithm": "ESM_only",
         "fv_dim": 0,
-        "combined_dim": model.vector_length,
-        "best_f1": float(max(history["val_f1_score"])),
-        "best_acc": float(max(history["val_accuracy"])),
-        "best_loss": float(min(history["val_loss"])),
-        "epochs": len(history["loss"]),
-        "training_time": model.training_time,
+        "combined_dim": classifier.vector_length,
+        "best_fmax": float(fmax),
+        "fmax_threshold": float(fmax_threshold),
+        "smin": float(smin),
+        "smin_threshold": float(smin_threshold),
+        "best_loss": float(min(classifier.history.history["val_loss"])),
+        "epochs": len(classifier.history.history["loss"]),
+        "training_time": classifier.training_time,
         "status": "ok",
     }
-    del model
+    del classifier
     gc.collect()
     return result
 
 
-def train_combined_single(combined_proteins, config, name, algo, seed, verbose=False):
-    """Train ESM + single feature algorithm."""
-    model = MultiClassifier(
-        algorithm="esm_combined",
+def train_combined_single(
+    protein_embeddings, protein_go_terms, go_ids,
+    dataset, config, name, algo, seed, verbose=False
+):
+    """Train ESM + single feature algorithm using MultiLabelClassifier."""
+    combined_embeddings, emb_dim, fv_dim = build_combined_embeddings(
+        protein_embeddings, dataset, algo, verbose
+    )
+
+    # Filter protein_go_terms to only proteins in combined_embeddings
+    filtered_go_terms = {
+        pid: terms
+        for pid, terms in protein_go_terms.items()
+        if pid in combined_embeddings
+    }
+
+    classifier = MultiLabelClassifier(
         verbose=verbose,
-        proteins=combined_proteins,
+        protein_embeddings=combined_embeddings,
+        protein_go_terms=filtered_go_terms,
+        go_ids=go_ids,
         config=config,
         id=f"{name}_scan_{algo}",
-        input_source="combined",
-        feature_algorithms=[algo],
         random_state=seed,
     )
-    model.run()
-    history = model.history.history
+    classifier.run()
+
+    # Compute CAFA metrics on validation set
+    y_pred = classifier.model.predict(classifier.X_val, verbose=0)
+    fmax, fmax_threshold = calculate_fmax(classifier.y_val, y_pred)
+    smin, smin_threshold = calculate_smin(classifier.y_val, y_pred)
+
     result = {
         "algorithm": algo,
-        "fv_dim": model.fv_dim,
-        "combined_dim": model.vector_length,
-        "best_f1": float(max(history["val_f1_score"])),
-        "best_acc": float(max(history["val_accuracy"])),
-        "best_loss": float(min(history["val_loss"])),
-        "epochs": len(history["loss"]),
-        "training_time": model.training_time,
+        "fv_dim": fv_dim,
+        "combined_dim": classifier.vector_length,
+        "best_fmax": float(fmax),
+        "fmax_threshold": float(fmax_threshold),
+        "smin": float(smin),
+        "smin_threshold": float(smin_threshold),
+        "best_loss": float(min(classifier.history.history["val_loss"])),
+        "epochs": len(classifier.history.history["loss"]),
+        "training_time": classifier.training_time,
         "status": "ok",
     }
-    del model
+    del classifier, combined_embeddings
     gc.collect()
     return result
 
 
 def print_results(results):
     """Print scan results as a sorted table."""
-    print("\n" + "=" * 90)
-    print("FEATURE SCAN RESULTS")
-    print("=" * 90)
+    print("\n" + "=" * 100)
+    print("FEATURE SCAN RESULTS (CAFA Metrics)")
+    print("=" * 100)
     print(f"Level: {results.get('level', '?')}")
     print(f"Seed: {results['seed']}")
     print(f"ESM dimension: {results['esm_dim']}")
@@ -216,45 +328,52 @@ def print_results(results):
     baseline = results["baseline"]
     algo_results = results["algorithms"]
 
-    # Sort by F1 score descending
-    sorted_results = sorted(algo_results, key=lambda x: x["best_f1"], reverse=True)
+    # Sort by Fmax descending
+    sorted_results = sorted(algo_results, key=lambda x: x["best_fmax"], reverse=True)
 
     print(
-        f"{'Rank':<5} {'Algorithm':<22} {'FV Dim':>7} {'F1':>8} {'dF1':>8} "
-        f"{'Acc':>8} {'Loss':>8} {'Epochs':>7} {'Time':>7} {'Status':<6}"
+        f"{'Rank':<5} {'Algorithm':<22} {'FV Dim':>7} {'Fmax':>8} {'dFmax':>8} "
+        f"{'Thr':>6} {'Smin':>8} {'Loss':>8} {'Epochs':>7} {'Time':>7} {'Status':<6}"
     )
-    print("-" * 98)
+    print("-" * 104)
 
     # Print baseline first
     print(
         f"{'---':<5} {'ESM_only (baseline)':<22} {'---':>7} "
-        f"{baseline['best_f1']:>8.4f} {'---':>8} "
-        f"{baseline['best_acc']:>8.4f} {baseline['best_loss']:>8.4f} "
+        f"{baseline['best_fmax']:>8.4f} {'---':>8} "
+        f"{baseline['fmax_threshold']:>6.2f} {baseline['smin']:>8.4f} "
+        f"{baseline['best_loss']:>8.4f} "
         f"{baseline['epochs']:>7d} {baseline['training_time']:>6.1f}s {'ok':<6}"
     )
-    print("-" * 98)
+    print("-" * 104)
 
     for rank, r in enumerate(sorted_results, 1):
         if r["status"] != "ok":
-            print(f"{rank:<5} {r['algorithm']:<22} {'---':>7} {'---':>8} {'---':>8} {'---':>8} {'---':>8} {'---':>7} {'---':>7} {r['status']:<6}")
+            print(
+                f"{rank:<5} {r['algorithm']:<22} {'---':>7} {'---':>8} {'---':>8} "
+                f"{'---':>6} {'---':>8} {'---':>8} {'---':>7} {'---':>7} {r['status']:<6}"
+            )
             continue
-        f1_diff = r["best_f1"] - baseline["best_f1"]
+        fmax_diff = r["best_fmax"] - baseline["best_fmax"]
         print(
             f"{rank:<5} {r['algorithm']:<22} {r['fv_dim']:>7d} "
-            f"{r['best_f1']:>8.4f} {f1_diff:>+8.4f} "
-            f"{r['best_acc']:>8.4f} {r['best_loss']:>8.4f} "
+            f"{r['best_fmax']:>8.4f} {fmax_diff:>+8.4f} "
+            f"{r['fmax_threshold']:>6.2f} {r['smin']:>8.4f} "
+            f"{r['best_loss']:>8.4f} "
             f"{r['epochs']:>7d} {r['training_time']:>6.1f}s {r['status']:<6}"
         )
 
     # Summary
     ok_results = [r for r in sorted_results if r["status"] == "ok"]
-    improved = [r for r in ok_results if r["best_f1"] > baseline["best_f1"] + 0.005]
+    improved = [r for r in ok_results if r["best_fmax"] > baseline["best_fmax"] + 0.005]
     print()
     print(f"Completed: {len(ok_results)}/{len(sorted_results)} algorithms")
-    print(f"Improved over baseline (>0.5% F1): {len(improved)}")
+    print(f"Improved over baseline (>0.5% Fmax): {len(improved)}")
     if improved:
-        print(f"Best: {improved[0]['algorithm']} (F1 {improved[0]['best_f1']:.4f}, "
-              f"+{improved[0]['best_f1'] - baseline['best_f1']:.4f})")
+        print(
+            f"Best: {improved[0]['algorithm']} (Fmax {improved[0]['best_fmax']:.4f}, "
+            f"+{improved[0]['best_fmax'] - baseline['best_fmax']:.4f})"
+        )
     print(f"\nTotal elapsed time: {results['elapsed']}s")
 
 
@@ -306,6 +425,14 @@ def main():
     if os.path.exists(results_file):
         with open(results_file, "r") as f:
             results = json.load(f)
+
+        # Detect old-format results (pre-Fmax) and start fresh
+        if results.get("baseline") and "best_f1" in results["baseline"]:
+            print(f"Old-format results detected in {results_file} (has best_f1, not best_fmax).")
+            print("Starting fresh with CAFA metrics.")
+            results = None
+
+    if results is not None:
         completed = {r["algorithm"] for r in results.get("algorithms", [])}
         remaining = [a for a in algorithms if a not in completed]
         if not remaining and results.get("baseline"):
@@ -340,20 +467,24 @@ def main():
     print("LOADING DATA")
     print("=" * 60)
     dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
-    proteins = load_embeddings(input_dir, args.verbose)
-    combined_proteins = build_combined_proteins(proteins, dataset, args.verbose)
+    protein_embeddings, protein_go_terms, go_ids = load_flat_embeddings(
+        input_dir, args.verbose
+    )
 
     # --- Baseline: ESM embeddings only ---
     if not results["baseline"]:
         print("\n" + "=" * 60)
         print("BASELINE: ESM EMBEDDINGS ONLY")
         print("=" * 60)
-        baseline = train_esm_only(proteins, config, name, args.seed, args.verbose)
+        baseline = train_esm_only(
+            protein_embeddings, protein_go_terms, go_ids,
+            config, name, args.seed, args.verbose,
+        )
         results["baseline"] = baseline
         results["esm_dim"] = baseline["combined_dim"]
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
-        print(f"Baseline F1: {baseline['best_f1']:.4f}")
+        print(f"Baseline Fmax: {baseline['best_fmax']:.4f}, Smin: {baseline['smin']:.4f}")
 
     # --- Scan individual algorithms ---
     total = len(algorithms)
@@ -367,7 +498,8 @@ def main():
 
         try:
             result = train_combined_single(
-                combined_proteins, config, name, algo, args.seed, args.verbose
+                protein_embeddings, protein_go_terms, go_ids,
+                dataset, config, name, algo, args.seed, args.verbose,
             )
         except Exception as e:
             print(f"FAILED: {algo} - {e}")
@@ -375,8 +507,10 @@ def main():
                 "algorithm": algo,
                 "fv_dim": 0,
                 "combined_dim": 0,
-                "best_f1": 0.0,
-                "best_acc": 0.0,
+                "best_fmax": 0.0,
+                "fmax_threshold": 0.0,
+                "smin": 0.0,
+                "smin_threshold": 0.0,
                 "best_loss": 0.0,
                 "epochs": 0,
                 "training_time": 0.0,
