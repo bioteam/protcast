@@ -516,6 +516,107 @@ class MultiLabelClassifier:
 
         return history  # type: ignore
 
+    def compute_depth_metrics(self, y_true, y_pred):
+        """Compute Fmax broken down by GO term depth in the DAG.
+
+        Groups GO terms by their depth (longest path to root) and computes
+        Fmax for each depth level. Enables apples-to-apples comparison with
+        KNNClassifier on rare/specific terms.
+
+        Returns
+        -------
+        dict
+            {depth: {"fmax": float, "threshold": float, "n_terms": int,
+                      "avg_train_count": float}}
+        """
+        if self.go_dag is None:
+            return {}
+
+        term_depths = {}
+        for i, go_id in enumerate(self.go_ids):
+            if go_id in self.go_dag.go_terms_map:
+                term = self.go_dag.go_terms_map[go_id]
+                term_depths[i] = term.depth
+
+        from collections import defaultdict
+        depth_groups = defaultdict(list)
+        for idx, depth in term_depths.items():
+            depth_groups[depth].append(idx)
+
+        results = {}
+        train_counts = self.X_train.shape[0] if hasattr(self, "X_train") else self.X.shape[0]
+        label_counts = self.y.sum(axis=0)
+
+        for depth, term_indices in sorted(depth_groups.items()):
+            y_true_subset = y_true[:, term_indices]
+            y_pred_subset = y_pred[:, term_indices]
+
+            if y_true_subset.sum() == 0:
+                continue
+
+            fmax, threshold = calculate_fmax(y_true_subset, y_pred_subset)
+            avg_count = float(label_counts[term_indices].mean())
+
+            results[depth] = {
+                "fmax": fmax,
+                "threshold": threshold,
+                "n_terms": len(term_indices),
+                "avg_train_count": avg_count,
+            }
+
+        return results
+
+    def compute_frequency_metrics(self, y_true, y_pred):
+        """Compute Fmax broken down by training set frequency.
+
+        Buckets: rare (<50), medium (50-500), common (>500).
+
+        Returns
+        -------
+        dict
+            {bucket_name: {"fmax": float, "threshold": float, "n_terms": int,
+                            "avg_train_count": float}}
+        """
+        label_counts = self.y.sum(axis=0)
+
+        buckets = {
+            "rare_lt50": [],
+            "medium_50_500": [],
+            "common_gt500": [],
+        }
+
+        for i in range(len(self.go_ids)):
+            count = label_counts[i]
+            if count < 50:
+                buckets["rare_lt50"].append(i)
+            elif count <= 500:
+                buckets["medium_50_500"].append(i)
+            else:
+                buckets["common_gt500"].append(i)
+
+        results = {}
+        for bucket_name, term_indices in buckets.items():
+            if not term_indices:
+                continue
+
+            y_true_subset = y_true[:, term_indices]
+            y_pred_subset = y_pred[:, term_indices]
+
+            if y_true_subset.sum() == 0:
+                continue
+
+            fmax, threshold = calculate_fmax(y_true_subset, y_pred_subset)
+            avg_count = float(label_counts[term_indices].mean())
+
+            results[bucket_name] = {
+                "fmax": fmax,
+                "threshold": threshold,
+                "n_terms": len(term_indices),
+                "avg_train_count": avg_count,
+            }
+
+        return results
+
     @typechecked
     def save_model(self) -> None:
         """Save the trained model and threshold metadata."""
@@ -583,6 +684,25 @@ class MultiLabelClassifier:
         mlflow.log_metric("val_smin", round(smin, 4))
         mlflow.log_metric("smin_threshold", round(smin_threshold, 4))
         print(" done.")
+
+        # Log depth-level metrics
+        depth_metrics = self.compute_depth_metrics(self.y_val, y_val_pred)
+        if depth_metrics:
+            print("  > Logging depth-level metrics...", end="", flush=True)
+            for depth, metrics in depth_metrics.items():
+                mlflow.log_metric(f"fmax_depth_{depth}", round(metrics["fmax"], 4))
+                mlflow.log_metric(f"n_terms_depth_{depth}", metrics["n_terms"])
+                mlflow.log_metric(f"avg_count_depth_{depth}", round(metrics["avg_train_count"], 1))
+            print(" done.")
+
+        # Log frequency-bucket metrics
+        freq_metrics = self.compute_frequency_metrics(self.y_val, y_val_pred)
+        if freq_metrics:
+            print("  > Logging frequency-bucket metrics...", end="", flush=True)
+            for bucket, metrics in freq_metrics.items():
+                mlflow.log_metric(f"fmax_{bucket}", round(metrics["fmax"], 4))
+                mlflow.log_metric(f"n_terms_{bucket}", metrics["n_terms"])
+            print(" done.")
 
         # Log epoch metrics
         print("  > Logging epoch metrics...", end="", flush=True)
