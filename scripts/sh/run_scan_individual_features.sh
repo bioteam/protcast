@@ -10,9 +10,9 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-OUTDIR=${WORK}/ProtCast/feature_scan
-LEVEL=8
+LEVEL=4
 SEED=42
+OUTDIR=${WORK}/ProtCast/feature_scan-level-${LEVEL}-seed-${SEED}
 
 # Only use local modules for Python 3.11 to match the Python version in the container
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
@@ -29,5 +29,4 @@ python3 scripts/scan_individual_features.py \
 -p $DATADIR/ProtCastDataset.bin \
 -d $DATADIR/$EMBEDDIR-${LEVEL} \
 -o $OUTDIR \
---seed $SEED \
-2>&1 | tee scan_level_${LEVEL}.log
+--seed $SEED
