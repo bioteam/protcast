@@ -351,6 +351,7 @@ class MultiClassifier:
         self.fv_scaler = StandardScaler()
         all_emb_scaled = self.emb_scaler.fit_transform(all_emb_array)
         all_fv_scaled = self.fv_scaler.fit_transform(all_fv_array)
+        all_fv_scaled = np.nan_to_num(all_fv_scaled, nan=0.0, posinf=0.0, neginf=0.0)
 
         # Concatenate scaled features
         all_combined = np.hstack(

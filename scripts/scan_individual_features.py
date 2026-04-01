@@ -213,6 +213,7 @@ def build_combined_embeddings(protein_embeddings, dataset, algo, verbose=False):
     fv_scaler = StandardScaler()
     emb_scaled = emb_scaler.fit_transform(emb_array)
     fv_scaled = fv_scaler.fit_transform(fv_array)
+    fv_scaled = np.nan_to_num(fv_scaled, nan=0.0, posinf=0.0, neginf=0.0)
 
     # Concatenate
     combined = np.hstack([emb_scaled, fv_scaled]).astype(np.float32)
