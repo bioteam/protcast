@@ -63,13 +63,13 @@ def parse_args():
     )
     parser.add_argument(
         "--minimum_seqs",
-        default=500,
+        default=50,
         help="Minimum number of sequences",
         type=int,
     )
     parser.add_argument(
         "--maximum_seqs",
-        default=2000,
+        default=50000,
         help="Maximum number of sequences to use for training",
         type=int,
     )
