@@ -10,7 +10,7 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-LEVEL=4
+LEVEL=5
 SEED=42
 OUTDIR=${WORK}/ProtCast/feature_scan-level-${LEVEL}-seed-${SEED}
 
