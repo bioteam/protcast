@@ -40,6 +40,7 @@ import json
 import re
 import gc
 import numpy as np
+import pandas as pd
 from collections import defaultdict
 from sklearn.preprocessing import StandardScaler
 from protein_feature_vectors import Calculator
@@ -198,9 +199,12 @@ def build_combined_embeddings(protein_embeddings, dataset, algo, verbose=False):
     if skipped > 0 and verbose:
         print(f"  Skipped {skipped} proteins missing from {algo} encodings")
 
+    # Coerce non-numeric values (e.g. 'NA' strings) to NaN before building arrays
+    numeric_encodings = calc.encodings.loc[final_pids].apply(pd.to_numeric, errors="coerce").fillna(0.0)
+
     # Build arrays
     emb_list = [protein_embeddings[pid].astype(np.float32) for pid in final_pids]
-    fv_list = [calc.encodings.loc[pid].values.astype(np.float32) for pid in final_pids]
+    fv_list = [numeric_encodings.loc[pid].values.astype(np.float32) for pid in final_pids]
 
     emb_array = np.vstack(emb_list)
     fv_array = np.vstack(fv_list)
