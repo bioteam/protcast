@@ -1,13 +1,13 @@
 """scan_individual_features.py
 
-Test every individual feature vector algorithm from protein-feature-vectors
-combined with ESM-C embeddings, comparing each against an ESM-only baseline.
+Test feature vector algorithms from protein-feature-vectors combined with
+ESM-C embeddings, comparing each against an ESM-only baseline.
+
+Supports both single algorithms and combinations using "+" syntax:
+    --algorithms PseKRAAC_type_3B PseKRAAC_type_3B+PseKRAAC_type_8
 
 Uses MultilabelClassifier (sigmoid, multi-label) so that CAFA-standard
 Fmax and Smin metrics can be computed for each algorithm.
-
-For each algorithm, trains a model using ESM embeddings + that single algorithm's
-feature vectors, then compares against ESM-only performance.
 
 Inputs (not modified):
     - Pre-computed ESM embeddings (.pkl files) in the -d/--input_dir directory.
@@ -28,6 +28,14 @@ python3 scripts/scan_individual_features.py \\
     -d mf_go_terms-level-8 \\
     -p ProtcastDataset.bin \\
     -o feature_scan \\
+    --seed 42 \\
+    -v
+
+python3 scripts/scan_individual_features.py \\
+    -d mf_go_terms-level-6 \\
+    -p ProtcastDataset.bin \\
+    -o feature_scan \\
+    --algorithms PseKRAAC_type_3B+PseKRAAC_type_8 \\
     --seed 42 \\
     -v
 """
@@ -146,12 +154,20 @@ def load_flat_embeddings(input_dir, verbose=False):
     return protein_embeddings, dict(protein_go_terms), go_ids
 
 
-def build_combined_embeddings(protein_embeddings, dataset, algo, verbose=False):
-    """Compute ESM + single feature algorithm combined vectors.
+def parse_algo_spec(algo_spec):
+    """Parse an algorithm specification that may contain '+' for combinations.
 
-    For each protein, generates the feature vector for the given algorithm,
-    normalizes ESM embeddings and feature vectors separately with StandardScaler,
-    then concatenates them.
+    Returns a list of individual algorithm names.
+    """
+    return algo_spec.split("+")
+
+
+def build_combined_embeddings(protein_embeddings, dataset, algo_spec, verbose=False):
+    """Compute ESM + feature algorithm(s) combined vectors.
+
+    Supports single algorithms ("CTriad") and combinations
+    ("PseKRAAC_type_3B+PseKRAAC_type_8"). Each algorithm's feature vectors
+    are normalized independently with StandardScaler before concatenation.
 
     Parameters
     ----------
@@ -159,20 +175,22 @@ def build_combined_embeddings(protein_embeddings, dataset, algo, verbose=False):
         {protein_id: np.ndarray} ESM embeddings.
     dataset : ProtCastDataset
         Dataset containing protein sequences.
-    algo : str
-        Feature vector algorithm name (e.g. "CTriad").
+    algo_spec : str
+        Algorithm specification, e.g. "CTriad" or "A+B+C".
     verbose : bool
         Print progress.
 
     Returns
     -------
     combined_embeddings : dict
-        {protein_id: np.ndarray} with concatenated normalized ESM + FV.
+        {protein_id: np.ndarray} with concatenated normalized ESM + FV(s).
     embedding_dim : int
         Dimension of the ESM embedding component.
     fv_dim : int
-        Dimension of the feature vector component.
+        Total dimension of all feature vector components.
     """
+    algos = parse_algo_spec(algo_spec)
+
     # Collect sequences for proteins that have both embedding and sequence
     sequences = {}
     valid_pids = []
@@ -184,50 +202,65 @@ def build_combined_embeddings(protein_embeddings, dataset, algo, verbose=False):
     if not valid_pids:
         raise ValueError("No proteins have both embeddings and sequences")
 
-    # Compute feature vectors
-    calc = Calculator(verbose=verbose)
-    calc.get_feature_vectors(algo, pdict=sequences)
-    if calc.encodings is None:
-        raise ValueError(f"No encodings generated for algorithm {algo}")
+    # Compute feature vectors for each algorithm, collecting encodings
+    all_encodings = []
+    for algo in algos:
+        calc = Calculator(verbose=verbose)
+        calc.get_feature_vectors(algo, pdict=sequences)
+        if calc.encodings is None:
+            raise ValueError(f"No encodings generated for algorithm {algo}")
+        # Coerce non-numeric values (e.g. 'NA' strings) to NaN
+        numeric = calc.encodings.apply(pd.to_numeric, errors="coerce").fillna(0.0)
+        all_encodings.append((algo, numeric))
+        del calc
+        gc.collect()
 
-    # Keep only proteins present in feature vector encodings
-    final_pids = [pid for pid in valid_pids if pid in calc.encodings.index]
+    # Intersect: keep only proteins present in ALL encodings
+    valid_set = set(valid_pids)
+    for algo, enc in all_encodings:
+        valid_set &= set(enc.index)
+    final_pids = [pid for pid in valid_pids if pid in valid_set]
+
     if not final_pids:
-        raise ValueError(f"No valid proteins for algorithm {algo}")
+        raise ValueError(f"No valid proteins for algorithm(s) {algo_spec}")
 
     skipped = len(valid_pids) - len(final_pids)
     if skipped > 0 and verbose:
-        print(f"  Skipped {skipped} proteins missing from {algo} encodings")
+        print(f"  Skipped {skipped} proteins missing from encodings")
 
-    # Coerce non-numeric values (e.g. 'NA' strings) to NaN before building arrays
-    numeric_encodings = calc.encodings.loc[final_pids].apply(pd.to_numeric, errors="coerce").fillna(0.0)
-
-    # Build arrays
-    emb_list = [protein_embeddings[pid].astype(np.float32) for pid in final_pids]
-    fv_list = [numeric_encodings.loc[pid].values.astype(np.float32) for pid in final_pids]
-
-    emb_array = np.vstack(emb_list)
-    fv_array = np.vstack(fv_list)
-
+    # Build ESM array
+    emb_array = np.vstack(
+        [protein_embeddings[pid].astype(np.float32) for pid in final_pids]
+    )
     embedding_dim = emb_array.shape[1]
-    fv_dim = fv_array.shape[1]
 
-    # Normalize separately to prevent ESM embeddings from dominating
+    # Normalize ESM
     emb_scaler = StandardScaler()
-    fv_scaler = StandardScaler()
     emb_scaled = emb_scaler.fit_transform(emb_array)
-    fv_scaled = fv_scaler.fit_transform(fv_array)
-    fv_scaled = np.nan_to_num(fv_scaled, nan=0.0, posinf=0.0, neginf=0.0)
 
-    # Concatenate
-    combined = np.hstack([emb_scaled, fv_scaled]).astype(np.float32)
+    # Build and normalize each FV block independently, then concatenate
+    fv_blocks = []
+    fv_dim = 0
+    for algo, enc in all_encodings:
+        fv_array = enc.loc[final_pids].values.astype(np.float32)
+        block_dim = fv_array.shape[1]
+        fv_dim += block_dim
+        fv_scaler = StandardScaler()
+        fv_scaled = fv_scaler.fit_transform(fv_array)
+        fv_scaled = np.nan_to_num(fv_scaled, nan=0.0, posinf=0.0, neginf=0.0)
+        fv_blocks.append(fv_scaled)
+        if verbose:
+            print(f"    {algo}: {block_dim} features")
+
+    # Concatenate ESM + all FV blocks
+    combined = np.hstack([emb_scaled] + fv_blocks).astype(np.float32)
 
     # Build output dict
     combined_embeddings = {pid: combined[i] for i, pid in enumerate(final_pids)}
 
     if verbose:
         print(
-            f"  {algo}: {len(final_pids)} proteins, dim={combined.shape[1]} "
+            f"  {algo_spec}: {len(final_pids)} proteins, dim={combined.shape[1]} "
             f"(ESM:{embedding_dim} + FV:{fv_dim})"
         )
 
@@ -270,13 +303,17 @@ def train_esm_only(protein_embeddings, protein_go_terms, go_ids, config, name, s
     return result
 
 
-def train_combined_single(
+def train_combined(
     protein_embeddings, protein_go_terms, go_ids,
-    dataset, config, name, algo, seed, verbose=False
+    dataset, config, name, algo_spec, seed, verbose=False
 ):
-    """Train ESM + single feature algorithm using MultiLabelClassifier."""
+    """Train ESM + feature algorithm(s) using MultiLabelClassifier.
+
+    algo_spec can be a single algorithm ("CTriad") or a combination
+    ("PseKRAAC_type_3B+PseKRAAC_type_8").
+    """
     combined_embeddings, emb_dim, fv_dim = build_combined_embeddings(
-        protein_embeddings, dataset, algo, verbose
+        protein_embeddings, dataset, algo_spec, verbose
     )
 
     # Filter protein_go_terms to only proteins in combined_embeddings
@@ -286,13 +323,15 @@ def train_combined_single(
         if pid in combined_embeddings
     }
 
+    # Use a filesystem-safe id (replace + with _)
+    safe_id = algo_spec.replace("+", "_")
     classifier = MultiLabelClassifier(
         verbose=verbose,
         protein_embeddings=combined_embeddings,
         protein_go_terms=filtered_go_terms,
         go_ids=go_ids,
         config=config,
-        id=f"{name}_scan_{algo}",
+        id=f"{name}_scan_{safe_id}",
         random_state=seed,
     )
     classifier.run()
@@ -303,7 +342,7 @@ def train_combined_single(
     smin, smin_threshold = calculate_smin(classifier.y_val, y_pred)
 
     result = {
-        "algorithm": algo,
+        "algorithm": algo_spec,
         "fv_dim": fv_dim,
         "combined_dim": classifier.vector_length,
         "best_fmax": float(fmax),
@@ -336,32 +375,37 @@ def print_results(results):
     # Sort by Fmax descending
     sorted_results = sorted(algo_results, key=lambda x: x["best_fmax"], reverse=True)
 
+    # Determine column width for algorithm names
+    all_names = [r["algorithm"] for r in algo_results] + ["ESM_only (baseline)"]
+    algo_width = max(22, max(len(n) for n in all_names) + 1)
+
     print(
-        f"{'Rank':<5} {'Algorithm':<22} {'FV Dim':>7} {'Fmax':>8} {'dFmax':>8} "
+        f"{'Rank':<5} {'Algorithm':<{algo_width}} {'FV Dim':>7} {'Fmax':>8} {'dFmax':>8} "
         f"{'Thr':>6} {'Smin':>8} {'Loss':>8} {'Epochs':>7} {'Time':>7} {'Status':<6}"
     )
-    print("-" * 104)
+    sep_width = 5 + algo_width + 7 + 8 + 8 + 6 + 8 + 8 + 7 + 7 + 6 + 10
+    print("-" * sep_width)
 
     # Print baseline first
     print(
-        f"{'---':<5} {'ESM_only (baseline)':<22} {'---':>7} "
+        f"{'---':<5} {'ESM_only (baseline)':<{algo_width}} {'---':>7} "
         f"{baseline['best_fmax']:>8.4f} {'---':>8} "
         f"{baseline['fmax_threshold']:>6.2f} {baseline['smin']:>8.4f} "
         f"{baseline['best_loss']:>8.4f} "
         f"{baseline['epochs']:>7d} {baseline['training_time']:>6.1f}s {'ok':<6}"
     )
-    print("-" * 104)
+    print("-" * sep_width)
 
     for rank, r in enumerate(sorted_results, 1):
         if r["status"] != "ok":
             print(
-                f"{rank:<5} {r['algorithm']:<22} {'---':>7} {'---':>8} {'---':>8} "
+                f"{rank:<5} {r['algorithm']:<{algo_width}} {'---':>7} {'---':>8} {'---':>8} "
                 f"{'---':>6} {'---':>8} {'---':>8} {'---':>7} {'---':>7} {r['status']:<6}"
             )
             continue
         fmax_diff = r["best_fmax"] - baseline["best_fmax"]
         print(
-            f"{rank:<5} {r['algorithm']:<22} {r['fv_dim']:>7d} "
+            f"{rank:<5} {r['algorithm']:<{algo_width}} {r['fv_dim']:>7d} "
             f"{r['best_fmax']:>8.4f} {fmax_diff:>+8.4f} "
             f"{r['fmax_threshold']:>6.2f} {r['smin']:>8.4f} "
             f"{r['best_loss']:>8.4f} "
@@ -405,7 +449,8 @@ def main():
         "--algorithms",
         nargs="+",
         default=None,
-        help="Specific algorithms to test (default: all)",
+        help="Algorithms to test; use '+' for combinations "
+        "(e.g. PseKRAAC_type_3B PseKRAAC_type_3B+PseKRAAC_type_8). Default: all individual",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
     args = parser.parse_args()
@@ -502,7 +547,7 @@ def main():
         print("=" * 60)
 
         try:
-            result = train_combined_single(
+            result = train_combined(
                 protein_embeddings, protein_go_terms, go_ids,
                 dataset, config, name, algo, args.seed, args.verbose,
             )
