@@ -492,8 +492,6 @@ class MultiLabelClassifier:
             callbacks=callbacks,
             verbose="auto",
             shuffle=True,
-            use_multiprocessing=False,
-            workers=1,
         )
 
         self.training_time = time.time() - train_start_time

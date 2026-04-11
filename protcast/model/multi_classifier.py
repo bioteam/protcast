@@ -622,10 +622,7 @@ class MultiClassifier:
             validation_data=(X_val, y_val),
             callbacks=callbacks,
             verbose="auto",
-            # New parameters to improve memory efficiency:
-            shuffle=True,  # Shuffle data for better training
-            use_multiprocessing=False,  # Avoid multiprocessing to reduce memory overhead
-            workers=1,  # Single worker to avoid memory duplication
+            shuffle=True,
         )
 
         # End timing and store the duration
