@@ -388,7 +388,7 @@ class KNNClassifier:
 
         return results
 
-    def save_model(self, path: str = None) -> str:
+    def save_model(self, path: str | None = None) -> str:
         """Save the trained KNN model to disk.
 
         Serializes the NearestNeighbors index, training labels, encoder,
