@@ -67,6 +67,7 @@ class KNNClassifier:
         id: str,
         use_mlflow: bool = False,
         go_dag: object = None,
+        random_state: int = 42,
     ) -> None:
         self.verbose = verbose
         self.protein_embeddings = protein_embeddings
@@ -91,6 +92,7 @@ class KNNClassifier:
         if not hasattr(self, "knn_algorithm"):
             self.knn_algorithm = "auto"
 
+        self.random_state = random_state
         self.training_time = 0
         self.logging_time = 0
 
@@ -213,7 +215,7 @@ class KNNClassifier:
         X_train, X_val, y_train, y_val = train_test_split(
             self.X, self.y,
             test_size=validation_split,
-            random_state=42,
+            random_state=self.random_state,
         )
 
         self.X_train = X_train
