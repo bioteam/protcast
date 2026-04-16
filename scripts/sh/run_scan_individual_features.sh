@@ -7,6 +7,9 @@
 #SBATCH -N 2
 #SBATCH -n 32
 
+# This script runs the feature scan for individual features (not combined) for GO level 5. Adjust the LEVEL variable to run for different GO levels.
+
+
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
