@@ -93,7 +93,9 @@ def load_flat_embeddings(input_dir, verbose=False):
         match = re.match(r"(GO_\d+)", filename)
         if not match:
             continue
-        go_id = match.group(1)
+        # Restore canonical GO:XXXXXXX format — filenames use underscores
+        # (GO_0008150.pkl) but the GO DAG and annotations use colons.
+        go_id = match.group(1).replace("_", ":", 1)
         go_ids.append(go_id)
         filepath = os.path.join(input_dir, filename)
         with open(filepath, "rb") as f:
@@ -510,11 +512,30 @@ def main():
     print("=" * 60)
     print("LOADING DATA")
     print("=" * 60)
-    dataset = ProtCastDataset.load_serialized_file(protcast_dataset)
-    protein_embeddings, protein_go_terms, go_ids = load_flat_embeddings(
-        input_dir, args.verbose
-    )
-    go_dag = dataset.annotated_dag
+    try:
+        dataset = ProtCastDataset.load_serialized_file(protcast_dataset)
+    except Exception as e:
+        print(f"Error loading ProtCastDataset from {protcast_dataset}: {e}")
+        return
+
+    try:
+        protein_embeddings, protein_go_terms, go_ids = load_flat_embeddings(
+            input_dir, args.verbose
+        )
+    except Exception as e:
+        print(f"Error loading embeddings from {input_dir}: {e}")
+        return
+
+    if not protein_embeddings:
+        print(f"Error: no protein embeddings loaded from {input_dir}")
+        return
+
+    go_dag = getattr(dataset, "annotated_dag", None)
+    if go_dag is None:
+        print(
+            "Warning: ProtCastDataset has no annotated_dag — depth metrics "
+            "and box containment loss will be unavailable."
+        )
 
     if results.get("esm_dim") is None:
         results["esm_dim"] = int(next(iter(protein_embeddings.values())).shape[0])
