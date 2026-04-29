@@ -101,12 +101,12 @@ def make_heatmap(values, cell_size=0.5):
 def _interpret(prob):
     """Plain-language reading of a binary-classification probability."""
     if prob >= 0.85:
-        return "very likely positive"
+        return "Yes, high probability"
     if prob >= 0.5:
         return "likely positive"
     if prob >= 0.15:
         return "likely negative"
-    return "very likely negative"
+    return "No, low probability"
 
 
 def make_value_labels(matrix, values, font_size=10):
@@ -168,7 +168,7 @@ def make_layer_column(n_visible, color, radius=0.22, v_spacing=0.7):
 
 
 def make_legend():
-    """Small color key: low (grey) -> high (red). Values are non-negative."""
+    """Small color key: low number (grey) -> high number (red)."""
     n = 7
     cells = VGroup()
     for i in range(n):
@@ -178,8 +178,22 @@ def make_legend():
         sq.set_fill(color, opacity=1.0)
         cells.add(sq)
     cells.arrange(RIGHT, buff=0.0)
-    low = Text("low", font_size=16, color=GREY_B, font=FONT).next_to(cells, LEFT, buff=0.15)
-    high = Text("high", font_size=16, color=GREY_B, font=FONT).next_to(cells, RIGHT, buff=0.15)
+    low = (
+        VGroup(
+            Text("low", font_size=16, color=GREY_B, font=FONT),
+            Text("number", font_size=16, color=GREY_B, font=FONT),
+        )
+        .arrange(DOWN, buff=0.05)
+        .next_to(cells, LEFT, buff=0.15)
+    )
+    high = (
+        VGroup(
+            Text("high", font_size=16, color=GREY_B, font=FONT),
+            Text("number", font_size=16, color=GREY_B, font=FONT),
+        )
+        .arrange(DOWN, buff=0.05)
+        .next_to(cells, RIGHT, buff=0.15)
+    )
     return VGroup(low, cells, high)
 
 
@@ -221,15 +235,19 @@ class ProtCastDataFlow(Scene):
             "Data Flow Through a Neural Network", font_size=30, font=FONT
         ).to_edge(UP, buff=0.4)
         subtitle = Text(
-            "Inspired by ProtCast", font_size=18, color=GREY_B, font=FONT
+            "Inspired by ProtCast (https://github.com/bioteam/protcast)",
+            font_size=18,
+            color=GREY_B,
+            font=FONT,
         ).next_to(title, DOWN, buff=0.1)
         legend = make_legend().to_corner(UR, buff=0.35)
         self.play(
             Write(title),
             FadeIn(subtitle, shift=DOWN * 0.15),
             FadeIn(legend),
-            run_time=1.2,
+            run_time=1.5,
         )
+        self.wait(1.5)
 
         # ===== Beat 1: Input panel  (1.5 -> 4.0s) =====
         # One protein at a time. We share the seed with ProtCastPreprocessing,
@@ -242,8 +260,8 @@ class ProtCastDataFlow(Scene):
         )
         input_panel = make_panel(input_mat, "Input", "(1, 343)", BLUE_B)
         input_panel.move_to([LEFT_X, PANEL_Y, 0])
-        self.play(FadeIn(input_panel, scale=0.95), run_time=1.2)
-        self.wait(1.3)
+        self.play(FadeIn(input_panel, scale=0.95), run_time=1.5)
+        self.wait(5.5)
 
         # Pick one protein's logit/probability to flow through.
         final_prob = float(1.0 / (1.0 + np.exp(-1.8)))  # = sigmoid(1.8) ≈ 0.86
@@ -257,7 +275,8 @@ class ProtCastDataFlow(Scene):
 
             # ReLU caption is no longer relevant when we hit the sigmoid layer.
             if is_sig and relu_desc is not None:
-                self.play(FadeOut(relu_desc), run_time=0.4)
+                self.play(FadeOut(relu_desc), run_time=0.6)
+                self.wait(0.5)
                 relu_desc = None
 
             # Build the right-side panel (one row, possibly split with '...').
@@ -305,9 +324,31 @@ class ProtCastDataFlow(Scene):
                 FadeIn(layer_col, scale=0.9),
                 Write(op_top),
                 Write(op_bot),
-                run_time=0.9,
+                run_time=1.5,
             )
-            self.play(FadeIn(right_panel, shift=RIGHT * 0.3), run_time=1.0)
+            self.wait(1.5)
+            self.play(FadeIn(right_panel, shift=RIGHT * 0.3), run_time=1.5)
+            self.wait(2.0)
+
+            # Briefly reveal each layer's W matrix so the viewer sees that
+            # every layer has its own learned weights, with shapes that change
+            # layer by layer.
+            prev_dim = 343 if i == 0 else LAYERS[i - 1][3]
+            W_data = np.random.rand(4, 3)
+            W_mat = make_heatmap(W_data, cell_size=0.18)
+            W_caption = Text(
+                f"Learned weights W: ({prev_dim} × {out_dim})",
+                font_size=18,
+                color=GREY_B,
+                font=FONT,
+            )
+            W_group = VGroup(W_mat, W_caption).arrange(DOWN, buff=0.12)
+            arrow_mid = (arrow.get_start() + arrow.get_end()) / 2
+            W_group.move_to([arrow_mid[0], -2.7, 0])
+            self.play(FadeIn(W_group), run_time=1.0)
+            self.wait(3.0)
+            self.play(FadeOut(W_group), run_time=0.7)
+            self.wait(1.0)
 
             # After the first layer's panel is in place, introduce ReLU.
             if relu_desc is None and not is_sig:
@@ -317,7 +358,8 @@ class ProtCastDataFlow(Scene):
                     color=GREY_B,
                     font=FONT,
                 ).to_edge(DOWN, buff=0.5)
-                self.play(Write(relu_desc), run_time=1.2)
+                self.play(Write(relu_desc), run_time=1.5)
+                self.wait(3.0)
 
             if is_sig:
                 prob_text = Text(
@@ -329,7 +371,8 @@ class ProtCastDataFlow(Scene):
                     color=GREY_B,
                     font=FONT,
                 ).next_to(prob_text, RIGHT, buff=0.2)
-                self.play(Write(VGroup(prob_text, interp_text)), run_time=1.2)
+                self.play(Write(VGroup(prob_text, interp_text)), run_time=1.5)
+                self.wait(2.5)
 
                 sigmoid_desc = Text(
                     "Sigmoid: σ(x) = 1 / (1 + e⁻ˣ). Maps any real number to a probability in [0, 1].",
@@ -337,9 +380,10 @@ class ProtCastDataFlow(Scene):
                     color=GREY_B,
                     font=FONT,
                 ).to_edge(DOWN, buff=0.5)
-                self.play(Write(sigmoid_desc), run_time=1.2)
+                self.play(Write(sigmoid_desc), run_time=1.5)
+                self.wait(3.0)
 
-            self.wait(2.0 if not is_sig else 2.0)
+            self.wait(7.0)
 
             # Slide pipeline left for the next layer (skip after the last layer).
             if i < len(LAYERS) - 1:
@@ -350,21 +394,23 @@ class ProtCastDataFlow(Scene):
                     FadeOut(op_top),
                     FadeOut(op_bot),
                     right_panel.animate.move_to([LEFT_X, PANEL_Y, 0]),
-                    run_time=1.0,
+                    run_time=1.5,
                 )
+                self.wait(0.5)
                 left_panel = right_panel
 
-        # ===== Outro  (~26 -> 30s) =====
+        # ===== Outro =====
         if sigmoid_desc is not None:
-            self.play(FadeOut(sigmoid_desc), run_time=0.4)
+            self.play(FadeOut(sigmoid_desc), run_time=0.6)
+            self.wait(0.5)
         outro = Text(
-            "Each layer creates a new representation of the data — applying its formula to learned weights.",
+            "Each hidden layer creates a new representation of the data — applying its formula to learned weights.",
             font_size=20,
             color=YELLOW,
             font=FONT,
         ).to_edge(DOWN, buff=0.5)
-        self.play(Write(outro), run_time=1.5)
-        self.wait(2.5)
+        self.play(Write(outro), run_time=2.0)
+        self.wait(9.0)
 
 
 # Network architecture (matches the matrix-flow video).
@@ -402,7 +448,10 @@ class ProtCastNetwork(Scene):
             "Neural Network Architecture", font_size=30, font=FONT
         ).to_edge(UP, buff=0.4)
         subtitle = Text(
-            "Inspired by ProtCast", font_size=18, color=GREY_B, font=FONT
+            "Inspired by ProtCast (https://github.com/bioteam/protcast)",
+            font_size=18,
+            color=GREY_B,
+            font=FONT,
         ).next_to(title, DOWN, buff=0.1)
         self.play(Write(title), FadeIn(subtitle, shift=DOWN * 0.15), run_time=1.2)
 
@@ -522,13 +571,13 @@ class ProtCastNetwork(Scene):
 
         hidden_desc = Text(
             "Hidden layers: y = ReLU(Wx + b). "
-            "The learned weights W reshape the data into more useful features.",
+            "Each line in the diagram is one weight in W, learned from data.",
             font_size=18,
             color=GREY_B,
             font=FONT,
         ).to_edge(DOWN, buff=0.5)
         self.play(Write(hidden_desc), run_time=1.2)
-        self.wait(0.4)
+        self.wait(3.4)
 
         # ===== Beat 7: Signal pulse — data propagates left to right  (10.5 -> 14.5s) =====
         self.play(Indicate(all_layers[0], color=YELLOW, scale_factor=1.18), run_time=0.4)
@@ -798,10 +847,10 @@ class ProtCastIntro(Scene):
         ).next_to(arrow, RIGHT, buff=0.25)
 
         yes_text = Text(
-            "✓ Yes", font_size=34, color=GREEN_B, weight="BOLD", font=FONT
+            "✓ Yes (high probability)", font_size=28, color=GREEN_B, weight="BOLD", font=FONT
         )
         no_text = Text(
-            "✗ No", font_size=34, color=GREY_B, weight="BOLD", font=FONT
+            "✗ No (low probability)", font_size=28, color=GREY_B, weight="BOLD", font=FONT
         )
         decisions = VGroup(yes_text, no_text).arrange(RIGHT, buff=2.5).move_to([0, -1.8, 0])
 
