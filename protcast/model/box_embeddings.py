@@ -142,6 +142,10 @@ def containment_loss(box_layer, parent_child_indices):
     that child GO terms are more specific than parents — so the child box
     should be contained within the parent box.
 
+    Hard variant: uses ReLU on the violation term.  When the child is
+    already inside the parent (no violation), gradients are exactly zero —
+    so containment can't be deepened further.
+
     penalty = mean over pairs of:
         sum_k [ max(0, parent_min_k - child_min_k)^2
               + max(0, child_max_k - parent_max_k)^2 ]
@@ -183,6 +187,62 @@ def containment_loss(box_layer, parent_child_indices):
     upper_violation = tf.nn.relu(child_max - parent_max)
 
     # Sum violations across dimensions, mean across edges
+    per_edge = tf.reduce_sum(
+        tf.square(lower_violation) + tf.square(upper_violation), axis=-1
+    )
+    return tf.reduce_mean(per_edge)
+
+
+def containment_loss_smoothed(box_layer, parent_child_indices, beta=5.0):
+    """Smoothed containment loss using softplus instead of ReLU.
+
+    The hard ReLU violation has zero gradient once the child is inside
+    the parent on a given dimension, so the optimizer has no signal to
+    push the child more deeply inside.  Replacing ReLU with
+    softplus(beta * x) / beta provides a non-zero gradient everywhere:
+    asymptotically equal to ReLU for large positive violations, smoothly
+    going to zero for large negative ones, and non-zero at the boundary.
+
+    This is the gradient-flow fix from Li et al. ICLR 2019, "Smoothing
+    the Geometry of Probabilistic Box Embeddings."
+
+    Parameters
+    ----------
+    box_layer : BoxEmbeddingLayer
+        The layer containing box parameters.
+    parent_child_indices : tf.Tensor
+        Shape (num_edges, 2) of integer index pairs [parent_idx, child_idx].
+    beta : float
+        Smoothness parameter.  Higher beta → closer to hard ReLU; lower
+        beta → smoother but more leakage at non-violating points.
+
+    Returns
+    -------
+    tf.Tensor
+        Scalar loss value.
+    """
+    if parent_child_indices is None or tf.shape(parent_child_indices)[0] == 0:
+        return tf.constant(0.0)
+
+    offsets = tf.nn.softplus(box_layer.log_offsets)
+
+    parent_idx = parent_child_indices[:, 0]
+    child_idx = parent_child_indices[:, 1]
+
+    parent_centers = tf.gather(box_layer.centers, parent_idx)
+    parent_offsets = tf.gather(offsets, parent_idx)
+    child_centers = tf.gather(box_layer.centers, child_idx)
+    child_offsets = tf.gather(offsets, child_idx)
+
+    parent_min = parent_centers - parent_offsets
+    parent_max = parent_centers + parent_offsets
+    child_min = child_centers - child_offsets
+    child_max = child_centers + child_offsets
+
+    # Softplus-based smoothed violation — non-zero gradient everywhere
+    lower_violation = tf.math.softplus(beta * (parent_min - child_min)) / beta
+    upper_violation = tf.math.softplus(beta * (child_max - parent_max)) / beta
+
     per_edge = tf.reduce_sum(
         tf.square(lower_violation) + tf.square(upper_violation), axis=-1
     )

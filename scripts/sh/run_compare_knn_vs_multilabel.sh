@@ -18,7 +18,7 @@ DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
 LEVEL=4
 SEED=42
-OUTDIR=${WORK}/ProtCast/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}
+OUTDIR=${WORK}/ProtCast_results/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}
 
 # Only use local modules for Python 3.11 to match the Python version in the container
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages

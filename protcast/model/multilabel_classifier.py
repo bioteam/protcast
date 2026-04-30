@@ -19,6 +19,7 @@ try:
         BoxEmbeddingLayer,
         build_box_embedding_model,
         containment_loss,
+        containment_loss_smoothed,
     )
     from protcast.preprocessing.go_dag_edges import extract_dag_edges
 
@@ -199,9 +200,14 @@ class MultiLabelClassifier:
         """Main training orchestration."""
         self.start_time = time.time()
 
-        # Start MLflow run before training so all logging goes to one run
+        # Start MLflow run before training so all logging goes to one run.
+        # If a parent run is already active (e.g. a comparison wrapper),
+        # this run is created as nested so the UI groups them together.
         if self.use_mlflow and self._mlflow is not None:
-            self._mlflow.start_run()
+            variant = "box" if getattr(self, "use_box_embeddings", False) else "flat"
+            run_name = f"multilabel_{variant}_{self.id}"
+            parent_active = self._mlflow.active_run() is not None
+            self._mlflow.start_run(run_name=run_name, nested=parent_active)
 
         self.prepare_data()
         self.build_model()
@@ -376,6 +382,9 @@ class MultiLabelClassifier:
         box_dim = getattr(self, "box_dim", 32)
         temperature = getattr(self, "box_temperature", 10.0)
         containment_weight = getattr(self, "containment_weight", 0.1)
+        # BOX_VARIANT: "hard" (ReLU violation) or "smoothed" (softplus violation)
+        box_variant = str(getattr(self, "box_variant", "hard")).lower()
+        smoothed_beta = float(getattr(self, "smoothed_box_beta", 5.0))
 
         model, box_layer = build_box_embedding_model(
             input_dim=input_dim,
@@ -399,6 +408,20 @@ class MultiLabelClassifier:
         dag_edges_tensor = tf.constant(self._dag_edges, dtype=tf.int32)
         cw = tf.constant(containment_weight, dtype=tf.float32)
 
+        # Pick the containment loss variant once, outside the per-batch closure
+        if box_variant == "smoothed":
+            def _c_loss():
+                return containment_loss_smoothed(
+                    box_layer, dag_edges_tensor, beta=smoothed_beta
+                )
+        elif box_variant == "hard":
+            def _c_loss():
+                return containment_loss(box_layer, dag_edges_tensor)
+        else:
+            raise ValueError(
+                f"Unknown BOX_VARIANT '{box_variant}'. Use 'hard' or 'smoothed'."
+            )
+
         def box_combined_loss(y_true, y_pred):
             # Weighted BCE (same as flat model)
             per_class_bce = -(
@@ -409,10 +432,8 @@ class MultiLabelClassifier:
                 per_class_bce * class_weights_tensor, axis=-1
             )
 
-            # Containment regularization
-            c_loss = containment_loss(box_layer, dag_edges_tensor)
-
-            return weighted_bce + cw * c_loss
+            # Containment regularization (variant-dependent)
+            return weighted_bce + cw * _c_loss()
 
         model.compile(
             optimizer=self.optimizer,  # type: ignore
@@ -423,9 +444,10 @@ class MultiLabelClassifier:
         self.model = model
 
         if self.verbose and len(self._dag_edges) > 0:
+            extra = f", beta={smoothed_beta}" if box_variant == "smoothed" else ""
             print(
-                f"Containment loss: {len(self._dag_edges)} DAG edges, "
-                f"weight={containment_weight}"
+                f"Containment loss ({box_variant}): {len(self._dag_edges)} DAG edges, "
+                f"weight={containment_weight}{extra}"
             )
 
     def train_model(self) -> History:
@@ -644,8 +666,10 @@ class MultiLabelClassifier:
 
         # Log parameters
         print("  > Logging parameters...", end="", flush=True)
+        variant = "box" if getattr(self, "use_box_embeddings", False) else "flat"
+        model_type = f"multi_label_{variant}"
         mlflow.log_params(self.params)
-        mlflow.log_param("model_type", "multi_label")
+        mlflow.log_param("model_type", model_type)
         mlflow.log_param("input_source", "esm_embeddings")
         mlflow.log_param("num_classes", len(self.go_ids))
         mlflow.log_param("feature_vector_length", self.vector_length)
@@ -750,7 +774,7 @@ class MultiLabelClassifier:
         print(" done.")
 
         mlflow.set_tag("Training Info", "MultiLabelClassifier full logging")
-        mlflow.set_tag("model_type", "multi_label")
+        mlflow.set_tag("model_type", model_type)
 
         self.logging_time = time.time() - log_start_time
         mlflow.log_metric("training_time_seconds", round(self.training_time, 2))

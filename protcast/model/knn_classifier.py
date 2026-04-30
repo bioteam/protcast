@@ -114,8 +114,12 @@ class KNNClassifier:
         """Main training + evaluation orchestration."""
         self.start_time = time.time()
 
+        # If a parent MLflow run is active (comparison wrapper), nest under it
+        # so the UI groups all child models together.
         if self.use_mlflow and self._mlflow is not None:
-            self._mlflow.start_run()
+            run_name = f"knn_{self.id}"
+            parent_active = self._mlflow.active_run() is not None
+            self._mlflow.start_run(run_name=run_name, nested=parent_active)
 
         self.prepare_data()
         self.build_model()
