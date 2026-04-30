@@ -199,9 +199,14 @@ class MultiLabelClassifier:
         """Main training orchestration."""
         self.start_time = time.time()
 
-        # Start MLflow run before training so all logging goes to one run
+        # Start MLflow run before training so all logging goes to one run.
+        # If a parent run is already active (e.g. a comparison wrapper),
+        # this run is created as nested so the UI groups them together.
         if self.use_mlflow and self._mlflow is not None:
-            self._mlflow.start_run()
+            variant = "box" if getattr(self, "use_box_embeddings", False) else "flat"
+            run_name = f"multilabel_{variant}_{self.id}"
+            parent_active = self._mlflow.active_run() is not None
+            self._mlflow.start_run(run_name=run_name, nested=parent_active)
 
         self.prepare_data()
         self.build_model()
@@ -644,8 +649,10 @@ class MultiLabelClassifier:
 
         # Log parameters
         print("  > Logging parameters...", end="", flush=True)
+        variant = "box" if getattr(self, "use_box_embeddings", False) else "flat"
+        model_type = f"multi_label_{variant}"
         mlflow.log_params(self.params)
-        mlflow.log_param("model_type", "multi_label")
+        mlflow.log_param("model_type", model_type)
         mlflow.log_param("input_source", "esm_embeddings")
         mlflow.log_param("num_classes", len(self.go_ids))
         mlflow.log_param("feature_vector_length", self.vector_length)
@@ -750,7 +757,7 @@ class MultiLabelClassifier:
         print(" done.")
 
         mlflow.set_tag("Training Info", "MultiLabelClassifier full logging")
-        mlflow.set_tag("model_type", "multi_label")
+        mlflow.set_tag("model_type", model_type)
 
         self.logging_time = time.time() - log_start_time
         mlflow.log_metric("training_time_seconds", round(self.training_time, 2))

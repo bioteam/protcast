@@ -51,11 +51,23 @@ python3 scripts/compare_knn_vs_multilabel.py \\
 """
 
 import os
+
+# Enable TensorFlow determinism BEFORE any TF import (which happens transitively
+# below via the classifier modules).  Together these flags make GPU training
+# deterministic for a given seed: identical Fmax across re-runs of the same
+# seed.  This eliminates within-seed (training) variance — so a single run per
+# seed is statistically sufficient, and all observed variance is attributable
+# to the train/val split (between-seed variance).  Costs ~5–10% throughput.
+os.environ["TF_DETERMINISTIC_OPS"] = "1"
+os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
+os.environ["PYTHONHASHSEED"] = "0"
+
 import re
 import gc
 import json
 import time
 import pickle
+import random
 import argparse
 from collections import defaultdict
 
@@ -458,6 +470,19 @@ def main():
 
     config = ConfigManager.load_config()
     start  = time.time()
+
+    # Seed Python, NumPy, and TF RNGs so determinism flags actually take effect.
+    # Combined with TF_DETERMINISTIC_OPS at the top of this file, this makes
+    # the same --seed reproduce the same Fmax bit-for-bit across re-runs.
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    try:
+        import tensorflow as tf
+        tf.random.set_seed(args.seed)
+        tf.keras.utils.set_random_seed(args.seed)
+    except Exception:
+        pass  # KNN-only runs don't need TF
+
     # Resolve to absolute paths now — os.chdir() later would silently break
     # any relative paths that are used after the working directory changes.
     input_dir = os.path.abspath(args.input_dir)
@@ -540,6 +565,32 @@ def main():
     if results.get("esm_dim") is None:
         results["esm_dim"] = int(next(iter(protein_embeddings.values())).shape[0])
 
+    # ── Parent MLflow run ────────────────────────────────────────────────────
+    # Wrap the three model runs under a single parent so they appear grouped
+    # in the MLflow UI as one comparison.  Each child run starts nested under
+    # this parent (handled inside the classifier .run() methods).
+    parent_mlflow = None
+    parent_run_ctx = None
+    if args.use_mlflow:
+        try:
+            from protcast.utils.mlflow_utils import init_mlflow
+            parent_mlflow = init_mlflow(
+                experiment_name=config.get("EXPERIMENT_NAME", "Default Experiment"),
+                repo_owner=config.get("DAGSHUB_REPO_OWNER", "aakpan"),
+                repo_name=config.get("DAGSHUB_REPO_NAME", "my-first-repo"),
+                verbose=args.verbose,
+            )
+            parent_run_name = f"comparison_{name}_seed{args.seed}"
+            parent_run_ctx = parent_mlflow.start_run(run_name=parent_run_name)
+            parent_mlflow.set_tag("comparison_type", "knn_vs_multilabel")
+            parent_mlflow.set_tag("level", str(level))
+            parent_mlflow.log_param("seed", args.seed)
+            parent_mlflow.log_param("box_enabled", args.box)
+            parent_mlflow.log_param("esm_dim", results["esm_dim"])
+        except Exception as e:
+            print(f"Warning: could not start parent MLflow run: {e}")
+            parent_mlflow = None
+
     # ── Model 1: KNN ───────────────────────────────────────────────────────
     if results.get("knn", {}).get("status") != "ok":
         print("\n" + "=" * 60)
@@ -619,6 +670,20 @@ def main():
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nResults saved to {results_file}")
+
+    # Close the parent MLflow run after all child runs have finished.
+    if parent_mlflow is not None:
+        try:
+            for key in ("knn", "multilabel_flat", "multilabel_box"):
+                r = results.get(key, {})
+                if r.get("status") == "ok":
+                    parent_mlflow.log_metric(f"{key}_fmax", r["fmax"])
+                    parent_mlflow.log_metric(f"{key}_smin", r["smin"])
+                    parent_mlflow.log_metric(f"{key}_training_time", r["training_time"])
+            parent_mlflow.log_metric("total_elapsed_seconds", results["elapsed"])
+            parent_mlflow.end_run()
+        except Exception as e:
+            print(f"Warning: error finalising parent MLflow run: {e}")
 
     print_results(results)
 

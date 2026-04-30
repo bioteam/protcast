@@ -63,14 +63,14 @@ def parse_args():
     )
     parser.add_argument(
         "--minimum_seqs",
-        default=50,
-        help="Minimum number of sequences",
+        default=10,
+        help="Minimum number of sequences per GO term (terms below this are skipped)",
         type=int,
     )
     parser.add_argument(
         "--maximum_seqs",
-        default=50000,
-        help="Maximum number of sequences to use for training",
+        default=None,
+        help="Optional cap on sequences per GO term; if unset, all sequences are used",
         type=int,
     )
     parser.add_argument(
@@ -127,7 +127,7 @@ def get_proteins_for_go_terms(
         Dictionary mapping GO IDs to dictionaries of protein_id: sequence
     """
     proteins_by_go = defaultdict(dict)
-
+ 
     for go_id in go_ids:
         # Get subgraph of GO terms (the term and all its descendants)
         subgraph_go_ids = dataset.get_subgraph(go_id)
@@ -155,7 +155,7 @@ def get_proteins_for_go_terms(
                     f"GO term {go_id} skipped: Only {len(proteins_by_go[go_id])} proteins, minimum {minimum_seqs} required"
                 )
             del proteins_by_go[go_id]
-        elif len(proteins_by_go[go_id]) > maximum_seqs:
+        elif maximum_seqs is not None and len(proteins_by_go[go_id]) > maximum_seqs:
             # Sample down to maximum number of proteins
             import random
 
