@@ -209,10 +209,10 @@ def make_panel(matrix, label_text, shape_text, label_color):
 # The sigmoid output panel has a single cell, so its split is (1, 0) and is
 # special-cased.
 LAYERS = [
-    ("Layer 1", "Dense 343 → 64, ReLU",  YELLOW,   64, (3, 3), False, YELLOW),
-    ("Layer 2", "Dense 64 → 32, ReLU",   GREEN_B,  32, (3, 2), False, GREEN_B),
-    ("Layer 3", "Dense 32 → 16, ReLU",   TEAL_B,   16, (2, 2), False, TEAL_B),
-    ("Layer 4", "Dense 16 → 1, Sigmoid", ORANGE,    1, (1, 0), True,  ORANGE),
+    ("Layer 1", "Dense 343 → 64",  YELLOW,   64, (3, 3), False, YELLOW),
+    ("Layer 2", "Dense 64 → 32",   GREEN_B,  32, (3, 2), False, GREEN_B),
+    ("Layer 3", "Dense 32 → 16",   TEAL_B,   16, (2, 2), False, TEAL_B),
+    ("Layer 4", "Dense 16 → 1",    ORANGE,    1, (1, 0), True,  ORANGE),
 ]
 
 # Per-layer node counts for the compact layer columns drawn on each DataFlow
@@ -261,23 +261,16 @@ class ProtCastDataFlow(Scene):
         input_panel = make_panel(input_mat, "Input", "(1, 343)", BLUE_B)
         input_panel.move_to([LEFT_X, PANEL_Y, 0])
         self.play(FadeIn(input_panel, scale=0.95), run_time=1.5)
-        self.wait(5.5)
+        self.wait(2.75)
 
         # Pick one protein's logit/probability to flow through.
         final_prob = float(1.0 / (1.0 + np.exp(-1.8)))  # = sigmoid(1.8) ≈ 0.86
 
-        relu_desc = None  # bottom-of-frame caption explaining ReLU
-        sigmoid_desc = None  # bottom-of-frame caption explaining Sigmoid
+        last_desc = None  # most recent bottom caption for the current layer
 
         left_panel = input_panel
         for i, (name, op, color, out_dim, vis_split, is_sig, label_color) in enumerate(LAYERS):
             n_left, n_right = vis_split
-
-            # ReLU caption is no longer relevant when we hit the sigmoid layer.
-            if is_sig and relu_desc is not None:
-                self.play(FadeOut(relu_desc), run_time=0.6)
-                self.wait(0.5)
-                relu_desc = None
 
             # Build the right-side panel (one row, possibly split with '...').
             if is_sig:
@@ -348,18 +341,31 @@ class ProtCastDataFlow(Scene):
             self.play(FadeIn(W_group), run_time=1.0)
             self.wait(3.0)
             self.play(FadeOut(W_group), run_time=0.7)
-            self.wait(1.0)
 
-            # After the first layer's panel is in place, introduce ReLU.
-            if relu_desc is None and not is_sig:
-                relu_desc = Text(
-                    "ReLU: f(x) = max(0, x). Positives pass through; negatives become zero.",
-                    font_size=18,
-                    color=GREY_B,
-                    font=FONT,
-                ).to_edge(DOWN, buff=0.5)
-                self.play(Write(relu_desc), run_time=1.5)
-                self.wait(3.0)
+            # Per-layer two-sentence description: weighted-sum sentence,
+            # followed by the activation formula sentence.
+            if is_sig:
+                s1_text = (
+                    f"The output = (input × weight) added up across all {prev_dim} inputs, plus a bias."
+                )
+                s2_text = "Then Sigmoid squashes to [0, 1]: σ(x) = 1 / (1 + e⁻ˣ)."
+            else:
+                s1_text = (
+                    f"Each of the {out_dim} outputs = (input × weight) added up across "
+                    f"all {prev_dim} inputs, plus a bias."
+                )
+                s2_text = "Then ReLU clips negatives to zero: f(x) = max(0, x)."
+
+            s1 = Text(s1_text, font_size=18, color=YELLOW, font=FONT)
+            s2 = Text(s2_text, font_size=18, color=YELLOW, font=FONT)
+            desc_group = VGroup(s1, s2).arrange(DOWN, buff=0.15).to_edge(
+                DOWN, buff=0.5
+            )
+            self.play(Write(s1), run_time=1.0)
+            self.wait(1.0)
+            self.play(Write(s2), run_time=1.0)
+            self.wait(1.0)
+            last_desc = desc_group
 
             if is_sig:
                 prob_text = Text(
@@ -374,16 +380,7 @@ class ProtCastDataFlow(Scene):
                 self.play(Write(VGroup(prob_text, interp_text)), run_time=1.5)
                 self.wait(2.5)
 
-                sigmoid_desc = Text(
-                    "Sigmoid: σ(x) = 1 / (1 + e⁻ˣ). Maps any real number to a probability in [0, 1].",
-                    font_size=18,
-                    color=GREY_B,
-                    font=FONT,
-                ).to_edge(DOWN, buff=0.5)
-                self.play(Write(sigmoid_desc), run_time=1.5)
-                self.wait(3.0)
-
-            self.wait(7.0)
+            self.wait(1.0)
 
             # Slide pipeline left for the next layer (skip after the last layer).
             if i < len(LAYERS) - 1:
@@ -393,15 +390,17 @@ class ProtCastDataFlow(Scene):
                     FadeOut(layer_col),
                     FadeOut(op_top),
                     FadeOut(op_bot),
+                    FadeOut(desc_group),
                     right_panel.animate.move_to([LEFT_X, PANEL_Y, 0]),
                     run_time=1.5,
                 )
+                last_desc = None
                 self.wait(0.5)
                 left_panel = right_panel
 
         # ===== Outro =====
-        if sigmoid_desc is not None:
-            self.play(FadeOut(sigmoid_desc), run_time=0.6)
+        if last_desc is not None:
+            self.play(FadeOut(last_desc), run_time=0.6)
             self.wait(0.5)
         outro = Text(
             "Each hidden layer creates a new representation of the data — applying its formula to learned weights.",
@@ -569,15 +568,36 @@ class ProtCastNetwork(Scene):
         ).next_to(output_arrow, RIGHT, buff=0.15)
         self.play(GrowArrow(output_arrow), Write(prediction_label), run_time=0.7)
 
-        hidden_desc = Text(
-            "Hidden layers: y = ReLU(Wx + b). "
-            "Each line in the diagram is one weight in W, learned from data.",
-            font_size=18,
-            color=GREY_B,
+        hidden_desc1 = Text(
+            "Each line in the diagram is one weight in W, learned in training.",
+            font_size=22,
+            weight="BOLD",
+            color=YELLOW,
             font=FONT,
         ).to_edge(DOWN, buff=0.5)
-        self.play(Write(hidden_desc), run_time=1.2)
+        self.play(Write(hidden_desc1), run_time=1.2)
         self.wait(3.4)
+
+        hidden_desc2 = (
+            VGroup(
+                Text(
+                    "Each destination node value = weighted sum of sources + bias.",
+                    font_size=18,
+                    color=YELLOW,
+                    font=FONT,
+                ),
+                Text(
+                    "ReLU then clips negatives to zero.",
+                    font_size=18,
+                    color=YELLOW,
+                    font=FONT,
+                ),
+            )
+            .arrange(DOWN, buff=0.1)
+            .to_edge(DOWN, buff=0.5)
+        )
+        self.play(FadeOut(hidden_desc1), Write(hidden_desc2), run_time=1.5)
+        self.wait(3.0)
 
         # ===== Beat 7: Signal pulse — data propagates left to right  (10.5 -> 14.5s) =====
         self.play(Indicate(all_layers[0], color=YELLOW, scale_factor=1.18), run_time=0.4)
@@ -692,13 +712,22 @@ class ProtCastPreprocessing(Scene):
         ).next_to(encode_arrow, DOWN, buff=0.18)
         self.play(GrowArrow(encode_arrow), Write(encode_top), Write(encode_bot), run_time=1.2)
 
-        ctriad_desc = Text(
+        ctriad_desc_first = Text(
             "CTriad represents each protein as counts of 343 triplets across 7 amino-acid groups.",
-            font_size=18,
-            color=GREY_B,
+            font_size=22,
+            color=YELLOW,
             font=FONT,
         ).to_edge(DOWN, buff=0.5)
-        self.play(Write(ctriad_desc), run_time=1.5)
+        self.play(Write(ctriad_desc_first), run_time=1.5)
+        self.wait(2.5)
+
+        ctriad_desc = Text(
+            "CTriad is just one way to encode sequences as numbers — there are many other algorithms.",
+            font_size=22,
+            color=YELLOW,
+            font=FONT,
+        ).to_edge(DOWN, buff=0.5)
+        self.play(FadeOut(ctriad_desc_first), Write(ctriad_desc), run_time=1.2)
         self.wait(0.4)
 
         # ===== Beat 3: Build matrix one row at a time  (11.5 -> 18.5s) =====
@@ -787,7 +816,7 @@ class ProtCastIntro(Scene):
         title = Text("The Problem", font_size=46, weight="BOLD", font=FONT)
         subtitle = Text(
             "Binary classification of protein sequences",
-            font_size=24,
+            font_size=30,
             color=GREY_B,
             font=FONT,
         )
@@ -866,7 +895,7 @@ class ProtCastIntro(Scene):
         outro = Text(
             "How? — start by turning sequences into numbers.",
             font_size=20,
-            color=GREY_B,
+            color=YELLOW,
             font=FONT,
         ).to_edge(DOWN, buff=0.5)
         self.play(Write(outro), run_time=1.2)
