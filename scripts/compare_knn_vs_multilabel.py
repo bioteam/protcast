@@ -172,6 +172,7 @@ def train_knn(
 def train_multilabel(
     protein_embeddings, protein_go_terms, go_ids,
     config, name, seed, go_dag, use_box, use_mlflow, verbose=False,
+    box_variant="hard",
 ):
     """Fit MultiLabelClassifier (flat or box) and return a serialisable result dict.
 
@@ -180,12 +181,19 @@ def train_multilabel(
     use_box : bool
         When True, overrides USE_BOX_EMBEDDINGS in config so a copy of config
         is used for this run—config.json on disk is never modified.
+    box_variant : str
+        "hard" (default) or "smoothed".  Only used when use_box=True.  Controls
+        the containment loss formulation; see protcast.model.box_embeddings.
     """
-    label = "box" if use_box else "flat"
+    if use_box:
+        label = f"box_{box_variant}"
+    else:
+        label = "flat"
 
-    # Work from a config copy so the flag doesn't persist between runs.
+    # Work from a config copy so flags don't persist between runs.
     run_config = dict(config)
     run_config["USE_BOX_EMBEDDINGS"] = use_box
+    run_config["BOX_VARIANT"] = box_variant if use_box else "hard"
 
     classifier = MultiLabelClassifier(
         verbose=verbose,
@@ -462,6 +470,15 @@ def main():
         help="Also train MultiLabelClassifier with BoxEmbeddingLayer (3-way comparison)",
     )
     parser.add_argument(
+        "--box-variant", choices=["hard", "smoothed"], default="hard",
+        help=(
+            "Containment loss variant for the box model. 'hard' (default) "
+            "uses ReLU violations; 'smoothed' uses softplus and provides "
+            "non-zero gradients even when the child is already inside the "
+            "parent (Li et al. 2019). Ignored unless --box is set."
+        ),
+    )
+    parser.add_argument(
         "--use_mlflow", action="store_true",
         help="Log each model run to MLflow",
     )
@@ -643,24 +660,27 @@ def main():
     # ── Model 3: MultiLabel + box (optional) ──────────────────────────────
     if args.box and results.get("multilabel_box", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print("MODEL 3 / 3: MULTILABEL + BOX EMBEDDINGS")
+        print(f"MODEL 3 / 3: MULTILABEL + BOX EMBEDDINGS ({args.box_variant})")
         print("=" * 60)
         try:
-            results["multilabel_box"] = train_multilabel(
+            box_result = train_multilabel(
                 protein_embeddings, protein_go_terms, go_ids,
                 config, name, args.seed, go_dag,
                 use_box=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
+                box_variant=args.box_variant,
             )
+            box_result["box_variant"] = args.box_variant
+            results["multilabel_box"] = box_result
             r = results["multilabel_box"]
             print(
-                f"Box NN — Fmax: {r['fmax']:.4f}  "
+                f"Box NN ({args.box_variant}) — Fmax: {r['fmax']:.4f}  "
                 f"Smin: {r['smin']:.4f}  "
                 f"Epochs: {r['epochs']}  "
                 f"Time: {r['training_time']:.1f}s"
             )
         except Exception as e:
-            print(f"FAILED: MultiLabel box — {e}")
-            results["multilabel_box"] = {"status": f"error: {e}"}
+            print(f"FAILED: MultiLabel box ({args.box_variant}) — {e}")
+            results["multilabel_box"] = {"status": f"error: {e}", "box_variant": args.box_variant}
 
         results["elapsed"] = round(time.time() - start)
         with open(results_file, "w") as f:

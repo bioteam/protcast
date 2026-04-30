@@ -19,6 +19,7 @@ try:
         BoxEmbeddingLayer,
         build_box_embedding_model,
         containment_loss,
+        containment_loss_smoothed,
     )
     from protcast.preprocessing.go_dag_edges import extract_dag_edges
 
@@ -381,6 +382,9 @@ class MultiLabelClassifier:
         box_dim = getattr(self, "box_dim", 32)
         temperature = getattr(self, "box_temperature", 10.0)
         containment_weight = getattr(self, "containment_weight", 0.1)
+        # BOX_VARIANT: "hard" (ReLU violation) or "smoothed" (softplus violation)
+        box_variant = str(getattr(self, "box_variant", "hard")).lower()
+        smoothed_beta = float(getattr(self, "smoothed_box_beta", 5.0))
 
         model, box_layer = build_box_embedding_model(
             input_dim=input_dim,
@@ -404,6 +408,20 @@ class MultiLabelClassifier:
         dag_edges_tensor = tf.constant(self._dag_edges, dtype=tf.int32)
         cw = tf.constant(containment_weight, dtype=tf.float32)
 
+        # Pick the containment loss variant once, outside the per-batch closure
+        if box_variant == "smoothed":
+            def _c_loss():
+                return containment_loss_smoothed(
+                    box_layer, dag_edges_tensor, beta=smoothed_beta
+                )
+        elif box_variant == "hard":
+            def _c_loss():
+                return containment_loss(box_layer, dag_edges_tensor)
+        else:
+            raise ValueError(
+                f"Unknown BOX_VARIANT '{box_variant}'. Use 'hard' or 'smoothed'."
+            )
+
         def box_combined_loss(y_true, y_pred):
             # Weighted BCE (same as flat model)
             per_class_bce = -(
@@ -414,10 +432,8 @@ class MultiLabelClassifier:
                 per_class_bce * class_weights_tensor, axis=-1
             )
 
-            # Containment regularization
-            c_loss = containment_loss(box_layer, dag_edges_tensor)
-
-            return weighted_bce + cw * c_loss
+            # Containment regularization (variant-dependent)
+            return weighted_bce + cw * _c_loss()
 
         model.compile(
             optimizer=self.optimizer,  # type: ignore
@@ -428,9 +444,10 @@ class MultiLabelClassifier:
         self.model = model
 
         if self.verbose and len(self._dag_edges) > 0:
+            extra = f", beta={smoothed_beta}" if box_variant == "smoothed" else ""
             print(
-                f"Containment loss: {len(self._dag_edges)} DAG edges, "
-                f"weight={containment_weight}"
+                f"Containment loss ({box_variant}): {len(self._dag_edges)} DAG edges, "
+                f"weight={containment_weight}{extra}"
             )
 
     def train_model(self) -> History:
