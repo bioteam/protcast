@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --job-name compare_hardbox
+#SBATCH --job-name compare_smoothedbox
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=aakpan@bioteam.net
-#SBATCH -o compare_hardbox.out
-#SBATCH -e compare_hardbox.err
+#SBATCH -o compare_smoothedbox.out
+#SBATCH -e compare_smoothedbox.err
 #SBATCH -p rtx-dev
 #SBATCH -N 1
 #SBATCH -n 1
