@@ -184,16 +184,24 @@ class MultiLabelClassifier:
 
         self._mlflow = None
         if self.use_mlflow:
-            from protcast.utils.mlflow_utils import init_mlflow
+            import mlflow as _mlflow_module
 
-            self._mlflow = init_mlflow(
-                experiment_name=config.get(
-                    "EXPERIMENT_NAME", "Default Experiment"
-                ),
-                repo_owner=config.get("DAGSHUB_REPO_OWNER", "aakpan"),
-                repo_name=config.get("DAGSHUB_REPO_NAME", "my-first-repo"),
-                verbose=self.verbose,
-            )
+            # If a parent run is already active (a comparison wrapper script
+            # has set things up), re-running init_mlflow() would reset client
+            # state and invalidate the parent run handle.  Just reuse the
+            # already-initialized module instead.
+            if _mlflow_module.active_run() is not None:
+                self._mlflow = _mlflow_module
+            else:
+                from protcast.utils.mlflow_utils import init_mlflow
+                self._mlflow = init_mlflow(
+                    experiment_name=config.get(
+                        "EXPERIMENT_NAME", "Default Experiment"
+                    ),
+                    repo_owner=config.get("DAGSHUB_REPO_OWNER", "aakpan"),
+                    repo_name=config.get("DAGSHUB_REPO_NAME", "my-first-repo"),
+                    verbose=self.verbose,
+                )
 
     @typechecked
     def run(self) -> None:
