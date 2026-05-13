@@ -18,9 +18,11 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-LEVEL=4
-SEED=42
-OUTDIR=${WORK}/ProtCast_results/knn_esm_vs_combined-level-${LEVEL}-seed-${SEED}
+LEVEL=${LEVEL:-4}
+SEED=${SEED:-42}
+FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"CTriad Moran CTDD"}
+TAG=${TAG:-default}
+OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_esm_vs_combined-${TAG}-level-${LEVEL}-seed-${SEED}}
 
 # Only use local modules for Python 3.11 to match the Python version in the container
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
@@ -37,7 +39,7 @@ python3 scripts/compare_knn_esm_vs_knn_combined.py \
 -p $DATADIR/ProtCastDataset.bin \
 -d $DATADIR/$EMBEDDIR-${LEVEL} \
 -o $OUTDIR \
---feature_algorithms CTriad Moran CTDD \
+--feature_algorithms ${FEATURE_ALGORITHMS} \
 --seed $SEED \
 --use_mlflow \
-2>&1 | tee knn_esm_vs_combined_level_${LEVEL}.log
+2>&1 | tee knn_esm_vs_combined_${TAG}_level_${LEVEL}_seed_${SEED}.log
