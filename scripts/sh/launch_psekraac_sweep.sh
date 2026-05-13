@@ -22,5 +22,5 @@ for SEED in "${SEEDS[@]}"; do
         --job-name=knn_${TAG}_s${SEED} \
         -o run_knn_${TAG}_s${SEED}.out \
         -e run_knn_${TAG}_s${SEED}.err \
-        scripts/sh/run_compare_knn_esm_vs_knn_combined.sh
+        protcastshared/ProtCast/scripts/sh/run_compare_knn_esm_vs_knn_combined.sh
 done
