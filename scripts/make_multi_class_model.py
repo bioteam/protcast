@@ -51,8 +51,28 @@ parser.add_argument(
     help="Maximum number of sequences to use for training",
     type=int,
 )
+parser.add_argument(
+    "--seed",
+    type=int,
+    default=None,
+    help=(
+        "Random seed for per-GO-term down-sampling. If unset, falls back "
+        "to RANDOM_SEED in config.json, then to 42."
+    ),
+)
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
 args = parser.parse_args()
+
+# Resolve seed: CLI flag > config["RANDOM_SEED"] > 42. The config is
+# already loaded at module top (line above), so we just read from it.
+if args.seed is None:
+    args.seed = int(config.get("RANDOM_SEED", 42))
+if args.verbose:
+    print(f"Random seed: {args.seed}")
+
+# One Random instance for the whole loop so the sampling sequence is
+# deterministic for a fixed seed and a fixed iteration order over go_ids.
+rng = random.Random(args.seed)
 
 start = time.time()
 
@@ -92,7 +112,11 @@ go_ids = {
     for line in open(args.go_ids_file, "r")
     if (match := re.search(r"GO:\d+", line))
 }
-for go_id in go_ids:
+# Sort before iterating: `go_ids` is a set, so its iteration order is
+# non-deterministic across processes. `rng` is reused across iterations,
+# so a different GO-term order would feed it different sub-populations and
+# yield different samples even with a fixed seed.
+for go_id in sorted(go_ids):
     subgraph_go_ids = dataset.get_subgraph(go_id)
     for subid in subgraph_go_ids:
         pids = dataset.get_term(subid).get_all_pids()
@@ -108,8 +132,12 @@ for go_id in go_ids:
         # If we've collected too many sequences, sample down to the maximum
         if len(proteins[go_id]) > args.maximum_seqs:
             num_to_sample = args.maximum_seqs
-            sampled_items = random.sample(
-                list(proteins[go_id].items()), num_to_sample
+            # Sort items by pid before sampling so the population order is
+            # fixed across runs — dict insertion order in `proteins[go_id]`
+            # depends on upstream GO-term and pid traversal which is not
+            # guaranteed stable across processes.
+            sampled_items = rng.sample(
+                sorted(proteins[go_id].items()), num_to_sample
             )
             # Replace the proteins dictionary for this GO ID with the sampled subset
             proteins[go_id] = dict(sampled_items)

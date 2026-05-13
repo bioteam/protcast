@@ -25,12 +25,14 @@ import torch
 import numpy  # noqa: F401
 import argparse
 import pickle
+import random
 import sys
 from pathlib import Path
 from collections import defaultdict
 from esm.models.esmc import ESMC
 
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
+from protcast.config.model_config import ConfigManager
 
 
 def parse_args():
@@ -74,6 +76,16 @@ def parse_args():
         type=int,
     )
     parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help=(
+            "Random seed for per-GO-term down-sampling when --maximum_seqs "
+            "is set. If unset, falls back to RANDOM_SEED in config.json, "
+            "then to 42."
+        ),
+    )
+    parser.add_argument(
         "-v", "--verbose", action="store_true", help="Verbose output"
     )
     parser.add_argument(
@@ -103,7 +115,7 @@ def load_go_ids(go_ids_file):
 
 
 def get_proteins_for_go_terms(
-    dataset, go_ids, minimum_seqs, maximum_seqs, verbose=False
+    dataset, go_ids, minimum_seqs, maximum_seqs, rng, verbose=False
 ):
     """
     Get protein sequences for specified GO terms.
@@ -118,6 +130,10 @@ def get_proteins_for_go_terms(
         Minimum number of proteins per GO term
     maximum_seqs : int
         Maximum number of proteins per GO term
+    rng : random.Random
+        Seeded RNG used for down-sampling when a GO term has more than
+        `maximum_seqs` proteins. A single instance is reused across GO terms
+        so the full sampling sequence is deterministic for a fixed seed.
     verbose : bool
         Whether to print verbose output
 
@@ -127,8 +143,12 @@ def get_proteins_for_go_terms(
         Dictionary mapping GO IDs to dictionaries of protein_id: sequence
     """
     proteins_by_go = defaultdict(dict)
- 
-    for go_id in go_ids:
+
+    # `go_ids` is a set, so its iteration order is non-deterministic across
+    # processes. Sorting fixes the order; this matters because `rng` is
+    # reused across GO terms, so the order of GO terms determines which
+    # protein samples each one gets.
+    for go_id in sorted(go_ids):
         # Get subgraph of GO terms (the term and all its descendants)
         subgraph_go_ids = dataset.get_subgraph(go_id)
 
@@ -156,11 +176,13 @@ def get_proteins_for_go_terms(
                 )
             del proteins_by_go[go_id]
         elif maximum_seqs is not None and len(proteins_by_go[go_id]) > maximum_seqs:
-            # Sample down to maximum number of proteins
-            import random
-
-            protein_items = list(proteins_by_go[go_id].items())
-            sampled_items = random.sample(protein_items, maximum_seqs)
+            # Sample down to maximum number of proteins. Sort by pid first
+            # so the sample is reproducible across runs — dict iteration is
+            # insertion-order stable within a process, but the upstream pid
+            # collection path can differ between processes (e.g. if GO term
+            # traversal order changes), so we don't rely on it.
+            protein_items = sorted(proteins_by_go[go_id].items())
+            sampled_items = rng.sample(protein_items, maximum_seqs)
             proteins_by_go[go_id] = dict(sampled_items)
             if verbose:
                 print(
@@ -295,6 +317,19 @@ def clean_go_id(go_id):
 def main():
     args = parse_args()
 
+    # Resolve seed: CLI flag > config["RANDOM_SEED"] > 42. config.json
+    # absence is non-fatal so the script still works in environments where
+    # the config file isn't deployed alongside it.
+    if args.seed is None:
+        try:
+            _config = ConfigManager.load_config()
+            args.seed = int(_config.get("RANDOM_SEED", 42))
+        except FileNotFoundError:
+            args.seed = 42
+    if args.verbose:
+        print(f"Random seed: {args.seed}")
+    rng = random.Random(args.seed)
+
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -314,6 +349,7 @@ def main():
         go_ids,
         args.minimum_seqs,
         args.maximum_seqs,
+        rng,
     )
 
     if args.verbose:

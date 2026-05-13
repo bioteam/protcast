@@ -68,13 +68,14 @@ def collect_subgraph_sequences(dataset, go_term, verbose=False):
 
 
 def prepare_training_data(
-    subgraph_sequences, dataset, verbose=False
+    subgraph_sequences, dataset, seed, verbose=False
 ):
     """Prepare balanced training data from subgraph and negative sequences.
 
     Args:
         subgraph_sequences: dict of protein_id -> sequence for positive samples
         dataset: ProtCastDataset instance
+        seed: Random seed for negative sampling
         verbose: Whether to print progress information
 
     Returns:
@@ -95,10 +96,16 @@ def prepare_training_data(
             if protein.sequence and len(protein.sequence) > 0:
                 valid_negative_ids.append(pid)
 
-    # Sample equal number of negative sequences
-    random.seed(42)  # For reproducibility
+    # Sort before sampling: `negative_protein_ids` came from a set, so its
+    # iteration order is non-deterministic across processes (PYTHONHASHSEED
+    # is randomised by default). Sorting fixes the input order so that
+    # rng.sample picks the same proteins every run for a given seed.
+    valid_negative_ids.sort()
+
+    # Use a local Random instance so the global module RNG isn't perturbed.
+    rng = random.Random(seed)
     if len(valid_negative_ids) >= len(positive_ids):
-        sampled_negative_ids = random.sample(
+        sampled_negative_ids = rng.sample(
             valid_negative_ids, len(positive_ids)
         )
     else:
@@ -298,7 +305,7 @@ def analyze_go_term(term, dataset, config, algorithm, args):
 
     # Prepare training data
     positive_sequences, negative_sequences = prepare_training_data(
-        subgraph_sequences, dataset, args.verbose
+        subgraph_sequences, dataset, args.seed, args.verbose
     )
 
     if len(negative_sequences) < len(positive_sequences) // 2:
@@ -404,12 +411,27 @@ def main():
         default="config.json",
         help="Path to configuration file",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help=(
+            "Random seed for negative sampling. If unset, falls back to "
+            "RANDOM_SEED in config.json, then to 42."
+        ),
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose")
     args = parser.parse_args()
 
     # Load configuration from file
     with open(args.config, "r") as f:
         config = json.load(f)
+
+    # Resolve seed: CLI flag > config["RANDOM_SEED"] > 42.
+    if args.seed is None:
+        args.seed = int(config.get("RANDOM_SEED", 42))
+    if args.verbose:
+        print(f"Random seed: {args.seed}")
 
     dataset = ProtCastDataset.load_serialized_file(args.protcast_dataset)
 
