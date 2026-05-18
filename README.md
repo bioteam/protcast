@@ -1,9 +1,31 @@
 # ProtCast
 
-Extract protein sequences and associated Gene Ontology (GO) annotations from UniProt, TrEMBL and
-Gene Ontology Annotation files and use feature vector representations of the protein sequences to
-predict the Molecular Function, Cellular Component, and Biological Process GO terms of proteins.
-This code uses TensorFlow for structured (tabular) data classification.
+ProtCast is a research codebase for predicting Gene Ontology (GO) annotations
+(Molecular Function, Cellular Component, Biological Process) from protein
+sequences. The current focus is on **ESM-C protein language model embeddings as
+the primary representation**, and on measuring whether augmenting those
+embeddings with classical sequence-derived **feature vectors** (AAC, CTriad,
+PseKRAAC, etc., from
+[protein-feature-vectors](https://github.com/bosborne/protein-feature-vectors))
+moves CAFA-standard Fmax / Smin metrics over an ESM-only baseline.
+
+Datasets are built from UniProt/Swiss-Prot, TrEMBL, GO, and UniProt-GOA inputs
+and packaged as a `ProtCastDataset`. Multi-label Keras/TensorFlow classifiers
+are trained per GO subgraph (by namespace and DAG level).
+
+The three scan workflows that drive the comparison live in `scripts/`:
+
+- `scan_individual_features.py` — ESM-C **+** each individual feature vector
+  vs. an ESM-only baseline.
+- `scan_feature_vectors_only.py` — each feature vector **alone** (no ESM-C)
+  vs. an ESM-only baseline.
+- `scan_individual_features.py` invoked with `+`-joined `--algorithms`
+  (launched by `scripts/sh/run_scan_combined_features.sh`) — ESM-C +
+  **combinations** of feature vectors.
+
+Each scan writes per-algorithm Fmax, Smin, and training time to a JSON file
+that is updated incrementally, so interrupted runs resume from where they
+left off.
 
 ## Installation
 
@@ -24,8 +46,8 @@ Binaries can be downloaded at [mmseqs.com](https://dev.mmseqs.com/latest/).
 ### Install *ProtCast*
 
 ```shell
-git clone https://github.com/bioteam/ProtCast
-cd ProtCast
+git clone git@github.com:bioteam/protcast.git
+cd protcast
 pip3 install .
 ```
 
@@ -237,37 +259,40 @@ Download the 4 input files necessary to build a ProtCastDataset:
 ```
 
 #### `create_protcast_dataset.sh`
+
 ## Running Jobs on TACC for Training and Evaluation
 
 1. SSH into your provisioned Frontera account
 
-2. Request a job queue with GPU access, such as rtx or rtx-dev
-   
-  ``` 
-  idev -p rtx-dev -t 00:30:00
-  ```
-  [TACC documenation](https://docs.tacc.utexas.edu/hpc/frontera/#queues) on queues for reference
+2. Request a job queue with GPU access, such as rtx or rtx-dev:
 
-   
-3. Load TACC's Apptainer module
-  ``` 
-  module load tacc-apptainer
-  ```
+   ```bash
+   idev -p rtx-dev -t 00:30:00
+   ```
+
+   [TACC documentation](https://docs.tacc.utexas.edu/hpc/frontera/#queues) on queues for reference
+
+3. Load TACC's Apptainer module:
+
+   ```bash
+   module load tacc-apptainer
+   ```
 
 4. Git Clone ProtCast and its dependencies
 
-5. Start an interactive shell session inside a Singularity container so that it has access to the cluster's NVIDIA GPUs
-  ```
-  singularity shell --nv tensorflow_2.17.0-gpu.sif
-  ```
+5. Start an interactive shell session inside a Singularity container so that it has access to the cluster's NVIDIA GPUs:
 
-6. Run the pip install commands for ProtCast and its dependencies if you haven't yet
-  ```
-  pip3 install .
-  ```
+   ```bash
+   singularity shell --nv tensorflow_2.17.0-gpu.sif
+   ```
+
+6. Run the pip install commands for ProtCast and its dependencies if you haven't yet:
+
+   ```bash
+   pip3 install .
+   ```
 
 7. Now, whatever test or training scripts you run will have access to GPU acceleration
-   
 
 ## Profiling and Benchmarking
 
@@ -275,34 +300,36 @@ Download the 4 input files necessary to build a ProtCastDataset:
 
 1. The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as part of the pyproject.toml
 
-2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model
+2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model:
 
-```python
-# Profiler callback in binary_classifier.py
-log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-          
-self.training_model.fit(
-              train_tfds,
-              epochs=self.epochs,
-              validation_data=val_tfds,
-              callbacks=[tensorboard_callback]
-)
-```
+   ```python
+   # Profiler callback in binary_classifier.py
+   log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+   tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-3. Load the relevant modules
+   self.training_model.fit(
+       train_tfds,
+       epochs=self.epochs,
+       validation_data=val_tfds,
+       callbacks=[tensorboard_callback]
+   )
+   ```
 
-```shell
-module load all/TensorFlow/2.15.1-Python-3.10 
-module load all/CUDA   
-```
+3. Load the relevant modules:
 
-4. Run the script that fits your model.
-   eg. to profile the model in binary_classifier.py you'd run
+   ```shell
+   module load all/TensorFlow/2.15.1-Python-3.10
+   module load all/CUDA
+   ```
 
-```shell
-python3 -t test/data/uniprotkb_gpcrs.fasta -nt test/data/uniprotkb_non-gpcrs.fasta scripts/binary_classify.py
-```
+4. Run the script that fits your model. For example, to profile the model in
+   `binary_classifier.py` you'd run:
+
+   ```shell
+   python3 -t test/data/uniprotkb_gpcrs.fasta \
+       -nt test/data/uniprotkb_non-gpcrs.fasta \
+       scripts/binary_classify.py
+   ```
 
 ### Python Profiling
 
@@ -313,7 +340,7 @@ When we say "the model transforms these features through various operations," we
 
 The Transformation Process
 
-1. Linear Transformations
+### Linear Transformations
 
 In artificial neural networks, a neuron (also called a node or unit) is the fundamental computational unit that:
 
@@ -371,7 +398,8 @@ w₁, w₂, ..., wₙ are learned weights
 b is a learned bias term
 In Protein Context: This might combine various protein features (hydrophobicity, charge, etc.) with different importance weights.
 
-2. Non-linear Activations
+### Non-linear Activations
+
 The weighted sum is passed through a non-linear function:
 
 a = activation_function(z)
@@ -383,7 +411,8 @@ Tanh: (e^z - e^(-z))/(e^z + e^(-z)) (squashes values between -1 and 1)
 
 In Protein Context: This introduces non-linearity, allowing the model to capture complex patterns in protein features.
 
-3. Hierarchical Feature Extraction
+### Hierarchical Feature Extraction
+
 As data flows through multiple layers:
 
 First layers: Capture simple combinations of raw features
@@ -479,9 +508,11 @@ Weight Update Mechanism
 1. Initial State
 Random Initialization: Weights typically start with small random values
 
+```python
 # Common initialization in code
-
 weights = np.random.normal(0, 0.01, size=(input_size, output_size))
+```
+
 Purpose: Random initialization breaks symmetry and enables diverse feature detection
 2. Forward Pass
 Input data passes through the network
@@ -519,53 +550,57 @@ Many weights grow from small random values to larger magnitudes
 Some weights may approach zero (especially with regularization)
 Certain critical weights might become very large (detecting key features)
 Factors Affecting Weight Changes
-1. Learning Rate
+
+### Learning Rate
+
 High Learning Rate: Larger, more rapid weight updates (risk of instability)
 Low Learning Rate: Smaller, more stable updates (risk of slow convergence)
 Learning Rate Schedules: Strategically reducing learning rate over time
-2. Optimizer Choice
+
+### Optimizer Choice
+
 SGD: Simple updates proportional to the gradient
 Adam/RMSprop: Adaptive updates based on historical gradient information
 Momentum-based: Incorporates previous update directions
-3. Regularization
+
+### Regularization
+
 L1/L2 Regularization: Adds penalties that push weights toward zero
 Dropout: Temporarily disables neurons, affecting weight update patterns
 Batch Normalization: Changes the dynamics of weight updates
 Code Example: Visualizing Weight Changes
 
-
  Feed-forward (also called a forward pass) is the fundamental process of passing input data through
    the network, layer by layer, until it reaches the output layer and makes a prediction. The data
   flows in one direction—forward—without any loops.
 
-  1. Role in Inference
+### Role in Inference
 
-  Inference is the process of using a trained model to make a prediction on new, unseen data.
+Inference is the process of using a trained model to make a prediction on new, unseen data.
 
-  The entire process of inference is a feed-forward pass.
+The entire process of inference is a feed-forward pass.
 
-   1. You provide an input (e.g., an image or text).
-   2. The data flows forward through the network's layers.
-   3. The network produces an output (the prediction).
+1. You provide an input (e.g., an image or text).
+2. The data flows forward through the network's layers.
+3. The network produces an output (the prediction).
 
-  That's it. There is no other step. So, Inference = Feed-Forward.
+That's it. There is no other step. So, Inference = Feed-Forward.
 
-  2. Role in Training
+### Role in Training
 
-  Training is the process of teaching the model by showing it labeled data and updating its weights.
+Training is the process of teaching the model by showing it labeled data and updating its weights.
 
-  The training process for a single batch of data consists of two main steps:
+The training process for a single batch of data consists of two main steps:
 
-   1. The Feed-Forward Pass: The network takes an input from the training data and performs a forward
-      pass to generate a prediction. This is the exact same mechanism as in inference.
+1. The Feed-Forward Pass: The network takes an input from the training data and performs a forward
+   pass to generate a prediction. This is the exact same mechanism as in inference.
 
-   2. The Backward Pass (Backpropagation): This is what makes it "training."
-       * The model compares its prediction from the forward pass to the correct label and calculates
-         the error (loss).
-       * It then propagates this error signal backward through the network, calculating the gradient
-         (the direction of error change) for every weight.
-       * The optimizer uses these gradients to update the weights, slightly improving the network.
-
+2. The Backward Pass (Backpropagation): This is what makes it "training."
+    - The model compares its prediction from the forward pass to the correct label and calculates
+      the error (loss).
+    - It then propagates this error signal backward through the network, calculating the gradient
+      (the direction of error change) for every weight.
+    - The optimizer uses these gradients to update the weights, slightly improving the network.
 
 ```py
 import matplotlib.pyplot as plt
