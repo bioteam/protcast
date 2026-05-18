@@ -113,12 +113,10 @@ class FmaxEarlyStopping(keras.callbacks.Callback):
 class MultiLabelClassifier:
     """MultiLabelClassifier
 
-    Multi-label classifier for protein function prediction.
-    Unlike MultiClassifier (softmax, one label per protein), this uses
-    sigmoid activations so each protein can be assigned multiple GO terms
+    Multi-label classifier for protein function prediction. Uses sigmoid
+    activations so each protein can be assigned multiple GO terms
     simultaneously.
 
-    Key differences from MultiClassifier:
     - Input: {protein_id: embedding_vector} (one entry per protein)
     - Labels: multi-hot vectors (multiple GO terms per protein)
     - Output activation: sigmoid (independent per-class probabilities)

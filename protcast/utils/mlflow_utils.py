@@ -2,8 +2,8 @@
 mlflow_utils.py
 
 Shared MLflow + DagsHub initialization and logging helpers.
-Used by both training (MultiClassifier) and inference scripts
-so the setup logic lives in one place.
+Used by both training and inference scripts so the setup logic
+lives in one place.
 """
 
 import json

@@ -5,7 +5,7 @@ Uses the test FASTA data (which has GO terms in headers) to run the full
 pipeline: parse sequences -> generate embeddings -> train -> evaluate -> infer.
 
 Supports both fake embeddings (for quick testing without ESM-C) and real
-ESM-C embeddings (matching the pattern from test_multi_classifier_embeds.py).
+ESM-C embeddings.
 
 Usage:
 
