@@ -6,7 +6,7 @@ sequences. The current focus is on **ESM-C protein language model embeddings as
 the primary representation**, and on measuring whether augmenting those
 embeddings with classical sequence-derived **feature vectors** (AAC, CTriad,
 PseKRAAC, etc., from
-[protein-feature-vectors](https://github.com/bosborne/protein-feature-vectors))
+[protein-feature-vectors](https://github.com/bioteam/protein-feature-vectors)
 moves CAFA-standard Fmax / Smin metrics over an ESM-only baseline.
 
 Datasets are built from UniProt/Swiss-Prot, TrEMBL, GO, and UniProt-GOA inputs
