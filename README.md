@@ -176,7 +176,7 @@ the location of the serialized ProtCastDataset and log files.
 
 ### Tensorflow Profiling
 
-1. The necessary libraries "tensorflow", "tensorrt", and "tensorboard" should all be installed as part of the pyproject.toml
+1. The necessary libraries *tensorflow*, *tensorrt*, and *tensorboard* should all be installed as part of the pyproject.toml
 
 2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model:
 
