@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Model and data artifacts
+*.keras
+*.h5
+*.pkl
+*.bin
+results/
+
+# Logs
+*.log
+*.out
+*.err
+logs/
+
+# IDE / tooling
+.vscode/
+.idea/
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
