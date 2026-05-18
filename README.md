@@ -2,7 +2,7 @@
 
 ProtCast is a research codebase for predicting Gene Ontology (GO) annotations
 (Molecular Function, Cellular Component, Biological Process) from protein
-sequences. The current focus is on **ESM-C protein language model embeddings as
+sequences. The current focus is on **[ESM-C](https://www.evolutionaryscale.ai/blog/esm-cambrian) protein language model embeddings as
 the primary representation**, and on measuring whether augmenting those
 embeddings with classical sequence-derived **feature vectors** (AAC, CTriad,
 PseKRAAC, etc., from
