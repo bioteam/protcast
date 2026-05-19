@@ -2,18 +2,17 @@
 
 ProtCast is a research codebase for predicting Gene Ontology (GO) annotations
 (Molecular Function, Cellular Component, Biological Process) from protein
-sequences. The current focus is on **[ESM-C](https://www.evolutionaryscale.ai/blog/esm-cambrian) protein language model embeddings as
-the primary representation**, and on measuring whether augmenting those
+sequences. The current focus is on **[ESM-C](https://www.evolutionaryscale.ai/blog/esm-cambrian) protein language model embeddings as the primary representation**, and on measuring whether augmenting those
 embeddings with classical sequence-derived **feature vectors** (AAC, CTriad,
 PseKRAAC, etc., from
 [protein-feature-vectors](https://github.com/bioteam/protein-feature-vectors)
-moves CAFA-standard Fmax / Smin metrics over an ESM-only baseline.
+increases CAFA-standard Fmax / Smin metrics above an ESM-only baseline.
 
 Datasets are built from UniProt/Swiss-Prot, TrEMBL, GO, and UniProt-GOA inputs
 and packaged as a `ProtCastDataset`. Multi-label Keras/TensorFlow classifiers
 are trained per GO subgraph (by namespace and DAG level).
 
-The three scan workflows that drive the comparison live in `scripts/`:
+Example workflows in `scripts/`:
 
 - `scan_individual_features.py` — ESM-C **+** each individual feature vector
   vs. an ESM-only baseline.
@@ -24,8 +23,7 @@ The three scan workflows that drive the comparison live in `scripts/`:
   **combinations** of feature vectors.
 
 Each scan writes per-algorithm Fmax, Smin, and training time to a JSON file
-that is updated incrementally, so interrupted runs resume from where they
-left off.
+that is updated incrementally.
 
 ## Installation
 
