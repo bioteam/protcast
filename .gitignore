@@ -19,6 +19,11 @@ env/
 *.h5
 *.pkl
 *.bin
+*.joblib
+*.tfrecord
+*.npz
+*.npy
+*.parquet
 results/
 
 # Logs
@@ -34,4 +39,29 @@ logs/
 
 # OS
 .DS_Store
+.AppleDouble
 Thumbs.db
+*.swp
+
+# Config (use config.example.json as a starting point)
+config.yaml
+config.json
+
+# ProtCast experiment outputs
+ProtCast_results/
+ProtCast_stats/
+mf_go_terms-level-*/
+feature_scan/
+knn_vs_multilabel/
+knn_esm_vs_combined/
+
+# Benchmark pipeline outputs
+benchmark_pipeline/data/raw/
+benchmark_pipeline/data/processed/
+benchmark_pipeline/results/
+
+# Wheels cache (used by CI)
+wheelhouse/
+
+# Jupyter
+.ipynb_checkpoints/

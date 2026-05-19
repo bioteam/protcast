@@ -21,9 +21,12 @@ Example workflows in `scripts/`:
 - `scan_individual_features.py` invoked with `+`-joined `--algorithms`
   (launched by `scripts/sh/run_scan_combined_features.sh`) — ESM-C +
   **combinations** of feature vectors.
+- `compare_knn_esm_vs_knn_combined.py` — two-way KNN comparison of ESM-C
+  alone vs. ESM-C concatenated with classical descriptors.
 
 Each scan writes per-algorithm Fmax, Smin, and training time to a JSON file
-that is updated incrementally.
+that is updated incrementally, so interrupted runs resume from where they
+left off.
 
 ## Installation
 
@@ -136,6 +139,90 @@ the location of the serialized ProtCastDataset and log files.
 
 ├─ scripts/
 
+### Results directory convention
+
+Long-running experiments write into `ProtCast_results/` using the
+convention `{experiment}-{feature_family}-level-{N}-seed-{S}/`
+(e.g. `knn_esm_vs_combined-psekraac-level-6-seed-43`). The sweep
+wrappers in [scripts/sh/](scripts/sh/) — `launch_psekraac_sweep.sh`,
+`launch_psekraac_sweep_all_levels.sh`,
+`launch_psekraac_sweep_all_levels_per_seed.sh` — generate this grid;
+matching the naming convention keeps downstream aggregation
+(`scripts/sh/run_compare_*_multilevel.sh`, the benchmarking pipeline)
+working.
+
+## Configuration (`config.json`)
+
+All training/comparison scripts call `ConfigManager.load_config()` (see
+[protcast/config/model_config.py](protcast/config/model_config.py)),
+which searches in this order:
+
+1. Path passed explicitly to `load_config(path=...)` (no CLI flag currently
+   wired in the scan/compare scripts).
+2. `./config.json` in the current working directory.
+3. `config.json` next to `model_config.py` (package default).
+
+If none is found a `FileNotFoundError` is raised, so a `config.json`
+**must be reachable** when you run a script. `config.json` is gitignored
+to keep per-user settings out of the repo — copy
+[config.example.json](config.example.json) to `config.json` and edit it:
+
+```bash
+cp config.example.json config.json
+```
+
+### Example `config.json`
+
+The tracked [config.example.json](config.example.json) is a minimal
+config that exercises both the multi-label and KNN code paths without
+errors:
+
+```json
+{
+    "USER": "your_handle",
+    "EXPERIMENT_NAME": "your_experiment_name",
+    "OPTIMIZER": "adam",
+    "LOSS": "binary_crossentropy",
+    "METRICS": ["accuracy"],
+    "EPOCHS": 100,
+    "BATCH_SIZE": 32,
+    "HIDDEN_LAYERS": [128, 64],
+    "DROPOUT": 0.5,
+    "PRED_THRESHOLD": 75.0,
+    "VALIDATION_SPLIT": 0.2,
+    "PATIENCE": 10,
+    "USE_BOX_EMBEDDINGS": false,
+    "BOX_DIM": 32,
+    "BOX_TEMPERATURE": 10.0,
+    "CONTAINMENT_WEIGHT": 0.1,
+    "KNN_N_NEIGHBORS": 10,
+    "KNN_METRIC": "cosine",
+    "KNN_WEIGHTS": "distance",
+    "KNN_ALGORITHM": "auto",
+    "RANDOM_SEED": 42
+}
+```
+
+Box-embedding fields (`USE_BOX_EMBEDDINGS`, `BOX_DIM`, `BOX_TEMPERATURE`,
+`CONTAINMENT_WEIGHT`) are only consumed when `USE_BOX_EMBEDDINGS: true` —
+otherwise the flat multi-label head is used. KNN fields are only consumed
+by the KNN code paths. So the same file safely drives every script.
+
+### Running a script
+
+From the project root (`config.json` auto-discovered):
+
+```bash
+python3 scripts/scan_individual_features.py \
+    -d mf_go_terms-level-8 \
+    -p ProtcastDataset.bin \
+    -o feature_scan \
+    --seed 42 -v
+```
+
+From any other directory, either `cd` to a folder that contains a
+`config.json` or copy the project `config.json` there first.
+
 ## Running Jobs on TACC for Training and Evaluation
 
 1. SSH into your provisioned Frontera account
@@ -172,40 +259,77 @@ the location of the serialized ProtCastDataset and log files.
 
 ## Profiling and Benchmarking
 
-### Tensorflow Profiling
+### TensorFlow Profiling
 
-1. The necessary libraries *tensorflow*, *tensorrt*, and *tensorboard* should all be installed as part of the pyproject.toml
+The `MultiLabelClassifier` already wires up a TensorBoard callback — it's
+gated by the `use_tensorboard` constructor argument and writes to
+`logs/fit/<timestamp>/` (see
+[protcast/model/multilabel_classifier.py:502-506](protcast/model/multilabel_classifier.py#L502-L506)).
 
-2. Add a tensorboard callback to the model fitting step to profile your TensorFlow model:
+1. The required libraries (`tensorflow`, `tensorrt`, `tensorboard`) are pinned
+   in `pyproject.toml` and are available inside the
+   `tensorflow_2.17.0-gpu.sif` Apptainer container used on Frontera (see
+   above).
 
-   ```python
-   # Profiler callback in binary_classifier.py
-   log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-   tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+2. Enable profiling when calling a script that exposes the flag —
+   currently `make_multilabel_model_embeds.py`:
 
-   self.training_model.fit(
-       train_tfds,
-       epochs=self.epochs,
-       validation_data=val_tfds,
-       callbacks=[tensorboard_callback]
-   )
+   ```bash
+   python3 scripts/make_multilabel_model_embeds.py \
+       -d mf_go_terms-level-8 \
+       -p ProtcastDataset.bin \
+       --use_tensorboard
    ```
 
-3. Load the relevant modules:
+   To profile from the scan/compare scripts, pass
+   `use_tensorboard=True` when instantiating the `MultiLabelClassifier`
+   in those scripts (not yet exposed on the CLI).
 
-   ```shell
-   module load all/TensorFlow/2.15.1-Python-3.10
-   module load all/CUDA
+3. View the run:
+
+   ```bash
+   tensorboard --logdir logs/fit
    ```
 
-4. Run the script that fits your model. For example, to profile the model in
-   `binary_classifier.py` you'd run:
+### Benchmarking Pipeline (`benchmark_pipeline/`)
 
-   ```shell
-   python3 -t test/data/uniprotkb_gpcrs.fasta \
-       -nt test/data/uniprotkb_non-gpcrs.fasta \
-       scripts/binary_classify.py
-   ```
+`benchmark_pipeline/` is a self-contained, post-hoc analysis pipeline
+that consumes per-GO-level TSV result files and produces aggregate
+metrics, figures, and a summary report. It has its own
+`environment.yml` / `requirements.txt` and is independent of the main
+`protcast` package (it doesn't import it).
+
+Use it when you want to compare baseline feature-vector methods across
+GO DAG levels — efficiency frontiers (F1 vs. cost), head-vs-tail
+performance, error correlation between algorithms.
+
+### Quick start
+
+```bash
+cd benchmark_pipeline
+
+# 1. Set up the env (conda) and the data/results dir layout
+make setup
+
+# 2. Drop one TSV per GO level into data/raw/  (e.g. level_3.tsv, level_4.tsv)
+#    Required columns: Algorithm, GO_Term, F1_Score, Sensitivity, Specificity
+#    Optional: Vector_Length, Elapsed_Time, TP/TN/FP/FN
+
+# 3. Preprocess + analyze in one shot
+make all
+
+# Outputs:
+#   results/figures/   efficiency_frontier.png, algorithm_comparison.png, ...
+#   results/reports/   benchmark_summary_report.csv, analysis_summary.txt
+#   results/data/      enhanced_benchmark_data.csv
+```
+
+Pipeline behavior, configurable knobs, and per-script invocation are
+documented in
+[benchmark_pipeline/PIPELINE_README.md](benchmark_pipeline/PIPELINE_README.md)
+and tuned via [benchmark_pipeline/config.yaml](benchmark_pipeline/config.yaml).
+
+## Principles
 
 ### Role in Inference
 
