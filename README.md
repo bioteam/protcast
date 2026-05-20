@@ -32,7 +32,7 @@ left off.
 
 ### Install *protein-feature-vectors*
 
-[protein-feature-vectors](https://github.com/bosborne/protein-feature-vectors) creates the feature vectors.
+[protein-feature-vectors](https://github.com/bioteam/protein-feature-vectors) creates the feature vectors.
 
 ```shell
 git clone git@github.com:bosborne/protein-feature-vectors.git
@@ -40,7 +40,7 @@ cd protein-feature-vectors
 pip3 install .
 ```
 
-### Install `mmseqs`
+### Install *mmseqs*
 
 Binaries can be downloaded at [mmseqs.com](https://dev.mmseqs.com/latest/).
 
