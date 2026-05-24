@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt','**/pyproject.toml') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -38,9 +38,8 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           # create a virtualenv to mimic local workflow
           python -m venv .venv
-          # install pinned requirements into the venv if present
-          if [ -f requirements.txt ]; then .venv/bin/python -m pip install -r requirements.txt; fi
-          # Ensure the protein-feature-vectors repo is available (clone if missing)
+          # TODO: pin protein-feature-vectors to a specific ref so an upstream
+          # breaking change can't silently break CI overnight.
           if [ ! -d protein-feature-vectors ]; then git clone https://github.com/bioteam/protein-feature-vectors.git; fi
           # build and install a wheel of the local dependency into the venv
           if [ -d protein-feature-vectors ]; then mkdir -p wheelhouse; .venv/bin/python -m pip wheel ./protein-feature-vectors -w wheelhouse; .venv/bin/python -m pip install wheelhouse/*; fi
@@ -50,15 +49,13 @@ jobs:
       - name: Run unit & fast tests (skip integration)
         run: |
           # Skip tests marked with @pytest.mark.integration
-          .venv/bin/python -m pytest test/ -v -m "not integration" --maxfail=1
+          .venv/bin/python -m pytest test/ -v -m "not integration"
         env:
           PYTHONWARNINGS: default
 
   integration-tests:
     name: Integration tests (network)
     runs-on: ubuntu-latest
-    # Only run integration tests on main branch pushes or when manually triggered.
-    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     needs: unit-tests
 
     steps:
@@ -68,7 +65,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt','**/pyproject.toml') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -82,7 +79,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
           python -m venv .venv
-          if [ -f requirements.txt ]; then .venv/bin/python -m pip install -r requirements.txt; fi
+          # TODO: pin protein-feature-vectors to a specific ref so an upstream
+          # breaking change can't silently break CI overnight.
           if [ ! -d protein-feature-vectors ]; then git clone https://github.com/bioteam/protein-feature-vectors.git; fi
           if [ -d protein-feature-vectors ]; then mkdir -p wheelhouse; .venv/bin/python -m pip wheel ./protein-feature-vectors -w wheelhouse; .venv/bin/python -m pip install wheelhouse/*; fi
           if [ -f pyproject.toml ] || [ -f setup.py ]; then .venv/bin/python -m pip install '.[dev]'; fi
@@ -98,4 +96,3 @@ jobs:
             -v -m integration --maxfail=1
         env:
           PYTHONWARNINGS: default
-
