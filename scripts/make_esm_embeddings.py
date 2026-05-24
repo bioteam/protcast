@@ -19,6 +19,14 @@ For a protein with length L, the per-residue embeddings would have shape (L, D) 
 When using average pooling to get a whole-protein representation, you get a vector of size (D)
 
 These embeddings are contextual, meaning each amino acid's representation is influenced by its surrounding sequence
+
+Pooling strategies (--pooling):
+
+mean         (default) per-dimension average across residues → vector of size D.
+             Standard practice for ESM-family embeddings.
+mean_max_std concatenation of per-dimension mean, max, and standard deviation
+             across residues → vector of size 3*D. Captures dispersion and
+             extreme-value information that mean pooling discards.
 """
 
 import torch
@@ -62,6 +70,19 @@ def parse_args():
         default="esmc_600m",
         choices=["esm3_c", "esmc_300m", "esmc_600m"],
         help="ESM-C model type to use (esm3_c defaults to esmc_600m)",
+    )
+    parser.add_argument(
+        "--pooling",
+        default="mean",
+        choices=["mean", "mean_max_std"],
+        help=(
+            "Strategy for reducing per-residue ESM-C embeddings to a "
+            "single per-protein vector. 'mean' (default) produces a "
+            "D-dimensional vector; 'mean_max_std' concatenates per-dimension "
+            "mean, max, and standard deviation, producing a 3*D-dimensional "
+            "vector. Use a separate --output_dir for non-default pooling, "
+            "since the output filenames do not encode the strategy."
+        ),
     )
     parser.add_argument(
         "--minimum_seqs",
@@ -197,6 +218,25 @@ def get_proteins_for_go_terms(
     return proteins_by_go
 
 
+def pool_embeddings(sequence_embeddings, strategy):
+    """Reduce per-residue embeddings of shape (L, D) to a single vector.
+
+    strategy:
+      mean         -> (D,) per-dimension mean across residues.
+      mean_max_std -> (3*D,) concatenation of mean, max, and std across
+                       residues. std uses unbiased=False so the result is
+                       defined (zero) for L=1.
+    """
+    if strategy == "mean":
+        return sequence_embeddings.mean(dim=0)
+    if strategy == "mean_max_std":
+        mean = sequence_embeddings.mean(dim=0)
+        max_ = sequence_embeddings.max(dim=0).values
+        std = sequence_embeddings.std(dim=0, unbiased=False)
+        return torch.cat([mean, max_, std], dim=0)
+    raise ValueError(f"Unknown pooling strategy: {strategy}")
+
+
 def load_esm_model(model_name, verbose=False):
     """Load an ESM-C model using the correct ESM 3.2.1 API."""
 
@@ -223,7 +263,7 @@ def load_esm_model(model_name, verbose=False):
         sys.exit(1)
 
 
-def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
+def get_embeddings_for_term(model, sequences_dict, go_id, pooling="mean", verbose=False):
     """
     Process protein sequences using ESM-C API to generate embeddings.
 
@@ -275,16 +315,19 @@ def get_embeddings_for_term(model, sequences_dict, go_id, verbose=False):
                     sequence_tokens=protein_tensor.sequence.unsqueeze(0)
                 )
 
-                # Extract embeddings and mean pool over sequence length
-                # Shape: [batch=1, seq_len, embed_dim] -> [embed_dim]
+                # Extract per-residue embeddings, then reduce to a single
+                # per-protein vector with the chosen pooling strategy.
+                # Shape: [batch=1, seq_len, embed_dim] -> pooled vector.
                 sequence_embeddings = output.embeddings.squeeze(
                     0
                 ).to(  # Remove batch dim
                     dtype=torch.float32
                 )  # Convert from bfloat16 before numpy conversion
                 protein_embedding = (
-                    sequence_embeddings.mean(dim=0).cpu().numpy()
-                )  # Mean pool
+                    pool_embeddings(sequence_embeddings, pooling)
+                    .cpu()
+                    .numpy()
+                )
 
                 embeddings_dict[protein_id] = protein_embedding
 
@@ -382,7 +425,7 @@ def main():
             print(f"Generating embeddings for GO term {go_id}")
         # Get embeddings for all proteins for this GO term
         embeddings = get_embeddings_for_term(
-            model, proteins, go_id, args.verbose
+            model, proteins, go_id, args.pooling, args.verbose
         )
 
         with open(go_path, "wb") as f:
