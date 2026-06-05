@@ -78,10 +78,9 @@ def parse_args():
         help=(
             "Strategy for reducing per-residue ESM-C embeddings to a "
             "single per-protein vector. 'mean' (default) produces a "
-            "D-dimensional vector; 'mean_max_std' concatenates per-dimension "
-            "mean, max, and standard deviation, producing a 3*D-dimensional "
-            "vector. Use a separate --output_dir for non-default pooling, "
-            "since the output filenames do not encode the strategy."
+            "vector of length D; 'mean_max_std' concatenates per-dimension "
+            "mean, max, and standard deviation, producing a 1-D vector of "
+            "length 3*D. Use a separate --output_dir for non-default pooling"
         ),
     )
     parser.add_argument(
