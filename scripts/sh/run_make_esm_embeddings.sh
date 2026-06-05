@@ -7,11 +7,14 @@
 #SBATCH -N 2
 #SBATCH -n 32
 
-MODEL_TYPE=esmc_600m
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
-WORK_DIR=${WORK}/ProtCast/ProtCastDataset/11-03-2025/
+WORK_DIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026/
 DATASET=${WORK_DIR}/ProtCastDataset.bin
-GO_FILE=${WORK_DIR}/mf_go_terms-level-4.tsv
+MIN_SEQ=200
+
+# Directory for Hugging Face
+mkdir -p ${WORK}/HF
+export HF_HOME=${WORK}/HF
 
 source ${HOME}/.bash_profile
 # Only use modules from the container
@@ -20,10 +23,14 @@ module load tacc-apptainer
 
 cd ${HOME}/git/ProtCast/
 
-singularity exec --nv $CONTAINER \
-python3 scripts/make_esm_embeddings.py \
--v \
--p $DATASET \
--g $GO_FILE \
--o $WORK \
---model_type $MODEL_TYPE
+for NUM in {0..10}
+do
+	singularity exec --nv $CONTAINER \
+	python3 scripts/make_esm_embeddings.py \
+	-v \
+        --minimum_seqs $MIN_SEQ \
+	-p $DATASET \
+	-g $WORK_DIR/mf_go_terms-level-${NUM}.tsv \
+	-o $WORK_DIR/mf_go_terms-level-${NUM}-mean_max_std \
+        --pooling mean_max_std
+done
