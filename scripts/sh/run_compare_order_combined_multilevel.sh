@@ -23,7 +23,7 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-LEVELS=${LEVELS:-"5 6 7 8"}
+LEVELS=${LEVELS:-"4 5 6 7 8"}
 SEED=${SEED:-42}
 # Order-violation loss variant: "soft" (default, softplus) or "hard" (ReLU).
 VARIANT=${VARIANT:-soft}

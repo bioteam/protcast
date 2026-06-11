@@ -1,8 +1,13 @@
 #!/bin/bash
 # Submit one SLURM job per seed for the two-way order feature comparison
-# (Order NN on ESM vs Order NN on ESM+PseKRAAC). Each job iterates levels 5-8
+# (Order NN on ESM vs Order NN on ESM+PseKRAAC). Each job iterates levels 4-8
 # in series inside a single allocation. Default: 3 SLURM jobs, well under the
-# rtx 8-per-user submit cap, covering 12 (level, seed) pairs.
+# rtx 8-per-user submit cap, covering 15 (level, seed) pairs.
+#
+# Level 4 is included as the broad/common-term control: ESM alone is already
+# strong there, so PseKRAAC helping at level 4 is a different (and weaker)
+# signal than it helping on the sparse deep terms at level 8. The depth and
+# frequency breakdowns in the Python script surface that contrast directly.
 #
 # Why not one job per (level, seed): that's 12 jobs and hits the cap.
 # Why not one job for everything: serialising all 12 in one allocation
@@ -26,7 +31,7 @@
 
 set -euo pipefail
 
-LEVELS="5 6 7 8"
+LEVELS="4 5 6 7 8"
 SEEDS=(42 43 44)
 VARIANT=${VARIANT:-soft}
 FEATURES=${FEATURES:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
