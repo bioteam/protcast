@@ -54,6 +54,7 @@ mf_go_terms-level-*/
 feature_scan/
 knn_vs_multilabel/
 knn_esm_vs_combined/
+results_local/
 
 # Benchmark pipeline outputs
 benchmark_pipeline/data/raw/
