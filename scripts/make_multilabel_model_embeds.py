@@ -58,7 +58,7 @@ parser.add_argument(
     "--obo_file",
     type=str,
     default=None,
-    help="Path to GO OBO file (required when USE_BOX_EMBEDDINGS is True)",
+    help="Path to GO OBO file (required when USE_ORDER_EMBEDDINGS is True)",
 )
 args = parser.parse_args()
 
@@ -128,11 +128,11 @@ if args.verbose:
 
 name = basename(args.input_dir)
 
-# Load GO DAG if box embeddings are enabled
+# Load GO DAG if order embeddings are enabled
 go_dag = None
-if config.get("USE_BOX_EMBEDDINGS", False):
+if config.get("USE_ORDER_EMBEDDINGS", False):
     if args.obo_file is None:
-        print("Error: --obo_file is required when USE_BOX_EMBEDDINGS is True")
+        print("Error: --obo_file is required when USE_ORDER_EMBEDDINGS is True")
         sys.exit(1)
     from protcast.preprocessing.annotated_godag import AnnotatedGODag
 

@@ -13,19 +13,19 @@ from protcast.model.stats.utils import calculate_fmax
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
-# Optional box embedding imports — only needed when USE_BOX_EMBEDDINGS is True
+# Optional order embedding imports — only needed when USE_ORDER_EMBEDDINGS is True
 try:
-    from protcast.model.box_embeddings import (
-        BoxEmbeddingLayer,
-        build_box_embedding_model,
-        containment_loss,
-        containment_loss_smoothed,
+    from protcast.model.order_embeddings import (
+        OrderEmbeddingLayer,
+        build_order_embedding_model,
+        order_violation_loss,
+        order_violation_loss_soft,
     )
     from protcast.preprocessing.go_dag_edges import extract_dag_edges
 
-    _BOX_AVAILABLE = True
+    _ORDER_AVAILABLE = True
 except ImportError:
-    _BOX_AVAILABLE = False
+    _ORDER_AVAILABLE = False
 
 
 class FmaxEarlyStopping(keras.callbacks.Callback):
@@ -157,8 +157,8 @@ class MultiLabelClassifier:
         use_tensorboard : bool
             Whether to log to TensorBoard.
         go_dag : AnnotatedGODag or None
-            GO DAG for box embedding containment loss. Required when
-            USE_BOX_EMBEDDINGS is True. Ignored for flat model.
+            GO DAG for the order-embedding violation loss. Required when
+            USE_ORDER_EMBEDDINGS is True. Ignored for flat model.
         random_state : int
             Random seed for train/test split. Default 42.
         """
@@ -210,7 +210,7 @@ class MultiLabelClassifier:
         # If a parent run is already active (e.g. a comparison wrapper),
         # this run is created as nested so the UI groups them together.
         if self.use_mlflow and self._mlflow is not None:
-            variant = "box" if getattr(self, "use_box_embeddings", False) else "flat"
+            variant = "order" if getattr(self, "use_order_embeddings", False) else "flat"
             run_name = f"multilabel_{variant}_{self.id}"
             parent_active = self._mlflow.active_run() is not None
             self._mlflow.start_run(run_name=run_name, nested=parent_active)
@@ -295,16 +295,17 @@ class MultiLabelClassifier:
     def build_model(self) -> None:
         """Build the multi-label neural network.
 
-        Two modes controlled by the USE_BOX_EMBEDDINGS config key:
+        Two modes controlled by the USE_ORDER_EMBEDDINGS config key:
 
         **Flat mode** (default):
             Input → [Dense+Dropout]* → Dense(sigmoid) → scores
             Standard multi-label with weighted binary crossentropy.
 
-        **Box mode** (USE_BOX_EMBEDDINGS=True):
-            Input → [Dense+Dropout]* → Dense(box_dim) → BoxEmbeddingLayer → scores
-            Adds containment regularization loss to enforce GO DAG hierarchy.
-            Requires a go_dag to be provided at init time.
+        **Order mode** (USE_ORDER_EMBEDDINGS=True):
+            Input → [Dense+Dropout]* → Dense(order_dim) → OrderEmbeddingLayer → scores
+            Adds an order-violation loss over GO DAG edges so that child terms
+            dominate (are more specific than) their parents in the product
+            order. Requires a go_dag to be provided at init time.
 
         Architecture is configurable via HIDDEN_LAYERS (list of ints).
         """
@@ -314,14 +315,14 @@ class MultiLabelClassifier:
         num_classes = len(self.go_ids)
         hidden_layers = getattr(self, "hidden_layers", [128, 64])
         dropout_rate = self.dropout  # type: ignore
-        use_boxes = getattr(self, "use_box_embeddings", False)
+        use_order = getattr(self, "use_order_embeddings", False)
 
         class_weights_tensor = tf.constant(
             self.class_weights, dtype=tf.float32
         )
 
-        if use_boxes:
-            self._build_box_model(
+        if use_order:
+            self._build_order_model(
                 input_dim, num_classes, hidden_layers, dropout_rate,
                 class_weights_tensor, tf,
             )
@@ -332,14 +333,14 @@ class MultiLabelClassifier:
             )
 
         if self.verbose:
-            mode = "box" if use_boxes else "flat"
+            mode = "order" if use_order else "flat"
             print(f"Model mode: {mode}")
             print(f"Hidden layers: {hidden_layers}")
             print(f"Dropout: {dropout_rate}")
             print(f"Model parameters: {self.model.count_params():,}")
-            if use_boxes:
-                box_dim = getattr(self, "box_dim", 32)
-                print(f"Box dim: {box_dim}")
+            if use_order:
+                order_dim = getattr(self, "order_dim", 32)
+                print(f"Order dim: {order_dim}")
                 print(f"DAG edges: {len(self._dag_edges)}")
 
     def _build_flat_model(
@@ -370,40 +371,40 @@ class MultiLabelClassifier:
         )
 
         self.model = model
-        self._box_layer = None
+        self._order_layer = None
         self._dag_edges = np.zeros((0, 2), dtype=np.int32)
 
-    def _build_box_model(
+    def _build_order_model(
         self, input_dim, num_classes, hidden_layers, dropout_rate,
         class_weights_tensor, tf,
     ):
-        """Build the box embedding model with containment loss."""
-        if not _BOX_AVAILABLE:
+        """Build the order embedding model with an order-violation loss."""
+        if not _ORDER_AVAILABLE:
             raise ImportError(
-                "Box embedding modules not found. Ensure "
-                "protcast.model.box_embeddings and "
+                "Order embedding modules not found. Ensure "
+                "protcast.model.order_embeddings and "
                 "protcast.preprocessing.go_dag_edges are importable."
             )
 
-        box_dim = getattr(self, "box_dim", 32)
-        temperature = getattr(self, "box_temperature", 10.0)
-        containment_weight = getattr(self, "containment_weight", 0.1)
-        # BOX_VARIANT: "hard" (ReLU violation) or "smoothed" (softplus violation)
-        box_variant = str(getattr(self, "box_variant", "hard")).lower()
-        smoothed_beta = float(getattr(self, "smoothed_box_beta", 5.0))
+        order_dim = getattr(self, "order_dim", 32)
+        temperature = getattr(self, "order_temperature", 10.0)
+        order_weight = getattr(self, "order_weight", 0.1)
+        # ORDER_VARIANT: "soft" (softplus violation, default) or "hard" (ReLU)
+        order_variant = str(getattr(self, "order_variant", "soft")).lower()
+        soft_beta = float(getattr(self, "order_beta", 5.0))
 
-        model, box_layer = build_box_embedding_model(
+        model, order_layer = build_order_embedding_model(
             input_dim=input_dim,
             num_classes=num_classes,
             hidden_layers=hidden_layers,
             dropout_rate=dropout_rate,
-            box_dim=box_dim,
+            order_dim=order_dim,
             temperature=temperature,
         )
 
-        self._box_layer = box_layer
+        self._order_layer = order_layer
 
-        # Extract DAG edges for containment loss
+        # Extract DAG edges for the order-violation loss
         if self.go_dag is not None:
             self._dag_edges = extract_dag_edges(
                 self.go_dag, self.go_ids, self.go_encoder
@@ -412,23 +413,23 @@ class MultiLabelClassifier:
             self._dag_edges = np.zeros((0, 2), dtype=np.int32)
 
         dag_edges_tensor = tf.constant(self._dag_edges, dtype=tf.int32)
-        cw = tf.constant(containment_weight, dtype=tf.float32)
+        ow = tf.constant(order_weight, dtype=tf.float32)
 
-        # Pick the containment loss variant once, outside the per-batch closure
-        if box_variant == "smoothed":
-            def _c_loss():
-                return containment_loss_smoothed(
-                    box_layer, dag_edges_tensor, beta=smoothed_beta
+        # Pick the order-violation loss variant once, outside the per-batch closure
+        if order_variant == "soft":
+            def _o_loss():
+                return order_violation_loss_soft(
+                    order_layer, dag_edges_tensor, beta=soft_beta
                 )
-        elif box_variant == "hard":
-            def _c_loss():
-                return containment_loss(box_layer, dag_edges_tensor)
+        elif order_variant == "hard":
+            def _o_loss():
+                return order_violation_loss(order_layer, dag_edges_tensor)
         else:
             raise ValueError(
-                f"Unknown BOX_VARIANT '{box_variant}'. Use 'hard' or 'smoothed'."
+                f"Unknown ORDER_VARIANT '{order_variant}'. Use 'soft' or 'hard'."
             )
 
-        def box_combined_loss(y_true, y_pred):
+        def order_combined_loss(y_true, y_pred):
             # Weighted BCE (same as flat model)
             per_class_bce = -(
                 y_true * tf.math.log(y_pred + 1e-7)
@@ -438,22 +439,22 @@ class MultiLabelClassifier:
                 per_class_bce * class_weights_tensor, axis=-1
             )
 
-            # Containment regularization (variant-dependent)
-            return weighted_bce + cw * _c_loss()
+            # Order-violation regularization (variant-dependent)
+            return weighted_bce + ow * _o_loss()
 
         model.compile(
             optimizer=self.optimizer,  # type: ignore
-            loss=box_combined_loss,
+            loss=order_combined_loss,
             metrics=["accuracy"],
         )
 
         self.model = model
 
         if self.verbose and len(self._dag_edges) > 0:
-            extra = f", beta={smoothed_beta}" if box_variant == "smoothed" else ""
+            extra = f", beta={soft_beta}" if order_variant == "soft" else ""
             print(
-                f"Containment loss ({box_variant}): {len(self._dag_edges)} DAG edges, "
-                f"weight={containment_weight}{extra}"
+                f"Order-violation loss ({order_variant}): {len(self._dag_edges)} DAG edges, "
+                f"weight={order_weight}{extra}"
             )
 
     def train_model(self) -> History:
@@ -672,7 +673,7 @@ class MultiLabelClassifier:
 
         # Log parameters
         print("  > Logging parameters...", end="", flush=True)
-        variant = "box" if getattr(self, "use_box_embeddings", False) else "flat"
+        variant = "order" if getattr(self, "use_order_embeddings", False) else "flat"
         model_type = f"multi_label_{variant}"
         mlflow.log_params(self.params)
         mlflow.log_param("model_type", model_type)

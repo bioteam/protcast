@@ -5,8 +5,9 @@ pre-computed ESM-C embeddings:
 
   1. KNN          – nearest-neighbour voting over raw ESM-C embedding space
   2. Flat NN      – multi-label sigmoid neural network trained on ESM-C embeddings
-  3. Box NN       – same network with BoxEmbeddingLayer + GO-DAG containment
-                    loss, enforcing ontological hierarchy (--box flag required)
+  3. Order NN     – same network with OrderEmbeddingLayer + GO-DAG order-violation
+                    loss, enforcing ontological hierarchy via the product order
+                    (--order flag required)
 
 Primary question: does the extra computational cost of the neural approaches
 yield a meaningful Fmax gain over simple KNN retrieval—especially on specific
@@ -25,7 +26,7 @@ Saved to the output directory (-o/--output_dir, default: knn_vs_multilabel):
     - {name}_knn_vs_multilabel_results.json   All results (updated after each model)
     - KNN model:   {name}_knn_comparison_knn.joblib
     - Flat NN:     {name}_multilabel_flat_comparison_multilabel.keras
-    - Box NN:      {name}_multilabel_box_comparison_multilabel.keras  (--box only)
+    - Order NN:    {name}_multilabel_order_comparison_multilabel.keras  (--order only)
     - GOEncoder files for each neural model
 
     If the results JSON already exists with all requested models completed, the
@@ -44,7 +45,7 @@ python3 scripts/compare_knn_vs_multilabel.py \\
 python3 scripts/compare_knn_vs_multilabel.py \\
     -d mf_go_terms-level-8 \\
     -p ProtcastDataset.bin \\
-    --box \\
+    --order \\
     --use_mlflow \\
     --seed 42 \\
     -v
@@ -171,29 +172,29 @@ def train_knn(
 
 def train_multilabel(
     protein_embeddings, protein_go_terms, go_ids,
-    config, name, seed, go_dag, use_box, use_mlflow, verbose=False,
-    box_variant="hard",
+    config, name, seed, go_dag, use_order, use_mlflow, verbose=False,
+    order_variant="soft",
 ):
-    """Fit MultiLabelClassifier (flat or box) and return a serialisable result dict.
+    """Fit MultiLabelClassifier (flat or order) and return a serialisable result dict.
 
     Parameters
     ----------
-    use_box : bool
-        When True, overrides USE_BOX_EMBEDDINGS in config so a copy of config
+    use_order : bool
+        When True, overrides USE_ORDER_EMBEDDINGS in config so a copy of config
         is used for this run—config.json on disk is never modified.
-    box_variant : str
-        "hard" (default) or "smoothed".  Only used when use_box=True.  Controls
-        the containment loss formulation; see protcast.model.box_embeddings.
+    order_variant : str
+        "soft" (default) or "hard".  Only used when use_order=True.  Controls
+        the order-violation loss formulation; see protcast.model.order_embeddings.
     """
-    if use_box:
-        label = f"box_{box_variant}"
+    if use_order:
+        label = f"order_{order_variant}"
     else:
         label = "flat"
 
     # Work from a config copy so flags don't persist between runs.
     run_config = dict(config)
-    run_config["USE_BOX_EMBEDDINGS"] = use_box
-    run_config["BOX_VARIANT"] = box_variant if use_box else "hard"
+    run_config["USE_ORDER_EMBEDDINGS"] = use_order
+    run_config["ORDER_VARIANT"] = order_variant if use_order else "soft"
 
     classifier = MultiLabelClassifier(
         verbose=verbose,
@@ -261,18 +262,18 @@ def _delta_str(model_fmax, knn_fmax):
 
 def print_results(results):
     """Print three-section comparison: overall, depth breakdown, frequency breakdown."""
-    # Derive has_box from actual data, not the run_box flag — the flag can be
-    # stale if --box was added on a resume run of a previously flag-less run.
-    has_box = results.get("multilabel_box", {}).get("status") == "ok"
+    # Derive has_order from actual data, not the run_order flag — the flag can
+    # be stale if --order was added on a resume of a previously flag-less run.
+    has_order = results.get("multilabel_order", {}).get("status") == "ok"
 
     knn  = results.get("knn", {})
     flat = results.get("multilabel_flat", {})
-    box  = results.get("multilabel_box", {}) if has_box else {}
+    order = results.get("multilabel_order", {}) if has_order else {}
 
     knn_fmax = knn.get("fmax")
 
-    sep = "=" * (104 if has_box else 88)
-    thin = "-" * (104 if has_box else 88)
+    sep = "=" * (104 if has_order else 88)
+    thin = "-" * (104 if has_order else 88)
 
     # ── Header ────────────────────────────────────────────────────────────────
     print("\n" + sep)
@@ -282,14 +283,14 @@ def print_results(results):
         f"Level : {results.get('level', '?')}   "
         f"Seed  : {results['seed']}   "
         f"ESM dim : {results['esm_dim']}   "
-        f"Box embeddings : {'yes' if has_box else 'no'}"
+        f"Order embeddings : {'yes' if has_order else 'no'}"
     )
 
     # ── Section 1: Overall ────────────────────────────────────────────────────
     print()
     print("── OVERALL METRICS ──")
-    if has_box:
-        hdr = f"{'Model':<22} {'Fmax':>8} {'Thr':>6} {'Smin':>8} {'Epochs':>7} {'Time':>8}   {'Flat-KNN':>9}  {'Box-KNN':>9}"
+    if has_order:
+        hdr = f"{'Model':<22} {'Fmax':>8} {'Thr':>6} {'Smin':>8} {'Epochs':>7} {'Time':>8}   {'Flat-KNN':>9}  {'Order-KNN':>9}"
     else:
         hdr = f"{'Model':<22} {'Fmax':>8} {'Thr':>6} {'Smin':>8} {'Epochs':>7} {'Time':>8}   {'Flat-KNN':>9}"
     print(hdr)
@@ -305,13 +306,13 @@ def print_results(results):
 
         if is_knn:
             deltas = f"{'---':>9}"
-            if has_box:
+            if has_order:
                 deltas += f"  {'---':>9}"
         else:
             deltas = _delta_str(r.get("fmax"), knn_fmax)
-            if has_box:
-                # second delta only makes sense for box row
-                if r is box:
+            if has_order:
+                # second delta only makes sense for the order row
+                if r is order:
                     deltas = f"{'---':>9}  " + _delta_str(r.get("fmax"), knn_fmax)
                 else:
                     deltas += f"  {'---':>9}"
@@ -322,22 +323,22 @@ def print_results(results):
         _overall_row("KNN", knn, is_knn=True)
     if flat:
         _overall_row("MultiLabel flat", flat)
-    if box:
-        _overall_row("MultiLabel + box", box)
+    if order:
+        _overall_row("MultiLabel + order", order)
 
     # ── Section 2: Depth breakdown ────────────────────────────────────────────
     print()
     print("── DEPTH BREAKDOWN  (higher depth = more specific GO terms) ──")
 
     all_depths = set()
-    for r in [knn, flat, box]:
+    for r in [knn, flat, order]:
         if r:
             all_depths.update(int(d) for d in r.get("depth_metrics", {}))
 
     if all_depths:
-        if has_box:
+        if has_order:
             hdr = (f"{'Depth':>5}  {'N terms':>7}  {'Avg ann':>8}  "
-                   f"{'KNN':>8}  {'Flat':>8}  {'Box':>8}  {'Flat-KNN':>9}  {'Box-KNN':>9}")
+                   f"{'KNN':>8}  {'Flat':>8}  {'Order':>8}  {'Flat-KNN':>9}  {'Order-KNN':>9}")
         else:
             hdr = (f"{'Depth':>5}  {'N terms':>7}  {'Avg ann':>8}  "
                    f"{'KNN':>8}  {'Flat':>8}  {'Flat-KNN':>9}")
@@ -348,15 +349,15 @@ def print_results(results):
             ds = str(depth)
             knn_d  = knn.get("depth_metrics", {}).get(ds, {})
             flat_d = flat.get("depth_metrics", {}).get(ds, {})
-            box_d  = box.get("depth_metrics", {}).get(ds, {}) if has_box else {}
+            order_d = order.get("depth_metrics", {}).get(ds, {}) if has_order else {}
 
-            meta    = knn_d or flat_d or box_d
+            meta    = knn_d or flat_d or order_d
             n_terms = meta.get("n_terms", "?")
             avg_ann = _nan_safe(meta.get("avg_train_count"), ".1f")
 
             knn_f  = knn_d.get("fmax")
             flat_f = flat_d.get("fmax")
-            box_f  = box_d.get("fmax") if has_box else None
+            order_f = order_d.get("fmax") if has_order else None
 
             try:
                 flat_knn = f"{float(flat_f) - float(knn_f):>+9.4f}"
@@ -365,12 +366,12 @@ def print_results(results):
 
             row = (f"{depth:>5}  {n_terms:>7}  {avg_ann:>8}  "
                    f"{_nan_safe(knn_f):>8}  {_nan_safe(flat_f):>8}")
-            if has_box:
+            if has_order:
                 try:
-                    box_knn = f"{float(box_f) - float(knn_f):>+9.4f}"
+                    order_knn = f"{float(order_f) - float(knn_f):>+9.4f}"
                 except (TypeError, ValueError):
-                    box_knn = f"{'---':>9}"
-                row += f"  {_nan_safe(box_f):>8}  {flat_knn}  {box_knn}"
+                    order_knn = f"{'---':>9}"
+                row += f"  {_nan_safe(order_f):>8}  {flat_knn}  {order_knn}"
             else:
                 row += f"  {flat_knn}"
             print(row)
@@ -387,11 +388,11 @@ def print_results(results):
         ("common_gt500",   "Common (>500)   "),
     ]
 
-    any_freq = any(r.get("frequency_metrics") for r in [knn, flat, box] if r)
+    any_freq = any(r.get("frequency_metrics") for r in [knn, flat, order] if r)
     if any_freq:
-        if has_box:
+        if has_order:
             hdr = (f"{'Bucket':<18}  {'N terms':>7}  {'Avg ann':>8}  "
-                   f"{'KNN':>8}  {'Flat':>8}  {'Box':>8}  {'Flat-KNN':>9}  {'Box-KNN':>9}")
+                   f"{'KNN':>8}  {'Flat':>8}  {'Order':>8}  {'Flat-KNN':>9}  {'Order-KNN':>9}")
         else:
             hdr = (f"{'Bucket':<18}  {'N terms':>7}  {'Avg ann':>8}  "
                    f"{'KNN':>8}  {'Flat':>8}  {'Flat-KNN':>9}")
@@ -401,9 +402,9 @@ def print_results(results):
         for bucket, label in bucket_labels:
             knn_b  = knn.get("frequency_metrics", {}).get(bucket, {})
             flat_b = flat.get("frequency_metrics", {}).get(bucket, {})
-            box_b  = box.get("frequency_metrics", {}).get(bucket, {}) if has_box else {}
+            order_b = order.get("frequency_metrics", {}).get(bucket, {}) if has_order else {}
 
-            meta = knn_b or flat_b or box_b
+            meta = knn_b or flat_b or order_b
             if not meta:
                 continue
 
@@ -412,7 +413,7 @@ def print_results(results):
 
             knn_f  = knn_b.get("fmax")
             flat_f = flat_b.get("fmax")
-            box_f  = box_b.get("fmax") if has_box else None
+            order_f = order_b.get("fmax") if has_order else None
 
             try:
                 flat_knn = f"{float(flat_f) - float(knn_f):>+9.4f}"
@@ -421,12 +422,12 @@ def print_results(results):
 
             row = (f"{label:<18}  {n_terms:>7}  {avg_ann:>8}  "
                    f"{_nan_safe(knn_f):>8}  {_nan_safe(flat_f):>8}")
-            if has_box:
+            if has_order:
                 try:
-                    box_knn = f"{float(box_f) - float(knn_f):>+9.4f}"
+                    order_knn = f"{float(order_f) - float(knn_f):>+9.4f}"
                 except (TypeError, ValueError):
-                    box_knn = f"{'---':>9}"
-                row += f"  {_nan_safe(box_f):>8}  {flat_knn}  {box_knn}"
+                    order_knn = f"{'---':>9}"
+                row += f"  {_nan_safe(order_f):>8}  {flat_knn}  {order_knn}"
             else:
                 row += f"  {flat_knn}"
             print(row)
@@ -445,7 +446,7 @@ def print_results(results):
 def main():
     parser = argparse.ArgumentParser(
         description=(
-            "Compare KNN vs MultiLabel flat vs MultiLabel+box on ESM-C embeddings "
+            "Compare KNN vs MultiLabel flat vs MultiLabel+order on ESM-C embeddings "
             "using CAFA Fmax/Smin with depth and frequency breakdowns."
         )
     )
@@ -466,16 +467,16 @@ def main():
         help="Directory for all output files (default: knn_vs_multilabel)",
     )
     parser.add_argument(
-        "--box", action="store_true",
-        help="Also train MultiLabelClassifier with BoxEmbeddingLayer (3-way comparison)",
+        "--order", action="store_true",
+        help="Also train MultiLabelClassifier with OrderEmbeddingLayer (3-way comparison)",
     )
     parser.add_argument(
-        "--box-variant", choices=["hard", "smoothed"], default="hard",
+        "--order-variant", choices=["soft", "hard"], default="soft",
         help=(
-            "Containment loss variant for the box model. 'hard' (default) "
-            "uses ReLU violations; 'smoothed' uses softplus and provides "
-            "non-zero gradients even when the child is already inside the "
-            "parent (Li et al. 2019). Ignored unless --box is set."
+            "Order-violation loss variant for the order model. 'soft' (default) "
+            "uses softplus violations and provides non-zero gradients even when "
+            "the child already dominates the parent (Lai & Hockenmaier 2017); "
+            "'hard' uses ReLU violations. Ignored unless --order is set."
         ),
     )
     parser.add_argument(
@@ -520,8 +521,8 @@ def main():
             results = json.load(f)
 
     expected = {"knn", "multilabel_flat"}
-    if args.box:
-        expected.add("multilabel_box")
+    if args.order:
+        expected.add("multilabel_order")
 
     if results is not None:
         done = {k for k in expected if results.get(k, {}).get("status") == "ok"}
@@ -536,7 +537,7 @@ def main():
             "seed":    args.seed,
             "level":   level,
             "esm_dim": None,
-            "run_box": args.box,
+            "run_order": args.order,
         }
 
     # ── Validate inputs ────────────────────────────────────────────────────
@@ -602,7 +603,7 @@ def main():
             parent_mlflow.set_tag("comparison_type", "knn_vs_multilabel")
             parent_mlflow.set_tag("level", str(level))
             parent_mlflow.log_param("seed", args.seed)
-            parent_mlflow.log_param("box_enabled", args.box)
+            parent_mlflow.log_param("order_enabled", args.order)
             parent_mlflow.log_param("esm_dim", results["esm_dim"])
         except Exception as e:
             print(f"Warning: could not start parent MLflow run: {e}")
@@ -640,7 +641,7 @@ def main():
             results["multilabel_flat"] = train_multilabel(
                 protein_embeddings, protein_go_terms, go_ids,
                 config, name, args.seed, go_dag,
-                use_box=False, use_mlflow=args.use_mlflow, verbose=args.verbose,
+                use_order=False, use_mlflow=args.use_mlflow, verbose=args.verbose,
             )
             r = results["multilabel_flat"]
             print(
@@ -657,30 +658,30 @@ def main():
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
 
-    # ── Model 3: MultiLabel + box (optional) ──────────────────────────────
-    if args.box and results.get("multilabel_box", {}).get("status") != "ok":
+    # ── Model 3: MultiLabel + order (optional) ────────────────────────────
+    if args.order and results.get("multilabel_order", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print(f"MODEL 3 / 3: MULTILABEL + BOX EMBEDDINGS ({args.box_variant})")
+        print(f"MODEL 3 / 3: MULTILABEL + ORDER EMBEDDINGS ({args.order_variant})")
         print("=" * 60)
         try:
-            box_result = train_multilabel(
+            order_result = train_multilabel(
                 protein_embeddings, protein_go_terms, go_ids,
                 config, name, args.seed, go_dag,
-                use_box=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
-                box_variant=args.box_variant,
+                use_order=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
+                order_variant=args.order_variant,
             )
-            box_result["box_variant"] = args.box_variant
-            results["multilabel_box"] = box_result
-            r = results["multilabel_box"]
+            order_result["order_variant"] = args.order_variant
+            results["multilabel_order"] = order_result
+            r = results["multilabel_order"]
             print(
-                f"Box NN ({args.box_variant}) — Fmax: {r['fmax']:.4f}  "
+                f"Order NN ({args.order_variant}) — Fmax: {r['fmax']:.4f}  "
                 f"Smin: {r['smin']:.4f}  "
                 f"Epochs: {r['epochs']}  "
                 f"Time: {r['training_time']:.1f}s"
             )
         except Exception as e:
-            print(f"FAILED: MultiLabel box ({args.box_variant}) — {e}")
-            results["multilabel_box"] = {"status": f"error: {e}", "box_variant": args.box_variant}
+            print(f"FAILED: MultiLabel order ({args.order_variant}) — {e}")
+            results["multilabel_order"] = {"status": f"error: {e}", "order_variant": args.order_variant}
 
         results["elapsed"] = round(time.time() - start)
         with open(results_file, "w") as f:
@@ -694,7 +695,7 @@ def main():
     # Close the parent MLflow run after all child runs have finished.
     if parent_mlflow is not None:
         try:
-            for key in ("knn", "multilabel_flat", "multilabel_box"):
+            for key in ("knn", "multilabel_flat", "multilabel_order"):
                 r = results.get(key, {})
                 if r.get("status") == "ok":
                     parent_mlflow.log_metric(f"{key}_fmax", r["fmax"])

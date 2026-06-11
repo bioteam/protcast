@@ -9,7 +9,7 @@
 #SBATCH -n 1
 #SBATCH -t 02:00:00
 
-# Three-way comparison: KNN vs MultiLabel flat vs MultiLabel+box on ESM-C
+# Three-way comparison: KNN vs MultiLabel flat vs MultiLabel+order on ESM-C
 # embeddings.  Adjust LEVEL to run different GO depths.  For levels deeper
 # than 4, switch -p to rtx and increase -t (budget ~1hr per 50K proteins).
 
@@ -36,6 +36,6 @@ python3 scripts/compare_knn_vs_multilabel.py \
 -d $DATADIR/$EMBEDDIR-${LEVEL} \
 -o $OUTDIR \
 --seed $SEED \
---box \
+--order \
 --use_mlflow \
 2>&1 | tee knn_vs_multilabel_level_${LEVEL}.log

@@ -202,7 +202,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--obo", type=str, default=None,
-        help="Path to GO OBO file (required for box embeddings mode)"
+        help="Path to GO OBO file (required for order embeddings mode)"
     )
     args = parser.parse_args()
 
@@ -294,10 +294,12 @@ if __name__ == "__main__":
         "DROPOUT": 0.5,
         "VALIDATION_SPLIT": 0.2,
         "PATIENCE": 10,
-        "USE_BOX_EMBEDDINGS": False,
-        "BOX_DIM": 32,
-        "BOX_TEMPERATURE": 10.0,
-        "CONTAINMENT_WEIGHT": 0.1,
+        "USE_ORDER_EMBEDDINGS": False,
+        "ORDER_DIM": 32,
+        "ORDER_TEMPERATURE": 10.0,
+        "ORDER_WEIGHT": 0.1,
+        "ORDER_VARIANT": "soft",
+        "ORDER_BETA": 5.0,
     }
 
     if args.config_path is not None:
@@ -329,12 +331,12 @@ if __name__ == "__main__":
     print("STEP 3: Training MultiLabelClassifier")
     print("=" * 60)
 
-    # Load GO DAG if box embeddings are enabled and --obo is provided
+    # Load GO DAG if order embeddings are enabled and --obo is provided
     go_dag = None
-    use_boxes = config.get("USE_BOX_EMBEDDINGS", False)
-    if use_boxes:
+    use_order = config.get("USE_ORDER_EMBEDDINGS", False)
+    if use_order:
         if args.obo is None:
-            print("Error: --obo is required when USE_BOX_EMBEDDINGS is True")
+            print("Error: --obo is required when USE_ORDER_EMBEDDINGS is True")
             sys.exit(1)
         from protcast.preprocessing.annotated_godag import AnnotatedGODag
         print(f"Loading GO DAG from {args.obo}...")
