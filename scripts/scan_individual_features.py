@@ -50,7 +50,6 @@ import gc
 import numpy as np
 import pandas as pd
 from collections import defaultdict
-from sklearn.preprocessing import StandardScaler
 from protein_feature_vectors import Calculator
 
 from protcast.model.multilabel_classifier import MultiLabelClassifier
@@ -166,8 +165,10 @@ def build_combined_embeddings(protein_embeddings, dataset, algo_spec, verbose=Fa
     """Compute ESM + feature algorithm(s) combined vectors.
 
     Supports single algorithms ("CTriad") and combinations
-    ("PseKRAAC_type_3B+PseKRAAC_type_8"). Each algorithm's feature vectors
-    are normalized independently with StandardScaler before concatenation.
+    ("PseKRAAC_type_3B+PseKRAAC_type_8"). The raw ESM and feature-vector
+    blocks are concatenated here; standardization is done later inside
+    MultiLabelClassifier (scale_features=True), fit on the training fold
+    only so it matches the ESM-only baseline and avoids validation leakage.
 
     Parameters
     ----------
@@ -228,32 +229,27 @@ def build_combined_embeddings(protein_embeddings, dataset, algo_spec, verbose=Fa
     if skipped > 0 and verbose:
         print(f"  Skipped {skipped} proteins missing from encodings")
 
-    # Build ESM array
+    # Build ESM array (raw; scaling happens in the classifier on the
+    # training fold only)
     emb_array = np.vstack(
         [protein_embeddings[pid].astype(np.float32) for pid in final_pids]
     )
     embedding_dim = emb_array.shape[1]
 
-    # Normalize ESM
-    emb_scaler = StandardScaler()
-    emb_scaled = emb_scaler.fit_transform(emb_array)
-
-    # Build and normalize each FV block independently, then concatenate
+    # Build each FV block, clean non-finite values, then concatenate raw
     fv_blocks = []
     fv_dim = 0
     for algo, enc in all_encodings:
         fv_array = enc.loc[final_pids].values.astype(np.float32)
+        fv_array = np.nan_to_num(fv_array, nan=0.0, posinf=0.0, neginf=0.0)
         block_dim = fv_array.shape[1]
         fv_dim += block_dim
-        fv_scaler = StandardScaler()
-        fv_scaled = fv_scaler.fit_transform(fv_array)
-        fv_scaled = np.nan_to_num(fv_scaled, nan=0.0, posinf=0.0, neginf=0.0)
-        fv_blocks.append(fv_scaled)
+        fv_blocks.append(fv_array)
         if verbose:
             print(f"    {algo}: {block_dim} features")
 
-    # Concatenate ESM + all FV blocks
-    combined = np.hstack([emb_scaled] + fv_blocks).astype(np.float32)
+    # Concatenate raw ESM + all FV blocks
+    combined = np.hstack([emb_array] + fv_blocks).astype(np.float32)
 
     # Build output dict
     combined_embeddings = {pid: combined[i] for i, pid in enumerate(final_pids)}
@@ -277,6 +273,7 @@ def train_esm_only(protein_embeddings, protein_go_terms, go_ids, config, name, s
         config=config,
         id=f"{name}_scan_esm_only",
         random_state=seed,
+        scale_features=True,
     )
     classifier.run()
 
@@ -333,6 +330,7 @@ def train_combined(
         config=config,
         id=f"{name}_scan_{safe_id}",
         random_state=seed,
+        scale_features=True,
     )
     classifier.run()
 

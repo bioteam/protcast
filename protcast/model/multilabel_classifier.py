@@ -8,6 +8,7 @@ from typeguard import typechecked
 from keras import layers, models
 from keras.callbacks import ModelCheckpoint, TensorBoard, History
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 from protcast.model.stats.utils import calculate_fmax
 
@@ -136,6 +137,7 @@ class MultiLabelClassifier:
         use_tensorboard: bool = False,
         go_dag: object = None,
         random_state: int = 42,
+        scale_features: bool = False,
     ) -> None:
         """
         Parameters
@@ -161,6 +163,12 @@ class MultiLabelClassifier:
             USE_BOX_EMBEDDINGS is True. Ignored for flat model.
         random_state : int
             Random seed for train/test split. Default 42.
+        scale_features : bool
+            If True, standardize features with StandardScaler fit on the
+            training fold only (then applied to validation) inside
+            train_model. Default False preserves legacy behavior; callers
+            that compare embeddings (e.g. the feature scan) should set True
+            so every model is scaled consistently and without leakage.
         """
         self.verbose = verbose
         self.protein_embeddings = protein_embeddings
@@ -171,6 +179,7 @@ class MultiLabelClassifier:
         self.id = id
         self.go_dag = go_dag
         self.random_state = random_state
+        self.scale_features = scale_features
 
         # Set instance attributes from config
         self.params = config
@@ -472,6 +481,16 @@ class MultiLabelClassifier:
             test_size=self.validation_split,  # type: ignore
             random_state=self.random_state,
         )
+
+        # Standardize on the training fold only (no validation leakage),
+        # then apply the same transform to validation. Gated so legacy
+        # callers are unaffected.
+        if self.scale_features:
+            self.scaler = StandardScaler()
+            X_train = self.scaler.fit_transform(X_train).astype(np.float32)
+            X_val = self.scaler.transform(X_val).astype(np.float32)
+            if self.verbose:
+                print("Applied StandardScaler (fit on train fold only)")
 
         self.X_train = X_train
         self.X_val = X_val
