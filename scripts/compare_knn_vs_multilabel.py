@@ -203,15 +203,46 @@ def train_multilabel(
         label = "flat"
 
     # Merge ESM-C + FV into a single concatenated embedding dict when dual mode.
+    # Both blocks are StandardScaler-normalised separately (fit on train proteins
+    # only) so their numerical ranges match before entering the dual-encoder.
+    # This is the same approach used in compare_knn_esm_vs_knn_combined.py.
     if use_dual_encoder and fv_embeddings is not None:
+        from sklearn.model_selection import train_test_split as _tts
+        from sklearn.preprocessing import StandardScaler
+
         esm_dim = next(iter(protein_embeddings.values())).shape[0]
+
+        # Determine train proteins using the same split the classifier will use.
+        common_pids = sorted(
+            set(protein_embeddings) & set(fv_embeddings) & set(protein_go_terms)
+        )
+        validation_split = config.get("VALIDATION_SPLIT", 0.2)
+        train_pids, _ = _tts(common_pids, test_size=validation_split,
+                              random_state=seed)
+        train_pid_set = set(train_pids)
+
+        esm_train = np.vstack(
+            [protein_embeddings[p] for p in train_pids]
+        ).astype(np.float32)
+        fv_train = np.vstack(
+            [fv_embeddings[p] for p in train_pids]
+        ).astype(np.float32)
+
+        esm_scaler = StandardScaler().fit(esm_train)
+        fv_scaler  = StandardScaler().fit(fv_train)
+
         combined_embeddings = {}
-        for pid in protein_embeddings:
-            if pid in fv_embeddings:
-                combined_embeddings[pid] = np.concatenate(
-                    [protein_embeddings[pid].ravel(),
-                     fv_embeddings[pid].ravel()]
-                ).astype(np.float32)
+        for pid in common_pids:
+            esm_s = esm_scaler.transform(
+                protein_embeddings[pid].reshape(1, -1).astype(np.float32)
+            )
+            fv_s = fv_scaler.transform(
+                fv_embeddings[pid].reshape(1, -1).astype(np.float32)
+            )
+            fv_s = np.nan_to_num(fv_s, nan=0.0, posinf=0.0, neginf=0.0)
+            combined_embeddings[pid] = np.concatenate(
+                [esm_s.ravel(), fv_s.ravel()]
+            ).astype(np.float32)
         effective_embeddings = combined_embeddings
     else:
         esm_dim = None
