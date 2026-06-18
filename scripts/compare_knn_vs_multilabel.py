@@ -636,7 +636,14 @@ def main():
     fv_embeddings = None
     if args.order and args.dual_encoder:
         print("Computing PseKRAAC feature vectors for dual-encoder...")
-        from scripts.compare_knn_esm_vs_knn_combined import compute_classical_feature_vectors
+        import importlib.util as _ilu, pathlib as _pl
+        _spec = _ilu.spec_from_file_location(
+            "compare_knn_esm_vs_knn_combined",
+            _pl.Path(__file__).parent / "compare_knn_esm_vs_knn_combined.py",
+        )
+        _mod = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        compute_classical_feature_vectors = _mod.compute_classical_feature_vectors
         sequences = {
             pid: dataset.proteins[pid].sequence
             for pid in protein_embeddings
