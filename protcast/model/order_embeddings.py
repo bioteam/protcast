@@ -235,6 +235,90 @@ def order_violation_loss_soft(order_layer, parent_child_indices, beta=5.0):
     return tf.reduce_mean(per_edge)
 
 
+def build_order_embedding_model_dual(
+    esm_dim,
+    fv_dim,
+    num_classes,
+    hidden_layers,
+    dropout_rate,
+    order_dim,
+    temperature=10.0,
+    fv_hidden=32,
+):
+    """Build a dual-encoder order embedding model.
+
+    Gives the small PseKRAAC feature block its own MLP branch before merging
+    with the ESM-C branch.  This prevents the 12 PseKRAAC dimensions from
+    being drowned out by the 1152 ESM-C dimensions in the first weight matrix,
+    which happens when both blocks are naively concatenated and fed into a
+    single dense layer.
+
+    Architecture:
+        ESM-C (esm_dim)    → [Dense+Dropout]* ─────────────┐
+                                                             ├─ Concatenate
+        PseKRAAC (fv_dim)  → Dense(fv_hidden, relu) ────────┘
+                                                → Dense(order_dim, softplus)
+                                                → OrderEmbeddingLayer → scores
+
+    Parameters
+    ----------
+    esm_dim : int
+        Dimension of ESM-C input (e.g. 1152).
+    fv_dim : int
+        Dimension of PseKRAAC feature vector (e.g. 12).
+    num_classes : int
+        Number of GO terms.
+    hidden_layers : list of int
+        Units in each hidden Dense layer applied to the ESM-C branch.
+    dropout_rate : float
+        Dropout rate after each ESM-C hidden layer.
+    order_dim : int
+        Dimensionality of the order embedding space.
+    temperature : float
+        Temperature for the membership score exponential.
+    fv_hidden : int
+        Units in the PseKRAAC encoder Dense layer (default 32).
+
+    Returns
+    -------
+    tuple of (keras.Model, OrderEmbeddingLayer)
+        The model and order layer (needed for the order-violation loss).
+        The model accepts a list of two inputs: [esm_tensor, fv_tensor].
+    """
+    esm_input = layers.Input(shape=(esm_dim,), name="esm_input")
+    fv_input  = layers.Input(shape=(fv_dim,),  name="fv_input")
+
+    # ESM-C branch — same hidden stack as the single-encoder model
+    x = esm_input
+    for units in hidden_layers:
+        x = layers.Dense(units, activation="relu")(x)
+        x = layers.Dropout(dropout_rate)(x)
+
+    # PseKRAAC branch — dedicated small MLP so these 12 dims get equal footing
+    fv = layers.Dense(fv_hidden, activation="relu", name="fv_encoder")(fv_input)
+
+    # Merge both branches then project into the non-negative orthant
+    merged = layers.Concatenate(name="feature_merge")([x, fv])
+    merged = layers.Dense(
+        order_dim, activation="softplus", name="order_projection"
+    )(merged)
+
+    order_layer = OrderEmbeddingLayer(
+        num_classes=num_classes,
+        order_dim=order_dim,
+        temperature=temperature,
+        name="order_embeddings",
+    )
+    scores = order_layer(merged)
+
+    model = keras.Model(
+        inputs=[esm_input, fv_input],
+        outputs=scores,
+        name="order_embedding_model_dual",
+    )
+    return model, order_layer
+
+
 def build_order_embedding_model(
     input_dim,
     num_classes,

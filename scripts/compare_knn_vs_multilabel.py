@@ -173,7 +173,7 @@ def train_knn(
 def train_multilabel(
     protein_embeddings, protein_go_terms, go_ids,
     config, name, seed, go_dag, use_order, use_mlflow, verbose=False,
-    order_variant="soft",
+    order_variant="soft", use_dual_encoder=False, fv_embeddings=None,
 ):
     """Fit MultiLabelClassifier (flat or order) and return a serialisable result dict.
 
@@ -185,20 +185,49 @@ def train_multilabel(
     order_variant : str
         "soft" (default) or "hard".  Only used when use_order=True.  Controls
         the order-violation loss formulation; see protcast.model.order_embeddings.
+    use_dual_encoder : bool
+        When True (and use_order=True), uses the dual-encoder architecture that
+        gives PseKRAAC features their own MLP branch before merging with ESM-C.
+        Requires fv_embeddings to be provided.
+    fv_embeddings : dict or None
+        {protein_id: np.ndarray} of PseKRAAC feature vectors.  Required when
+        use_dual_encoder=True.  The ESM-C and FV blocks are concatenated before
+        being passed to MultiLabelClassifier; ESM_DIM in config tells the model
+        where to split them internally.
     """
-    if use_order:
+    if use_order and use_dual_encoder:
+        label = f"order_{order_variant}_dual"
+    elif use_order:
         label = f"order_{order_variant}"
     else:
         label = "flat"
+
+    # Merge ESM-C + FV into a single concatenated embedding dict when dual mode.
+    if use_dual_encoder and fv_embeddings is not None:
+        esm_dim = next(iter(protein_embeddings.values())).shape[0]
+        combined_embeddings = {}
+        for pid in protein_embeddings:
+            if pid in fv_embeddings:
+                combined_embeddings[pid] = np.concatenate(
+                    [protein_embeddings[pid].ravel(),
+                     fv_embeddings[pid].ravel()]
+                ).astype(np.float32)
+        effective_embeddings = combined_embeddings
+    else:
+        esm_dim = None
+        effective_embeddings = protein_embeddings
 
     # Work from a config copy so flags don't persist between runs.
     run_config = dict(config)
     run_config["USE_ORDER_EMBEDDINGS"] = use_order
     run_config["ORDER_VARIANT"] = order_variant if use_order else "soft"
+    run_config["USE_DUAL_ENCODER"] = use_dual_encoder
+    if esm_dim is not None:
+        run_config["ESM_DIM"] = esm_dim
 
     classifier = MultiLabelClassifier(
         verbose=verbose,
-        protein_embeddings=protein_embeddings,
+        protein_embeddings=effective_embeddings,
         protein_go_terms=protein_go_terms,
         go_ids=go_ids,
         config=run_config,
@@ -228,8 +257,11 @@ def train_multilabel(
         "best_loss": float(min(classifier.history.history["val_loss"])),
         "epochs": len(classifier.history.history["loss"]),
         "training_time": round(classifier.training_time, 2),
+        "vector_length": classifier.vector_length,
         "depth_metrics": {str(k): v for k, v in depth_metrics.items()},
         "frequency_metrics": freq_metrics,
+        "dual_encoder": use_dual_encoder,
+        "order_variant": order_variant if use_order else None,
         "status": "ok",
     }
     del classifier
@@ -480,6 +512,21 @@ def main():
         ),
     )
     parser.add_argument(
+        "--dual-encoder", action="store_true",
+        help=(
+            "Use the dual-encoder order model: ESM-C and PseKRAAC blocks get "
+            "separate MLP branches before merging, preventing the 12 PseKRAAC "
+            "dimensions from being drowned out by 1152 ESM-C dimensions. "
+            "Requires --order and --feature_algorithms. "
+            "Computes PseKRAAC features from protein sequences in ProtCastDataset."
+        ),
+    )
+    parser.add_argument(
+        "--feature_algorithms", nargs="+",
+        default=["PseKRAAC_type_7", "PseKRAAC_type_3B", "PseKRAAC_type_8"],
+        help="PseKRAAC algorithms for --dual-encoder (default: type_7 type_3B type_8)",
+    )
+    parser.add_argument(
         "--use_mlflow", action="store_true",
         help="Log each model run to MLflow",
     )
@@ -523,6 +570,8 @@ def main():
     expected = {"knn", "multilabel_flat"}
     if args.order:
         expected.add("multilabel_order")
+    if args.order and args.dual_encoder:
+        expected.add("multilabel_order_dual")
 
     if results is not None:
         done = {k for k in expected if results.get(k, {}).get("status") == "ok"}
@@ -582,6 +631,24 @@ def main():
 
     if results.get("esm_dim") is None:
         results["esm_dim"] = int(next(iter(protein_embeddings.values())).shape[0])
+
+    # ── PseKRAAC feature vectors (dual-encoder only) ───────────────────────
+    fv_embeddings = None
+    if args.order and args.dual_encoder:
+        print("Computing PseKRAAC feature vectors for dual-encoder...")
+        from scripts.compare_knn_esm_vs_knn_combined import compute_classical_feature_vectors
+        sequences = {
+            pid: dataset.proteins[pid].sequence
+            for pid in protein_embeddings
+            if pid in dataset.proteins
+        }
+        fv_embeddings = compute_classical_feature_vectors(
+            sequences, args.feature_algorithms, verbose=args.verbose
+        )
+        if results.get("fv_dim") is None:
+            fv_dim_sample = next(iter(fv_embeddings.values())).shape[0]
+            results["fv_dim"] = int(fv_dim_sample)
+        print(f"FV dim: {results['fv_dim']}  proteins with FV: {len(fv_embeddings)}")
 
     # ── Parent MLflow run ────────────────────────────────────────────────────
     # Wrap the three model runs under a single parent so they appear grouped
@@ -658,10 +725,12 @@ def main():
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
 
+    n_models = 3 + (1 if args.order and args.dual_encoder else 0)
+
     # ── Model 3: MultiLabel + order (optional) ────────────────────────────
     if args.order and results.get("multilabel_order", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print(f"MODEL 3 / 3: MULTILABEL + ORDER EMBEDDINGS ({args.order_variant})")
+        print(f"MODEL 3 / {n_models}: MULTILABEL + ORDER EMBEDDINGS ({args.order_variant})")
         print("=" * 60)
         try:
             order_result = train_multilabel(
@@ -682,6 +751,40 @@ def main():
         except Exception as e:
             print(f"FAILED: MultiLabel order ({args.order_variant}) — {e}")
             results["multilabel_order"] = {"status": f"error: {e}", "order_variant": args.order_variant}
+
+        results["elapsed"] = round(time.time() - start)
+        with open(results_file, "w") as f:
+            json.dump(results, f, indent=2)
+
+    # ── Model 4: MultiLabel + order + dual-encoder (optional) ─────────────
+    if (args.order and args.dual_encoder
+            and results.get("multilabel_order_dual", {}).get("status") != "ok"):
+        print("\n" + "=" * 60)
+        print(f"MODEL 4 / {n_models}: MULTILABEL + ORDER + DUAL-ENCODER ({args.order_variant})")
+        print("=" * 60)
+        if fv_embeddings is None:
+            print("SKIPPED: no FV embeddings available (--dual-encoder requires sequences)")
+            results["multilabel_order_dual"] = {"status": "skipped: no fv_embeddings"}
+        else:
+            try:
+                dual_result = train_multilabel(
+                    protein_embeddings, protein_go_terms, go_ids,
+                    config, name, args.seed, go_dag,
+                    use_order=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
+                    order_variant=args.order_variant,
+                    use_dual_encoder=True, fv_embeddings=fv_embeddings,
+                )
+                results["multilabel_order_dual"] = dual_result
+                r = results["multilabel_order_dual"]
+                print(
+                    f"Order NN dual-encoder ({args.order_variant}) — Fmax: {r['fmax']:.4f}  "
+                    f"Smin: {r['smin']:.4f}  "
+                    f"Epochs: {r['epochs']}  "
+                    f"Time: {r['training_time']:.1f}s"
+                )
+            except Exception as e:
+                print(f"FAILED: MultiLabel order dual-encoder — {e}")
+                results["multilabel_order_dual"] = {"status": f"error: {e}"}
 
         results["elapsed"] = round(time.time() - start)
         with open(results_file, "w") as f:

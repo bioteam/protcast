@@ -18,6 +18,7 @@ try:
     from protcast.model.order_embeddings import (
         OrderEmbeddingLayer,
         build_order_embedding_model,
+        build_order_embedding_model_dual,
         order_violation_loss,
         order_violation_loss_soft,
     )
@@ -307,6 +308,16 @@ class MultiLabelClassifier:
             dominate (are more specific than) their parents in the product
             order. Requires a go_dag to be provided at init time.
 
+        **Dual-encoder order mode** (USE_ORDER_EMBEDDINGS=True, USE_DUAL_ENCODER=True):
+            ESM-C → [Dense+Dropout]* ──┐
+                                        ├─ Concat → Dense(order_dim) → OrderEmbeddingLayer
+            FV → Dense(fv_hidden) ─────┘
+            Gives the small PseKRAAC block its own MLP branch so its 12 dims
+            aren't drowned out by 1152 ESM-C dims in the first weight matrix.
+            Requires protein_embeddings values to be dicts with "esm" and "fv" keys,
+            or self.X to be set externally as a (N, esm_dim+fv_dim) matrix with
+            ESM_DIM config key indicating the split point.
+
         Architecture is configurable via HIDDEN_LAYERS (list of ints).
         """
         import tensorflow as tf
@@ -316,12 +327,25 @@ class MultiLabelClassifier:
         hidden_layers = getattr(self, "hidden_layers", [128, 64])
         dropout_rate = self.dropout  # type: ignore
         use_order = getattr(self, "use_order_embeddings", False)
+        use_dual = use_order and getattr(self, "use_dual_encoder", False)
 
         class_weights_tensor = tf.constant(
             self.class_weights, dtype=tf.float32
         )
 
-        if use_order:
+        if use_dual:
+            esm_dim = getattr(self, "esm_dim", None)
+            if esm_dim is None:
+                raise ValueError(
+                    "USE_DUAL_ENCODER requires ESM_DIM in config to split the "
+                    "concatenated input into ESM-C and feature-vector blocks."
+                )
+            fv_dim = input_dim - esm_dim
+            self._build_order_model_dual(
+                esm_dim, fv_dim, num_classes, hidden_layers, dropout_rate,
+                class_weights_tensor, tf,
+            )
+        elif use_order:
             self._build_order_model(
                 input_dim, num_classes, hidden_layers, dropout_rate,
                 class_weights_tensor, tf,
@@ -333,7 +357,12 @@ class MultiLabelClassifier:
             )
 
         if self.verbose:
-            mode = "order" if use_order else "flat"
+            if use_dual:
+                mode = "order-dual-encoder"
+            elif use_order:
+                mode = "order"
+            else:
+                mode = "flat"
             print(f"Model mode: {mode}")
             print(f"Hidden layers: {hidden_layers}")
             print(f"Dropout: {dropout_rate}")
@@ -342,6 +371,9 @@ class MultiLabelClassifier:
                 order_dim = getattr(self, "order_dim", 32)
                 print(f"Order dim: {order_dim}")
                 print(f"DAG edges: {len(self._dag_edges)}")
+                if use_dual:
+                    fv_hidden = getattr(self, "fv_hidden", 32)
+                    print(f"FV encoder hidden: {fv_hidden}")
 
     def _build_flat_model(
         self, input_dim, num_classes, hidden_layers, dropout_rate,
@@ -455,6 +487,119 @@ class MultiLabelClassifier:
             print(
                 f"Order-violation loss ({order_variant}): {len(self._dag_edges)} DAG edges, "
                 f"weight={order_weight}{extra}"
+            )
+
+    def _build_order_model_dual(
+        self, esm_dim, fv_dim, num_classes, hidden_layers, dropout_rate,
+        class_weights_tensor, tf,
+    ):
+        """Build the dual-encoder order model.
+
+        The concatenated input matrix self.X (shape N × (esm_dim + fv_dim)) is
+        split at the esm_dim boundary inside the model using Lambda slicing, so
+        the rest of the training pipeline (train_test_split, FmaxEarlyStopping,
+        model.fit) requires no changes — they all see a single matrix.
+        """
+        if not _ORDER_AVAILABLE:
+            raise ImportError(
+                "Order embedding modules not found. Ensure "
+                "protcast.model.order_embeddings is importable."
+            )
+
+        order_dim     = getattr(self, "order_dim", 32)
+        temperature   = getattr(self, "order_temperature", 10.0)
+        order_weight  = getattr(self, "order_weight", 0.1)
+        order_variant = str(getattr(self, "order_variant", "soft")).lower()
+        soft_beta     = float(getattr(self, "order_beta", 5.0))
+        fv_hidden     = int(getattr(self, "fv_hidden", 32))
+
+        # ── Build a wrapper model that splits its single input internally ──
+        # This keeps the training loop identical to the single-encoder path:
+        # model.fit(X, y) where X is the full concatenated matrix.
+        combined_input = layers.Input(shape=(esm_dim + fv_dim,), name="combined_input")
+        esm_slice = layers.Lambda(
+            lambda z: z[:, :esm_dim], name="esm_slice"
+        )(combined_input)
+        fv_slice = layers.Lambda(
+            lambda z: z[:, esm_dim:], name="fv_slice"
+        )(combined_input)
+
+        # ESM-C branch
+        x = esm_slice
+        for units in hidden_layers:
+            x = layers.Dense(units, activation="relu")(x)
+            x = layers.Dropout(dropout_rate)(x)
+
+        # PseKRAAC branch — dedicated small MLP
+        fv = layers.Dense(fv_hidden, activation="relu", name="fv_encoder")(fv_slice)
+
+        # Merge and project into order space
+        merged = layers.Concatenate(name="feature_merge")([x, fv])
+        merged = layers.Dense(
+            order_dim, activation="softplus", name="order_projection"
+        )(merged)
+
+        order_layer = OrderEmbeddingLayer(
+            num_classes=num_classes,
+            order_dim=order_dim,
+            temperature=temperature,
+            name="order_embeddings",
+        )
+        scores = order_layer(merged)
+
+        import keras as _keras
+        model = _keras.Model(
+            inputs=combined_input, outputs=scores,
+            name="order_embedding_model_dual",
+        )
+        self._order_layer = order_layer
+
+        # DAG edges
+        if self.go_dag is not None:
+            self._dag_edges = extract_dag_edges(
+                self.go_dag, self.go_ids, self.go_encoder
+            )
+        else:
+            self._dag_edges = np.zeros((0, 2), dtype=np.int32)
+
+        dag_edges_tensor = tf.constant(self._dag_edges, dtype=tf.int32)
+        ow = tf.constant(order_weight, dtype=tf.float32)
+
+        if order_variant == "soft":
+            def _o_loss():
+                return order_violation_loss_soft(
+                    order_layer, dag_edges_tensor, beta=soft_beta
+                )
+        elif order_variant == "hard":
+            def _o_loss():
+                return order_violation_loss(order_layer, dag_edges_tensor)
+        else:
+            raise ValueError(
+                f"Unknown ORDER_VARIANT '{order_variant}'. Use 'soft' or 'hard'."
+            )
+
+        def order_combined_loss(y_true, y_pred):
+            per_class_bce = -(
+                y_true * tf.math.log(y_pred + 1e-7)
+                + (1 - y_true) * tf.math.log(1 - y_pred + 1e-7)
+            )
+            weighted_bce = tf.reduce_mean(
+                per_class_bce * class_weights_tensor, axis=-1
+            )
+            return weighted_bce + ow * _o_loss()
+
+        model.compile(
+            optimizer=self.optimizer,  # type: ignore
+            loss=order_combined_loss,
+            metrics=["accuracy"],
+        )
+        self.model = model
+
+        if self.verbose and len(self._dag_edges) > 0:
+            extra = f", beta={soft_beta}" if order_variant == "soft" else ""
+            print(
+                f"Dual-encoder order-violation loss ({order_variant}): "
+                f"{len(self._dag_edges)} DAG edges, weight={order_weight}{extra}"
             )
 
     def train_model(self) -> History:
