@@ -16,8 +16,10 @@
 # capture the all-level PseKRAAC signal KNN/flat already show.
 #
 # Env: LEVELS SEED VARIANT FEATURE_SETS OUTROOT
-
-set -euo pipefail
+#
+# No `set -u`: `module load` sources lmod/apptainer bash-completion that
+# references unbound variables, which is fatal under nounset and would kill the
+# job before python runs. The existing batch scripts omit `set` for this reason.
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026

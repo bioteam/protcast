@@ -22,8 +22,10 @@
 #
 # Resume-safe: each level's results JSON skips already-completed arms, so the
 # shuffled control can be added to an existing run without retraining the rest.
-
-set -euo pipefail
+#
+# No `set -u`: `module load` sources lmod/apptainer bash-completion that trips
+# nounset and would kill the job before python runs. The ${VAR:-} guards below
+# keep every optional knob safe without it.
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
