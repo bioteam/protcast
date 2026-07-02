@@ -174,6 +174,7 @@ def train_multilabel(
     protein_embeddings, protein_go_terms, go_ids,
     config, name, seed, go_dag, use_order, use_mlflow, verbose=False,
     order_variant="soft", use_dual_encoder=False, fv_embeddings=None,
+    shuffle_fv=False,
 ):
     """Fit MultiLabelClassifier (flat or order) and return a serialisable result dict.
 
@@ -197,6 +198,8 @@ def train_multilabel(
     """
     if use_order and use_dual_encoder:
         label = f"order_{order_variant}_dual"
+        if shuffle_fv:
+            label += "_shuffled"
     elif use_order:
         label = f"order_{order_variant}"
     else:
@@ -207,6 +210,18 @@ def train_multilabel(
     # only) so their numerical ranges match before entering the dual-encoder.
     # This is the same approach used in compare_knn_esm_vs_knn_combined.py.
     if use_dual_encoder and fv_embeddings is not None:
+        # Capacity control: with shuffle_fv, permute the PseKRAAC vectors across
+        # protein IDs (seeded, deterministic). This destroys the protein↔FV
+        # correspondence — killing the biological signal — while preserving the
+        # FV distribution, dimensionality, and per-block scaling. If the dual
+        # encoder still gains here, the gain is added capacity, not PseKRAAC.
+        if shuffle_fv:
+            _rng = np.random.RandomState(seed)
+            _fv_pids = sorted(fv_embeddings)
+            _fv_vals = [fv_embeddings[p] for p in _fv_pids]
+            _perm = _rng.permutation(len(_fv_vals))
+            fv_embeddings = {p: _fv_vals[_perm[i]] for i, p in enumerate(_fv_pids)}
+
         from sklearn.model_selection import train_test_split as _tts
         from sklearn.preprocessing import StandardScaler
 
@@ -292,6 +307,7 @@ def train_multilabel(
         "depth_metrics": {str(k): v for k, v in depth_metrics.items()},
         "frequency_metrics": freq_metrics,
         "dual_encoder": use_dual_encoder,
+        "shuffled": bool(shuffle_fv),
         "order_variant": order_variant if use_order else None,
         "status": "ok",
     }
@@ -497,6 +513,21 @@ def print_results(results):
     else:
         print("  (no frequency metrics)")
 
+    # ── Capacity control: dual (real FV) vs dual (shuffled FV) ─────────────
+    # The gap between these two is the PseKRAAC signal with model capacity held
+    # constant — both arms are the identical dual architecture; only whether the
+    # FV block carries real vs permuted biochemistry differs.
+    dual = results.get("multilabel_order_dual", {})
+    dual_shuf = results.get("multilabel_order_dual_shuffled", {})
+    if dual.get("status") == "ok" and dual_shuf.get("status") == "ok":
+        real = dual.get("fmax")
+        shuf = dual_shuf.get("fmax")
+        print()
+        print("── DUAL-ENCODER CAPACITY CONTROL ──")
+        print(f"  Dual (real PseKRAAC)     Fmax: {_nan_safe(real)}")
+        print(f"  Dual (shuffled PseKRAAC) Fmax: {_nan_safe(shuf)}")
+        print(f"  Signal attributable to PseKRAAC (real − shuffled): {_delta_str(real, shuf)}")
+
     print()
     print(f"Total elapsed time: {results.get('elapsed', '?')}s")
     print(sep)
@@ -558,6 +589,37 @@ def main():
         help="PseKRAAC algorithms for --dual-encoder (default: type_7 type_3B type_8)",
     )
     parser.add_argument(
+        "--shuffle-fv-control", action="store_true",
+        help=(
+            "Add a capacity-control arm: dual-encoder trained on PseKRAAC vectors "
+            "shuffled across proteins (seeded). Isolates whether a dual-encoder "
+            "gain is real biochemical signal or just added capacity. Requires "
+            "--order and --dual-encoder."
+        ),
+    )
+    # ── Architecture / optimisation tunables ────────────────────────────────
+    # All opt-in: omitting a flag leaves config.json untouched and reproduces
+    # prior runs bit-for-bit. Each is applied to the shared config so every
+    # trained arm sees identical settings (deltas stay attributable to features).
+    parser.add_argument("--fv-hidden", type=int, default=None,
+                        help="Units in the PseKRAAC branch Dense layer (dual-encoder; default 32)")
+    parser.add_argument("--fv-dropout", type=float, default=None,
+                        help="Dropout on the PseKRAAC branch (dual-encoder; default 0.0 = none)")
+    parser.add_argument("--gated-fusion", action="store_true",
+                        help="Gate the FV branch by an ESM-derived sigmoid before merging (dual-encoder)")
+    parser.add_argument("--order-weight", type=float, default=None,
+                        help="Weight of the order-violation loss vs BCE (order arms; default 0.1)")
+    parser.add_argument("--order-dim", type=int, default=None,
+                        help="Dimensionality of the order-embedding space (order arms; default 32)")
+    parser.add_argument("--learning-rate", type=float, default=None,
+                        help="Adam learning-rate override (default: Keras adam default 1e-3)")
+    parser.add_argument("--lr-schedule", choices=["cosine"], default=None,
+                        help="Optional LR schedule: cosine decay over training (default: constant)")
+    parser.add_argument("--patience", type=int, default=None,
+                        help="Early-stopping patience on val Fmax (default 10)")
+    parser.add_argument("--min-delta", type=float, default=None,
+                        help="Min Fmax gain to reset early-stopping patience (default 0.001)")
+    parser.add_argument(
         "--use_mlflow", action="store_true",
         help="Log each model run to MLflow",
     )
@@ -565,6 +627,28 @@ def main():
     args = parser.parse_args()
 
     config = ConfigManager.load_config()
+
+    # Apply opt-in CLI overrides to the shared config so every trained arm
+    # (flat / order / dual) sees the same hyper-parameters — keeping any Fmax
+    # delta attributable to the feature representation, not the settings.
+    # Omitting a flag leaves config.json untouched and reproduces prior runs.
+    _cli_overrides = {
+        "FV_HIDDEN": args.fv_hidden,
+        "FV_DROPOUT": args.fv_dropout,
+        "ORDER_WEIGHT": args.order_weight,
+        "ORDER_DIM": args.order_dim,
+        "LEARNING_RATE": args.learning_rate,
+        "PATIENCE": args.patience,
+        "MIN_DELTA": args.min_delta,
+    }
+    for _k, _v in _cli_overrides.items():
+        if _v is not None:
+            config[_k] = _v
+    if args.gated_fusion:
+        config["GATED_FUSION"] = True
+    if args.lr_schedule:
+        config["LR_SCHEDULE"] = args.lr_schedule
+
     start  = time.time()
 
     # Seed Python, NumPy, and TF RNGs so determinism flags actually take effect.
@@ -603,6 +687,8 @@ def main():
         expected.add("multilabel_order")
     if args.order and args.dual_encoder:
         expected.add("multilabel_order_dual")
+    if args.order and args.dual_encoder and args.shuffle_fv_control:
+        expected.add("multilabel_order_dual_shuffled")
 
     if results is not None:
         done = {k for k in expected if results.get(k, {}).get("status") == "ok"}
@@ -763,7 +849,11 @@ def main():
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
 
-    n_models = 3 + (1 if args.order and args.dual_encoder else 0)
+    n_models = (
+        3
+        + (1 if args.order and args.dual_encoder else 0)
+        + (1 if args.order and args.dual_encoder and args.shuffle_fv_control else 0)
+    )
 
     # ── Model 3: MultiLabel + order (optional) ────────────────────────────
     if args.order and results.get("multilabel_order", {}).get("status") != "ok":
@@ -823,6 +913,40 @@ def main():
             except Exception as e:
                 print(f"FAILED: MultiLabel order dual-encoder — {e}")
                 results["multilabel_order_dual"] = {"status": f"error: {e}"}
+
+        results["elapsed"] = round(time.time() - start)
+        with open(results_file, "w") as f:
+            json.dump(results, f, indent=2)
+
+    # ── Model 5: dual-encoder capacity control (shuffled PseKRAAC) ─────────
+    if (args.order and args.dual_encoder and args.shuffle_fv_control
+            and results.get("multilabel_order_dual_shuffled", {}).get("status") != "ok"):
+        print("\n" + "=" * 60)
+        print(f"MODEL {n_models} / {n_models}: DUAL-ENCODER CONTROL (shuffled PseKRAAC)")
+        print("=" * 60)
+        if fv_embeddings is None:
+            print("SKIPPED: no FV embeddings available (--dual-encoder requires sequences)")
+            results["multilabel_order_dual_shuffled"] = {"status": "skipped: no fv_embeddings"}
+        else:
+            try:
+                shuffled_result = train_multilabel(
+                    protein_embeddings, protein_go_terms, go_ids,
+                    config, name, args.seed, go_dag,
+                    use_order=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
+                    order_variant=args.order_variant,
+                    use_dual_encoder=True, fv_embeddings=fv_embeddings,
+                    shuffle_fv=True,
+                )
+                results["multilabel_order_dual_shuffled"] = shuffled_result
+                r = results["multilabel_order_dual_shuffled"]
+                print(
+                    f"Dual-encoder CONTROL (shuffled) — Fmax: {r['fmax']:.4f}  "
+                    f"Smin: {r['smin']:.4f}  Epochs: {r['epochs']}  "
+                    f"Time: {r['training_time']:.1f}s"
+                )
+            except Exception as e:
+                print(f"FAILED: dual-encoder shuffled control — {e}")
+                results["multilabel_order_dual_shuffled"] = {"status": f"error: {e}"}
 
         results["elapsed"] = round(time.time() - start)
         with open(results_file, "w") as f:

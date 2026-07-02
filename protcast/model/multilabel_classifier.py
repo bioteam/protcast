@@ -374,6 +374,49 @@ class MultiLabelClassifier:
                 if use_dual:
                     fv_hidden = getattr(self, "fv_hidden", 32)
                     print(f"FV encoder hidden: {fv_hidden}")
+                    print(f"FV encoder dropout: {float(getattr(self, 'fv_dropout', 0.0))}")
+                    print(f"Gated fusion: {bool(getattr(self, 'gated_fusion', False))}")
+
+    def _make_optimizer(self):
+        """Resolve the Keras optimizer used to compile every model variant.
+
+        Back-compatible by default: when neither LEARNING_RATE nor LR_SCHEDULE is
+        present in config, this returns the optimizer *string* (e.g. "adam")
+        exactly as before, so existing runs reproduce bit-for-bit. An explicit
+        optimizer object is constructed only when a learning rate or schedule is
+        requested — the tunables for probing whether the dual encoder's fast
+        (~half-epoch) convergence is early-stopping before it exploits PseKRAAC.
+        """
+        import keras
+
+        lr = getattr(self, "learning_rate", None)
+        schedule = getattr(self, "lr_schedule", None)
+        if lr is None and not schedule:
+            return self.optimizer  # unchanged path — string like "adam"
+
+        lr_value = float(lr) if lr is not None else 1e-3  # Keras Adam default
+
+        if schedule and str(schedule).lower() == "cosine":
+            # decay_steps needs the post-split training size; prepare_data() has
+            # already populated self.X by the time build_model() compiles.
+            val_split = float(getattr(self, "validation_split", 0.2))
+            n_train = max(1, int(self.X.shape[0] * (1.0 - val_split)))
+            bs = int(getattr(self, "batch_size", 32))
+            if n_train > 10000:
+                bs = min(bs, 64)  # mirror train_model's adaptive batch rule
+            steps_per_epoch = max(1, -(-n_train // bs))  # ceil division
+            decay_steps = steps_per_epoch * int(getattr(self, "epochs", 100))
+            lr_value = keras.optimizers.schedules.CosineDecay(
+                initial_learning_rate=lr_value, decay_steps=decay_steps
+            )
+
+        opt_name = str(getattr(self, "optimizer", "adam")).lower()
+        if opt_name == "adam":
+            return keras.optimizers.Adam(learning_rate=lr_value)
+        # Fallback for any other named optimizer.
+        opt = keras.optimizers.get(opt_name)
+        opt.learning_rate = lr_value
+        return opt
 
     def _build_flat_model(
         self, input_dim, num_classes, hidden_layers, dropout_rate,
@@ -397,7 +440,7 @@ class MultiLabelClassifier:
             return tf.reduce_mean(weighted, axis=-1)
 
         model.compile(
-            optimizer=self.optimizer,  # type: ignore
+            optimizer=self._make_optimizer(),
             loss=weighted_binary_crossentropy,
             metrics=["accuracy"],
         )
@@ -475,7 +518,7 @@ class MultiLabelClassifier:
             return weighted_bce + ow * _o_loss()
 
         model.compile(
-            optimizer=self.optimizer,  # type: ignore
+            optimizer=self._make_optimizer(),
             loss=order_combined_loss,
             metrics=["accuracy"],
         )
@@ -512,6 +555,8 @@ class MultiLabelClassifier:
         order_variant = str(getattr(self, "order_variant", "soft")).lower()
         soft_beta     = float(getattr(self, "order_beta", 5.0))
         fv_hidden     = int(getattr(self, "fv_hidden", 32))
+        fv_dropout    = float(getattr(self, "fv_dropout", 0.0))
+        use_gated     = bool(getattr(self, "gated_fusion", False))
 
         # ── Build a wrapper model that splits its single input internally ──
         # This keeps the training loop identical to the single-encoder path:
@@ -532,6 +577,22 @@ class MultiLabelClassifier:
 
         # PseKRAAC branch — dedicated small MLP
         fv = layers.Dense(fv_hidden, activation="relu", name="fv_encoder")(fv_slice)
+        # Optional regularisation on the FV branch. By default the ESM branch is
+        # dropped at 0.5 while the FV branch passes un-dropped — a stable signal
+        # that fits fast and can trip early-stopping before the model has learned
+        # to exploit it. FV_DROPOUT lets us regularise this branch symmetrically.
+        if fv_dropout > 0.0:
+            fv = layers.Dropout(fv_dropout, name="fv_dropout")(fv)
+
+        # Merge and project into order space. With GATED_FUSION the ESM branch
+        # learns a per-dimension gate in (0, 1) over the FV features, so the
+        # model can dial PseKRAAC up where it complements ESM (e.g. L6) and toward
+        # zero where it is redundant/noisy (saturated deep levels), instead of the
+        # fixed fv_hidden/(hidden[-1]+fv_hidden) weight a plain concatenation
+        # imposes identically at every level.
+        if use_gated:
+            gate = layers.Dense(fv_hidden, activation="sigmoid", name="fv_gate")(x)
+            fv = layers.Multiply(name="fv_gated")([fv, gate])
 
         # Merge and project into order space
         merged = layers.Concatenate(name="feature_merge")([x, fv])
@@ -589,7 +650,7 @@ class MultiLabelClassifier:
             return weighted_bce + ow * _o_loss()
 
         model.compile(
-            optimizer=self.optimizer,  # type: ignore
+            optimizer=self._make_optimizer(),
             loss=order_combined_loss,
             metrics=["accuracy"],
         )
@@ -631,7 +692,7 @@ class MultiLabelClassifier:
             X_val=X_val,
             y_val=y_val,
             patience=self.patience,  # type: ignore
-            min_delta=0.001,
+            min_delta=float(getattr(self, "min_delta", 0.001)),
             verbose=self.verbose,
         )
 
