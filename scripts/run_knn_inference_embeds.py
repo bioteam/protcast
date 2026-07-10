@@ -26,10 +26,10 @@ from pathlib import Path
 from collections import Counter
 from Bio import SeqIO
 from esm.models.esmc import ESMC
-from esm.sdk.api import ESMProtein
 
 from protcast.model.knn_classifier import KNNClassifier
 from protcast.model.multilabel_classifier import GOEncoder, get_confidence_label
+from protcast.preprocessing.esm_embedding import embed_sequence, POOLING_STRATEGIES
 
 
 def load_esm_model(model_name, verbose=False):
@@ -48,20 +48,31 @@ def load_esm_model(model_name, verbose=False):
         sys.exit(1)
 
 
-def get_embedding_for_sequence(model, sequence, protein_id, verbose=False):
-    """Generate ESM-C embedding for a single protein sequence."""
+def get_embedding_for_sequence(
+    model,
+    sequence,
+    protein_id,
+    pooling="mean",
+    layer=None,
+    strip_special_tokens=True,
+    verbose=False,
+):
+    """Generate an ESM-C embedding for a single protein sequence.
+
+    Delegates to the shared embed_sequence pipeline so the pooling recipe is
+    identical to the one used to build the training embeddings. The pooling,
+    layer, and strip_special_tokens arguments MUST match whatever produced the
+    embeddings the model was trained on, or the query vectors will live in a
+    different feature space and predictions will be meaningless.
+    """
     try:
-        protein = ESMProtein(sequence=sequence)
-        with torch.no_grad():
-            protein_tensor = model.encode(protein)
-            output = model.forward(
-                sequence_tokens=protein_tensor.sequence.unsqueeze(0)
-            )
-            sequence_embeddings = output.embeddings.squeeze(0).to(
-                dtype=torch.float32
-            )
-            protein_embedding = sequence_embeddings.mean(dim=0).cpu().numpy()
-            return protein_embedding
+        return embed_sequence(
+            model,
+            sequence,
+            pooling=pooling,
+            layer=layer,
+            strip_special_tokens=strip_special_tokens,
+        )
     except Exception as e:
         print(f"Error processing protein {protein_id}: {e}")
         return None
@@ -116,6 +127,32 @@ def main():
         default="esmc_600m",
         choices=["esm3_c", "esmc_300m", "esmc_600m"],
         help="ESM-C model type for embedding generation",
+    )
+    parser.add_argument(
+        "--pooling",
+        default="mean",
+        choices=list(POOLING_STRATEGIES),
+        help=(
+            "Pooling strategy for query embeddings. MUST match the pooling "
+            "used to train the model being loaded (default: mean)."
+        ),
+    )
+    parser.add_argument(
+        "--layer",
+        type=int,
+        default=None,
+        help=(
+            "ESM-C hidden layer to pool (default: final embeddings). MUST "
+            "match the layer used to train the model being loaded."
+        ),
+    )
+    parser.add_argument(
+        "--keep_special_tokens",
+        action="store_true",
+        help=(
+            "Keep BOS/EOS positions when pooling (default: stripped). MUST "
+            "match the setting used to train the model being loaded."
+        ),
     )
     parser.add_argument(
         "--threshold",
@@ -180,7 +217,13 @@ def main():
             continue
 
         embedding = get_embedding_for_sequence(
-            esm_model, seqstr, seq.id, verbose=args.verbose
+            esm_model,
+            seqstr,
+            seq.id,
+            pooling=args.pooling,
+            layer=args.layer,
+            strip_special_tokens=not args.keep_special_tokens,
+            verbose=args.verbose,
         )
 
         if embedding is None:

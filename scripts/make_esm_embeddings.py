@@ -27,6 +27,22 @@ mean         (default) per-dimension average across residues → vector of size 
 mean_max_std concatenation of per-dimension mean, max, and standard deviation
              across residues → vector of size 3*D. Captures dispersion and
              extreme-value information that mean pooling discards.
+
+Special tokens: ESM-C prepends a BOS and appends an EOS token, so the raw
+per-residue output has shape (L+2, D). By default these two positions are
+stripped before pooling (--keep_special_tokens disables this). Stripping is
+important for mean_max_std, where the max would otherwise be dominated by the
+special tokens' activations.
+
+Layer selection (--layer): by default the final-layer embeddings are pooled.
+Passing an integer pools that hidden layer instead (negative indices allowed,
+e.g. -1 for the last hidden layer), which is useful because mid-layer
+representations often outperform the final layer for function prediction.
+
+The pooling recipe implemented here is shared with the inference-time embedders
+via protcast.preprocessing.esm_embedding, so training and inference vectors are
+guaranteed to live in the same feature space. If you change the pooling,
+strip, or layer here, generate inference embeddings with the SAME settings.
 """
 
 import torch
@@ -40,6 +56,7 @@ from collections import defaultdict
 from esm.models.esmc import ESMC
 
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
+from protcast.preprocessing.esm_embedding import embed_sequence, POOLING_STRATEGIES
 from protcast.config.model_config import ConfigManager
 
 
@@ -74,13 +91,34 @@ def parse_args():
     parser.add_argument(
         "--pooling",
         default="mean",
-        choices=["mean", "mean_max_std"],
+        choices=list(POOLING_STRATEGIES),
         help=(
             "Strategy for reducing per-residue ESM-C embeddings to a "
             "single per-protein vector. 'mean' (default) produces a "
             "vector of length D; 'mean_max_std' concatenates per-dimension "
             "mean, max, and standard deviation, producing a 1-D vector of "
             "length 3*D. Use a separate --output_dir for non-default pooling"
+        ),
+    )
+    parser.add_argument(
+        "--layer",
+        type=int,
+        default=None,
+        help=(
+            "ESM-C hidden layer to pool. Default (unset) pools the final "
+            "embeddings, matching previous behaviour. An integer selects that "
+            "hidden layer (negative indices allowed, e.g. -1 for the last). "
+            "Mid-layer representations often beat the final layer for function "
+            "prediction. Use a separate --output_dir per layer."
+        ),
+    )
+    parser.add_argument(
+        "--keep_special_tokens",
+        action="store_true",
+        help=(
+            "Keep the BOS/EOS special-token positions when pooling. By default "
+            "they are stripped (recommended). Kept only for ablation or to "
+            "reproduce older embeddings; not advised with mean_max_std pooling."
         ),
     )
     parser.add_argument(
@@ -217,25 +255,6 @@ def get_proteins_for_go_terms(
     return proteins_by_go
 
 
-def pool_embeddings(sequence_embeddings, strategy):
-    """Reduce per-residue embeddings of shape (L, D) to a single vector.
-
-    strategy:
-      mean         -> (D,) per-dimension mean across residues.
-      mean_max_std -> (3*D,) concatenation of mean, max, and std across
-                       residues. std uses unbiased=False so the result is
-                       defined (zero) for L=1.
-    """
-    if strategy == "mean":
-        return sequence_embeddings.mean(dim=0)
-    if strategy == "mean_max_std":
-        mean = sequence_embeddings.mean(dim=0)
-        max_ = sequence_embeddings.max(dim=0).values
-        std = sequence_embeddings.std(dim=0, unbiased=False)
-        return torch.cat([mean, max_, std], dim=0)
-    raise ValueError(f"Unknown pooling strategy: {strategy}")
-
-
 def load_esm_model(model_name, verbose=False):
     """Load an ESM-C model using the correct ESM 3.2.1 API."""
 
@@ -262,7 +281,15 @@ def load_esm_model(model_name, verbose=False):
         sys.exit(1)
 
 
-def get_embeddings_for_term(model, sequences_dict, go_id, pooling="mean", verbose=False):
+def get_embeddings_for_term(
+    model,
+    sequences_dict,
+    go_id,
+    pooling="mean",
+    layer=None,
+    strip_special_tokens=True,
+    verbose=False,
+):
     """
     Process protein sequences using ESM-C API to generate embeddings.
 
@@ -274,6 +301,12 @@ def get_embeddings_for_term(model, sequences_dict, go_id, pooling="mean", verbos
         Dictionary mapping protein IDs to sequences
     go_id : str
         GO term identifier
+    pooling : str
+        Pooling strategy passed to the shared embed_sequence pipeline.
+    layer : int or None
+        ESM-C hidden layer to pool (None -> final embeddings).
+    strip_special_tokens : bool
+        Whether to drop BOS/EOS positions before pooling.
     verbose : bool
         Whether to print verbose output
 
@@ -283,8 +316,6 @@ def get_embeddings_for_term(model, sequences_dict, go_id, pooling="mean", verbos
         Dictionary mapping protein IDs to ESM-C embeddings
     """
 
-    from esm.sdk.api import ESMProtein
-
     embeddings_dict = {}
 
     if verbose:
@@ -292,48 +323,30 @@ def get_embeddings_for_term(model, sequences_dict, go_id, pooling="mean", verbos
             f"Processing {len(sequences_dict)} sequences for GO term {go_id}..."
         )
 
-    # ESM-C processes sequences individually
+    # ESM-C processes sequences individually. All pooling (layer selection,
+    # special-token stripping, mean/mean_max_std) is delegated to the shared
+    # embed_sequence pipeline so training and inference vectors match exactly.
     for protein_id, sequence in sequences_dict.items():
         try:
-            # Create ESMProtein object
-            protein = ESMProtein(sequence=sequence)
-
             if verbose:
                 print(
                     f"Creating embedding for {protein_id} (length: {len(sequence)}, GO term: {go_id})"
                 )
 
-            # Get embeddings using ESM-C
-            with torch.no_grad():
-                # Encode protein to get tokens
-                protein_tensor = model.encode(protein)
+            protein_embedding = embed_sequence(
+                model,
+                sequence,
+                pooling=pooling,
+                layer=layer,
+                strip_special_tokens=strip_special_tokens,
+            )
 
-                # Get embeddings through forward pass
-                # Add batch dimension (unsqueeze) for the sequence tokens
-                output = model.forward(
-                    sequence_tokens=protein_tensor.sequence.unsqueeze(0)
+            embeddings_dict[protein_id] = protein_embedding
+
+            if verbose:
+                print(
+                    f"  ✓ Processed {protein_id}: embedding shape {protein_embedding.shape}"
                 )
-
-                # Extract per-residue embeddings, then reduce to a single
-                # per-protein vector with the chosen pooling strategy.
-                # Shape: [batch=1, seq_len, embed_dim] -> pooled vector.
-                sequence_embeddings = output.embeddings.squeeze(
-                    0
-                ).to(  # Remove batch dim
-                    dtype=torch.float32
-                )  # Convert from bfloat16 before numpy conversion
-                protein_embedding = (
-                    pool_embeddings(sequence_embeddings, pooling)
-                    .cpu()
-                    .numpy()
-                )
-
-                embeddings_dict[protein_id] = protein_embedding
-
-                if verbose:
-                    print(
-                        f"  ✓ Processed {protein_id}: embedding shape {protein_embedding.shape}"
-                    )
 
         except Exception as e:
             print(f"❌ Error processing protein {protein_id}: {e}")
@@ -370,6 +383,11 @@ def main():
             args.seed = 42
     if args.verbose:
         print(f"Random seed: {args.seed}")
+        layer_desc = "final embeddings" if args.layer is None else f"hidden layer {args.layer}"
+        print(
+            f"Pooling: {args.pooling} | {layer_desc} | "
+            f"special tokens: {'kept' if args.keep_special_tokens else 'stripped'}"
+        )
     rng = random.Random(args.seed)
 
     output_dir = Path(args.output_dir).resolve()
@@ -424,7 +442,13 @@ def main():
             print(f"Generating embeddings for GO term {go_id}")
         # Get embeddings for all proteins for this GO term
         embeddings = get_embeddings_for_term(
-            model, proteins, go_id, args.pooling, args.verbose
+            model,
+            proteins,
+            go_id,
+            pooling=args.pooling,
+            layer=args.layer,
+            strip_special_tokens=not args.keep_special_tokens,
+            verbose=args.verbose,
         )
 
         with open(go_path, "wb") as f:
