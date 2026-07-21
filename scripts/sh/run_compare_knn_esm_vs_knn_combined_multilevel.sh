@@ -22,6 +22,10 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
+# Pooling suffix on the embedding directory. The per-level ESM dirs are now
+# named mf_go_terms-level-<N>-<POOL> (e.g. -mean_max_std). Leave POOL empty to
+# fall back to the legacy plain mf_go_terms-level-<N> layout.
+POOL=${POOL:-mean_max_std}
 LEVELS=${LEVELS:-"5 6 7 8"}
 SEED=${SEED:-42}
 FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"CTriad Moran CTDD"}
@@ -33,19 +37,26 @@ module load tacc-apptainer
 
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
+# Build the "-<POOL>" suffix only when POOL is non-empty, so an empty POOL
+# still resolves to the legacy mf_go_terms-level-<N> directory.
+POOL_SUFFIX=${POOL:+-${POOL}}
+
 for LEVEL in ${LEVELS}; do
-    OUTDIR=${OUTROOT}/knn_esm_vs_combined-${TAG}-level-${LEVEL}-seed-${SEED}
+    EMBED_PATH=$DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}
+    OUTDIR=${OUTROOT}/knn_esm_vs_combined-${TAG}-${POOL:-mean}-level-${LEVEL}-seed-${SEED}
     echo "============================================"
     echo "Running KNN(ESM-C) vs KNN(ESM-C + classical) for GO level ${LEVEL} (seed ${SEED})"
+    echo "  embeddings: ${EMBED_PATH}"
+    echo "  features  : ${FEATURE_ALGORITHMS}"
     echo "============================================"
     singularity exec --nv $CONTAINER \
     python3 scripts/compare_knn_esm_vs_knn_combined.py \
     -v \
     -p $DATADIR/ProtCastDataset.bin \
-    -d $DATADIR/$EMBEDDIR-${LEVEL} \
+    -d $EMBED_PATH \
     -o $OUTDIR \
     --feature_algorithms ${FEATURE_ALGORITHMS} \
     --seed $SEED \
     --use_mlflow \
-    2>&1 | tee knn_esm_vs_combined_${TAG}_level_${LEVEL}_seed_${SEED}.log
+    2>&1 | tee knn_esm_vs_combined_${TAG}_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
 done

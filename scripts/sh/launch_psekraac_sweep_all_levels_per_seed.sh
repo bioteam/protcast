@@ -19,13 +19,17 @@ set -euo pipefail
 LEVELS="5 6 7 8"
 SEEDS=(42 43 44)
 FEATURES="PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"
+# Base ESM embedding pooling to concatenate the PseKRAAC block onto. Points the
+# runner at mf_go_terms-level-<N>-mean_max_std. Override on the command line,
+# e.g.  POOL=mean bash scripts/sh/launch_psekraac_sweep_all_levels_per_seed.sh
+POOL=${POOL:-mean_max_std}
 TAG=psekraac
 
 for SEED in "${SEEDS[@]}"; do
     sbatch \
-        --export=ALL,SEED=${SEED},LEVELS="${LEVELS}",TAG=${TAG},FEATURE_ALGORITHMS="${FEATURES}" \
+        --export=ALL,SEED=${SEED},LEVELS="${LEVELS}",POOL=${POOL},TAG=${TAG},FEATURE_ALGORITHMS="${FEATURES}" \
         --job-name=knn_${TAG}_ml_s${SEED} \
-        -o run_knn_${TAG}_ml_s${SEED}.out \
-        -e run_knn_${TAG}_ml_s${SEED}.err \
+        -o run_knn_${TAG}_${POOL}_ml_s${SEED}.out \
+        -e run_knn_${TAG}_${POOL}_ml_s${SEED}.err \
         protcastshared/ProtCast/scripts/sh/run_compare_knn_esm_vs_knn_combined_multilevel.sh
 done
