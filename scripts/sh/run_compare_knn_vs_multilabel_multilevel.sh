@@ -24,6 +24,17 @@
 #
 # Override LEVELS / SEED / POOL / VARIANT / OUTROOT via --export from a
 # launcher (see launch_multilabel_sweep_all_levels_per_seed.sh).
+#
+# ── Order-model tuning knobs (opt-in) ──────────────────────────────────────
+# All OPT-IN. Leave a var empty (the default) and the corresponding CLI flag is
+# not passed, so the driver falls back to config.json and reproduces prior runs
+# bit-for-bit. Set any of them to tune the order model on the wider mean_max_std
+# embeddings: ORDER_WEIGHT, ORDER_DIM, LEARNING_RATE, LR_SCHEDULE (only "cosine"),
+# PATIENCE, MIN_DELTA.
+#
+# For the dual-encoder (ESM + PseKRAAC two-branch) variant use the dedicated
+# toolchain instead: run_compare_dual_encoder{,_multilevel}.sh and
+# run_dual_encoder_hparam.sh (all now POOL-aware).
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
@@ -35,13 +46,33 @@ SEED=${SEED:-42}
 VARIANT=${VARIANT:-soft}
 OUTROOT=${OUTROOT:-${WORK}/ProtCast_results}
 
+# Tuning knobs (empty = use config.json default; flag omitted).
+ORDER_WEIGHT=${ORDER_WEIGHT:-}
+ORDER_DIM=${ORDER_DIM:-}
+LEARNING_RATE=${LEARNING_RATE:-}
+LR_SCHEDULE=${LR_SCHEDULE:-}
+PATIENCE=${PATIENCE:-}
+MIN_DELTA=${MIN_DELTA:-}
+
 # Build the "-<POOL>" suffix only when POOL is non-empty.
 POOL_SUFFIX=${POOL:+-${POOL}}
+
+# Assemble the opt-in argument list. Only non-empty knobs contribute a flag, so
+# a bare invocation is byte-identical to the previous bare "--order" runner.
+EXTRA_ARGS=()
+[ -n "$ORDER_WEIGHT" ]  && EXTRA_ARGS+=(--order-weight "$ORDER_WEIGHT")
+[ -n "$ORDER_DIM" ]     && EXTRA_ARGS+=(--order-dim "$ORDER_DIM")
+[ -n "$LEARNING_RATE" ] && EXTRA_ARGS+=(--learning-rate "$LEARNING_RATE")
+[ -n "$LR_SCHEDULE" ]   && EXTRA_ARGS+=(--lr-schedule "$LR_SCHEDULE")
+[ -n "$PATIENCE" ]      && EXTRA_ARGS+=(--patience "$PATIENCE")
+[ -n "$MIN_DELTA" ]     && EXTRA_ARGS+=(--min-delta "$MIN_DELTA")
 
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
 module load tacc-apptainer
 
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
+
+echo "Extra args: ${EXTRA_ARGS[*]:-<none, config.json defaults>}"
 
 for LEVEL in ${LEVELS}; do
     EMBED_PATH=$DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}
@@ -61,6 +92,7 @@ for LEVEL in ${LEVELS}; do
     --seed $SEED \
     --order \
     --order-variant $VARIANT \
+    "${EXTRA_ARGS[@]}" \
     --use_mlflow \
     2>&1 | tee knn_vs_multilabel_${VARIANT}order_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
 done

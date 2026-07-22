@@ -34,11 +34,15 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
+# Pooling suffix on the embedding directory: mf_go_terms-level-<N>-<POOL>.
+# Empty POOL falls back to the legacy plain mf_go_terms-level-<N> layout.
+POOL=${POOL:-mean_max_std}
 LEVEL=${LEVEL:-6}
 SEED=${SEED:-42}
 VARIANT=${VARIANT:-soft}
 FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
-OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}-${VARIANT}order-dual}
+POOL_SUFFIX=${POOL:+-${POOL}}
+OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}-${VARIANT}order-dual}
 
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
 module load tacc-apptainer
@@ -46,14 +50,15 @@ module load tacc-apptainer
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
 echo "============================================"
-echo "Dual-encoder pilot: ${VARIANT} order, level ${LEVEL}, seed ${SEED}"
+echo "Dual-encoder pilot: ${VARIANT} order, level ${LEVEL}, seed ${SEED}, pool=${POOL:-mean}"
 echo "Features: ${FEATURE_ALGORITHMS}"
+echo "  embeddings: $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}"
 echo "============================================"
 singularity exec --nv $CONTAINER \
 python3 scripts/compare_knn_vs_multilabel.py \
 -v \
 -p $DATADIR/ProtCastDataset.bin \
--d $DATADIR/$EMBEDDIR-${LEVEL} \
+-d $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX} \
 -o $OUTDIR \
 --seed $SEED \
 --order \
@@ -61,4 +66,4 @@ python3 scripts/compare_knn_vs_multilabel.py \
 --dual-encoder \
 --feature_algorithms ${FEATURE_ALGORITHMS} \
 --use_mlflow \
-2>&1 | tee compare_dual_encoder_${VARIANT}_level_${LEVEL}_seed_${SEED}.log
+2>&1 | tee compare_dual_encoder_${VARIANT}_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log

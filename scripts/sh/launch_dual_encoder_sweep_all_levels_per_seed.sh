@@ -20,14 +20,15 @@ set -euo pipefail
 
 LEVELS="5 6 7 8"
 SEEDS=(42 43 44)
+POOL=${POOL:-mean_max_std}
 VARIANT=${VARIANT:-soft}
 FEATURES=${FEATURES:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
 
 for SEED in "${SEEDS[@]}"; do
     sbatch \
-        --export=ALL,SEED=${SEED},LEVELS="${LEVELS}",VARIANT=${VARIANT},FEATURE_ALGORITHMS="${FEATURES}" \
-        --job-name=dual_enc_${VARIANT}_s${SEED} \
-        -o run_dual_enc_${VARIANT}_s${SEED}.out \
-        -e run_dual_enc_${VARIANT}_s${SEED}.err \
+        --export=ALL,SEED=${SEED},LEVELS="${LEVELS}",POOL=${POOL},VARIANT=${VARIANT},FEATURE_ALGORITHMS="${FEATURES}" \
+        --job-name=dual_enc_${VARIANT}_${POOL}_s${SEED} \
+        -o run_dual_enc_${VARIANT}_${POOL}_s${SEED}.out \
+        -e run_dual_enc_${VARIANT}_${POOL}_s${SEED}.err \
         protcastshared/ProtCast/scripts/sh/run_compare_dual_encoder_multilevel.sh
 done

@@ -14,17 +14,22 @@
 # submitting one job per (level, seed) this stays under the per-user queue
 # cap. Re-running is safe: each level's results JSON is resumed independently.
 #
-# Override LEVELS / SEED / VARIANT / FEATURE_ALGORITHMS / OUTROOT via
+# Override LEVELS / SEED / POOL / VARIANT / FEATURE_ALGORITHMS / OUTROOT via
 # --export from the launcher (see launch_dual_encoder_sweep_all_levels_per_seed.sh).
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
+# Pooling suffix on the embedding directory: mf_go_terms-level-<N>-<POOL>.
+# Empty POOL falls back to the legacy plain mf_go_terms-level-<N> layout.
+POOL=${POOL:-mean_max_std}
 LEVELS=${LEVELS:-"5 6 7 8"}
 SEED=${SEED:-42}
 VARIANT=${VARIANT:-soft}
 FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
 OUTROOT=${OUTROOT:-${WORK}/ProtCast_results}
+
+POOL_SUFFIX=${POOL:+-${POOL}}
 
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
 module load tacc-apptainer
@@ -32,15 +37,17 @@ module load tacc-apptainer
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
 for LEVEL in ${LEVELS}; do
-    OUTDIR=${OUTROOT}/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}-${VARIANT}order-dual
+    EMBED_PATH=$DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}
+    OUTDIR=${OUTROOT}/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}-${VARIANT}order-dual
     echo "============================================"
-    echo "Dual-encoder: ${VARIANT} order, GO level ${LEVEL} (seed ${SEED})"
+    echo "Dual-encoder: ${VARIANT} order, GO level ${LEVEL} (pool=${POOL:-mean}, seed ${SEED})"
+    echo "  embeddings: ${EMBED_PATH}"
     echo "============================================"
     singularity exec --nv $CONTAINER \
     python3 scripts/compare_knn_vs_multilabel.py \
     -v \
     -p $DATADIR/ProtCastDataset.bin \
-    -d $DATADIR/$EMBEDDIR-${LEVEL} \
+    -d $EMBED_PATH \
     -o $OUTDIR \
     --seed $SEED \
     --order \
@@ -48,5 +55,5 @@ for LEVEL in ${LEVELS}; do
     --dual-encoder \
     --feature_algorithms ${FEATURE_ALGORITHMS} \
     --use_mlflow \
-    2>&1 | tee compare_dual_encoder_${VARIANT}_level_${LEVEL}_seed_${SEED}.log
+    2>&1 | tee compare_dual_encoder_${VARIANT}_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
 done

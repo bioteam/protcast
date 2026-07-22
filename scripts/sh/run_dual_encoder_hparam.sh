@@ -30,11 +30,14 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
+# Pooling suffix on the embedding directory. Empty POOL -> legacy plain layout.
+POOL=${POOL:-mean_max_std}
 LEVELS=${LEVELS:-"6 7"}
 SEED=${SEED:-42}
 VARIANT=${VARIANT:-soft}
 FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
 OUTROOT=${OUTROOT:-${WORK}/ProtCast_results}
+POOL_SUFFIX=${POOL:+-${POOL}}
 
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
 module load tacc-apptainer
@@ -59,15 +62,16 @@ TAG="${VARIANT}order-dual"
 echo "Extra args: ${EXTRA_ARGS:-<none>}"
 
 for LEVEL in ${LEVELS}; do
-    OUTDIR=${OUTROOT}/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}-${TAG}
+    OUTDIR=${OUTROOT}/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}-${TAG}
     echo "============================================"
-    echo "Dual hparam: level ${LEVEL} seed ${SEED} tag ${TAG}"
+    echo "Dual hparam: level ${LEVEL} seed ${SEED} pool=${POOL:-mean} tag ${TAG}"
+    echo "  embeddings: $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}"
     echo "============================================"
     singularity exec --nv $CONTAINER \
     python3 scripts/compare_knn_vs_multilabel.py \
     -v \
     -p $DATADIR/ProtCastDataset.bin \
-    -d $DATADIR/$EMBEDDIR-${LEVEL} \
+    -d $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX} \
     -o $OUTDIR \
     --seed $SEED \
     --order \
