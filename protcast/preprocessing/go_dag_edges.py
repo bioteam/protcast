@@ -1,10 +1,10 @@
 """go_dag_edges.py
 
-Extract parent-child edge pairs from the GO DAG for box containment loss.
+Extract parent-child edge pairs from the GO DAG for the order-violation loss.
 
 Given an AnnotatedGODag and a set of GO IDs used in the model, produces
-integer index pairs suitable for the containment regularization loss
-in box_embeddings.py.
+integer index pairs suitable for the order-violation regularization loss
+in order_embeddings.py.
 """
 
 from __future__ import annotations

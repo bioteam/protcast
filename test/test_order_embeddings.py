@@ -1,14 +1,15 @@
-"""Tests for box embeddings: BoxEmbeddingLayer, containment loss, DAG edges,
-and end-to-end training with the box model path."""
+"""Tests for order embeddings: OrderEmbeddingLayer, order-violation loss,
+DAG edges, and end-to-end training with the order model path."""
 
 import numpy as np
 import pytest
 
 import tensorflow as tf
-from protcast.model.box_embeddings import (
-    BoxEmbeddingLayer,
-    build_box_embedding_model,
-    containment_loss,
+from protcast.model.order_embeddings import (
+    OrderEmbeddingLayer,
+    build_order_embedding_model,
+    order_violation_loss,
+    order_violation_loss_soft,
 )
 from protcast.model.multilabel_classifier import (
     MultiLabelClassifier,
@@ -18,142 +19,171 @@ from protcast.preprocessing.go_dag_edges import extract_dag_edges
 
 
 # ---------------------------------------------------------------------------
-# BoxEmbeddingLayer tests
+# OrderEmbeddingLayer tests
 # ---------------------------------------------------------------------------
 
 
-class TestBoxEmbeddingLayer:
+class TestOrderEmbeddingLayer:
     def test_output_shape(self):
-        layer = BoxEmbeddingLayer(num_classes=5, box_dim=8)
+        layer = OrderEmbeddingLayer(num_classes=5, order_dim=8)
         x = tf.random.normal((4, 8))
         out = layer(x)
         assert out.shape == (4, 5)
 
     def test_output_range(self):
-        """Membership scores should be in (0, 1) since they are sigmoid."""
-        layer = BoxEmbeddingLayer(num_classes=3, box_dim=16)
-        x = tf.random.normal((10, 16))
+        """Membership scores are exp(-energy), so they lie in (0, 1]."""
+        layer = OrderEmbeddingLayer(num_classes=3, order_dim=16)
+        # Use non-negative inputs (the projection head emits softplus output)
+        x = tf.abs(tf.random.normal((10, 16)))
         out = layer(x).numpy()
         assert np.all(out >= 0.0)
         assert np.all(out <= 1.0)
 
-    def test_point_inside_box_scores_high(self):
-        """A point at the center of a box should score higher than one far away."""
-        layer = BoxEmbeddingLayer(num_classes=1, box_dim=4, temperature=10.0)
-        # Build by calling once
+    def test_dominating_point_scores_high(self):
+        """A protein point that dominates a term coordinate-wise should score
+        higher than one that fails to dominate it.
+
+        In the reversed product order, the protein must be >= the term on
+        every dimension to fully entail it (energy 0, score 1)."""
+        layer = OrderEmbeddingLayer(num_classes=1, order_dim=4, temperature=10.0)
+        _ = layer(tf.zeros((1, 4)))  # build
+
+        # Place the term at a small positive position (softplus(-0.433)≈0.5).
+        layer.raw_terms.assign(tf.constant([[-0.433, -0.433, -0.433, -0.433]]))
+
+        # Dominating point: well above the term on every dim
+        dominating = tf.constant([[5.0, 5.0, 5.0, 5.0]])
+        # Failing point: at the origin, below the (positive) term
+        failing = tf.zeros((1, 4))
+
+        score_dom = layer(dominating).numpy()[0, 0]
+        score_fail = layer(failing).numpy()[0, 0]
+        assert score_dom > score_fail
+        # A fully-dominating point should be near 1 (energy ~0)
+        assert score_dom > 0.99
+
+    def test_get_term_positions(self):
+        layer = OrderEmbeddingLayer(num_classes=3, order_dim=4)
         _ = layer(tf.zeros((1, 4)))
-
-        # Set box to center=0, offset=1 (box spans [-1, 1] in each dim)
-        layer.centers.assign(tf.zeros((1, 4)))
-        layer.log_offsets.assign(tf.ones((1, 4)))  # softplus(1) ≈ 1.31
-
-        center_point = tf.zeros((1, 4))
-        far_point = tf.constant([[10.0, 10.0, 10.0, 10.0]])
-
-        score_center = layer(center_point).numpy()[0, 0]
-        score_far = layer(far_point).numpy()[0, 0]
-        assert score_center > score_far
-
-    def test_get_box_bounds(self):
-        layer = BoxEmbeddingLayer(num_classes=3, box_dim=4)
-        _ = layer(tf.zeros((1, 4)))
-        box_min, box_max = layer.get_box_bounds()
-        assert box_min.shape == (3, 4)
-        assert box_max.shape == (3, 4)
-        assert np.all(box_min <= box_max)
+        positions = layer.get_term_positions()
+        assert positions.shape == (3, 4)
+        # softplus output is strictly positive
+        assert np.all(positions > 0.0)
 
     def test_serialization(self):
         """Layer should be serializable for model save/load."""
-        layer = BoxEmbeddingLayer(num_classes=5, box_dim=8)
+        layer = OrderEmbeddingLayer(num_classes=5, order_dim=8)
         config = layer.get_config()
         assert config["num_classes"] == 5
-        assert config["box_dim"] == 8
+        assert config["order_dim"] == 8
         assert config["temperature"] == 10.0
 
-        restored = BoxEmbeddingLayer.from_config(config)
+        restored = OrderEmbeddingLayer.from_config(config)
         assert restored.num_classes == 5
-        assert restored.box_dim == 8
+        assert restored.order_dim == 8
 
 
 # ---------------------------------------------------------------------------
-# Containment loss tests
+# Order-violation loss tests
 # ---------------------------------------------------------------------------
 
 
-class TestContainmentLoss:
+class TestOrderViolationLoss:
     def test_no_edges_returns_zero(self):
-        layer = BoxEmbeddingLayer(num_classes=3, box_dim=4)
+        layer = OrderEmbeddingLayer(num_classes=3, order_dim=4)
         _ = layer(tf.zeros((1, 4)))
         empty_edges = tf.constant(np.zeros((0, 2), dtype=np.int32))
-        loss_val = containment_loss(layer, empty_edges)
+        loss_val = order_violation_loss(layer, empty_edges)
         assert float(loss_val) == 0.0
 
-    def test_child_inside_parent_low_loss(self):
-        """When child box is fully inside parent, loss should be ~0."""
-        layer = BoxEmbeddingLayer(num_classes=2, box_dim=4)
+    def test_child_dominates_parent_low_loss(self):
+        """When the child dominates the parent coordinate-wise (child is more
+        specific), the order-violation loss should be ~0."""
+        layer = OrderEmbeddingLayer(num_classes=2, order_dim=4)
         _ = layer(tf.zeros((1, 4)))
 
-        # Parent: center=0, large offset → big box
-        # Child: center=0, small offset → small box inside parent
-        layer.centers.assign(tf.zeros((2, 4)))
-        # softplus(3) ≈ 3.05, softplus(-2) ≈ 0.13
-        layer.log_offsets.assign(tf.constant([
-            [3.0, 3.0, 3.0, 3.0],   # parent: big box
-            [-2.0, -2.0, -2.0, -2.0],  # child: tiny box
+        # term 0 = parent (small coords), term 1 = child (larger coords).
+        # softplus(0)≈0.69 (parent), softplus(3)≈3.05 (child) -> child dominates.
+        layer.raw_terms.assign(tf.constant([
+            [0.0, 0.0, 0.0, 0.0],   # parent: ~0.69 per dim
+            [3.0, 3.0, 3.0, 3.0],   # child:  ~3.05 per dim (dominates parent)
         ]))
 
-        edges = tf.constant([[0, 1]], dtype=tf.int32)
-        loss_val = float(containment_loss(layer, edges))
+        edges = tf.constant([[0, 1]], dtype=tf.int32)  # [parent_idx, child_idx]
+        loss_val = float(order_violation_loss(layer, edges))
         assert loss_val < 0.01
 
-    def test_child_outside_parent_high_loss(self):
-        """When child box extends far beyond parent, loss should be large."""
-        layer = BoxEmbeddingLayer(num_classes=2, box_dim=4)
+    def test_child_below_parent_high_loss(self):
+        """When the child fails to dominate the parent (parent coords larger),
+        the order-violation loss should be large."""
+        layer = OrderEmbeddingLayer(num_classes=2, order_dim=4)
         _ = layer(tf.zeros((1, 4)))
 
-        # Parent: small box at center=0
-        # Child: huge box far from parent
-        layer.centers.assign(tf.constant([
-            [0.0, 0.0, 0.0, 0.0],    # parent
-            [10.0, 10.0, 10.0, 10.0],  # child far away
-        ]))
-        layer.log_offsets.assign(tf.constant([
-            [-2.0, -2.0, -2.0, -2.0],  # parent: tiny
-            [3.0, 3.0, 3.0, 3.0],      # child: huge
+        # Parent has large coords, child has small coords -> child violates.
+        layer.raw_terms.assign(tf.constant([
+            [3.0, 3.0, 3.0, 3.0],     # parent: ~3.05 per dim
+            [-2.0, -2.0, -2.0, -2.0],  # child:  ~0.13 per dim (fails to dominate)
         ]))
 
         edges = tf.constant([[0, 1]], dtype=tf.int32)
-        loss_val = float(containment_loss(layer, edges))
+        loss_val = float(order_violation_loss(layer, edges))
         assert loss_val > 1.0
 
+    def test_soft_variant_nonzero_gradient_when_satisfied(self):
+        """The soft variant should keep a non-zero gradient even when the child
+        already dominates the parent — the gradient-flow property the hard
+        ReLU variant lacks."""
+        layer = OrderEmbeddingLayer(num_classes=2, order_dim=4)
+        _ = layer(tf.zeros((1, 4)))
+        # Child already dominates parent (constraint satisfied)
+        layer.raw_terms.assign(tf.constant([
+            [0.0, 0.0, 0.0, 0.0],
+            [3.0, 3.0, 3.0, 3.0],
+        ]))
+        edges = tf.constant([[0, 1]], dtype=tf.int32)
+
+        with tf.GradientTape() as tape:
+            loss_soft = order_violation_loss_soft(layer, edges, beta=5.0)
+        grad_soft = tape.gradient(loss_soft, layer.raw_terms)
+
+        with tf.GradientTape() as tape:
+            loss_hard = order_violation_loss(layer, edges)
+        grad_hard = tape.gradient(loss_hard, layer.raw_terms)
+
+        # Hard ReLU gives an (almost) zero gradient once satisfied; soft does not.
+        soft_norm = float(tf.norm(grad_soft))
+        hard_norm = float(tf.norm(grad_hard)) if grad_hard is not None else 0.0
+        assert soft_norm > hard_norm
+        assert soft_norm > 0.0
+
 
 # ---------------------------------------------------------------------------
-# build_box_embedding_model tests
+# build_order_embedding_model tests
 # ---------------------------------------------------------------------------
 
 
-class TestBuildBoxModel:
+class TestBuildOrderModel:
     def test_model_builds(self):
-        model, box_layer = build_box_embedding_model(
+        model, order_layer = build_order_embedding_model(
             input_dim=64, num_classes=5, hidden_layers=[32, 16],
-            dropout_rate=0.3, box_dim=8,
+            dropout_rate=0.3, order_dim=8,
         )
         assert model is not None
-        assert isinstance(box_layer, BoxEmbeddingLayer)
+        assert isinstance(order_layer, OrderEmbeddingLayer)
 
     def test_model_output_shape(self):
-        model, _ = build_box_embedding_model(
+        model, _ = build_order_embedding_model(
             input_dim=64, num_classes=10, hidden_layers=[32],
-            dropout_rate=0.2, box_dim=16,
+            dropout_rate=0.2, order_dim=16,
         )
         x = np.random.randn(3, 64).astype(np.float32)
         y = model.predict(x, verbose=0)
         assert y.shape == (3, 10)
 
     def test_model_output_range(self):
-        model, _ = build_box_embedding_model(
+        model, _ = build_order_embedding_model(
             input_dim=32, num_classes=4, hidden_layers=[16],
-            dropout_rate=0.1, box_dim=8,
+            dropout_rate=0.1, order_dim=8,
         )
         x = np.random.randn(5, 32).astype(np.float32)
         y = model.predict(x, verbose=0)
@@ -229,12 +259,12 @@ class TestExtractDagEdges:
 
 
 # ---------------------------------------------------------------------------
-# MultiLabelClassifier box mode integration test
+# MultiLabelClassifier order mode integration test
 # ---------------------------------------------------------------------------
 
 
-class TestMultiLabelClassifierBoxMode:
-    def _make_config(self, use_boxes=True):
+class TestMultiLabelClassifierOrderMode:
+    def _make_config(self, use_order=True, order_variant="soft"):
         return {
             "USER": "test",
             "EXPERIMENT_NAME": "test",
@@ -248,10 +278,12 @@ class TestMultiLabelClassifierBoxMode:
             "PRED_THRESHOLD": 50.0,
             "VALIDATION_SPLIT": 0.2,
             "PATIENCE": 2,
-            "USE_BOX_EMBEDDINGS": use_boxes,
-            "BOX_DIM": 8,
-            "BOX_TEMPERATURE": 10.0,
-            "CONTAINMENT_WEIGHT": 0.1,
+            "USE_ORDER_EMBEDDINGS": use_order,
+            "ORDER_DIM": 8,
+            "ORDER_TEMPERATURE": 10.0,
+            "ORDER_WEIGHT": 0.1,
+            "ORDER_VARIANT": order_variant,
+            "ORDER_BETA": 5.0,
         }
 
     def _make_synthetic_data(self, n_proteins=100, n_go_terms=5, embed_dim=32):
@@ -278,8 +310,8 @@ class TestMultiLabelClassifierBoxMode:
             terms.append(FakeGOTerm(go_id, parents=parents, children=children))
         return FakeGODag(terms)
 
-    def test_box_model_trains(self, tmp_path):
-        """Full training run with box embeddings and a fake DAG."""
+    def test_order_model_trains(self, tmp_path):
+        """Full training run with order embeddings and a fake DAG."""
         embeddings, go_terms, go_ids = self._make_synthetic_data()
         dag = self._make_fake_dag(go_ids)
 
@@ -288,8 +320,8 @@ class TestMultiLabelClassifierBoxMode:
             protein_embeddings=embeddings,
             protein_go_terms=go_terms,
             go_ids=go_ids,
-            config=self._make_config(use_boxes=True),
-            id=str(tmp_path / "test_box"),
+            config=self._make_config(use_order=True),
+            id=str(tmp_path / "test_order"),
             go_dag=dag,
         )
         clf.run()
@@ -297,17 +329,35 @@ class TestMultiLabelClassifierBoxMode:
         assert clf.model is not None
         assert hasattr(clf, "best_threshold")
         assert 0.0 < clf.best_threshold < 1.0
-        assert clf._box_layer is not None
+        assert clf._order_layer is not None
 
-        # Predictions should be valid sigmoid outputs
+        # Predictions should be valid (0, 1] scores
         X_test = np.random.randn(3, 32).astype(np.float32)
         y_pred = clf.model.predict(X_test, verbose=0)
         assert y_pred.shape == (3, 5)
         assert np.all(y_pred >= 0)
         assert np.all(y_pred <= 1)
 
-    def test_box_model_without_dag(self, tmp_path):
-        """Box model should work without DAG (no containment loss)."""
+    def test_order_model_hard_variant_trains(self, tmp_path):
+        """The hard (ReLU) order-violation variant should also train end-to-end."""
+        embeddings, go_terms, go_ids = self._make_synthetic_data()
+        dag = self._make_fake_dag(go_ids)
+
+        clf = MultiLabelClassifier(
+            verbose=False,
+            protein_embeddings=embeddings,
+            protein_go_terms=go_terms,
+            go_ids=go_ids,
+            config=self._make_config(use_order=True, order_variant="hard"),
+            id=str(tmp_path / "test_order_hard"),
+            go_dag=dag,
+        )
+        clf.run()
+        assert clf.model is not None
+        assert clf._order_layer is not None
+
+    def test_order_model_without_dag(self, tmp_path):
+        """Order model should work without a DAG (no order-violation loss)."""
         embeddings, go_terms, go_ids = self._make_synthetic_data()
 
         clf = MultiLabelClassifier(
@@ -315,8 +365,8 @@ class TestMultiLabelClassifierBoxMode:
             protein_embeddings=embeddings,
             protein_go_terms=go_terms,
             go_ids=go_ids,
-            config=self._make_config(use_boxes=True),
-            id=str(tmp_path / "test_box_nodag"),
+            config=self._make_config(use_order=True),
+            id=str(tmp_path / "test_order_nodag"),
             go_dag=None,
         )
         clf.run()
@@ -324,7 +374,7 @@ class TestMultiLabelClassifierBoxMode:
         assert len(clf._dag_edges) == 0
 
     def test_flat_model_still_works(self, tmp_path):
-        """Verify flat path is unaffected by box config being present."""
+        """Verify flat path is unaffected by order config being present."""
         embeddings, go_terms, go_ids = self._make_synthetic_data()
 
         clf = MultiLabelClassifier(
@@ -332,12 +382,12 @@ class TestMultiLabelClassifierBoxMode:
             protein_embeddings=embeddings,
             protein_go_terms=go_terms,
             go_ids=go_ids,
-            config=self._make_config(use_boxes=False),
+            config=self._make_config(use_order=False),
             id=str(tmp_path / "test_flat"),
         )
         clf.run()
         assert clf.model is not None
-        assert clf._box_layer is None
+        assert clf._order_layer is None
 
 
 if __name__ == "__main__":
