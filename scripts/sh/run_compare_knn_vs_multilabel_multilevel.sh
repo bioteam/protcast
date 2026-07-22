@@ -11,14 +11,18 @@
 
 # Multi-level variant of run_compare_knn_vs_multilabel.sh. One SLURM job
 # iterates GO depths in series for a single seed, running the 3-way
-# comparison (KNN vs MultiLabel-flat vs MultiLabel+box) on ESM-C embeddings.
+# comparison (KNN vs MultiLabel-flat vs MultiLabel+order) on ESM-C embeddings.
+#
+# NOTE: arm 3 is the order-embedding model (--order/--order-variant), which
+# replaced the earlier box model after the order-embeddings merge. VARIANT is
+# the order-violation loss variant: "soft" (default) or "hard".
 #
 # Unlike the KNN-only PseKRAAC sweep, this trains two neural models per level
-# (flat + box, EPOCHS from config.json), so it goes to `rtx` with a 24h wall
+# (flat + order, EPOCHS from config.json), so it goes to `rtx` with a 24h wall
 # clock rather than rtx-dev/4h. Re-running is safe: each level's results.json
 # is resumed independently, and completed arms are skipped.
 #
-# Override LEVELS / SEED / POOL / VARIANT / TAG / OUTROOT via --export from a
+# Override LEVELS / SEED / POOL / VARIANT / OUTROOT via --export from a
 # launcher (see launch_multilabel_sweep_all_levels_per_seed.sh).
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
@@ -28,8 +32,7 @@ EMBEDDIR=mf_go_terms-level
 POOL=${POOL:-mean_max_std}
 LEVELS=${LEVELS:-"5 6 7 8"}
 SEED=${SEED:-42}
-VARIANT=${VARIANT:-hard}
-TAG=${TAG:-mlbox}
+VARIANT=${VARIANT:-soft}
 OUTROOT=${OUTROOT:-${WORK}/ProtCast_results}
 
 # Build the "-<POOL>" suffix only when POOL is non-empty.
@@ -42,9 +45,11 @@ cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
 for LEVEL in ${LEVELS}; do
     EMBED_PATH=$DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}
-    OUTDIR=${OUTROOT}/knn_vs_multilabel-${TAG}-${POOL:-mean}-level-${LEVEL}-seed-${SEED}
+    # Naming mirrors the existing "-softorder" result convention, with the pool
+    # tag inserted so mean_max_std runs never clobber the old mean-pooled ones.
+    OUTDIR=${OUTROOT}/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}-${VARIANT}order
     echo "============================================"
-    echo "KNN vs MultiLabel(flat + ${VARIANT} box) — GO level ${LEVEL} (pool=${POOL:-mean}, seed ${SEED})"
+    echo "KNN vs MultiLabel(flat + ${VARIANT} order) — GO level ${LEVEL} (pool=${POOL:-mean}, seed ${SEED})"
     echo "  embeddings: ${EMBED_PATH}"
     echo "============================================"
     singularity exec --nv $CONTAINER \
@@ -54,8 +59,8 @@ for LEVEL in ${LEVELS}; do
     -d $EMBED_PATH \
     -o $OUTDIR \
     --seed $SEED \
-    --box \
-    --box-variant $VARIANT \
+    --order \
+    --order-variant $VARIANT \
     --use_mlflow \
-    2>&1 | tee knn_vs_multilabel_${TAG}_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
+    2>&1 | tee knn_vs_multilabel_${VARIANT}order_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
 done
