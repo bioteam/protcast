@@ -12,10 +12,12 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-LEVEL=4
-SEED=42
+POOL=${POOL:-mean_max_std}
+LEVEL=${LEVEL:-4}
+SEED=${SEED:-42}
 VARIANT=smoothed
-OUTDIR=${WORK}/ProtCast_results/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}-${VARIANT}box
+POOL_SUFFIX=${POOL:+-${POOL}}
+OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}-${VARIANT}box}
 
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
 module load tacc-apptainer
@@ -23,16 +25,16 @@ module load tacc-apptainer
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
 echo "============================================"
-echo "Geometry comparison: ${VARIANT} box, level ${LEVEL}, seed ${SEED}"
+echo "Geometry comparison: ${VARIANT} box, level ${LEVEL}, seed ${SEED}, pool=${POOL:-mean}"
 echo "============================================"
 singularity exec --nv $CONTAINER \
 python3 scripts/compare_knn_vs_multilabel.py \
 -v \
 -p $DATADIR/ProtCastDataset.bin \
--d $DATADIR/$EMBEDDIR-${LEVEL} \
+-d $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX} \
 -o $OUTDIR \
 --seed $SEED \
 --box \
 --box-variant $VARIANT \
 --use_mlflow \
-2>&1 | tee compare_${VARIANT}box_level_${LEVEL}_seed_${SEED}.log
+2>&1 | tee compare_${VARIANT}box_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log

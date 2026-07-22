@@ -16,9 +16,13 @@
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 DATADIR=/work2/04769/bosborne/frontera/ProtCast/ProtCastDataset/01-23-2026
 EMBEDDIR=mf_go_terms-level
-LEVEL=4
-SEED=42
-OUTDIR=${WORK}/ProtCast_results/knn_vs_multilabel-level-${LEVEL}-seed-${SEED}
+# Pooling suffix on the embedding directory: mf_go_terms-level-<N>-<POOL>.
+# Empty POOL falls back to the legacy plain mf_go_terms-level-<N> layout.
+POOL=${POOL:-mean_max_std}
+LEVEL=${LEVEL:-4}
+SEED=${SEED:-42}
+POOL_SUFFIX=${POOL:+-${POOL}}
+OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}}
 
 # Only use local modules for Python 3.11 to match the Python version in the container
 export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
@@ -27,15 +31,16 @@ module load tacc-apptainer
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
 echo "============================================"
-echo "Running KNN vs MultiLabel for GO level ${LEVEL}"
+echo "Running KNN vs MultiLabel for GO level ${LEVEL} (pool=${POOL:-mean}, seed=${SEED})"
+echo "  embeddings: $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX}"
 echo "============================================"
 singularity exec --nv $CONTAINER \
 python3 scripts/compare_knn_vs_multilabel.py \
 -v \
 -p $DATADIR/ProtCastDataset.bin \
--d $DATADIR/$EMBEDDIR-${LEVEL} \
+-d $DATADIR/$EMBEDDIR-${LEVEL}${POOL_SUFFIX} \
 -o $OUTDIR \
 --seed $SEED \
 --box \
 --use_mlflow \
-2>&1 | tee knn_vs_multilabel_level_${LEVEL}.log
+2>&1 | tee knn_vs_multilabel_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
