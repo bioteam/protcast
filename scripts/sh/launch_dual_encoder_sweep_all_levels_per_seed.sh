@@ -22,11 +22,15 @@ LEVELS="5 6 7 8"
 SEEDS=(42 43 44)
 POOL=${POOL:-mean_max_std}
 VARIANT=${VARIANT:-soft}
+# Include the shuffled-FV capacity control by default — it is what separates
+# "real PseKRAAC signal" from "extra parameters" in the dual − order delta,
+# and is the whole point of the cross-architecture FV-value question.
+SHUFFLE_FV=${SHUFFLE_FV:-1}
 FEATURES=${FEATURES:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
 
 for SEED in "${SEEDS[@]}"; do
     sbatch \
-        --export=ALL,SEED=${SEED},LEVELS="${LEVELS}",POOL=${POOL},VARIANT=${VARIANT},FEATURE_ALGORITHMS="${FEATURES}" \
+        --export=ALL,SEED=${SEED},LEVELS="${LEVELS}",POOL=${POOL},VARIANT=${VARIANT},SHUFFLE_FV=${SHUFFLE_FV},FEATURE_ALGORITHMS="${FEATURES}" \
         --job-name=dual_enc_${VARIANT}_${POOL}_s${SEED} \
         -o run_dual_enc_${VARIANT}_${POOL}_s${SEED}.out \
         -e run_dual_enc_${VARIANT}_${POOL}_s${SEED}.err \

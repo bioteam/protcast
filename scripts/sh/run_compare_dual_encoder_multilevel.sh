@@ -28,6 +28,16 @@ SEED=${SEED:-42}
 VARIANT=${VARIANT:-soft}
 FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
 OUTROOT=${OUTROOT:-${WORK}/ProtCast_results}
+# Scale the single-encoder baseline arms (flat/order); no-op for the dual arm,
+# which already scales its blocks. MANDATORY for mean_max_std.
+SCALE_FEATURES=${SCALE_FEATURES:-1}
+SCALE_ARG=""; [ "$SCALE_FEATURES" = "1" ] && SCALE_ARG="--scale-features"
+# Capacity control: also train a dual encoder on PseKRAAC vectors shuffled
+# across proteins. If dual gains over the ESM-only order baseline but the
+# shuffled arm gains just as much, the "gain" is added capacity, not FV signal.
+# Adds one extra model per level; results land in the same results.json.
+SHUFFLE_FV=${SHUFFLE_FV:-0}
+SHUFFLE_ARG=""; [ "$SHUFFLE_FV" = "1" ] && SHUFFLE_ARG="--shuffle-fv-control"
 
 POOL_SUFFIX=${POOL:+-${POOL}}
 
@@ -54,6 +64,8 @@ for LEVEL in ${LEVELS}; do
     --order-variant $VARIANT \
     --dual-encoder \
     --feature_algorithms ${FEATURE_ALGORITHMS} \
+    ${SCALE_ARG} \
+    ${SHUFFLE_ARG} \
     --use_mlflow \
     2>&1 | tee compare_dual_encoder_${VARIANT}_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log
 done
