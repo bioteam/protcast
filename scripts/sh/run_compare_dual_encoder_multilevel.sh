@@ -41,7 +41,11 @@ SHUFFLE_ARG=""; [ "$SHUFFLE_FV" = "1" ] && SHUFFLE_ARG="--shuffle-fv-control"
 
 POOL_SUFFIX=${POOL:+-${POOL}}
 
-export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages
+# Prepend the repo root so `import protcast` resolves to THIS checkout, not a
+# stale pip-installed copy in ~/.local (scripts are run by path, so the repo
+# root is otherwise never on sys.path). Prevents new protcast API — e.g.
+# MultiLabelClassifier(scale_features=...) — from silently hitting old code.
+export PYTHONPATH=/work2/10504/wisdawg/frontera/protcastshared/ProtCast:$HOME/.local/lib/python3.11/site-packages
 module load tacc-apptainer
 
 cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
