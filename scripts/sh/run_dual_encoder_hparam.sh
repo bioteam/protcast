@@ -50,11 +50,8 @@ cd /work2/10504/wisdawg/frontera/protcastshared/ProtCast/
 
 # Build the opt-in flag list + an output-dir tag that encodes the swept knobs
 # so different configurations don't overwrite each other's results.
-# Scale single-encoder baseline arms (flat/order); no-op for the dual arm.
-# MANDATORY for mean_max_std. SCALE_FEATURES=0 reproduces legacy raw-input runs.
-SCALE_FEATURES=${SCALE_FEATURES:-1}
+# Input scaling is unconditional inside the driver (no flag needed).
 EXTRA_ARGS=""
-[ "$SCALE_FEATURES" = "1" ] && EXTRA_ARGS="--scale-features"
 TAG="${VARIANT}order-dual"
 [ -n "${FV_HIDDEN:-}" ]    && { EXTRA_ARGS="$EXTRA_ARGS --fv-hidden ${FV_HIDDEN}";       TAG="${TAG}-fvh${FV_HIDDEN}"; }
 [ -n "${FV_DROPOUT:-}" ]   && { EXTRA_ARGS="$EXTRA_ARGS --fv-dropout ${FV_DROPOUT}";      TAG="${TAG}-fvd${FV_DROPOUT}"; }

@@ -12,8 +12,14 @@ A protein embedding ``p`` is also projected into the orthant and must
 *dominate* every GO term it is annotated with.  Membership is scored from the
 per-dimension order violation:
 
-    E(p entails t)  = || max(0, t - p) ||^2          (zero iff p dominates t)
-    score           = exp(-temperature * E)          (in (0, 1], drop-in for BCE)
+    E(p entails t)  = mean_k [ max(0, t_k - p_k) ]^2  (zero iff p dominates t)
+    score           = exp(-temperature * E)           (in (0, 1], drop-in for BCE)
+
+Energy is the per-dimension *mean* (not sum) of squared violations, and
+``temperature`` is a learned positive scalar. Together these keep the score
+from saturating to 0 as the order dimensionality or the input scale changes —
+the failure mode that made a fixed-temperature, summed-energy score collapse to
+"predict everything negative" on standardized (e.g. mean_max_std) embeddings.
 
 Unlike box embeddings, the partial order *is* the scoring function — there is
 no box volume to estimate and no separate containment regularizer competing
@@ -72,11 +78,19 @@ class OrderEmbeddingLayer(layers.Layer):
     order_dim : int
         Dimensionality of the order embedding space.
     temperature : float
-        Scaling factor inside the exp (higher = sharper boundaries).  Plays
-        the same role as ``temperature`` did for the box layer.
+        *Initial* value of the (now learned) temperature inside the exp.
+        Temperature is a trainable scalar (softplus-parameterized to stay
+        positive) so the score sharpness self-calibrates to whatever energy
+        scale the input produces, instead of a fixed value that silently
+        saturates ``exp(-temperature * energy)`` to 0 — the "predict
+        everything negative" collapse seen when the input scale changes
+        (e.g. standardized mean_max_std embeddings).  Initialized low on
+        purpose: a saturated start has ~0 gradient on temperature and cannot
+        recover, so we begin under-sharp (gradients alive) and let training
+        sharpen as needed.
     """
 
-    def __init__(self, num_classes, order_dim, temperature=10.0, **kwargs):
+    def __init__(self, num_classes, order_dim, temperature=1.0, **kwargs):
         super().__init__(**kwargs)
         self.num_classes = num_classes
         self.order_dim = order_dim
@@ -88,6 +102,15 @@ class OrderEmbeddingLayer(layers.Layer):
             name="raw_terms",
             shape=(self.num_classes, self.order_dim),
             initializer="glorot_uniform",
+            trainable=True,
+        )
+        # Learned temperature. Stored softplus-inverted so softplus(raw) equals
+        # the requested initial `temperature`; kept positive by softplus in call.
+        init_raw = float(np.log(np.expm1(max(self.temperature, 1e-3))))
+        self.raw_temperature = self.add_weight(
+            name="raw_temperature",
+            shape=(),
+            initializer=keras.initializers.Constant(init_raw),
             trainable=True,
         )
 
@@ -113,12 +136,18 @@ class OrderEmbeddingLayer(layers.Layer):
         t = tf.expand_dims(terms, axis=0)
 
         # Order violation per dimension: positive where the term is NOT
-        # dominated by the protein (t_k > p_k).  Squared, summed over dims.
+        # dominated by the protein (t_k > p_k).  Squared, then *averaged* over
+        # dims (not summed): a mean keeps the energy independent of order_dim and
+        # in a bounded range, so temperature stays meaningful and the score does
+        # not saturate to 0 as dimensionality or input scale grows.
         violation = tf.nn.relu(t - p)  # (batch, num_classes, order_dim)
-        energy = tf.reduce_sum(tf.square(violation), axis=-1)  # (batch, num_classes)
+        energy = tf.reduce_mean(tf.square(violation), axis=-1)  # (batch, num_classes)
+
+        # Learned, positive temperature (softplus keeps it > 0).
+        temperature = tf.nn.softplus(self.raw_temperature)
 
         # Map energy -> (0, 1]: 1 when fully entailed (energy 0), -> 0 otherwise
-        scores = tf.exp(-self.temperature * energy)
+        scores = tf.exp(-temperature * energy)
 
         return scores
 

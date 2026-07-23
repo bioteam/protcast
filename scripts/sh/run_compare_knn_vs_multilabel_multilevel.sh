@@ -46,11 +46,6 @@ SEED=${SEED:-42}
 VARIANT=${VARIANT:-soft}
 OUTROOT=${OUTROOT:-${WORK}/ProtCast_results}
 
-# Standardize NN inputs. MANDATORY for mean_max_std (heterogeneous mean/max/std
-# blocks otherwise collapse NN training). Set SCALE_FEATURES=0 only to reproduce
-# legacy raw-input mean-pooled runs.
-SCALE_FEATURES=${SCALE_FEATURES:-1}
-
 # Tuning knobs (empty = use config.json default; flag omitted).
 ORDER_WEIGHT=${ORDER_WEIGHT:-}
 ORDER_DIM=${ORDER_DIM:-}
@@ -63,10 +58,9 @@ MIN_DELTA=${MIN_DELTA:-}
 POOL_SUFFIX=${POOL:+-${POOL}}
 
 # Assemble the opt-in argument list. Only non-empty knobs contribute a flag, so
-# a bare invocation (SCALE_FEATURES=0, no knobs) is byte-identical to the
-# previous bare "--order" runner.
+# a bare invocation (no knobs) is byte-identical to the previous bare
+# "--order" runner. (Input scaling is unconditional inside the driver.)
 EXTRA_ARGS=()
-[ "$SCALE_FEATURES" = "1" ] && EXTRA_ARGS+=(--scale-features)
 [ -n "$ORDER_WEIGHT" ]  && EXTRA_ARGS+=(--order-weight "$ORDER_WEIGHT")
 [ -n "$ORDER_DIM" ]     && EXTRA_ARGS+=(--order-dim "$ORDER_DIM")
 [ -n "$LEARNING_RATE" ] && EXTRA_ARGS+=(--learning-rate "$LEARNING_RATE")

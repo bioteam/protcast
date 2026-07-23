@@ -174,7 +174,7 @@ def train_multilabel(
     protein_embeddings, protein_go_terms, go_ids,
     config, name, seed, go_dag, use_order, use_mlflow, verbose=False,
     order_variant="soft", use_dual_encoder=False, fv_embeddings=None,
-    shuffle_fv=False, scale_features=False,
+    shuffle_fv=False, scale_features=True,
 ):
     """Fit MultiLabelClassifier (flat or order) and return a serialisable result dict.
 
@@ -197,12 +197,14 @@ def train_multilabel(
         where to split them internally.
     scale_features : bool
         Standardize the (single-encoder) NN input with a train-fold-fit
-        StandardScaler. MANDATORY for multi-block pooling such as mean_max_std,
-        whose mean/max/std blocks have heterogeneous magnitudes that otherwise
-        let the high-magnitude max block dominate the first Dense layer and
-        collapse training. Ignored for the dual-encoder path, which already
-        scales its ESM and FV blocks separately above (passing it there would
-        double-scale). Leave False to reproduce legacy raw-input runs.
+        StandardScaler. Defaults to True and is always on in practice — this
+        matches scan_individual_features.py so every NN comparison scales its
+        inputs identically and none can silently run unscaled. MANDATORY for
+        multi-block pooling such as mean_max_std, whose mean/max/std blocks have
+        heterogeneous magnitudes that otherwise let the high-magnitude max block
+        dominate the first Dense layer and collapse training. Automatically
+        disabled for the dual-encoder path, which already scales its ESM and FV
+        blocks separately above (passing it there would double-scale).
     """
     if use_order and use_dual_encoder:
         label = f"order_{order_variant}_dual"
@@ -631,14 +633,10 @@ def main():
                         help="Early-stopping patience on val Fmax (default 10)")
     parser.add_argument("--min-delta", type=float, default=None,
                         help="Min Fmax gain to reset early-stopping patience (default 0.001)")
-    parser.add_argument("--scale-features", action="store_true",
-                        help=(
-                            "Standardize single-encoder NN inputs (flat/order) with a "
-                            "train-fold-fit StandardScaler. MANDATORY for multi-block "
-                            "pooling (mean_max_std): its heterogeneous mean/max/std "
-                            "magnitudes otherwise collapse NN training. The dual-encoder "
-                            "arm already scales its blocks, so this is a no-op there."
-                        ))
+    # NOTE: NN inputs are always standardized (train-fold-fit StandardScaler),
+    # matching scan_individual_features.py. There is deliberately no flag to
+    # disable it — an unscaled NN silently collapses on multi-block pooling
+    # (mean_max_std), which is the confusion this uniformity removes.
     parser.add_argument(
         "--use_mlflow", action="store_true",
         help="Log each model run to MLflow",
@@ -853,7 +851,6 @@ def main():
                 protein_embeddings, protein_go_terms, go_ids,
                 config, name, args.seed, go_dag,
                 use_order=False, use_mlflow=args.use_mlflow, verbose=args.verbose,
-                scale_features=args.scale_features,
             )
             r = results["multilabel_flat"]
             print(
@@ -887,7 +884,6 @@ def main():
                 config, name, args.seed, go_dag,
                 use_order=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
                 order_variant=args.order_variant,
-                scale_features=args.scale_features,
             )
             order_result["order_variant"] = args.order_variant
             results["multilabel_order"] = order_result
@@ -923,7 +919,6 @@ def main():
                     use_order=True, use_mlflow=args.use_mlflow, verbose=args.verbose,
                     order_variant=args.order_variant,
                     use_dual_encoder=True, fv_embeddings=fv_embeddings,
-                    scale_features=args.scale_features,
                 )
                 results["multilabel_order_dual"] = dual_result
                 r = results["multilabel_order_dual"]
@@ -959,7 +954,6 @@ def main():
                     order_variant=args.order_variant,
                     use_dual_encoder=True, fv_embeddings=fv_embeddings,
                     shuffle_fv=True,
-                    scale_features=args.scale_features,
                 )
                 results["multilabel_order_dual_shuffled"] = shuffled_result
                 r = results["multilabel_order_dual_shuffled"]

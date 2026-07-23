@@ -43,11 +43,9 @@ VARIANT=${VARIANT:-soft}
 FEATURE_ALGORITHMS=${FEATURE_ALGORITHMS:-"PseKRAAC_type_7 PseKRAAC_type_3B PseKRAAC_type_8"}
 POOL_SUFFIX=${POOL:+-${POOL}}
 OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}-${VARIANT}order-dual}
-# Scale the single-encoder baseline arms (flat/order). The dual arm already
-# scales its ESM/FV blocks, so this is a no-op there but keeps the embeddings-
-# only NN baseline fair for the FV-value delta. MANDATORY for mean_max_std.
-SCALE_FEATURES=${SCALE_FEATURES:-1}
-SCALE_ARG=""; [ "$SCALE_FEATURES" = "1" ] && SCALE_ARG="--scale-features"
+# NN inputs are always standardized inside the driver (no flag needed); the
+# dual arm self-scales its ESM/FV blocks, the flat/order arms scale via the
+# driver default.
 
 # Prepend the repo root so `import protcast` resolves to THIS checkout, not a
 # stale pip-installed copy in ~/.local (scripts are run by path, so the repo
@@ -74,6 +72,5 @@ python3 scripts/compare_knn_vs_multilabel.py \
 --order-variant $VARIANT \
 --dual-encoder \
 --feature_algorithms ${FEATURE_ALGORITHMS} \
-${SCALE_ARG} \
 --use_mlflow \
 2>&1 | tee compare_dual_encoder_${VARIANT}_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log

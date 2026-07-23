@@ -22,10 +22,7 @@ POOL=${POOL:-mean_max_std}
 LEVEL=${LEVEL:-4}
 SEED=${SEED:-42}
 POOL_SUFFIX=${POOL:+-${POOL}}
-# Standardize NN inputs. MANDATORY for mean_max_std (heterogeneous mean/max/std
-# blocks). Set SCALE_FEATURES=0 only to reproduce legacy raw-input mean runs.
-SCALE_FEATURES=${SCALE_FEATURES:-1}
-SCALE_ARG=""; [ "$SCALE_FEATURES" = "1" ] && SCALE_ARG="--scale-features"
+# NN inputs are always standardized inside the driver (no flag needed).
 OUTDIR=${OUTDIR:-${WORK}/ProtCast_results/knn_vs_multilabel-${POOL:-mean}-level-${LEVEL}-seed-${SEED}}
 
 # Only use local modules for Python 3.11 to match the Python version in the container
@@ -50,6 +47,5 @@ python3 scripts/compare_knn_vs_multilabel.py \
 -o $OUTDIR \
 --seed $SEED \
 --order \
-${SCALE_ARG} \
 --use_mlflow \
 2>&1 | tee knn_vs_multilabel_${POOL:-mean}_level_${LEVEL}_seed_${SEED}.log

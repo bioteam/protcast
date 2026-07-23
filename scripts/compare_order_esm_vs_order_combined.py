@@ -287,6 +287,10 @@ def train_order_multilabel(
         use_mlflow=use_mlflow,
         go_dag=go_dag,
         random_state=seed,
+        # Always standardize inputs (train-fold-fit), matching
+        # scan_individual_features.py, so ESM and ESM+FV arms are preprocessed
+        # identically and no arm silently runs unscaled on mean_max_std.
+        scale_features=True,
     )
     classifier.run()
 

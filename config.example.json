@@ -16,7 +16,7 @@
     "PATIENCE": 10,
     "USE_ORDER_EMBEDDINGS": false,
     "ORDER_DIM": 32,
-    "ORDER_TEMPERATURE": 10.0,
+    "ORDER_TEMPERATURE": 1.0,
     "ORDER_WEIGHT": 0.1,
     "ORDER_VARIANT": "soft",
     "ORDER_BETA": 5.0,

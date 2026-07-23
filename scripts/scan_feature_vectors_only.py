@@ -238,6 +238,7 @@ def train_esm_baseline(protein_embeddings, protein_go_terms, go_ids, config, nam
         config=config,
         id=f"{name}_fvscan_esm_only",
         random_state=seed,
+        scale_features=True,
     )
     classifier.run()
 
@@ -275,6 +276,7 @@ def train_fv_only(protein_go_terms, go_ids, dataset, protein_ids, config, name, 
         config=config,
         id=f"{name}_fvscan_{algo}",
         random_state=seed,
+        scale_features=True,
     )
     classifier.run()
 
