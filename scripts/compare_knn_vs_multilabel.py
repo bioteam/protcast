@@ -8,6 +8,12 @@ pre-computed ESM-C embeddings:
   3. Order NN     – same network with OrderEmbeddingLayer + GO-DAG order-violation
                     loss, enforcing ontological hierarchy via the product order
                     (--order flag required)
+  4. GBDT         – LightGBM one-vs-rest boosted trees on RAW ESM-C (--gbdt).
+                    A third, tree-based inductive bias; scale-invariant, so no
+                    StandardScaler is involved.
+  5. GBDT + FV    – same trees on raw ESM-C ⊕ raw PseKRAAC (--gbdt). Reports the
+                    ESM-vs-FV gain share: how much predictive work the classical
+                    features do once they sit next to the embedding.
 
 Primary question: does the extra computational cost of the neural approaches
 yield a meaningful Fmax gain over simple KNN retrieval—especially on specific
@@ -27,6 +33,8 @@ Saved to the output directory (-o/--output_dir, default: knn_vs_multilabel):
     - KNN model:   {name}_knn_comparison_knn.joblib
     - Flat NN:     {name}_multilabel_flat_comparison_multilabel.keras
     - Order NN:    {name}_multilabel_order_comparison_multilabel.keras  (--order only)
+    - GBDT:        {name}_gbdt_comparison_gbdt.joblib (+ *_gain_importance.npy)  (--gbdt only)
+    - GBDT + FV:   {name}_gbdt_combined_comparison_gbdt.joblib                  (--gbdt only)
     - GOEncoder files for each neural model
 
     If the results JSON already exists with all requested models completed, the
@@ -76,6 +84,7 @@ import numpy as np
 
 from protcast.model.knn_classifier import KNNClassifier
 from protcast.model.multilabel_classifier import MultiLabelClassifier
+from protcast.model.gbdt_classifier import GBDTClassifier
 from protcast.model.stats.utils import calculate_fmax, calculate_smin
 from protcast.preprocessing.protcast_dataset import ProtCastDataset
 from protcast.config.model_config import ConfigManager
@@ -330,6 +339,144 @@ def train_multilabel(
     return result
 
 
+def build_raw_combined_embeddings(protein_embeddings, fv_embeddings, protein_go_terms):
+    """Raw ESM ⊕ raw PseKRAAC over the common protein set — NO scaling.
+
+    Trees are invariant to monotone per-feature rescaling, so the GBDT arms
+    consume raw blocks. This also removes the block-scaling confound the neural
+    arms must manage (see train_multilabel's scale_features notes). FV blocks
+    are NaN-cleaned exactly as in the dual-encoder path.
+
+    Returns
+    -------
+    (esm_common, combined, common_pids, esm_dim, fv_dim)
+        esm_common : {pid: raw ESM float32}, restricted to common_pids
+        combined   : {pid: concat([ESM, FV]) float32}, ESM first
+        common_pids: sorted(ESM ∩ FV ∩ GO)
+    """
+    common_pids = sorted(
+        set(protein_embeddings) & set(fv_embeddings) & set(protein_go_terms)
+    )
+    if not common_pids:
+        raise ValueError(
+            "No proteins have ESM embeddings, feature vectors and GO annotations"
+        )
+    esm_dim = int(np.asarray(protein_embeddings[common_pids[0]]).shape[0])
+    fv_dim = int(np.asarray(fv_embeddings[common_pids[0]]).shape[0])
+    esm_common, combined = {}, {}
+    for pid in common_pids:
+        esm = np.asarray(protein_embeddings[pid], dtype=np.float32).ravel()
+        fv = np.nan_to_num(
+            np.asarray(fv_embeddings[pid], dtype=np.float32).ravel(),
+            nan=0.0, posinf=0.0, neginf=0.0,
+        )
+        esm_common[pid] = esm
+        combined[pid] = np.concatenate([esm, fv])
+    return esm_common, combined, common_pids, esm_dim, fv_dim
+
+
+def shuffle_fv_embeddings(fv_embeddings, seed):
+    """Permute FV vectors across protein IDs (seeded) — capacity control.
+
+    Destroys the protein↔FV correspondence (kills the biological signal) while
+    preserving the FV distribution and dimensionality. Same construction as the
+    dual-encoder shuffled control inside train_multilabel.
+    """
+    rng = np.random.RandomState(seed)
+    pids = sorted(fv_embeddings)
+    vals = [fv_embeddings[p] for p in pids]
+    perm = rng.permutation(len(vals))
+    return {p: vals[perm[i]] for i, p in enumerate(pids)}
+
+
+def train_gbdt(
+    protein_embeddings, protein_go_terms, go_ids,
+    config, name, seed, go_dag, use_mlflow, verbose=False,
+    variant_tag="gbdt", esm_dim=None, fv_matrix=None,
+    feature_algorithms=None, n_proteins_esm_only=None,
+):
+    """Fit GBDTClassifier (LightGBM one-vs-rest) and return a serialisable result dict.
+
+    Parameters
+    ----------
+    variant_tag : str
+        "gbdt" (raw ESM), "gbdt_combined" (raw ESM ⊕ FV) or
+        "gbdt_combined_shuffled" (capacity control). Drives artifact names:
+        {name}_{variant_tag}_comparison_gbdt.joblib.
+    esm_dim : int or None
+        Width of the ESM block. Set for the combined arms so the classifier can
+        split summed gain importances into ESM vs FV shares.
+    fv_matrix : np.ndarray or None
+        (n_proteins, fv_dim) float32 FV block aligned to the classifier's sorted
+        protein_ids. Persisted in the artifact so measure_hierarchy_violations.py
+        can rebuild the exact X without recomputing PseKRAAC.
+    n_proteins_esm_only : int or None
+        |ESM ∩ GO| — recorded so readers know whether gbdt-vs-KNN is same-split.
+    """
+    run_config = dict(config)
+    if esm_dim is not None:
+        run_config["ESM_DIM"] = int(esm_dim)
+
+    classifier = GBDTClassifier(
+        verbose=verbose,
+        protein_embeddings=protein_embeddings,
+        protein_go_terms=protein_go_terms,
+        go_ids=go_ids,
+        config=run_config,
+        id=f"{name}_{variant_tag}_comparison",
+        use_mlflow=use_mlflow,
+        go_dag=go_dag,
+        random_state=seed,
+    )
+    classifier.fv_matrix = fv_matrix
+    classifier.feature_algorithms = feature_algorithms
+    classifier.run()
+
+    depth_metrics = classifier.compute_depth_metrics(
+        classifier.y_val, classifier.y_val_pred
+    )
+    freq_metrics = classifier.compute_frequency_metrics(
+        classifier.y_val, classifier.y_val_pred
+    )
+
+    # Always save locally (MLflow upload happens inside run() if enabled).
+    classifier.save_model()
+    importance_files = classifier.save_importances()
+    shares = classifier.compute_block_shares()
+
+    n_proteins = len(classifier.protein_ids)
+    result = {
+        "fmax": float(classifier.best_fmax),
+        "fmax_threshold": float(classifier.best_threshold),
+        "smin": float(classifier.best_smin),
+        "smin_threshold": float(classifier.smin_threshold),
+        "training_time": round(classifier.training_time, 2),
+        "vector_length": int(classifier.vector_length),
+        "n_proteins": n_proteins,
+        "pid_set_matches_esm_only": (
+            None if n_proteins_esm_only is None
+            else bool(n_proteins_esm_only == n_proteins)
+        ),
+        "n_labels": len(classifier.go_ids),
+        "n_constant_labels": len(classifier.constant_cols),
+        "best_iterations_mean": (
+            float(np.mean(classifier.best_iterations))
+            if classifier.best_iterations else None
+        ),
+        "hyperparams": classifier.hyperparams(),
+        "importance_files": importance_files,
+        "feature_algorithms": list(feature_algorithms) if feature_algorithms else None,
+        "shuffled": variant_tag.endswith("_shuffled"),
+        **shares,
+        "depth_metrics": {str(k): v for k, v in depth_metrics.items()},
+        "frequency_metrics": freq_metrics,
+        "status": "ok",
+    }
+    del classifier
+    gc.collect()
+    return result
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Results display
 # ──────────────────────────────────────────────────────────────────────────────
@@ -358,6 +505,10 @@ def print_results(results):
     # Derive has_order from actual data, not the run_order flag — the flag can
     # be stale if --order was added on a resume of a previously flag-less run.
     has_order = results.get("multilabel_order", {}).get("status") == "ok"
+    has_gbdt = any(
+        results.get(k, {}).get("status") == "ok"
+        for k in ("gbdt", "gbdt_combined", "gbdt_combined_shuffled")
+    )
 
     knn  = results.get("knn", {})
     flat = results.get("multilabel_flat", {})
@@ -376,7 +527,8 @@ def print_results(results):
         f"Level : {results.get('level', '?')}   "
         f"Seed  : {results['seed']}   "
         f"ESM dim : {results['esm_dim']}   "
-        f"Order embeddings : {'yes' if has_order else 'no'}"
+        f"Order embeddings : {'yes' if has_order else 'no'}   "
+        f"GBDT arms : {'yes' if has_gbdt else 'no'}"
     )
 
     # ── Section 1: Overall ────────────────────────────────────────────────────
@@ -542,9 +694,112 @@ def print_results(results):
         print(f"  Dual (shuffled PseKRAAC) Fmax: {_nan_safe(shuf)}")
         print(f"  Signal attributable to PseKRAAC (real − shuffled): {_delta_str(real, shuf)}")
 
+    _print_gbdt_section(results)
+
     print()
     print(f"Total elapsed time: {results.get('elapsed', '?')}s")
     print(sep)
+
+
+_GBDT_ARMS = [
+    # (results key, table label, short column label)
+    ("gbdt",                   "GBDT (ESM raw)",           "GBDT"),
+    ("gbdt_combined",          "GBDT (ESM + PseKRAAC)",    "GBDT+FV"),
+    ("gbdt_combined_shuffled", "GBDT (shuffled PseKRAAC)", "GBDT+shufFV"),
+]
+
+
+def _print_gbdt_section(results):
+    """GBDT (LightGBM) arms: overall, gain shares, depth & frequency deltas.
+
+    Self-contained so the three legacy tables above stay byte-identical when
+    --gbdt is absent. Prints nothing unless a GBDT arm completed.
+    """
+    present = [
+        (k, lbl, short, results[k]) for k, lbl, short in _GBDT_ARMS
+        if results.get(k, {}).get("status") == "ok"
+    ]
+    if not present:
+        return
+
+    knn_fmax = results.get("knn", {}).get("fmax")
+    base_fmax = results.get("gbdt", {}).get("fmax")
+    by_key = {k: r for k, _, _, r in present}
+
+    print()
+    print("── GBDT (LightGBM) ARMS  (raw inputs, no scaling; one booster per GO term) ──")
+    hdr = (f"{'Model':<26} {'Fmax':>8} {'Thr':>6} {'Smin':>8} {'Time':>8}   "
+           f"{'vs KNN':>9}  {'vs GBDT':>9}  {'N prot':>7}")
+    print(hdr)
+    print("-" * len(hdr))
+    for key, label, _, r in present:
+        vs_knn = _delta_str(r.get("fmax"), knn_fmax)
+        vs_gbdt = f"{'---':>9}" if key == "gbdt" else _delta_str(r.get("fmax"), base_fmax)
+        print(f"{label:<26} {_nan_safe(r.get('fmax')):>8} "
+              f"{_nan_safe(r.get('fmax_threshold'), '.2f'):>6} "
+              f"{_nan_safe(r.get('smin')):>8} "
+              f"{_nan_safe(r.get('training_time'), '.1f'):>7}s   "
+              f"{vs_knn}  {vs_gbdt}  {str(r.get('n_proteins', '?')):>7}")
+
+    for key, label, _, r in present:
+        if r.get("fv_gain_share") is not None:
+            print(f"  {label}: gain share ESM {100 * r['esm_gain_share']:.1f}%  "
+                  f"FV {100 * r['fv_gain_share']:.1f}%  "
+                  f"(FV per-dim ratio {_nan_safe(r.get('fv_gain_per_dim_ratio'), '.2f')}, "
+                  f"fv_dim {r.get('fv_dim')}, "
+                  f"split share {_nan_safe(r.get('fv_split_share'), '.3f')})")
+        if r.get("n_constant_labels"):
+            print(f"  {label}: {r['n_constant_labels']} label(s) fell back to the "
+                  f"train prior (too few positives in the train fold)")
+    if any(r.get("pid_set_matches_esm_only") is False for _, _, _, r in present):
+        print("  NOTE: GBDT arms trained on the ESM∩FV∩GO protein set (smaller than the "
+              "ESM-only arms): GBDT-vs-GBDT deltas are exact, GBDT-vs-KNN approximate.")
+
+    comb = by_key.get("gbdt_combined", {})
+    shuf = by_key.get("gbdt_combined_shuffled", {})
+    if comb and shuf:
+        print(f"  Capacity control — signal attributable to PseKRAAC "
+              f"(real − shuffled): {_delta_str(comb.get('fmax'), shuf.get('fmax'))}")
+
+    def _breakdown(title, field, row_keys, row_label):
+        rows = [(k, short, r) for k, _, short, r in present if r.get(field)]
+        if not rows:
+            return
+        keys = {k for k, _, _ in rows}
+        show_delta = {"gbdt", "gbdt_combined"} <= keys
+        print()
+        print(title)
+        hdr = f"{'':<18}  {'N terms':>7}  {'Avg ann':>8}"
+        hdr += "".join(f"  {short:>12}" for _, short, _ in rows)
+        if show_delta:
+            hdr += f"  {'FV-GBDT':>10}"
+        print(hdr)
+        print("-" * len(hdr))
+        for rk in row_keys:
+            metas = [r[field].get(rk, {}) for _, _, r in rows]
+            meta = next((m for m in metas if m), None)
+            if meta is None:
+                continue
+            line = (f"{row_label(rk):<18}  {str(meta.get('n_terms', '?')):>7}  "
+                    f"{_nan_safe(meta.get('avg_train_count'), '.1f'):>8}")
+            line += "".join(f"  {_nan_safe(m.get('fmax')):>12}" for m in metas)
+            if show_delta:
+                d = _delta_str(
+                    by_key["gbdt_combined"][field].get(rk, {}).get("fmax"),
+                    by_key["gbdt"][field].get(rk, {}).get("fmax"),
+                )
+                line += f"  {d:>10}"
+            print(line)
+
+    all_depths = sorted({
+        int(d) for _, _, _, r in present for d in r.get("depth_metrics", {})
+    })
+    _breakdown("── GBDT DEPTH BREAKDOWN ──", "depth_metrics",
+               [str(d) for d in all_depths], lambda d: f"depth {d}")
+    _bucket_names = {"rare_lt50": "Rare  (<50)", "medium_50_500": "Medium (50–500)",
+                     "common_gt500": "Common (>500)"}
+    _breakdown("── GBDT FREQUENCY BREAKDOWN ──", "frequency_metrics",
+               list(_bucket_names), lambda b: _bucket_names[b])
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -611,6 +866,37 @@ def main():
             "--order and --dual-encoder."
         ),
     )
+    # ── GBDT (LightGBM) arms ────────────────────────────────────────────────
+    parser.add_argument(
+        "--gbdt", action="store_true",
+        help=(
+            "Add two LightGBM one-vs-rest arms: 'gbdt' on raw ESM-C and "
+            "'gbdt_combined' on raw ESM-C + PseKRAAC (uses --feature_algorithms). "
+            "Trees are scale-invariant so no StandardScaler is applied. The "
+            "combined arm reports the ESM-vs-FV gain share. With "
+            "--shuffle-fv-control a third 'gbdt_combined_shuffled' capacity-"
+            "control arm is added. Requires lightgbm."
+        ),
+    )
+    # GBDT tunables — all opt-in (default None → config.json / class defaults).
+    parser.add_argument("--gbdt-n-estimators", type=int, default=None,
+                        help="Boosting rounds per label (default 300)")
+    parser.add_argument("--gbdt-learning-rate", type=float, default=None,
+                        help="LightGBM learning_rate (default 0.05)")
+    parser.add_argument("--gbdt-num-leaves", type=int, default=None,
+                        help="LightGBM num_leaves (default 31)")
+    parser.add_argument("--gbdt-min-child-samples", type=int, default=None,
+                        help="LightGBM min_data_in_leaf (default 20)")
+    parser.add_argument("--gbdt-colsample-bytree", type=float, default=None,
+                        help="LightGBM feature_fraction; main speed knob on wide inputs (default 0.3)")
+    parser.add_argument("--gbdt-subsample", type=float, default=None,
+                        help="LightGBM bagging_fraction (default 0.8)")
+    parser.add_argument("--gbdt-reg-lambda", type=float, default=None,
+                        help="LightGBM lambda_l2 (default 1.0)")
+    parser.add_argument("--gbdt-n-jobs", type=int, default=None,
+                        help="LightGBM num_threads (default 0 = all cores)")
+    parser.add_argument("--gbdt-early-stopping-rounds", type=int, default=None,
+                        help="Per-label early stopping on val logloss; 0 = off (default 0)")
     # ── Architecture / optimisation tunables ────────────────────────────────
     # All opt-in: omitting a flag leaves config.json untouched and reproduces
     # prior runs bit-for-bit. Each is applied to the shared config so every
@@ -658,6 +944,15 @@ def main():
         "LEARNING_RATE": args.learning_rate,
         "PATIENCE": args.patience,
         "MIN_DELTA": args.min_delta,
+        "GBDT_N_ESTIMATORS": args.gbdt_n_estimators,
+        "GBDT_LEARNING_RATE": args.gbdt_learning_rate,
+        "GBDT_NUM_LEAVES": args.gbdt_num_leaves,
+        "GBDT_MIN_CHILD_SAMPLES": args.gbdt_min_child_samples,
+        "GBDT_COLSAMPLE_BYTREE": args.gbdt_colsample_bytree,
+        "GBDT_SUBSAMPLE": args.gbdt_subsample,
+        "GBDT_REG_LAMBDA": args.gbdt_reg_lambda,
+        "GBDT_N_JOBS": args.gbdt_n_jobs,
+        "GBDT_EARLY_STOPPING_ROUNDS": args.gbdt_early_stopping_rounds,
     }
     for _k, _v in _cli_overrides.items():
         if _v is not None:
@@ -707,6 +1002,10 @@ def main():
         expected.add("multilabel_order_dual")
     if args.order and args.dual_encoder and args.shuffle_fv_control:
         expected.add("multilabel_order_dual_shuffled")
+    if args.gbdt:
+        expected.update({"gbdt", "gbdt_combined"})
+        if args.shuffle_fv_control:
+            expected.add("gbdt_combined_shuffled")
 
     if results is not None:
         done = {k for k in expected if results.get(k, {}).get("status") == "ok"}
@@ -722,6 +1021,7 @@ def main():
             "level":   level,
             "esm_dim": None,
             "run_order": args.order,
+            "run_gbdt": args.gbdt,
         }
 
     # ── Validate inputs ────────────────────────────────────────────────────
@@ -767,10 +1067,11 @@ def main():
     if results.get("esm_dim") is None:
         results["esm_dim"] = int(next(iter(protein_embeddings.values())).shape[0])
 
-    # ── PseKRAAC feature vectors (dual-encoder only) ───────────────────────
+    # ── PseKRAAC feature vectors (dual-encoder and/or GBDT arms) ───────────
     fv_embeddings = None
-    if args.order and args.dual_encoder:
-        print("Computing PseKRAAC feature vectors for dual-encoder...")
+    need_fv = (args.order and args.dual_encoder) or args.gbdt
+    if need_fv:
+        print("Computing PseKRAAC feature vectors (dual-encoder / GBDT arms)...")
         import importlib.util as _ilu, pathlib as _pl
         _spec = _ilu.spec_from_file_location(
             "compare_knn_esm_vs_knn_combined",
@@ -813,15 +1114,24 @@ def main():
             parent_mlflow.set_tag("level", str(level))
             parent_mlflow.log_param("seed", args.seed)
             parent_mlflow.log_param("order_enabled", args.order)
+            parent_mlflow.log_param("gbdt_enabled", args.gbdt)
             parent_mlflow.log_param("esm_dim", results["esm_dim"])
         except Exception as e:
             print(f"Warning: could not start parent MLflow run: {e}")
             parent_mlflow = None
 
+    n_gbdt_arms = (2 + (1 if args.shuffle_fv_control else 0)) if args.gbdt else 0
+    n_models = (
+        3
+        + (1 if args.order and args.dual_encoder else 0)
+        + (1 if args.order and args.dual_encoder and args.shuffle_fv_control else 0)
+        + n_gbdt_arms
+    )
+
     # ── Model 1: KNN ───────────────────────────────────────────────────────
     if results.get("knn", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print("MODEL 1 / 3: KNN")
+        print(f"MODEL 1 / {n_models}: KNN")
         print("=" * 60)
         try:
             results["knn"] = train_knn(
@@ -844,7 +1154,7 @@ def main():
     # ── Model 2: MultiLabel flat ───────────────────────────────────────────
     if results.get("multilabel_flat", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print("MODEL 2 / 3: MULTILABEL (flat)")
+        print(f"MODEL 2 / {n_models}: MULTILABEL (flat)")
         print("=" * 60)
         try:
             results["multilabel_flat"] = train_multilabel(
@@ -866,12 +1176,6 @@ def main():
         results["elapsed"] = round(time.time() - start)
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
-
-    n_models = (
-        3
-        + (1 if args.order and args.dual_encoder else 0)
-        + (1 if args.order and args.dual_encoder and args.shuffle_fv_control else 0)
-    )
 
     # ── Model 3: MultiLabel + order (optional) ────────────────────────────
     if args.order and results.get("multilabel_order", {}).get("status") != "ok":
@@ -940,7 +1244,7 @@ def main():
     if (args.order and args.dual_encoder and args.shuffle_fv_control
             and results.get("multilabel_order_dual_shuffled", {}).get("status") != "ok"):
         print("\n" + "=" * 60)
-        print(f"MODEL {n_models} / {n_models}: DUAL-ENCODER CONTROL (shuffled PseKRAAC)")
+        print(f"MODEL 5 / {n_models}: DUAL-ENCODER CONTROL (shuffled PseKRAAC)")
         print("=" * 60)
         if fv_embeddings is None:
             print("SKIPPED: no FV embeddings available (--dual-encoder requires sequences)")
@@ -970,6 +1274,132 @@ def main():
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
 
+    # ── GBDT (LightGBM) arms (optional) ────────────────────────────────────
+    # Raw inputs — no scaling (trees are scale-invariant). Both GBDT arms train
+    # on the ESM∩FV∩GO protein set so gbdt_combined − gbdt is an exact same-rows
+    # comparison: the hypothesis under test. If FV computation failed, the
+    # ESM-only GBDT arm still runs on the full ESM set.
+    if args.gbdt:
+        gbdt_idx = n_models - n_gbdt_arms + 1
+        n_esm_only = len(set(protein_embeddings) & set(protein_go_terms))
+        esm_for_gbdt = protein_embeddings
+        combined_emb = fv_matrix = esm_dim_g = None
+        if fv_embeddings is not None:
+            try:
+                (esm_for_gbdt, combined_emb, common_pids,
+                 esm_dim_g, _fv_dim_g) = build_raw_combined_embeddings(
+                    protein_embeddings, fv_embeddings, protein_go_terms
+                )
+                fv_matrix = np.nan_to_num(
+                    np.vstack([fv_embeddings[p] for p in common_pids]).astype(np.float32),
+                    nan=0.0, posinf=0.0, neginf=0.0,
+                )
+                if len(common_pids) != n_esm_only:
+                    print(
+                        f"NOTE: GBDT arms use the ESM∩FV∩GO set: {len(common_pids)} "
+                        f"proteins (ESM-only arms: {n_esm_only}). gbdt vs gbdt_combined "
+                        f"is exact same-split; gbdt vs knn/flat is approximate."
+                    )
+            except Exception as e:
+                print(f"WARNING: could not build ESM+FV inputs for GBDT — {e}")
+                esm_for_gbdt = protein_embeddings
+                combined_emb = fv_matrix = esm_dim_g = None
+
+        # ── GBDT on raw ESM ──
+        if results.get("gbdt", {}).get("status") != "ok":
+            print("\n" + "=" * 60)
+            print(f"MODEL {gbdt_idx} / {n_models}: GBDT (LightGBM, raw ESM)")
+            print("=" * 60)
+            try:
+                results["gbdt"] = train_gbdt(
+                    esm_for_gbdt, protein_go_terms, go_ids,
+                    config, name, args.seed, go_dag, args.use_mlflow, args.verbose,
+                    variant_tag="gbdt", n_proteins_esm_only=n_esm_only,
+                )
+                r = results["gbdt"]
+                print(
+                    f"GBDT — Fmax: {r['fmax']:.4f}  Smin: {r['smin']:.4f}  "
+                    f"Time: {r['training_time']:.1f}s"
+                )
+            except Exception as e:
+                print(f"FAILED: GBDT — {e}")
+                results["gbdt"] = {"status": f"error: {e}"}
+
+            results["elapsed"] = round(time.time() - start)
+            with open(results_file, "w") as f:
+                json.dump(results, f, indent=2)
+
+        # ── GBDT on raw ESM ⊕ raw PseKRAAC ──
+        if results.get("gbdt_combined", {}).get("status") != "ok":
+            print("\n" + "=" * 60)
+            print(f"MODEL {gbdt_idx + 1} / {n_models}: GBDT (LightGBM, raw ESM + PseKRAAC)")
+            print("=" * 60)
+            if combined_emb is None:
+                print("SKIPPED: no FV embeddings available (PseKRAAC computation failed or unavailable)")
+                results["gbdt_combined"] = {"status": "skipped: no fv_embeddings"}
+            else:
+                try:
+                    results["gbdt_combined"] = train_gbdt(
+                        combined_emb, protein_go_terms, go_ids,
+                        config, name, args.seed, go_dag, args.use_mlflow, args.verbose,
+                        variant_tag="gbdt_combined", esm_dim=esm_dim_g,
+                        fv_matrix=fv_matrix, feature_algorithms=args.feature_algorithms,
+                        n_proteins_esm_only=n_esm_only,
+                    )
+                    r = results["gbdt_combined"]
+                    print(
+                        f"GBDT + PseKRAAC — Fmax: {r['fmax']:.4f}  Smin: {r['smin']:.4f}  "
+                        f"Time: {r['training_time']:.1f}s  "
+                        f"FV gain share: {_nan_safe(r.get('fv_gain_share'), '.3f')}  "
+                        f"per-dim ratio: {_nan_safe(r.get('fv_gain_per_dim_ratio'), '.2f')}"
+                    )
+                except Exception as e:
+                    print(f"FAILED: GBDT + PseKRAAC — {e}")
+                    results["gbdt_combined"] = {"status": f"error: {e}"}
+
+            results["elapsed"] = round(time.time() - start)
+            with open(results_file, "w") as f:
+                json.dump(results, f, indent=2)
+
+        # ── GBDT capacity control: shuffled PseKRAAC (optional) ──
+        if (args.shuffle_fv_control
+                and results.get("gbdt_combined_shuffled", {}).get("status") != "ok"):
+            print("\n" + "=" * 60)
+            print(f"MODEL {gbdt_idx + 2} / {n_models}: GBDT CONTROL (shuffled PseKRAAC)")
+            print("=" * 60)
+            if combined_emb is None:
+                print("SKIPPED: no FV embeddings available")
+                results["gbdt_combined_shuffled"] = {"status": "skipped: no fv_embeddings"}
+            else:
+                try:
+                    shuffled_fv = shuffle_fv_embeddings(fv_embeddings, args.seed)
+                    _, shuffled_comb, shuf_pids, _, _ = build_raw_combined_embeddings(
+                        protein_embeddings, shuffled_fv, protein_go_terms
+                    )
+                    shuf_matrix = np.nan_to_num(
+                        np.vstack([shuffled_fv[p] for p in shuf_pids]).astype(np.float32),
+                        nan=0.0, posinf=0.0, neginf=0.0,
+                    )
+                    results["gbdt_combined_shuffled"] = train_gbdt(
+                        shuffled_comb, protein_go_terms, go_ids,
+                        config, name, args.seed, go_dag, args.use_mlflow, args.verbose,
+                        variant_tag="gbdt_combined_shuffled", esm_dim=esm_dim_g,
+                        fv_matrix=shuf_matrix, feature_algorithms=args.feature_algorithms,
+                        n_proteins_esm_only=n_esm_only,
+                    )
+                    r = results["gbdt_combined_shuffled"]
+                    print(
+                        f"GBDT CONTROL (shuffled) — Fmax: {r['fmax']:.4f}  "
+                        f"Smin: {r['smin']:.4f}  Time: {r['training_time']:.1f}s"
+                    )
+                except Exception as e:
+                    print(f"FAILED: GBDT shuffled control — {e}")
+                    results["gbdt_combined_shuffled"] = {"status": f"error: {e}"}
+
+            results["elapsed"] = round(time.time() - start)
+            with open(results_file, "w") as f:
+                json.dump(results, f, indent=2)
+
     results["elapsed"] = round(time.time() - start)
     with open(results_file, "w") as f:
         json.dump(results, f, indent=2)
@@ -978,12 +1408,15 @@ def main():
     # Close the parent MLflow run after all child runs have finished.
     if parent_mlflow is not None:
         try:
-            for key in ("knn", "multilabel_flat", "multilabel_order"):
+            for key in ("knn", "multilabel_flat", "multilabel_order",
+                        "gbdt", "gbdt_combined", "gbdt_combined_shuffled"):
                 r = results.get(key, {})
                 if r.get("status") == "ok":
                     parent_mlflow.log_metric(f"{key}_fmax", r["fmax"])
                     parent_mlflow.log_metric(f"{key}_smin", r["smin"])
                     parent_mlflow.log_metric(f"{key}_training_time", r["training_time"])
+                    if r.get("fv_gain_share") is not None:
+                        parent_mlflow.log_metric(f"{key}_fv_gain_share", r["fv_gain_share"])
             parent_mlflow.log_metric("total_elapsed_seconds", results["elapsed"])
             parent_mlflow.end_run()
         except Exception as e:

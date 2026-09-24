@@ -34,6 +34,7 @@ dependencies = [
     "numba",
     "typeguard",
     "scikit-learn",
+    "lightgbm>=4.0",
     "tqdm",
     "biopython",
     "goatools",

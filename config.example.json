@@ -24,5 +24,14 @@
     "KNN_METRIC": "cosine",
     "KNN_WEIGHTS": "distance",
     "KNN_ALGORITHM": "auto",
+    "GBDT_N_ESTIMATORS": 300,
+    "GBDT_LEARNING_RATE": 0.05,
+    "GBDT_NUM_LEAVES": 31,
+    "GBDT_MIN_CHILD_SAMPLES": 20,
+    "GBDT_COLSAMPLE_BYTREE": 0.3,
+    "GBDT_SUBSAMPLE": 0.8,
+    "GBDT_REG_LAMBDA": 1.0,
+    "GBDT_N_JOBS": 0,
+    "GBDT_EARLY_STOPPING_ROUNDS": 0,
     "RANDOM_SEED": 42
 }

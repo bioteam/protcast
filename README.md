@@ -199,6 +199,15 @@ errors:
     "KNN_METRIC": "cosine",
     "KNN_WEIGHTS": "distance",
     "KNN_ALGORITHM": "auto",
+    "GBDT_N_ESTIMATORS": 300,
+    "GBDT_LEARNING_RATE": 0.05,
+    "GBDT_NUM_LEAVES": 31,
+    "GBDT_MIN_CHILD_SAMPLES": 20,
+    "GBDT_COLSAMPLE_BYTREE": 0.3,
+    "GBDT_SUBSAMPLE": 0.8,
+    "GBDT_REG_LAMBDA": 1.0,
+    "GBDT_N_JOBS": 0,
+    "GBDT_EARLY_STOPPING_ROUNDS": 0,
     "RANDOM_SEED": 42
 }
 ```
@@ -207,6 +216,31 @@ Box-embedding fields (`USE_BOX_EMBEDDINGS`, `BOX_DIM`, `BOX_TEMPERATURE`,
 `CONTAINMENT_WEIGHT`) are only consumed when `USE_BOX_EMBEDDINGS: true` —
 otherwise the flat multi-label head is used. KNN fields are only consumed
 by the KNN code paths. So the same file safely drives every script.
+
+### GBDT (LightGBM) keys
+
+The `GBDT_*` keys are read only by the GBDT arms of
+`scripts/compare_knn_vs_multilabel.py --gbdt` (class `GBDTClassifier` in
+`protcast/model/gbdt_classifier.py`). They are optional: when absent the class
+defaults shown above apply, and every key has a matching opt-in CLI override
+(`--gbdt-n-estimators`, `--gbdt-colsample-bytree`, …). `GBDT_COLSAMPLE_BYTREE`
+is the main speed knob on the 3456-dim `mean_max_std` inputs;
+`GBDT_EARLY_STOPPING_ROUNDS > 0` early-stops each per-label booster on the
+validation fold (the neural arms already early-stop on validation Fmax, so this
+is parity, but the default is a fixed budget so all labels and arms train
+identically). `lightgbm` is a declared dependency; on Frontera install it into
+the container's user site with `pip3 install --user lightgbm`.
+
+The `--gbdt` flag adds two arms — `gbdt` on raw ESM-C and `gbdt_combined` on raw
+ESM-C ⊕ PseKRAAC (no `StandardScaler`: trees are scale-invariant) — plus, with
+`--shuffle-fv-control`, a `gbdt_combined_shuffled` capacity control. The
+combined arm reports the summed gain importance split into an ESM block and an
+FV block (`fv_gain_share`, `fv_gain_per_dim_ratio`). Read those *after* the
+`gbdt_combined − gbdt` Fmax delta and the shuffled control: a non-zero FV gain
+share alone does not prove signal, since trees spend some splits on noise
+features; it tells you how the trees used the features once the delta is known
+to be real. See `scripts/sh/run_compare_gbdt_multilevel.sh`, which by default
+resumes into the existing sweep directories so only the GBDT arms train.
 
 ### Running a script
 

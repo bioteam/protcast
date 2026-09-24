@@ -2,7 +2,8 @@
 
 Quantify how much "hierarchy signal is on the table" for the trained models in a
 compare_knn_vs_multilabel.py results directory, across every arm present
-(KNN, flat NN, order NN), and report — per arm — how often their predictions
+(KNN, flat NN, order NN, and the LightGBM GBDT arms when the run used --gbdt),
+and report — per arm — how often their predictions
 violate the GO DAG true-path rule (a child term scored above its parent, which
 is impossible for a consistent annotation) and what the true-path rule recovers.
 
@@ -12,6 +13,8 @@ Why compare arms:
     and geometric/structural hierarchy methods are moot.
   * The order NN is *designed* to be consistent; this shows whether its geometry
     actually buys the consistency it sacrifices accuracy for.
+  * The GBDT arms (raw ESM, raw ESM + PseKRAAC) are one-vs-rest boosters with no
+    coupling between labels at all — a second hierarchy-blind reference point.
 
 For each arm we print:
   1. Continuous violations  — % of (protein x parent-child-edge) pairs with
@@ -56,6 +59,7 @@ from compare_knn_vs_multilabel import load_flat_embeddings  # noqa: E402
 
 from protcast.model.multilabel_classifier import GOEncoder  # noqa: E402
 from protcast.model.knn_classifier import KNNClassifier  # noqa: E402
+from protcast.model.gbdt_classifier import GBDTClassifier  # noqa: E402
 from protcast.model.stats.utils import calculate_fmax  # noqa: E402
 from protcast.preprocessing.go_dag_edges import extract_dag_edges  # noqa: E402
 from protcast.preprocessing.protcast_dataset import ProtCastDataset  # noqa: E402
@@ -140,6 +144,8 @@ def main():
             "KNN": (R.get("knn", {}) or {}).get("fmax"),
             "flat NN": (R.get("multilabel_flat", {}) or {}).get("fmax"),
             "order NN": (R.get("multilabel_order", {}) or {}).get("fmax"),
+            "GBDT": (R.get("gbdt", {}) or {}).get("fmax"),
+            "GBDT+FV": (R.get("gbdt_combined", {}) or {}).get("fmax"),
         }
 
     # ── Rebuild the exact data / split / scaler used by every arm ───────────
@@ -149,15 +155,20 @@ def main():
     go_encoder = GOEncoder(f"{name}_hviol")
     go_encoder.fit(go_ids)
 
+    def _multihot(pids):
+        """Multi-hot label matrix for an ordered protein list (encoder columns)."""
+        yy = np.zeros((len(pids), len(go_ids)), dtype=np.float32)
+        for i, pid in enumerate(pids):
+            for go_id in protein_go_terms[pid]:
+                j = go_encoder.go_to_int.get(go_id)
+                if j is not None:
+                    yy[i, j] = 1.0
+        return yy
+
     protein_ids = sorted(set(protein_embeddings) & set(protein_go_terms))
     X = np.vstack([np.asarray(protein_embeddings[p], dtype=np.float32)
                    for p in protein_ids])
-    y = np.zeros((len(protein_ids), len(go_ids)), dtype=np.float32)
-    for i, pid in enumerate(protein_ids):
-        for go_id in protein_go_terms[pid]:
-            j = go_encoder.go_to_int.get(go_id)
-            if j is not None:
-                y[i, j] = 1.0
+    y = _multihot(protein_ids)
 
     X_tr, X_val_raw, y_tr, y_val = train_test_split(
         X, y, test_size=val_split, random_state=args.seed)
@@ -208,6 +219,44 @@ def main():
         model = keras.models.load_model(files[0], compile=False)
         yp = model.predict(X_val_scaled, verbose=0)
         rows.append(violation_report(label, yp, y_val, edges, reported.get(label)))
+
+    # GBDT arms — RAW inputs (trees are scale-invariant), scored like KNN. The
+    # artifact records the exact protein set the arm trained on and, for the
+    # combined arm, the raw PseKRAAC block, so X is rebuilt byte-exactly without
+    # recomputing feature vectors; predictions are still recomputed from the
+    # boosters, so the self-check Fmax gate stays meaningful. The shuffled
+    # capacity-control arm is a control, not a model of interest — skipped.
+    gbdt_arms = [
+        ("GBDT", [
+            f for f in glob.glob(os.path.join(args.output_dir, "*_gbdt_comparison_gbdt.joblib"))
+            if "combined" not in os.path.basename(f)
+        ]),
+        ("GBDT+FV", glob.glob(os.path.join(
+            args.output_dir, "*_gbdt_combined_comparison_gbdt.joblib"))),
+    ]
+    for label, files in gbdt_arms:
+        if not files:
+            continue
+        art = GBDTClassifier.load_model(files[0])
+        if list(art["go_ids"]) != go_ids:
+            print(f"\n── {label} ──")
+            print("  !! GO term set in artifact differs from the embeddings dir — skipping")
+            continue
+        pids = list(art["protein_ids"])
+        missing = [p for p in pids if p not in protein_embeddings]
+        if missing:
+            print(f"\n── {label} ──")
+            print(f"  !! {len(missing)} artifact proteins missing from embeddings — skipping")
+            continue
+        Xg = np.vstack([np.asarray(protein_embeddings[p], dtype=np.float32) for p in pids])
+        fv = art.get("fv_matrix")
+        if fv is not None:
+            Xg = np.hstack([Xg, np.asarray(fv, dtype=np.float32)])
+        yg = _multihot(pids)
+        _, Xg_val, _, yg_val = train_test_split(
+            Xg, yg, test_size=val_split, random_state=args.seed)
+        yp = GBDTClassifier.predict_from_artifact(art, Xg_val)
+        rows.append(violation_report(label, yp, yg_val, edges, reported.get(label)))
 
     # ── Comparison table + verdict ─────────────────────────────────────────
     good = [r for r in rows if r.get("trustworthy")]
