@@ -1,23 +1,31 @@
 """compare_knn_esm_vs_knn_combined.py
 
-Two-way CAFA comparison of KNN protein-function prediction:
+Three-way CAFA comparison of KNN protein-function prediction:
 
-  1. KNN (ESM-C)            – nearest-neighbour voting over raw ESM-C
-                              embeddings (same as compare_knn_vs_multilabel.py).
-  2. KNN (ESM-C + classical) – nearest-neighbour voting over a concatenation
-                              of ESM-C embeddings and classical feature
-                              vectors (CTriad, Moran, CTDD by default).
-                              The two feature blocks are standardised
-                              separately (fit on the training split only)
-                              before concatenation, so the high-dimensional
-                              ESM block does not numerically dominate the
-                              distance metric.
+  1. KNN (ESM-C, raw)      – nearest-neighbour voting over raw (unscaled)
+                              ESM-C embeddings. Diagnostic only.
+  2. KNN (ESM-C, scaled)   – raw ESM-C block standardised (StandardScaler fit
+                              on the training fold only). This is the *fair*
+                              baseline for arm 3.
+  3. KNN (ESM-C + classical) – concatenation of the SAME standardised ESM-C
+                              block with a standardised classical feature-vector
+                              block (CTriad, Moran, CTDD by default).
 
-Primary question: do classical descriptors carry information that
-complements ESM-C embeddings under a simple non-parametric model (KNN),
-or is ESM-C alone already saturating what KNN can extract?
+Why three arms, not two. Arms 2 and 3 share one identical, train-fold-fit
+ESM scaler, so the only difference between them is the presence of the
+classical block — making (arm3 − arm2) a clean estimate of what the classical
+features add. Arm 1 (raw ESM) exists to expose a confound: standardising the
+ESM block changes cosine-KNN geometry and can move Fmax on its own. Comparing
+arm 2 against arm 1 quantifies that standardisation effect, so a gain that is
+really just ESM standardisation cannot be mis-attributed to the features.
+An earlier two-arm version compared a *raw* ESM baseline against a *scaled*
+combined model, which conflated those two effects.
 
-Both KNN models are trained and evaluated on the *same* protein set,
+Primary, defensible question: beyond a properly-standardised ESM-C baseline,
+do classical descriptors add information under a simple non-parametric model
+(KNN)? The (combined − scaled) delta answers it.
+
+All three KNN models are trained and evaluated on the *same* protein set,
 the *same* train/val split (controlled by --seed), and the *same*
 KNN hyper-parameters, so any Fmax/Smin delta is attributable to the
 feature representation, not the data or the algorithm.
@@ -28,8 +36,9 @@ Inputs (not modified):
 
 Saved to the output directory (-o/--output_dir):
     - {name}_knn_esm_vs_combined_results.json
-    - {name}_knn_esm_comparison_knn.joblib
-    - {name}_knn_combined_comparison_knn.joblib
+    - {name}_knn_esm_comparison_knn.joblib          (arm 1: raw ESM)
+    - {name}_knn_esm_scaled_comparison_knn.joblib   (arm 2: scaled ESM)
+    - {name}_knn_combined_comparison_knn.joblib     (arm 3: scaled ESM + clf)
     - {name}_knn_combined_scalers.pkl  (ESM + FV StandardScalers, plus
                                         the train-protein-id list used to
                                         fit them, for reproducible inference)
@@ -49,12 +58,6 @@ python3 scripts/compare_knn_esm_vs_knn_combined.py \\
 """
 
 import os
-
-# Match the determinism flags used in compare_knn_vs_multilabel.py so the
-# environments are identical, even though KNN itself does not use TF.
-os.environ["TF_DETERMINISTIC_OPS"] = "1"
-os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
-os.environ["PYTHONHASHSEED"] = "0"
 
 import re
 import gc
@@ -152,14 +155,25 @@ def compute_classical_feature_vectors(sequences, feature_algorithms, verbose=Fal
     return fv_dict
 
 
-def build_combined_embeddings(
+def build_scaled_representations(
     protein_embeddings, fv_dict, train_pids, verbose=False,
 ):
-    """Concatenate scaled ESM and scaled classical FVs into one vector per pid.
+    """Fit train-fold StandardScalers and build the scaled representations.
 
-    Scalers are fit on the train pids only (no validation leakage) and then
-    used to transform every protein. We return the resulting per-pid dict
-    plus the fitted scalers so they can be persisted for inference.
+    Produces two per-pid dicts that share the SAME esm_scaler:
+      * scaled_esm : the standardised ESM block only — the *fair* baseline.
+      * combined   : standardised ESM block ⊕ standardised classical block.
+
+    Because both use the identical train-fold-fit esm_scaler, the only thing
+    that differs between the scaled-ESM baseline and the combined model is the
+    presence of the classical block. Any Fmax/Smin delta between them is
+    therefore attributable to the classical features, not to a change in ESM
+    preprocessing. (The separate raw-ESM arm in main() quantifies how much the
+    standardisation *alone* moved the score — the confound this fix isolates.)
+
+    Scalers are fit on the train pids only (no validation leakage) and applied
+    to every protein. Returns both dicts plus the fitted scalers and the common
+    pid list, so the scalers can be persisted for inference.
     """
     common_pids = sorted(set(protein_embeddings) & set(fv_dict))
     if not common_pids:
@@ -180,19 +194,24 @@ def build_combined_embeddings(
     esm_scaler = StandardScaler().fit(esm_train)
     fv_scaler  = StandardScaler().fit(fv_train)
 
+    scaled_esm = {}
     combined = {}
     for pid in common_pids:
         esm_s = esm_scaler.transform(protein_embeddings[pid].reshape(1, -1).astype(np.float32))
+        esm_s = np.nan_to_num(esm_s, nan=0.0, posinf=0.0, neginf=0.0).ravel()
         fv_s  = fv_scaler.transform(fv_dict[pid].reshape(1, -1).astype(np.float32))
-        fv_s  = np.nan_to_num(fv_s, nan=0.0, posinf=0.0, neginf=0.0)
-        combined[pid] = np.concatenate([esm_s.ravel(), fv_s.ravel()]).astype(np.float32)
+        fv_s  = np.nan_to_num(fv_s, nan=0.0, posinf=0.0, neginf=0.0).ravel()
+        # The ESM half of `combined` is byte-identical to `scaled_esm[pid]`, so
+        # the two arms share exactly one ESM representation.
+        scaled_esm[pid] = esm_s.astype(np.float32)
+        combined[pid] = np.concatenate([esm_s, fv_s]).astype(np.float32)
 
     if verbose:
         print(
-            f"Combined feature dim: {esm_dim + fv_dim} "
+            f"Scaled-ESM dim: {esm_dim}; combined dim: {esm_dim + fv_dim} "
             f"(ESM: {esm_dim} + FV: {fv_dim})  over {len(common_pids)} proteins"
         )
-    return combined, esm_scaler, fv_scaler, common_pids
+    return scaled_esm, combined, esm_scaler, fv_scaler, common_pids
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -289,14 +308,16 @@ def _delta_str(a, b):
 
 
 def print_results(results):
-    esm  = results.get("knn_esm", {})
-    comb = results.get("knn_combined", {})
-    esm_fmax = esm.get("fmax")
+    esm     = results.get("knn_esm", {})          # raw ESM (diagnostic)
+    scaled  = results.get("knn_esm_scaled", {})    # scaled ESM (fair baseline)
+    comb    = results.get("knn_combined", {})      # scaled ESM + classical
+    raw_fmax    = esm.get("fmax")
+    scaled_fmax = scaled.get("fmax")
 
     sep  = "=" * 96
     thin = "-" * 96
     print("\n" + sep)
-    print("KNN(ESM-C) vs KNN(ESM-C + classical)  (CAFA Metrics)")
+    print("KNN(ESM-C raw) vs KNN(ESM-C scaled) vs KNN(ESM-C scaled + classical)  (CAFA Metrics)")
     print(sep)
     print(
         f"Level : {results.get('level', '?')}   "
@@ -307,52 +328,71 @@ def print_results(results):
     )
 
     # ── Overall ───────────────────────────────────────────────────────────────
+    # Delta column is context-specific: the scaled baseline is measured against
+    # raw ESM (the standardisation effect), and the combined model is measured
+    # against the scaled baseline (the true, defensible classical-feature
+    # effect — same ESM preprocessing on both sides).
     print()
     print("── OVERALL METRICS ──")
-    hdr = (f"{'Model':<26} {'Fmax':>8} {'Thr':>6} {'Smin':>8} "
-           f"{'Time':>8}   {'Δ vs ESM':>10}")
+    hdr = (f"{'Model':<28} {'Fmax':>8} {'Thr':>6} {'Smin':>8} "
+           f"{'Time':>8}   {'Δ':>10}  {'(vs)':<12}")
     print(hdr)
     print(thin)
 
-    def _row(label, r, is_baseline=False):
+    def _row(label, r, ref_fmax, ref_label):
         fmax = _nan_safe(r.get("fmax"))
         thr  = _nan_safe(r.get("fmax_threshold"), ".2f")
         smin = _nan_safe(r.get("smin"))
         t    = _nan_safe(r.get("training_time"), ".1f")
-        delta = f"{'---':>10}" if is_baseline else _delta_str(r.get("fmax"), esm_fmax)
-        print(f"{label:<26} {fmax:>8} {thr:>6} {smin:>8} {t:>7}s   {delta}")
+        delta = f"{'---':>10}" if ref_fmax is None else _delta_str(r.get("fmax"), ref_fmax)
+        print(f"{label:<28} {fmax:>8} {thr:>6} {smin:>8} {t:>7}s   {delta}  {ref_label:<12}")
 
     if esm:
-        _row("KNN (ESM-C)",            esm,  is_baseline=True)
+        _row("KNN (ESM-C, raw)",         esm,    None,        "baseline")
+    if scaled:
+        _row("KNN (ESM-C, scaled)",      scaled, raw_fmax,    "vs raw")
     if comb:
-        _row("KNN (ESM-C + classical)", comb)
+        _row("KNN (ESM-C scaled + clf)", comb,   scaled_fmax, "vs scaled")
+
+    # ── Effect decomposition ───────────────────────────────────────────────────
+    print()
+    print("── EFFECT DECOMPOSITION (Fmax) ──")
+    if raw_fmax is not None and scaled_fmax is not None:
+        print(f"  Standardisation effect (scaled − raw)      : {_delta_str(scaled_fmax, raw_fmax).strip()}")
+    else:
+        print("  Standardisation effect (scaled − raw)      : ---")
+    if scaled_fmax is not None and comb.get("fmax") is not None:
+        print(f"  Classical-feature effect (combined − scaled): {_delta_str(comb.get('fmax'), scaled_fmax).strip()}   <- defensible estimate")
+    else:
+        print("  Classical-feature effect (combined − scaled): ---")
 
     # ── Depth breakdown ───────────────────────────────────────────────────────
+    # Δ compares combined against the scaled baseline (the fair comparison).
     print()
     print("── DEPTH BREAKDOWN  (higher depth = more specific GO terms) ──")
     all_depths = set()
-    for r in (esm, comb):
+    for r in (esm, scaled, comb):
         if r:
             all_depths.update(int(d) for d in r.get("depth_metrics", {}))
 
     if all_depths:
         hdr = (f"{'Depth':>5}  {'N terms':>7}  {'Avg ann':>8}  "
-               f"{'ESM':>8}  {'Combined':>9}  {'Δ vs ESM':>10}")
+               f"{'raw':>8}  {'scaled':>8}  {'combined':>9}  {'Δ c−s':>9}")
         print(hdr)
         print("-" * len(hdr))
         for depth in sorted(all_depths):
             ds = str(depth)
-            esm_d  = esm.get("depth_metrics", {}).get(ds, {})
-            comb_d = comb.get("depth_metrics", {}).get(ds, {})
-            meta   = esm_d or comb_d
+            esm_d    = esm.get("depth_metrics", {}).get(ds, {})
+            scaled_d = scaled.get("depth_metrics", {}).get(ds, {})
+            comb_d   = comb.get("depth_metrics", {}).get(ds, {})
+            meta   = esm_d or scaled_d or comb_d
             n_terms = meta.get("n_terms", "?")
             avg_ann = _nan_safe(meta.get("avg_train_count"), ".1f")
-            esm_f  = esm_d.get("fmax")
-            comb_f = comb_d.get("fmax")
             print(
                 f"{depth:>5}  {n_terms:>7}  {avg_ann:>8}  "
-                f"{_nan_safe(esm_f):>8}  {_nan_safe(comb_f):>9}  "
-                f"{_delta_str(comb_f, esm_f)}"
+                f"{_nan_safe(esm_d.get('fmax')):>8}  {_nan_safe(scaled_d.get('fmax')):>8}  "
+                f"{_nan_safe(comb_d.get('fmax')):>9}  "
+                f"{_delta_str(comb_d.get('fmax'), scaled_d.get('fmax'))}"
             )
     else:
         print("  (no depth metrics — go_dag not available)")
@@ -365,26 +405,26 @@ def print_results(results):
         ("medium_50_500", "Medium (50–500) "),
         ("common_gt500",  "Common (>500)   "),
     ]
-    any_freq = any(r.get("frequency_metrics") for r in (esm, comb) if r)
+    any_freq = any(r.get("frequency_metrics") for r in (esm, scaled, comb) if r)
     if any_freq:
         hdr = (f"{'Bucket':<18}  {'N terms':>7}  {'Avg ann':>8}  "
-               f"{'ESM':>8}  {'Combined':>9}  {'Δ vs ESM':>10}")
+               f"{'raw':>8}  {'scaled':>8}  {'combined':>9}  {'Δ c−s':>9}")
         print(hdr)
         print("-" * len(hdr))
         for bucket, label in bucket_labels:
-            esm_b  = esm.get("frequency_metrics", {}).get(bucket, {})
-            comb_b = comb.get("frequency_metrics", {}).get(bucket, {})
-            meta = esm_b or comb_b
+            esm_b    = esm.get("frequency_metrics", {}).get(bucket, {})
+            scaled_b = scaled.get("frequency_metrics", {}).get(bucket, {})
+            comb_b   = comb.get("frequency_metrics", {}).get(bucket, {})
+            meta = esm_b or scaled_b or comb_b
             if not meta:
                 continue
             n_terms = meta.get("n_terms", "?")
             avg_ann = _nan_safe(meta.get("avg_train_count"), ".1f")
-            esm_f  = esm_b.get("fmax")
-            comb_f = comb_b.get("fmax")
             print(
                 f"{label:<18}  {n_terms:>7}  {avg_ann:>8}  "
-                f"{_nan_safe(esm_f):>8}  {_nan_safe(comb_f):>9}  "
-                f"{_delta_str(comb_f, esm_f)}"
+                f"{_nan_safe(esm_b.get('fmax')):>8}  {_nan_safe(scaled_b.get('fmax')):>8}  "
+                f"{_nan_safe(comb_b.get('fmax')):>9}  "
+                f"{_delta_str(comb_b.get('fmax'), scaled_b.get('fmax'))}"
             )
     else:
         print("  (no frequency metrics)")
@@ -421,6 +461,15 @@ def main():
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()
 
+    # Match the determinism flags used in compare_knn_vs_multilabel.py so the
+    # environments are identical, even though KNN itself does not use TF. These
+    # are set here in main() rather than at module import so that importing this
+    # script (e.g. from tests) does not reconfigure TF determinism process-wide
+    # and break unrelated TF training that has not set a global seed.
+    os.environ["TF_DETERMINISTIC_OPS"] = "1"
+    os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
+    os.environ["PYTHONHASHSEED"] = "0"
+
     config = ConfigManager.load_config()
     start  = time.time()
 
@@ -450,7 +499,7 @@ def main():
         with open(results_file) as f:
             results = json.load(f)
 
-    expected = {"knn_esm", "knn_combined"}
+    expected = {"knn_esm", "knn_esm_scaled", "knn_combined"}
     if results is not None:
         done = {k for k in expected if results.get(k, {}).get("status") == "ok"}
         if done == expected:
@@ -504,7 +553,7 @@ def main():
         print("Warning: ProtCastDataset has no annotated_dag — depth metrics unavailable.")
 
     # ── Compute classical FVs once for the intersection of pids ────────────
-    # Both KNN variants must train on the SAME protein set, otherwise the
+    # All three arms must train on the SAME protein set, otherwise the
     # train/val split (which is driven by sorted pid order) would differ.
     sequences = {
         pid: dataset.proteins[pid].sequence
@@ -520,15 +569,15 @@ def main():
         sequences, args.feature_algorithms, verbose=args.verbose,
     )
 
-    # Restrict the protein set to the intersection so both variants train on
-    # identical data. The KNN baseline must therefore drop any pids that
+    # Restrict the protein set to the intersection so all three arms train on
+    # identical data. The ESM-only arms must therefore drop any pids that
     # lack a valid classical FV.
     common_pids = sorted(set(protein_embeddings) & set(fv_dict) & set(protein_go_terms))
     if not common_pids:
         print("Error: empty intersection of ESM / FV / annotated proteins")
         return
     if args.verbose:
-        print(f"Common protein set (used for both variants): {len(common_pids)}")
+        print(f"Common protein set (used for all three arms): {len(common_pids)}")
 
     protein_embeddings = {p: protein_embeddings[p] for p in common_pids}
     protein_go_terms   = {p: protein_go_terms[p]   for p in common_pids}
@@ -536,10 +585,55 @@ def main():
     if results.get("esm_dim") is None:
         results["esm_dim"] = int(next(iter(protein_embeddings.values())).shape[0])
 
-    # ── Variant 1: KNN on ESM-C only ───────────────────────────────────────
+    def _save():
+        results["elapsed"] = round(time.time() - start)
+        with open(results_file, "w") as f:
+            json.dump(results, f, indent=2)
+
+    # ── Shared scaled representations ──────────────────────────────────────
+    # The scaled-ESM baseline (arm 2) and the combined model (arm 3) must use
+    # IDENTICAL ESM preprocessing, otherwise the baseline-vs-combined delta
+    # conflates "added classical features" with "standardised the ESM block".
+    # Fit the scalers once, on the training fold only, and reuse for both.
+    validation_split = config.get("VALIDATION_SPLIT", 0.2)
+    train_pids = get_train_pids(common_pids, validation_split, args.seed)
+
+    scaled_esm = combined_embeddings = None
+    need_scaled = (
+        results.get("knn_esm_scaled", {}).get("status") != "ok"
+        or results.get("knn_combined", {}).get("status") != "ok"
+    )
+    if need_scaled:
+        scaled_esm, combined_embeddings, esm_scaler, fv_scaler, _ = (
+            build_scaled_representations(
+                protein_embeddings, fv_dict, train_pids, verbose=args.verbose,
+            )
+        )
+        # Persist scalers (+ the train pids used to fit them) so that inference
+        # on new proteins is exactly reproducible.
+        scalers_path = f"{name}_knn_combined_scalers.pkl"
+        with open(scalers_path, "wb") as f:
+            pickle.dump(
+                {
+                    "esm_scaler": esm_scaler,
+                    "fv_scaler":  fv_scaler,
+                    "feature_algorithms": args.feature_algorithms,
+                    "train_pids": train_pids,
+                },
+                f,
+            )
+        if args.verbose:
+            print(f"Saved combined scalers to {scalers_path}")
+        results["combined_dim"] = int(
+            next(iter(combined_embeddings.values())).shape[0]
+        )
+
+    # ── Arm 1 / 3: KNN on raw ESM-C ────────────────────────────────────────
+    # Diagnostic only: comparing this against arm 2 reveals how much of any
+    # apparent gain is just the ESM standardisation, not the classical features.
     if results.get("knn_esm", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print("MODEL 1 / 2: KNN (ESM-C)")
+        print("MODEL 1 / 3: KNN (ESM-C, raw)")
         print("=" * 60)
         try:
             results["knn_esm"] = train_knn(
@@ -548,50 +642,42 @@ def main():
                 args.use_mlflow, args.verbose,
             )
             print(
-                f"KNN ESM — Fmax: {results['knn_esm']['fmax']:.4f}  "
+                f"KNN ESM (raw) — Fmax: {results['knn_esm']['fmax']:.4f}  "
                 f"Smin: {results['knn_esm']['smin']:.4f}  "
                 f"Time: {results['knn_esm']['training_time']:.1f}s"
             )
         except Exception as e:
-            print(f"FAILED: KNN ESM — {e}")
+            print(f"FAILED: KNN ESM (raw) — {e}")
             results["knn_esm"] = {"status": f"error: {e}"}
+        _save()
 
-        results["elapsed"] = round(time.time() - start)
-        with open(results_file, "w") as f:
-            json.dump(results, f, indent=2)
-
-    # ── Variant 2: KNN on (scaled ESM-C ⊕ scaled classical FVs) ───────────
-    if results.get("knn_combined", {}).get("status") != "ok":
+    # ── Arm 2 / 3: KNN on scaled ESM-C (the fair baseline) ─────────────────
+    if results.get("knn_esm_scaled", {}).get("status") != "ok":
         print("\n" + "=" * 60)
-        print(f"MODEL 2 / 2: KNN (ESM-C + {', '.join(args.feature_algorithms)})")
+        print("MODEL 2 / 3: KNN (ESM-C, scaled)")
         print("=" * 60)
         try:
-            validation_split = config.get("VALIDATION_SPLIT", 0.2)
-            train_pids = get_train_pids(common_pids, validation_split, args.seed)
-            combined_embeddings, esm_scaler, fv_scaler, _ = build_combined_embeddings(
-                protein_embeddings, fv_dict, train_pids, verbose=args.verbose,
+            results["knn_esm_scaled"] = train_knn(
+                scaled_esm, protein_go_terms, go_ids,
+                config, name, "esm_scaled", args.seed, go_dag,
+                args.use_mlflow, args.verbose,
             )
-
-            # Persist scalers (+ the train pids used to fit them) so that
-            # inference on new proteins is exactly reproducible.
-            scalers_path = f"{name}_knn_combined_scalers.pkl"
-            with open(scalers_path, "wb") as f:
-                pickle.dump(
-                    {
-                        "esm_scaler": esm_scaler,
-                        "fv_scaler":  fv_scaler,
-                        "feature_algorithms": args.feature_algorithms,
-                        "train_pids": train_pids,
-                    },
-                    f,
-                )
-            if args.verbose:
-                print(f"Saved combined scalers to {scalers_path}")
-
-            results["combined_dim"] = int(
-                next(iter(combined_embeddings.values())).shape[0]
+            print(
+                f"KNN ESM (scaled) — Fmax: {results['knn_esm_scaled']['fmax']:.4f}  "
+                f"Smin: {results['knn_esm_scaled']['smin']:.4f}  "
+                f"Time: {results['knn_esm_scaled']['training_time']:.1f}s"
             )
+        except Exception as e:
+            print(f"FAILED: KNN ESM (scaled) — {e}")
+            results["knn_esm_scaled"] = {"status": f"error: {e}"}
+        _save()
 
+    # ── Arm 3 / 3: KNN on (scaled ESM-C ⊕ scaled classical FVs) ────────────
+    if results.get("knn_combined", {}).get("status") != "ok":
+        print("\n" + "=" * 60)
+        print(f"MODEL 3 / 3: KNN (ESM-C + {', '.join(args.feature_algorithms)})")
+        print("=" * 60)
+        try:
             results["knn_combined"] = train_knn(
                 combined_embeddings, protein_go_terms, go_ids,
                 config, name, "combined", args.seed, go_dag,
@@ -605,10 +691,7 @@ def main():
         except Exception as e:
             print(f"FAILED: KNN Combined — {e}")
             results["knn_combined"] = {"status": f"error: {e}"}
-
-        results["elapsed"] = round(time.time() - start)
-        with open(results_file, "w") as f:
-            json.dump(results, f, indent=2)
+        _save()
 
     results["elapsed"] = round(time.time() - start)
     with open(results_file, "w") as f:
