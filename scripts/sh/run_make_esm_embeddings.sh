@@ -4,8 +4,10 @@
 #SBATCH --mail-user=briano@bioteam.net
 #SBATCH -o run_make_esm_embeddings.out
 #SBATCH -e run_make_esm_embeddings.err
-#SBATCH -N 2
-#SBATCH -n 32
+#SBATCH -p rtx
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH -t 24:00:00
 
 CONTAINER=${WORK}/tensorflow_2.17.0-gpu.sif
 WORK_DIR=${WORK}/ProtCast/ProtCastDataset/01-23-2026/
@@ -23,7 +25,7 @@ module load tacc-apptainer
 
 cd ${HOME}/git/ProtCast/
 
-for NUM in {0..10}
+for NUM in {4..4}
 do
 	singularity exec --nv $CONTAINER \
 	python3 scripts/make_esm_embeddings.py \
